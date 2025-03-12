@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s  # Intervalle de récupération des métriques
+
+scrape_configs:
+  - job_name: 'spring-boot-apps'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['transactions-service:8080', 'auth-service:8081']

@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  mariadb:
+    build: ./docker/mariadb
+    container_name: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: SparringMASI!
+      MARIADB_USER: module
+      MARIADB_PASSWORD: SparringMASI!
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  mongodb:
+    build: ./docker/mongodb
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: SparringMASI!
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    command: ["--auth"]  # To activate authentication
+
+
+  rabbitmq:
+    build: ./docker/rabbitmq
+    container_name: rabbitmq
+    volumes:
+      - ./docker/rabbitmq/volumes/data/:/var/lib/rabbitmq/mnesia
+      - ./docker/rabbitmq/volumes/logs/:/var/log/rabbitmq/
+    environment:
+      RABBITMQ_DEFAULT_USER: grapes
+      RABBITMQ_DEFAULT_PASS: grapes
+    ports:
+      - "5672:5672"
+      - "15673:15672"
+
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: sonarqube
+    environment:
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://sonarqube-db:5432/sonar
+      - SONARQUBE_JDBC_USERNAME=sonar
+      - SONARQUBE_JDBC_PASSWORD=sonar
+    ports:
+      - "9000:9000"
+    depends_on:
+      - sonarqube-db
+
+  sonarqube-db:
+    image: postgres:13
+    container_name: sonarqube-db
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonar
+    volumes:
+      - sonarqube-data:/var/lib/postgresql/data
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    volumes:
+      - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  mariadb_data:
+  mongodb_data:
+  sonarqube-data:
