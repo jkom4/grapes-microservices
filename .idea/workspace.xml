@@ -5,128 +5,52 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2a6ec140-cf87-4e45-abdd-79cb30b14d1e" name="Changes" comment="init">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/grapes-microservices.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_05-03-25_21_33_[Changes]/shelved.patch" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_05-03-25_21_33__Changes_.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/.gitattributes" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/mvnw" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/mvnw.cmd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/src/main/java/grapes/microservices/apigateway/ApiGatewayApplication.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/src/main/java/grapes/microservices/apigateway/security/SecurityConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/src/main/resources/application.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api-gateway/src/test/java/grapes/microservices/apigateway/ApiGatewayApplicationTests.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/auth-service/auth-frontend/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/.gitattributes" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/mvnw" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/mvnw.cmd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/src/main/java/grapes/microservices/chatservice/ChatServiceApplication.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/src/main/java/grapes/microservices/chatservice/security/SecurityConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/src/main/resources/application.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/chat-service/src/test/java/grapes/microservices/chatservice/ChatServiceApplicationTests.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/.idea/data-mining-service.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/app/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/app/database.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/app/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/app/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data-mining-service/app/routes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/.gitattributes" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/mvnw" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/mvnw.cmd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/src/main/java/grapes/microservices/deliveryservice/DeliveryServiceApplication.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/src/main/java/grapes/microservices/deliveryservice/security/SecurityConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/src/main/resources/application.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/delivery-service/src/test/java/grapes/microservices/deliveryservice/DeliveryServiceApplicationTests.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/public/favicon.ico" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/public/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/public/logo192.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/public/logo512.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/public/manifest.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/public/robots.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/src/App.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/src/App.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/src/App.test.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/src/index.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/src/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/src/logo.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/src/reportWebVitals.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend-web/src/setupTests.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/.gitattributes" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/mvnw" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/mvnw.cmd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/src/main/java/grapes/microservices/paymentbackend/PaymentBackendApplication.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/src/main/java/grapes/microservices/paymentbackend/security/SecurityConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/src/main/resources/application.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-backend/src/test/java/grapes/microservices/paymentbackend/PaymentBackendApplicationTests.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/public/favicon.ico" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/public/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/public/logo192.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/public/logo512.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/public/manifest.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/public/robots.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/src/App.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/src/App.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/src/App.test.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/src/index.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/src/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/src/logo.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/src/reportWebVitals.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/payment-service/payment-frontend/src/setupTests.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/.gitattributes" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/mvnw" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/mvnw.cmd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/src/main/java/grapes/microservices/transactionsservice/TransactionsServiceApplication.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/src/main/java/grapes/microservices/transactionsservice/security/SecurityConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/src/main/resources/application.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/transactions-service/src/test/java/grapes/microservices/transactionsservice/TransactionsServiceApplicationTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data-mining-service/backend/src/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data-mining-service/backend/src/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data-mining-service/backend/tests/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data-mining-service/scripts-r/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data-mining-service/scripts-r/analysis.R" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data-mining-service/scripts-r/data_cleaning.R" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data-mining-service/scripts-r/visualisation.R" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker/mariadb/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker/mariadb/config/my.cnf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker/mongodb/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker/mongodb/config/init-db.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker/rabbitmq/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/monitoring/grafana/datasources.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/monitoring/grafana/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/monitoring/grafana/granfana.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/monitoring/prometheus/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/monitoring/prometheus/prometheus.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/monitoring/sonarqube/docker-compose.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/monitoring/sonarqube/sonar.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transactions-service/src/main/java/grapes/microservices/transactionsservice/controllers/TransactionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transactions-service/src/main/java/grapes/microservices/transactionsservice/dto/TransactionDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transactions-service/src/main/java/grapes/microservices/transactionsservice/mapper/TransactionMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transactions-service/src/main/java/grapes/microservices/transactionsservice/models/Transaction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transactions-service/src/main/java/grapes/microservices/transactionsservice/repositories/TransactionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/transactions-service/src/main/java/grapes/microservices/transactionsservice/services/TransactionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_05-03-25_21_33_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_05-03-25_21_33__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api-gateway/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api-gateway/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auth-service/auth-backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/auth-service/auth-backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/chat-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data-mining-service/.idea/data-mining-service.iml" beforeDir="false" afterPath="$PROJECT_DIR$/data-mining-service/.idea/data-mining-service.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data-mining-service/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/data-mining-service/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data-mining-service/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/data-mining-service/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data-mining-service/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/data-mining-service/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data-mining-service/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/data-mining-service/backend/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data-mining-service/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/data-mining-service/backend/src/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data-mining-service/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/data-mining-service/backend/src/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data-mining-service/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/data-mining-service/backend/src/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data-mining-service/app/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/data-mining-service/backend/src/routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/delivery-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/delivery-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transactions-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/transactions-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/transactions-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/transactions-service/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -148,8 +72,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Python Script" />
+        <option value="Interface" />
+        <option value="Class" />
         <option value="Dockerfile" />
       </list>
     </option>
@@ -195,49 +120,51 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.ApiGatewayApplication.executor": "Run",
-    "Application.AuthServiceApplication.executor": "Run",
-    "JavaScript Debug.Debug Application.executor": "Run",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.ApiGatewayApplication.executor": "Run",
-    "Spring Boot.AuthServiceApplication.executor": "Run",
-    "Spring Boot.ChatServiceApplication.executor": "Run",
-    "Spring Boot.DeliveryServiceApplication.executor": "Run",
-    "Spring Boot.PaymentBackendApplication.executor": "Run",
-    "Spring Boot.TransactionsServiceApplication.executor": "Run",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/komjj/Documents/MASI1/Q2/grapes-microservices/api-gateway/src/main/java/grapes/microservices/apigateway",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_interpreter_path": "node",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "run.configurations.included.in.services": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.ApiGatewayApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Application.AuthServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.sonarqube: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript Debug.Debug Application.executor&quot;: &quot;Run&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.ApiGatewayApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.AuthServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.ChatServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.DeliveryServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.PaymentBackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.TransactionsServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/komjj/Documents/MASI1/Q2/grapes-microservices/transactions-service&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_interpreter_path&quot;: &quot;node&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\komjj\Documents\MASI1\Q2\grapes-microservices\docker" />
       <recent name="C:\Users\komjj\Documents\MASI1\Q2\grapes-microservices\api-gateway\src\main\java\grapes\microservices\apigateway" />
       <recent name="C:\Users\komjj\Documents\MASI1\Q2\grapes-microservices\chat-service\src\main\java\grapes\microservices\chatservice" />
       <recent name="C:\Users\komjj\Documents\MASI1\Q2\grapes-microservices\payment-service\payment-backend\src\main\java\grapes\microservices\paymentbackend" />
       <recent name="C:\Users\komjj\Documents\MASI1\Q2\grapes-microservices\payment-service" />
-      <recent name="C:\Users\komjj\Documents\MASI1\Q2\grapes-microservices\delivery-service\src\main\java\grapes\microservices\deliveryservice" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\komjj\Documents\MASI1\Q2\grapes-microservices\data-mining-service\backend" />
       <recent name="C:\Users\komjj\Documents\MASI1\Q2\grapes-microservices\api-gateway" />
     </key>
   </component>
@@ -251,7 +178,7 @@
       </set>
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.ApiGatewayApplication">
+  <component name="RunManager" selected="Docker.sonarqube: Compose Deployment">
     <configuration name="ApiGatewayApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="grapes.microservices.apigateway.ApiGatewayApplication" />
       <module name="api-gateway" />
@@ -328,21 +255,36 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
+      <deployment type="docker-compose.yml">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="sonarqube: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="sourceFilePath" value="monitoring/sonarqube/docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Application.ApiGatewayApplication" />
       <item itemvalue="Application.AuthServiceApplication" />
+      <item itemvalue="Docker.sonarqube: Compose Deployment" />
       <item itemvalue="JavaScript Debug.Debug Application" />
-      <item itemvalue="Spring Boot.ChatServiceApplication" />
       <item itemvalue="Spring Boot.ApiGatewayApplication" />
       <item itemvalue="Spring Boot.AuthServiceApplication" />
+      <item itemvalue="Spring Boot.ChatServiceApplication" />
       <item itemvalue="Spring Boot.DeliveryServiceApplication" />
       <item itemvalue="Spring Boot.PaymentBackendApplication" />
       <item itemvalue="Spring Boot.TransactionsServiceApplication" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Docker.sonarqube: Compose Deployment" />
         <item itemvalue="Application.ApiGatewayApplication" />
-        <item itemvalue="Application.AuthServiceApplication" />
         <item itemvalue="Application.AuthServiceApplication" />
         <item itemvalue="Application.AuthServiceApplication" />
         <item itemvalue="Application.AuthServiceApplication" />
@@ -374,7 +316,12 @@
       <workItem from="1741204198117" duration="733000" />
       <workItem from="1741205215607" duration="3195000" />
       <workItem from="1741208812392" duration="2272000" />
-      <workItem from="1741212075916" duration="3802000" />
+      <workItem from="1741212075916" duration="4829000" />
+      <workItem from="1741600155442" duration="27000" />
+      <workItem from="1741688815613" duration="1678000" />
+      <workItem from="1741724287876" duration="1962000" />
+      <workItem from="1741773650916" duration="12750000" />
+      <workItem from="1741816215827" duration="3245000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <option name="closed" value="true" />
@@ -400,7 +347,23 @@
       <option name="project" value="LOCAL" />
       <updated>1741205275634</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="init">
+      <option name="closed" value="true" />
+      <created>1741221121062</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1741221121062</updated>
+    </task>
+    <task id="LOCAL-00005" summary="init">
+      <option name="closed" value="true" />
+      <created>1741221292278</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1741221292278</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
