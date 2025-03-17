@@ -28,7 +28,7 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <sonar.projectKey>transactions-service</sonar.projectKey>
+        <sonar.projectKey>sales-service</sonar.projectKey>
         <sonar.host.url>http://localhost:9000</sonar.host.url>
     </properties>
     <dependencies>
