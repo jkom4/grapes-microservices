@@ -3,7 +3,7 @@ version: '3.8'
 services:
   mariadb:
     build: ./docker/mariadb
-    container_name: mariadb
+    container_name: grapes-mariadb
     environment:
       MARIADB_ROOT_PASSWORD: SparringMASI!
       MARIADB_USER: module
@@ -11,11 +11,11 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - ./docker/mariadb/volumes/mariadb_data:/var/lib/mysql
 
   mongodb:
     build: ./docker/mongodb
-    container_name: mongodb
+    container_name: grapes-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: SparringMASI!
@@ -28,7 +28,7 @@ services:
 
   rabbitmq:
     build: ./docker/rabbitmq
-    container_name: rabbitmq
+    container_name: grapes-rabbitmq
     volumes:
       - ./docker/rabbitmq/volumes/data/:/var/lib/rabbitmq/mnesia
       - ./docker/rabbitmq/volumes/logs/:/var/log/rabbitmq/
@@ -41,7 +41,7 @@ services:
 
   sonarqube:
     image: sonarqube:lts-community
-    container_name: sonarqube
+    container_name: grapes-sonarqube
     environment:
       - SONARQUBE_JDBC_URL=jdbc:postgresql://sonarqube-db:5432/sonar
       - SONARQUBE_JDBC_USERNAME=sonar
@@ -53,7 +53,7 @@ services:
 
   sonarqube-db:
     image: postgres:13
-    container_name: sonarqube-db
+    container_name: grapes-sonarqube-db
     environment:
       - POSTGRES_USER=sonar
       - POSTGRES_PASSWORD=sonar
@@ -63,7 +63,7 @@ services:
 
   prometheus:
     image: prom/prometheus
-    container_name: prometheus
+    container_name: grapes-prometheus
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -71,7 +71,7 @@ services:
 
   grafana:
     image: grafana/grafana
-    container_name: grafana
+    container_name: grapes-grafana
     volumes:
       - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
     ports:

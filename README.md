@@ -66,7 +66,7 @@ grapes-microservices/
     ```
 
    Replace `api-gateway`, `auth-service`, `payment-service` with the names of the services you wish to start.
-   NB: DB containers must also be running
+   NB: DB containers must also be running : `mariadb` `mongodb`
 
 ## Accessing APIs
 
