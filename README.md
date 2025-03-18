@@ -74,8 +74,7 @@ Here are the links to the APIs exposed by the various services in your applicati
 
 - **API Gateway** : [http://localhost:8090/api-gateway](http://localhost:8090/api-gateway)
 - **Auth Service** : [http://localhost:8091/auth-service](http://localhost:8091/auth-service)
-- **Transactions Service** : [http://localhost:8092/transactions-service](http://localhost:8092/transactions-service)
-- **Delivery Service** : [http://localhost:8093/delivery-service](http://localhost:8093/delivery-service)
+- **Sales Service** : [http://localhost:8092/sales-service](http://localhost:8092/transactions-service)
 - **Payment Service** : [http://localhost:8094/payment-service](http://localhost:8094/payment-service)
 - **Chat Service** : [http://localhost:8095/chat-service](http://localhost:8095/chat-service)
 - **Data Mining Service** : [http://localhost:8096/data-mining-service](http://localhost:8096/data-mining-service)
@@ -86,8 +85,7 @@ Swagger is used for API documentation. You can access it via the following links
 
 - **Swagger API Gateway** : [http://localhost:8090/swagger-ui/index.html](http://localhost:8090/swagger-ui/index.html)
 - **Swagger Auth Service** : [http://localhost:8091/swagger-ui/index.html](http://localhost:8091/swagger-ui/index.html)
-- **Swagger Transactions Service** : [http://localhost:8092/swagger-ui/index.html](http://localhost:8092/swagger-ui/index.html)
-- **Swagger Delivery Service** : [http://localhost:8093/swagger-ui/index.html](http://localhost:8093/swagger-ui/index.html)
+- **Swagger Sales Service** : [http://localhost:8092/swagger-ui/index.html](http://localhost:8092/swagger-ui/index.html)
 - **Swagger Payment Service** : [http://localhost:8094/swagger-ui/index.htmlr](http://localhost:8094/swagger-ui/index.html)
 
 ## Stop services
@@ -108,6 +106,18 @@ docker-compose up -d --build
 ```
 
 This will rebuild the images and restart the services.
+
+## Authors
+
+   - [Jobelin KOM](https://linkedin.com/in/jobelin-kom/).
+   - [Smets NGOUMOU](https://linkedin.com/).
+   - [Benjamin SUKRANLI](https://linkedin.com/).
+   - [Cameron NOUPOUE](https://linkedin.com).
+   - [Mathys FRANCO](https://linkedin.com).
+   - [Nassim BELLI](https://linkedin.com).
+   - [Dounia KILANE](https://linkedin.com).
+   - [Nasser KOTIYEV](https://linkedin.com).
+   - [Charles VIGNON](https://linkedin.com).
 
 ## Licenses
 
