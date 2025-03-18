@@ -16,14 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
         matrix:
-          service: [auth-service, transactions-service, payment-service]
+          service: [auth-service, sales-service, payment-service]
           include:
             - service: auth-service
               test_command: mvn clean test
-            - service: transactions-service
-              test_command: npm install && npm test
+            - service: sales-service
+              test_command: mvn clean test
             - service: payment-service
-              test_command: pip install -r requirements.txt && pytest
+              test_command: mvn clean test
 
     steps:
         - name: Checkout repository
