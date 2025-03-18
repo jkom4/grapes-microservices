@@ -14,17 +14,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+        matrix:
+          service: [auth-service, transactions-service, payment-service]
+          include:
+            - service: auth-service
+              test_command: mvn clean test
+            - service: transactions-service
+              test_command: npm install && npm test
+            - service: payment-service
+              test_command: pip install -r requirements.txt && pytest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-
-      - name: Build and Run Tests
-        run: mvn clean verify
+        - name: Checkout repository
+          uses: actions/checkout@v3
+  
+        - name: Run Tests for ${{ matrix.service }}
+          working-directory: ./${{ matrix.service }}
+          run: ${{ matrix.test_command }}
   
 
