@@ -30,9 +30,9 @@ jobs:
       # 🔹 Test Auth (Spring Boot)
       - name: Run Tests for Auth Service (Java)
         working-directory: ./auth-service/auth-backend
-        run: mvn clean test
+        run: mvn clean verify
 
       # 🔹 Test  Sales (Spring Boot)
       - name: Run Tests for Transactions Service (Node.js)
         working-directory: ./transactions-service
-        run: mvn clean test
+        run: mvn clean verify
