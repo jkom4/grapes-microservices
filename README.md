@@ -19,18 +19,18 @@ Before getting started, make sure you have the following installed on your machi
 
 ```plaintext
 grapes-microservices/
+│── .github/                         # CI/CD Config
 │── api-gateway/                     # API Gateway (Spring Cloud Gateway)
 │── auth-service/                    # Authentication Service
-│── transactions-service/            # Transactions Service
-│── delivery-service/                # Delivery Service
+│── sales-service/                   # Sales Service
 │── payment-service/                 # Payment Service
 │── chat-service/                    # Real-time Chat Service
 │── data-mining-service/             # Big Data & Analytics Service
 │── frontend-web/                    # Main Web Frontend (React)
-│── frontend-mobile/                 # Main Mobile Frontend (Kotlin)
+│── mobile-cll/                      # Delivery Mobile Frontend (Kotlin)
+│── mobile-clm/                      # Transaction Mobile Frontend (Kotlin)
 │── config-server/                   # Centralized Configuration Server
-│── monitoring/                      # Monitoring Stack (Prometheus, Grafana)
-│── ci-cd/                           # CI/CD Config
+│── monitoring/                      # Monitoring Stack (Prometheus, Grafana)                          
 │── docker/                          # Databases & RabbitMQ images
 │── kubernetes/                      # Kubernetes Deployment Files
 │── docker-compose.yml               # Local deployment with Docker Compose
