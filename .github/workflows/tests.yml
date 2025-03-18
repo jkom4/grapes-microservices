@@ -32,7 +32,7 @@ jobs:
         working-directory: ./auth-service/auth-backend
         run: mvn validate
 
-      # 🔹 Test  Sales (Spring Boot)
-      - name: Run Tests for Transactions Service (Node.js)
-        working-directory: ./transactions-service
+      # 🔹 Test Sales (Spring Boot)
+      - name: Run Tests for Sales Service (Node.js)
+        working-directory: ./sales-service
         run: mvn validate
