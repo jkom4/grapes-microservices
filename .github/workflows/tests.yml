@@ -1,6 +1,11 @@
 name: Run Tests
 
 on:
+  push:
+    branches:
+      - main
+      - develop
+
   pull_request:
     branches:
       - develop
@@ -19,10 +24,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Build and Test Services
-        run: |
-          cd api-gateway
-          mvn test
-          
+      - name: Build and Run Tests
+        run: mvn clean verify
   
 
