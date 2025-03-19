@@ -29,6 +29,7 @@ grapes-microservices/
 │── frontend-web/                    # Main Web Frontend (React)
 │── mobile-cll/                      # Delivery Mobile Frontend (Kotlin)
 │── mobile-clm/                      # Transaction Mobile Frontend (Kotlin)
+│── frontend-chat/                   # Chat Frontend (JavaFx/Java Swing)
 │── config-server/                   # Centralized Configuration Server
 │── monitoring/                      # Monitoring Stack (Prometheus, Grafana)                          
 │── docker/                          # Databases & RabbitMQ images
