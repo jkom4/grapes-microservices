@@ -43,7 +43,6 @@ grapes-microservices/
 1. **Clone the repository**
 
    Clone this repository on your machine :
-
     ```bash
     git clone https://github.com/jkom4/grapes-microservices.git
     cd grapes-microservices
@@ -62,7 +61,8 @@ grapes-microservices/
 3. **Start specific services
 
    If you wish to start only certain services, you can do so by specifying the desired services as follows:
-    ```bash
+    
+   ```bash
     docker-compose up -d api-gateway auth-service payment-service
     ```
 
