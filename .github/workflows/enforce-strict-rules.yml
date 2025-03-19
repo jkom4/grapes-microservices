@@ -1,6 +1,11 @@
 name: Enforce Strict Rules
 
 on:
+  push:
+    branches:
+      - main
+      - develop
+      - sprint-1
   pull_request:
     branches:
       - main
