@@ -63,7 +63,7 @@ grapes-microservices/
    If you wish to start only certain services, you can do so by specifying the desired services as follows:
     
    ```bash
-    docker-compose up -d api-gateway auth-service payment-service 
+    docker-compose up -d api-gateway auth-service payment-service
     ```
 
    Replace `api-gateway`, `auth-service`, `payment-service` with the names of the services you wish to start.
