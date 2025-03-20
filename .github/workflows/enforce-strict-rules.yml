@@ -1,0 +1,39 @@
+name: Enforce Strict Rules
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - sprint-1
+
+jobs:
+  check-admins:
+    name: Prevent Admin Merges Without Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check if PR author is an admin
+        run: |
+          AUTHOR=$(jq -r ".pull_request.user.login" "$GITHUB_EVENT_PATH")
+          ADMIN_LIST=("Jkom4")
+          
+          for admin in "${ADMIN_LIST[@]}"; do
+            if [[ "$AUTHOR" == "$admin" ]]; then
+              echo "❌ Admin users cannot bypass test requirements."
+              exit 1
+            fi
+          done
+
+      - name: Check for test files
+        run: |
+          if ! find . -type f -name "*test*" | grep -q .; then
+            echo "❌ No test files found. Please add tests before merging."
+            exit 1
+          fi
+
+      - name: Run Tests
+       # Call tests.yml #TODO

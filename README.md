@@ -19,18 +19,19 @@ Before getting started, make sure you have the following installed on your machi
 
 ```plaintext
 grapes-microservices/
+│── .github/                         # CI/CD Config
 │── api-gateway/                     # API Gateway (Spring Cloud Gateway)
 │── auth-service/                    # Authentication Service
-│── transactions-service/            # Transactions Service
-│── delivery-service/                # Delivery Service
+│── sales-service/                   # Sales Service
 │── payment-service/                 # Payment Service
 │── chat-service/                    # Real-time Chat Service
 │── data-mining-service/             # Big Data & Analytics Service
 │── frontend-web/                    # Main Web Frontend (React)
-│── frontend-mobile/                 # Main Mobile Frontend (Kotlin)
+│── mobile-cll/                      # Delivery Mobile Frontend (Kotlin)
+│── mobile-clm/                      # Transaction Mobile Frontend (Kotlin)
+│── frontend-chat/                   # Chat Frontend (JavaFx/Java Swing)
 │── config-server/                   # Centralized Configuration Server
-│── monitoring/                      # Monitoring Stack (Prometheus, Grafana)
-│── ci-cd/                           # CI/CD Config
+│── monitoring/                      # Monitoring Stack (Prometheus, Grafana)                          
 │── docker/                          # Databases & RabbitMQ images
 │── kubernetes/                      # Kubernetes Deployment Files
 │── docker-compose.yml               # Local deployment with Docker Compose
@@ -42,7 +43,6 @@ grapes-microservices/
 1. **Clone the repository**
 
    Clone this repository on your machine :
-
     ```bash
     git clone https://github.com/jkom4/grapes-microservices.git
     cd grapes-microservices
@@ -61,7 +61,8 @@ grapes-microservices/
 3. **Start specific services
 
    If you wish to start only certain services, you can do so by specifying the desired services as follows:
-    ```bash
+    
+   ```bash
     docker-compose up -d api-gateway auth-service payment-service
     ```
 
@@ -74,8 +75,7 @@ Here are the links to the APIs exposed by the various services in your applicati
 
 - **API Gateway** : [http://localhost:8090/api-gateway](http://localhost:8090/api-gateway)
 - **Auth Service** : [http://localhost:8091/auth-service](http://localhost:8091/auth-service)
-- **Transactions Service** : [http://localhost:8092/transactions-service](http://localhost:8092/transactions-service)
-- **Delivery Service** : [http://localhost:8093/delivery-service](http://localhost:8093/delivery-service)
+- **Sales Service** : [http://localhost:8092/sales-service](http://localhost:8092/transactions-service)
 - **Payment Service** : [http://localhost:8094/payment-service](http://localhost:8094/payment-service)
 - **Chat Service** : [http://localhost:8095/chat-service](http://localhost:8095/chat-service)
 - **Data Mining Service** : [http://localhost:8096/data-mining-service](http://localhost:8096/data-mining-service)
@@ -86,8 +86,7 @@ Swagger is used for API documentation. You can access it via the following links
 
 - **Swagger API Gateway** : [http://localhost:8090/swagger-ui/index.html](http://localhost:8090/swagger-ui/index.html)
 - **Swagger Auth Service** : [http://localhost:8091/swagger-ui/index.html](http://localhost:8091/swagger-ui/index.html)
-- **Swagger Transactions Service** : [http://localhost:8092/swagger-ui/index.html](http://localhost:8092/swagger-ui/index.html)
-- **Swagger Delivery Service** : [http://localhost:8093/swagger-ui/index.html](http://localhost:8093/swagger-ui/index.html)
+- **Swagger Sales Service** : [http://localhost:8092/swagger-ui/index.html](http://localhost:8092/swagger-ui/index.html)
 - **Swagger Payment Service** : [http://localhost:8094/swagger-ui/index.htmlr](http://localhost:8094/swagger-ui/index.html)
 
 ## Stop services
@@ -108,6 +107,18 @@ docker-compose up -d --build
 ```
 
 This will rebuild the images and restart the services.
+
+## Authors
+
+   - [Jobelin KOM](https://linkedin.com/in/jobelin-kom/).
+   - [Smets NGOUMOU](https://linkedin.com/).
+   - [Benjamin SUKRANLI](https://linkedin.com/).
+   - [Cameron NOUPOUE](https://linkedin.com).
+   - [Mathys FRANCO](https://linkedin.com).
+   - [Nassim BELLI](https://linkedin.com).
+   - [Dounia KILANE](https://linkedin.com).
+   - [Nasser KOTIYEV](https://linkedin.com).
+   - [Charles VIGNON](https://linkedin.com).
 
 ## Licenses
 
