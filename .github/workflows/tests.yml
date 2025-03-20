@@ -1,0 +1,38 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  test-grapes-microservices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'  
+          java-version: '21'
+
+      - name: Verify Java version
+        run: java -version
+
+      # 🔹 Test Auth (Spring Boot)
+      - name: Run Tests for Auth Service (Java)
+        working-directory: ./auth-service/auth-backend
+        run: mvn validate
+
+      # 🔹 Test Sales (Spring Boot)
+      - name: Run Tests for Sales Service (Node.js)
+        working-directory: ./sales-service
+        run: mvn validate
