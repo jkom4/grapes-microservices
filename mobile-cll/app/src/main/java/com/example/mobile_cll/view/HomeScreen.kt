@@ -23,7 +23,7 @@ fun HomeScreen(navController: NavController) {
             id = "$index",
             name = "John Doe $index",
             distance = "${10 + index} mi",
-            address = "6391 Elgin St. Celina, Delaware 10299",
+            address = "Rue Brederode 16, 1000 Bruxelles",
         )
     }
 

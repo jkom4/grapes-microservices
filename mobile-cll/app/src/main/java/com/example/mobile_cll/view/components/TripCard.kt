@@ -1,5 +1,6 @@
 package com.example.mobile_cll.view.components
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,7 +27,14 @@ fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable { navController.navigate("trip_details/${trip.id}") }
+            .clickable {
+
+                val encodedName = Uri.encode(trip.name)
+                val encodedDistance = Uri.encode(trip.distance)
+                val encodedAddress = Uri.encode(trip.address)
+
+                navController.navigate("trip_details/${trip.id}/$encodedName/$encodedDistance/$encodedAddress")
+            }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {

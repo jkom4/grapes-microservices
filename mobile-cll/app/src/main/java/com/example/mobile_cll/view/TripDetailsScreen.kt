@@ -1,5 +1,6 @@
 package com.example.mobile_cll.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,21 +14,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.mobile_cll.model.Trip
 import com.example.mobile_cll.viewmodel.TripDetailsViewModel
 import com.example.mobile_cll.view.components.*
 
 @Composable
-fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewModel = viewModel()) {
-    // Récupérer l'ID du voyage passé dans la navigation
-    val tripId = navController?.currentBackStackEntry?.arguments?.getString("id") ?: ""
+fun TripDetailsScreen(
+    navController: NavController?,
+    tripId: String,
+    tripName: String,
+    tripDistance: String,
+    tripAddress: String,
+    viewModel: TripDetailsViewModel = viewModel()
+) {
+    Log.d("TripDetailsScreen", "Received trip -> id: $tripId, name: $tripName, distance: $tripDistance, address: $tripAddress")
 
-    // Mettre à jour l'ID du voyage dans le ViewModel
-    viewModel.updateTripId(tripId)
+    // Mettre à jour le voyage dans le ViewModel
+    viewModel.updateTrip(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
 
-    // Récupérer les données du voyage et des commandes à partir du ViewModel
+    // Obtenez l'état de chargement et les données du voyage et des commandes
     val trip = viewModel.trip
     val orders = viewModel.orders ?: emptyList()
     val deliveryRequestCount = viewModel.deliveryRequestCount
+    val isLoading = viewModel.isLoading
 
     Scaffold(
         topBar = { TopSectionDetails(navController) },
@@ -39,7 +48,7 @@ fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewM
                     .fillMaxSize()
             ) {
                 // Si le ViewModel est en train de charger les données, afficher un indicateur de chargement
-                if (viewModel.isLoading) {
+                if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 } else {
                     // Si les données du voyage sont disponibles, affichez-les
@@ -66,7 +75,7 @@ fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewM
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                   LazyColumn(
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 8.dp)
@@ -80,7 +89,7 @@ fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewM
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(
-                                onClick = { navController?.navigate("emailsent")},
+                                onClick = { navController?.navigate("emailsent") },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(8.dp),

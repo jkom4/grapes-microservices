@@ -47,7 +47,7 @@ fun ScanView(navController: NavController?) {
                     onClick = {
                         if (scanCode.isNotEmpty()) {
                             submitScanCode(scanCode)
-                            navController?.navigate("trip_details/{id}")
+                            navController?.popBackStack()
                             keyboardController?.hide()
                         } else {
                             isError = true
