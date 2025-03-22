@@ -21,13 +21,24 @@ class MapsViewModel(application: Application) : AndroidViewModel(application) {
     private val _deliveryCenter = MutableLiveData<LatLng>()
     val deliveryCenter: LiveData<LatLng> get() = _deliveryCenter
 
+    // Nouveau LiveData pour la position du client
+    private val _clientLocation = MutableLiveData<LatLng>()
+    val clientLocation: LiveData<LatLng> get() = _clientLocation
+
     init {
         _deliveryCenter.value = LatLng(50.6201326, 5.5816244)
 
+        // Récupération de la dernière position de l'utilisateur
         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
             location?.let {
                 _userLocation.value = LatLng(it.latitude, it.longitude)
             }
         }
     }
+
+    // Méthode pour mettre à jour la position du client
+    fun updateClientLocation(clientLatLng: LatLng) {
+        _clientLocation.value = clientLatLng
+    }
 }
+

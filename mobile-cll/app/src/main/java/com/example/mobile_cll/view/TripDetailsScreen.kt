@@ -91,7 +91,12 @@ fun TripDetailsScreen(
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(
-                                onClick = { navController?.navigate("emailsent") },
+                                onClick = {
+                                    // Passer les informations du trip à EmailSentScreen via NavController
+                                    navController?.navigate(
+                                        "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
+                                    )
+                                },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(8.dp),

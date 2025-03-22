@@ -49,7 +49,23 @@ class MainActivity : ComponentActivity() {
                 }
 
                 composable("scan") { ScanView(navController) }
-                composable("emailsent") { EmailSentScreen(navController) }
+                composable(
+                    "emailsent?tripId={tripId}&tripName={tripName}&tripAddress={tripAddress}",
+                    arguments = listOf(
+                        navArgument("tripId") { type = NavType.StringType },
+                        navArgument("tripName") { type = NavType.StringType },
+                        navArgument("tripAddress") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+                    val tripName = backStackEntry.arguments?.getString("tripName") ?: ""
+                    val tripAddress = backStackEntry.arguments?.getString("tripAddress") ?: ""
+
+                    Log.d("NavHost", "Trip ID: $tripId, Trip Name: $tripName, Trip Address: $tripAddress")
+
+                    // Passer les données au composant EmailSentScreen
+                    EmailSentScreen(navController, tripId, tripName, tripAddress)
+                }
             }
         }
     }
