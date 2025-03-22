@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
@@ -18,6 +19,7 @@ import com.example.mobile_cll.view.components.TripCard
 
 @Composable
 fun HomeScreen(navController: NavController) {
+    val context = LocalContext.current
     val trips = List(10) { index ->
         Trip(
             id = "$index",
@@ -65,7 +67,7 @@ fun HomeScreen(navController: NavController) {
             }
         }
 
-        BottomNavigationBar(navController)
+        BottomNavigationBar(navController, context)
     }
 }
 
