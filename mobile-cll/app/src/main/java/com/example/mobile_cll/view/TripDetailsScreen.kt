@@ -1,6 +1,7 @@
 package com.example.mobile_cll.view
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,12 +18,15 @@ import com.example.mobile_cll.view.components.*
 
 @Composable
 fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewModel = viewModel()) {
-    // Récupérer l'ID du voyage
+    // Récupérer l'ID du voyage passé dans la navigation
     val tripId = navController?.currentBackStackEntry?.arguments?.getString("id") ?: ""
+
+    // Mettre à jour l'ID du voyage dans le ViewModel
     viewModel.updateTripId(tripId)
 
+    // Récupérer les données du voyage et des commandes à partir du ViewModel
     val trip = viewModel.trip
-    val orders = viewModel.orders
+    val orders = viewModel.orders ?: emptyList()
     val deliveryRequestCount = viewModel.deliveryRequestCount
 
     Scaffold(
@@ -32,10 +36,13 @@ fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewM
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
+                    .fillMaxSize()
             ) {
+                // Si le ViewModel est en train de charger les données, afficher un indicateur de chargement
                 if (viewModel.isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 } else {
+                    // Si les données du voyage sont disponibles, affichez-les
                     trip?.let {
                         TripInfoCard(
                             navController = navController,
@@ -49,36 +56,45 @@ fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewM
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Afficher le nombre de demandes de livraison
                     Column(
                         modifier = Modifier
                             .padding(16.dp)
                             .fillMaxWidth()
                     ) {
                         Text("Delivery Requests: $deliveryRequestCount", fontSize = 14.sp, fontWeight = FontWeight.Bold)
-
                         Spacer(modifier = Modifier.height(16.dp))
+                    }
 
-                        orders.forEach { order ->
-                            OrderCard(order = order, onScanClick = { viewModel.onScanClick(order.id) })
+                   LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp)
+                    ) {
+                        items(orders.size) { index ->
+                            val order = orders[index]
+                            OrderCard(order = order, onScanClick = { navController?.navigate("scan") })
+                            Spacer(modifier = Modifier.height(4.dp))
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Button(
-                            onClick = { /* Action pour confirmer */ },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)), // Vert
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(
-                                text = "Confirm",
-                                color = Color.White,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { navController?.navigate("emailsent")},
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = "Confirm",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
+                        }
                     }
                 }
             }

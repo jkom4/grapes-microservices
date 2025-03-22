@@ -4,5 +4,5 @@ data class Order(
     val id: String,
     val productDescription: String,
     val quantity: Int,
-    val tripId: String
+    val tripId: String,
 )

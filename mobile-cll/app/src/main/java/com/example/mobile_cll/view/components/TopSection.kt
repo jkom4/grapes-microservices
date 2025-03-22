@@ -17,11 +17,11 @@ fun TopSection() {
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFF4CAD7E))
-            .height(140.dp)
+            .height(130.dp)
             .padding(horizontal = 35.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.Start
     ) {
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(35.dp))
         Text("Hello Mathys", fontSize = 18.sp, color = Color.White)
         Text("4 trips to do", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
     }

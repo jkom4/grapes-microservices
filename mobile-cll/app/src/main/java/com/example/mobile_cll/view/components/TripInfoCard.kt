@@ -1,5 +1,7 @@
 package com.example.mobile_cll.view.components
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -9,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -17,6 +20,7 @@ import com.example.mobile_cll.model.Trip
 
 @Composable
 fun TripInfoCard(navController: NavController?, tripId: String, customerName: String, address: String, orderId: String, trip: Trip) {
+    val context = LocalContext.current
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
@@ -52,11 +56,18 @@ fun TripInfoCard(navController: NavController?, tripId: String, customerName: St
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Button(
-                        onClick = { /* Action pour appeler le client */ },
+                        onClick = {
+                            // Lancer l'appel téléphonique en utilisant Intent.ACTION_DIAL
+                            val intent = Intent(Intent.ACTION_DIAL).apply {
+                                data = Uri.parse("tel:0648953161")
+                            }
+                            // Utilisez le contexte pour démarrer l'intention
+                            context.startActivity(intent)
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.padding(8.dp)
-                    ) {
+                    ){
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
