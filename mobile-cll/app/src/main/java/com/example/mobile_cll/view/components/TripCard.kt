@@ -19,7 +19,7 @@ import com.example.mobile_cll.model.Trip
 
 @Composable
 fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
-    // 🔹 Calcul du total des quantités de produits commandés
+    // Calculate the total quantity of ordered products
     val totalQuantity = orders.filter { it.tripId == trip.id }.sumOf { it.quantity }
 
     Card(

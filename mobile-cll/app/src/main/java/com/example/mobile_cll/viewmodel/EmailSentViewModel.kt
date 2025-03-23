@@ -8,12 +8,14 @@ import kotlinx.coroutines.launch
 
 class EmailSentViewModel : ViewModel() {
 
+    // State to control whether navigation should occur
     var shouldNavigate = mutableStateOf(false)
 
+    // Method to trigger navigation after a delay
     fun handleNavigationAfterDelay() {
         viewModelScope.launch {
-            delay(5000)
-            shouldNavigate.value = true
+            delay(5000) // Wait for 5 seconds
+            shouldNavigate.value = true // Set navigation flag to true after delay
         }
     }
 }

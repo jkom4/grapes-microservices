@@ -27,13 +27,13 @@ fun BottomNavigationBar(navController: NavController?, context: Context) {
                 Icon(Icons.Filled.Home, contentDescription = "Home", tint = Color.White)
             }
             IconButton(onClick = {
-                // Utilisation de l'Intent pour naviguer vers MapsActivity
+                // Use Intent to navigate to MapsActivity
                 val intent = Intent(context, MapsActivity::class.java)
                 context.startActivity(intent)
             }) {
                 Icon(Icons.Filled.LocationOn, contentDescription = "Map", tint = Color.White)
             }
-            IconButton(onClick = { /* Action pour le compte */ }) {
+            IconButton(onClick = { }) {
                 Icon(Icons.Filled.AccountCircle, contentDescription = "Account", tint = Color.White)
             }
         }

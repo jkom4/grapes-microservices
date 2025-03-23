@@ -12,33 +12,34 @@ import com.google.android.gms.tasks.OnSuccessListener
 
 class MapsViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Utilisation de LocationServices pour obtenir une instance de FusedLocationProviderClient
+    // FusedLocationProviderClient instance to access location services
     private val fusedLocationProviderClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(application)
 
+    // LiveData to observe user location
     private val _userLocation = MutableLiveData<LatLng>()
     val userLocation: LiveData<LatLng> get() = _userLocation
 
+    // LiveData for delivery center location
     private val _deliveryCenter = MutableLiveData<LatLng>()
     val deliveryCenter: LiveData<LatLng> get() = _deliveryCenter
 
-    // Nouveau LiveData pour la position du client
+    // LiveData for client location
     private val _clientLocation = MutableLiveData<LatLng>()
     val clientLocation: LiveData<LatLng> get() = _clientLocation
 
     init {
-        _deliveryCenter.value = LatLng(50.6201326, 5.5816244)
+        _deliveryCenter.value = LatLng(50.6201326, 5.5816244) // Set initial delivery center location
 
-        // Récupération de la dernière position de l'utilisateur
+        // Retrieve the user's last known location
         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
             location?.let {
-                _userLocation.value = LatLng(it.latitude, it.longitude)
+                _userLocation.value = LatLng(it.latitude, it.longitude) // Set user location if available
             }
         }
     }
 
-    // Méthode pour mettre à jour la position du client
+    // Method to update the client's location
     fun updateClientLocation(clientLatLng: LatLng) {
-        _clientLocation.value = clientLatLng
+        _clientLocation.value = clientLatLng // Update client location
     }
 }
-

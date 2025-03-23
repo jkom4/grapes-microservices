@@ -31,6 +31,7 @@ fun ScanView(navController: NavController?) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                // Scan Code Input Field
                 ScanCodeInput(
                     scanCode = scanCode,
                     isError = isError,
@@ -42,15 +43,17 @@ fun ScanView(navController: NavController?) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Submit Button
                 SubmitButton(
                     scanCode = scanCode,
                     onClick = {
+                        // Check if scanCode is not empty and submit the scan code
                         if (scanCode.isNotEmpty()) {
-                            submitScanCode(scanCode)
-                            navController?.popBackStack()
-                            keyboardController?.hide()
+                            submitScanCode(scanCode) // Submit the code
+                            navController?.popBackStack() // Navigate back after submission
+                            keyboardController?.hide() // Hide the keyboard after submission
                         } else {
-                            isError = true
+                            isError = true // Show error if the scanCode is empty
                         }
                     }
                 )
@@ -68,13 +71,13 @@ fun SubmitButton(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),
-        enabled = scanCode.isNotEmpty()
+        enabled = scanCode.isNotEmpty() // Enable button only if scanCode is not empty
     ) {
         Text("Submit", fontSize = 16.sp, color = Color.White)
     }
 }
 
-
+// Function to handle scan code submission
 fun submitScanCode(code: String) {
     println("Code submitted: $code")
 }

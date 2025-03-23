@@ -57,11 +57,11 @@ fun TripInfoCard(navController: NavController?, tripId: String, customerName: St
                 ) {
                     Button(
                         onClick = {
-                            // Lancer l'appel téléphonique en utilisant Intent.ACTION_DIAL
+                            // Launch the phone call using Intent.ACTION_DIAL
                             val intent = Intent(Intent.ACTION_DIAL).apply {
                                 data = Uri.parse("tel:0648953161")
                             }
-                            // Utilisez le contexte pour démarrer l'intention
+                            // Use the context to start the intent
                             context.startActivity(intent)
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),

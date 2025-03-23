@@ -6,32 +6,36 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
-import com.example.mobile_cll.model.* // Assure-toi que tes classes Trip et Order sont bien importées
+import com.example.mobile_cll.model.* // Ensure Trip and Order classes are imported
 
 class TripDetailsViewModel : ViewModel() {
 
-    var tripId by mutableStateOf("")
+    // State variables for trip details, loading status, and orders
+    var tripId by mutableStateOf("") // Trip ID, initially empty
         private set
-    var trip by mutableStateOf<Trip?>(null)
+    var trip by mutableStateOf<Trip?>(null) // Holds the trip object, initially null
         private set
-    var isLoading by mutableStateOf(true)
+    var isLoading by mutableStateOf(true) // Flag indicating loading state
         private set
-    var orders by mutableStateOf<List<Order>>(emptyList())
+    var orders by mutableStateOf<List<Order>>(emptyList()) // List of orders for the trip
         private set
 
+    // Update the trip ID and trigger loading the trip details
     fun updateTripId(id: String) {
         Log.d("TripDetailsViewModel", "updateTripId called with id: $id")
         tripId = id
         loadTripDetails()
     }
 
+    // Simulate loading trip details (fetching data)
     private fun loadTripDetails() {
         Log.d("TripDetailsViewModel", "Loading trip details for tripId: $tripId")
         viewModelScope.launch {
-            isLoading = true
+            isLoading = true // Start loading
 
-            delay(500)
+            delay(500) // Simulate network delay
 
+            // Mock data for trip and orders
             trip = Trip(
                 id = tripId,
                 name = "John Doe",
@@ -40,41 +44,44 @@ class TripDetailsViewModel : ViewModel() {
             )
 
             orders = listOf(
-                Order("1", "Product A", tripId = tripId, quantity = 2),
-                Order("2", "Product B", tripId = tripId, quantity = 3),
-                Order("3", "Product C", tripId = tripId, quantity = 5)
+                Order(id = "1", productDescription = "Product A", tripId = tripId, quantity = 2, scannedAt = null),
+                Order(id = "2", productDescription = "Product B", tripId = tripId, quantity = 3, scannedAt = null),
+                Order(id = "3", productDescription = "Product C", tripId = tripId, quantity = 5, scannedAt = null)
             )
 
             Log.d("TripDetailsViewModel", "Trip loaded: $trip, Orders: $orders")
 
-            isLoading = false
+            isLoading = false // End loading
         }
     }
 
+    // Computed property to return the count of orders
     val deliveryRequestCount: Int
         get() = orders.size
 
+    // Placeholder function for scan action (no action defined yet)
     fun onScanClick(orderId: String) {
     }
 
+    // Update the trip with new data (if changed)
     fun updateTrip(trip: Trip) {
         if (this@TripDetailsViewModel.trip != trip) {
             Log.d("TripDetailsViewModel", "updateTrip called with trip: $trip")
             viewModelScope.launch {
-                isLoading = true // Le chargement commence
-                delay(500) // Simuler un délai de mise à jour
+                isLoading = true // Start loading
+                delay(500) // Simulate network delay
 
-                // Mettre à jour le voyage
+                // Update trip and orders
                 this@TripDetailsViewModel.trip = trip
                 orders = listOf(
-                    Order("1", "Product A", tripId = trip.id, quantity = 2),
-                    Order("2", "Product B", tripId = trip.id, quantity = 3),
-                    Order("3", "Product C", tripId = trip.id, quantity = 5)
+                    Order(id = "1", productDescription = "Product A", tripId = tripId, quantity = 2, scannedAt = null),
+                    Order(id = "2", productDescription = "Product B", tripId = tripId, quantity = 3, scannedAt = null),
+                    Order(id = "3", productDescription = "Product C", tripId = tripId, quantity = 5, scannedAt = null)
                 )
 
                 Log.d("TripDetailsViewModel", "Trip updated: $trip, Orders: $orders")
 
-                isLoading = false // Le chargement est terminé
+                isLoading = false // End loading
             }
         }
     }

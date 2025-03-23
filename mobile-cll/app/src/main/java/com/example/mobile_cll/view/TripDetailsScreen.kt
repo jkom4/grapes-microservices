@@ -30,15 +30,21 @@ fun TripDetailsScreen(
 ) {
     Log.d("TripDetailsScreen", "Received trip -> id: $tripId, name: $tripName, distance: $tripDistance, address: $tripAddress")
 
-    // Mettre à jour le voyage dans le ViewModel
+    // Update trip data in the ViewModel
     viewModel.updateTrip(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
 
-    // Obtenez l'état de chargement et les données du voyage et des commandes
+    // Get the trip and orders data, and loading state
     val trip = viewModel.trip
     val orders = viewModel.orders ?: emptyList()
     val deliveryRequestCount = viewModel.deliveryRequestCount
     val isLoading = viewModel.isLoading
     val context = LocalContext.current
+
+    // State for showing the AlertDialog
+    var showAlertDialog by remember { mutableStateOf(false) }
+
+    // Function to check if all orders are scanned
+    val areAllOrdersScanned = orders.all { it.isScanned } // Assumes 'isScanned' is a property of Order
 
     Scaffold(
         topBar = { TopSectionDetails(navController) },
@@ -49,11 +55,11 @@ fun TripDetailsScreen(
                     .padding(paddingValues)
                     .fillMaxSize()
             ) {
-                // Si le ViewModel est en train de charger les données, afficher un indicateur de chargement
+                // Show a loading indicator while the data is loading
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 } else {
-                    // Si les données du voyage sont disponibles, affichez-les
+                    // Show trip details if available
                     trip?.let {
                         TripInfoCard(
                             navController = navController,
@@ -67,7 +73,7 @@ fun TripDetailsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Afficher le nombre de demandes de livraison
+                    // Display the delivery request count
                     Column(
                         modifier = Modifier
                             .padding(16.dp)
@@ -77,6 +83,7 @@ fun TripDetailsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
+                    // Display list of orders
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -92,10 +99,15 @@ fun TripDetailsScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(
                                 onClick = {
-                                    // Passer les informations du trip à EmailSentScreen via NavController
-                                    navController?.navigate(
-                                        "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
-                                    )
+                                    if (areAllOrdersScanned) {
+                                        // Navigate to EmailSentScreen with trip data as parameters
+                                        navController?.navigate(
+                                            "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
+                                        )
+                                    } else {
+                                        // Show the alert dialog if not all orders are scanned
+                                        showAlertDialog = true
+                                    }
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -116,4 +128,35 @@ fun TripDetailsScreen(
             }
         }
     )
+
+    // AlertDialog that shows when not all orders are scanned
+    if (showAlertDialog) {
+        AlertDialog(
+            onDismissRequest = { showAlertDialog = false },
+            title = { Text("Incomplete Orders") },
+            text = { Text("Please scan all orders before confirming.") },
+            confirmButton = {
+                Button(
+                    onClick = { showAlertDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E))
+                ) {
+                    Text("OK", color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        // Close the alert dialog and navigate to the EmailSentScreen
+                        showAlertDialog = false
+                        navController?.navigate(
+                            "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
+                        )
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E))
+                ) {
+                    Text("Continue Anyway", color = Color.White)
+                }
+            }
+        )
+    }
 }

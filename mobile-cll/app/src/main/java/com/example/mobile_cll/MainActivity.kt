@@ -18,11 +18,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            // Initialize navigation controller
             val navController = rememberNavController()
 
+            // Set up NavHost with the starting screen and routes
             NavHost(navController = navController, startDestination = "home") {
+
+                // Define "home" route and associated screen
                 composable("home") { HomeScreen(navController) }
 
+                // Define "trip_details" route with parameters
                 composable(
                     route = "trip_details/{id}/{name}/{distance}/{address}",
                     arguments = listOf(
@@ -32,6 +37,7 @@ class MainActivity : ComponentActivity() {
                         navArgument("address") { type = NavType.StringType }
                     )
                 ) { backStackEntry ->
+                    // Retrieve arguments passed to the route
                     val tripId = backStackEntry.arguments?.getString("id") ?: ""
                     val tripName = backStackEntry.arguments?.getString("name") ?: ""
                     val tripDistance = backStackEntry.arguments?.getString("distance") ?: ""
@@ -39,6 +45,7 @@ class MainActivity : ComponentActivity() {
 
                     Log.d("NavHost", "TripDetails args -> id: $tripId, name: $tripName, distance: $tripDistance, address: $tripAddress")
 
+                    // Pass arguments to TripDetailsScreen
                     TripDetailsScreen(
                         navController = navController,
                         tripId = tripId,
@@ -48,7 +55,10 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                // Define "scan" route and associated screen
                 composable("scan") { ScanView(navController) }
+
+                // Define "emailsent" route with optional parameters
                 composable(
                     "emailsent?tripId={tripId}&tripName={tripName}&tripAddress={tripAddress}",
                     arguments = listOf(
@@ -57,17 +67,17 @@ class MainActivity : ComponentActivity() {
                         navArgument("tripAddress") { type = NavType.StringType }
                     )
                 ) { backStackEntry ->
+                    // Retrieve optional parameters passed to the route
                     val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
                     val tripName = backStackEntry.arguments?.getString("tripName") ?: ""
                     val tripAddress = backStackEntry.arguments?.getString("tripAddress") ?: ""
 
                     Log.d("NavHost", "Trip ID: $tripId, Trip Name: $tripName, Trip Address: $tripAddress")
 
-                    // Passer les données au composant EmailSentScreen
+                    // Pass the data to EmailSentScreen
                     EmailSentScreen(navController, tripId, tripName, tripAddress)
                 }
             }
         }
     }
 }
-
