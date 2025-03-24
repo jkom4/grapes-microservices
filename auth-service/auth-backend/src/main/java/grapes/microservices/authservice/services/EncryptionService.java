@@ -1,11 +1,10 @@
 package grapes.microservices.authservice.services;
 
-import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.security.AESConfig;
-import org.springframework.beans.factory.annotation.Autowired;
+import grapes.microservices.authservice.utils.AuthLogger;
+import org.slf4j.Logger;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -14,62 +13,58 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
- * EncryptionService provides AES-256 encryption using GCM mode to securely encrypt sensitive user data.
- * This class is designed to encrypt fields such as National ID, Card Number, and PIN Code.
- * - Uses AES-256 with GCM mode for authenticated encryption.
- * - Generates a random IV (Initialization Vector) for each encryption.
- * - Stores encrypted data as a Base64-encoded string.
+ * Static utility class for AES-256 encryption and decryption using GCM mode.
+ * This class provides methods to securely encrypt and decrypt sensitive user data.
  *
  * @author Cameron
  */
 public class EncryptionService {
 
+    private static final Logger logger = AuthLogger.getLogger();
     private static final String AES_ALGORITHM = "AES";
     private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
-    private static final int GCM_TAG_LENGTH = 128; // Authentication tag length (in bits)
-    private static final int IV_LENGTH = 12; // Recommended IV size for GCM mode
+    private static final int GCM_TAG_LENGTH = 128;
+    private static final int IV_LENGTH = 12;
+    private static final SecretKey secretKey;
 
-    private final SecretKey secretKey;
+    static {
+        try {
+            byte[] key = AESConfig.getKey();
+            if (key == null) {
+                key = AESConfig.generateAESKey();
+                logger.warn("AES key is generated as it was not provided.");
+            } else {
+                logger.info("AES key loaded from configuration.");
+            }
+            secretKey = new SecretKeySpec(key, AES_ALGORITHM);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize EncryptionService", e);
+        }
+    }
 
-    /**
-     * Constructs an EncryptionService instance with a given AES key.
-     */
-    @Autowired
-    public EncryptionService() {
-        this.secretKey = new SecretKeySpec(AESConfig.getKey(), AES_ALGORITHM);
+    private EncryptionService() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 
     /**
-     * Generates a new AES-256 key.
-     *
-     * @return A byte array containing the AES-256 key.
-     * @throws Exception If key generation fails.
-     */
-    public static byte[] generateAESKey() throws Exception {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance(AES_ALGORITHM);
-        keyGenerator.init(256); // 256-bit key
-        return keyGenerator.generateKey().getEncoded();
-    }
-
-    /**
-     * Encrypts a given string using AES-256 GCM mode.
+     * Encrypts a given plaintext string using AES-256 GCM mode.
      *
      * @param data The plaintext data to encrypt.
-     * @return The encrypted data as a Base64-encoded string.
-     * @throws Exception If encryption fails.
+     * @return The encrypted data as a Base64-encoded string, or {@code null} if the input is null or empty.
+     * @throws Exception If encryption fails due to cryptographic errors.
      */
-    private String encrypt(String data) throws Exception {
+    public static String encrypt(String data) throws Exception {
         if (data == null || data.isEmpty()) {
-            return null;
+            logger.warn("Data to encrypt is null or empty.");
+            throw new IllegalArgumentException("Data to encrypt is null or empty.");
         }
         Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
         byte[] iv = new byte[IV_LENGTH];
-        new SecureRandom().nextBytes(iv); // Generate a random IV
+        new SecureRandom().nextBytes(iv);
         GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, parameterSpec);
         byte[] encryptedData = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
 
-        // Combine IV and encrypted data
         byte[] encryptedWithIv = new byte[IV_LENGTH + encryptedData.length];
         System.arraycopy(iv, 0, encryptedWithIv, 0, IV_LENGTH);
         System.arraycopy(encryptedData, 0, encryptedWithIv, IV_LENGTH, encryptedData.length);
@@ -78,17 +73,28 @@ public class EncryptionService {
     }
 
     /**
-     * Encrypts sensitive user data fields such as National ID, Card Number, and PIN Code.
+     * Decrypts an AES-256 GCM encrypted string.
      *
-     * @param user The user object containing the data to be encrypted.
+     * @param encryptedData The Base64-encoded encrypted data containing the IV and ciphertext.
+     * @return The decrypted plaintext string, or {@code null} if the input is invalid.
+     * @throws Exception If decryption fails due to an invalid key, corrupted data, or authentication failure.
      */
-    public void encryptData(User user) {
-        try {
-            user.setNationalId(encrypt(user.getNationalId()));
-            user.setCardNumber(encrypt(user.getCardNumber()));
-            user.setPinCode(encrypt(user.getPinCode()));
-        } catch (Exception e) {
-            throw new RuntimeException("Error encrypting user data", e);
+    public static String decrypt(String encryptedData) throws Exception {
+        if (encryptedData == null || encryptedData.isEmpty()) {
+            logger.warn("Data to decrypt is null or empty.");
+            throw new IllegalArgumentException("Data to decrypt is null or empty.");
         }
+        byte[] decodedData = Base64.getDecoder().decode(encryptedData);
+        byte[] iv = new byte[IV_LENGTH];
+        System.arraycopy(decodedData, 0, iv, 0, IV_LENGTH);
+        byte[] encryptedBytes = new byte[decodedData.length - IV_LENGTH];
+        System.arraycopy(decodedData, IV_LENGTH, encryptedBytes, 0, encryptedBytes.length);
+
+        Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
+        GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, parameterSpec);
+        byte[] decryptedData = cipher.doFinal(encryptedBytes);
+
+        return new String(decryptedData, StandardCharsets.UTF_8);
     }
 }

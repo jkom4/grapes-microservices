@@ -6,9 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserTest {
 
-    /**
-     * Test the creation of a user
-     */
     @Test
     public void testUserCreation() {
         User user = new User();

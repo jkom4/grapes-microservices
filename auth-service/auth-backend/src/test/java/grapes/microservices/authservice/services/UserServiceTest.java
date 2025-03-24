@@ -1,10 +1,17 @@
 package grapes.microservices.authservice.services;
+
+import grapes.microservices.authservice.models.Address;
+import grapes.microservices.authservice.models.Gender;
+import grapes.microservices.authservice.models.Role;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.repositories.UserRepository;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.slf4j.Logger;
+
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -14,24 +21,40 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private Logger logger;
+
     @InjectMocks
     private UserService userService;
 
     private User user;
 
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        when(logger.isInfoEnabled()).thenReturn(true);
+        when(logger.isDebugEnabled()).thenReturn(true);
+        when(logger.isErrorEnabled()).thenReturn(true);
+        when(logger.isWarnEnabled()).thenReturn(true);
+
+        Address address = new Address();
         user = new User();
         user.setId(new ObjectId("67e13f0735d02563d11c04b6"));
         user.setFirstName("John");
+        user.setName("Doe");
+        user.setBillingAddress(address);
+        user.setDeliveryAddress(address);
         user.setEmail("test@example.com");
         user.setPassword("Valid123@");
+        user.setGender(Gender.MALE);
+        user.setNationalId("12345678901");
+        user.setBankId("12345678901");
+        user.setBirthDate(new Date());
+        user.setRole(Role.USER);
     }
 
     @Test
-    void testRegisterUser_Success() {
+    void testRegisterUser_Success() throws Exception {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
         when(userRepository.save(user)).thenReturn(user);
 
@@ -57,7 +80,7 @@ public class UserServiceTest {
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.registerUser(user));
 
-        assertEquals("Password is not strong enough : it must contain at least one uppercase letter, one lowercase letter, one digit, one special character and must be at least 8 characters long", thrown.getMessage());
+        assertEquals("Validation errors: password Password must contain at least one uppercase letter, one digit, and one special character; password Password must be between 8 and 20 characters long; ", thrown.getMessage());
     }
 
     @Test
@@ -99,7 +122,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testEditUser_Success() {
+    void testEditUser_Success() throws Exception {
         User updatedUser = new User();
         updatedUser.setFirstName("Jack");
         ObjectId id = new ObjectId("67e13f0735d02563d11c04b6");
@@ -119,12 +142,12 @@ public class UserServiceTest {
         User updatedUser = new User();
         ObjectId id = new ObjectId("67e13f0735d02563d11c04b6");
         updatedUser.setId(id);
-        updatedUser.setPassword("weak");
+        updatedUser.setPassword("weakpassword");
 
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.editUser(updatedUser));
 
-        assertEquals("Password is not strong enough", thrown.getMessage());
+        assertEquals("Validation errors: password Password must contain at least one uppercase letter, one digit, and one special character; ", thrown.getMessage());
     }
 
     @Test

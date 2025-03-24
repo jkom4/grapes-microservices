@@ -1,17 +1,22 @@
 package grapes.microservices.authservice.services;
 
-import java.util.Base64;
-import java.util.regex.Pattern;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.repositories.UserRepository;
-import jakarta.annotation.PostConstruct;
+import grapes.microservices.authservice.utils.AuthLogger;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import static grapes.microservices.authservice.validators.UserValidator.isValid;
+
+/**
+ * UserService provides CRUD operations for managing User entities.
+ * This service handles user registration, retrieval, update, and deletion.
+ * It ensures password encryption, email uniqueness, and user validation before processing.
+ * @author Cameron
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -19,43 +24,28 @@ public class UserService {
     @Autowired
     private final UserRepository userRepository;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    private static final String EMAIL_PATTERN =
-            "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-
-    private static final Pattern pattern = Pattern.compile(EMAIL_PATTERN);
-
-    /**
-     * Password must contain at least one uppercase letter, one lowercase letter, one digit, one special character
-     * and must be at least 8 characters long
-     */
-    private static final String PASSWORD_REGEX =
-            "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
-
-
-    private static final Pattern PASSWORD_PATTERN = Pattern.compile(PASSWORD_REGEX);
+    private static final Logger logger = AuthLogger.getLogger();
 
     /**
      * Register a new user and verify the password strength and email uniqueness
      * Hash the password before saving it with bcrypt
+     *
      * @param user the user to register
      * @return the registered user
      */
-    public User registerUser(User user) throws IllegalArgumentException {
+    public User registerUser(User user) throws Exception {
+        logger.info("Attempting to register user with email: {}", user.getEmail());
         if (userRepository.existsByEmail(user.getEmail())) {
+            logger.error("Registration failed: an account already exists with this email: {}", user.getEmail());
             throw new IllegalArgumentException("Already exists an account with this email");
         }
-        if (!isPasswordStrong(user.getPassword())) {
-            throw new IllegalArgumentException("Password is not strong enough : it must contain at least one uppercase letter, one lowercase letter, one digit, one special character and must be at least 8 characters long");
+        if(isValid(user)) {
+            user.encryptUser();
+            logger.info("User registered successfully with email: {}", user.getEmail());
+            return userRepository.save(user);
         }
-        if (!pattern.matcher(user.getEmail()).matches()) {
-            throw new IllegalArgumentException("Email is not valid");
-        }
-        user.encryptData();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        return userRepository.save(user);
+        logger.error("Registration failed: user is not valid for email: {}", user.getEmail());
+        throw new IllegalArgumentException("User is not valid");
     }
 
     /**
@@ -67,11 +57,16 @@ public class UserService {
      */
     public User getUserById(String idStr) throws IllegalArgumentException {
         if (idStr == null) {
+            logger.error("User retrieval failed: ID cannot be null");
             throw new IllegalArgumentException("ID cannot be null");
         }
         ObjectId id = new ObjectId(idStr);
+        logger.info("Attempting to retrieve user by ID: {}", idStr);
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("No user found with this ID"));
+                .orElseThrow(() -> {
+                    logger.error("No user found with ID: {}", idStr);
+                    return new IllegalArgumentException("No user found with this ID");
+                });
     }
 
     /**
@@ -83,10 +78,16 @@ public class UserService {
      */
     public User getUserByEmail(String email) throws IllegalArgumentException {
         if (email == null) {
+            logger.error("User retrieval failed: Email cannot be null");
             throw new IllegalArgumentException("Email cannot be null");
         }
+
+        logger.info("Attempting to retrieve user by email: {}", email);
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("No user found with this email"));
+                .orElseThrow(() -> {
+                    logger.error("No user found with email: {}", email);
+                    return new IllegalArgumentException("No user found with this email");
+                });
     }
 
     /**
@@ -96,28 +97,26 @@ public class UserService {
      * @return The updated user.
      * @throws IllegalArgumentException if no user is found with the provided ID.
      */
-    public User editUser(User updatedUser) throws IllegalArgumentException {
+    public User editUser(User updatedUser) throws Exception {
         User user;
         if (updatedUser.getId() != null) {
             user = getUserById(String.valueOf(updatedUser.getId()));
-            System.out.println("1");
-        } else if (updatedUser.getEmail() != null){
+        } else if (updatedUser.getEmail() != null) {
             user = getUserByEmail(updatedUser.getEmail());
-            System.out.println("2");
         } else {
-            System.out.println("3");
+            logger.error("Edit failed: ID or email cannot be null");
             throw new IllegalArgumentException("ID or email cannot be null");
         }
 
+        logger.info("Attempting to update user with ID: {}", user.getId());
         user.update(updatedUser);
-        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-            if (!isPasswordStrong(updatedUser.getPassword())) {
-                throw new IllegalArgumentException("Password is not strong enough");
-            }
-            user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        if(isValid(user)) {
+            user.encryptUser();
+            logger.info("User with ID: {} updated successfully", user.getId());
+            return userRepository.save(user);
         }
-
-        return userRepository.save(user);
+        logger.error("User update failed: User with ID: {} is not valid", user.getId());
+        throw new IllegalArgumentException("User is not valid");
     }
 
     /**
@@ -128,18 +127,12 @@ public class UserService {
      */
     public void deleteUser(String idStr) throws IllegalArgumentException {
         if (idStr == null) {
+            logger.error("Deletion failed: ID cannot be null");
             throw new IllegalArgumentException("ID cannot be null");
         }
         User user = getUserById(idStr);
+        logger.info("Attempting to delete user with ID: {}", idStr);
         userRepository.delete(user);
+        logger.info("User with ID: {} deleted successfully", idStr);
     }
-
-
-    /**
-     * Check if the password is strong enough
-     * @param password the password to check
-     * @return true if the password is strong enough
-     */
-    private boolean isPasswordStrong(String password) {
-        return PASSWORD_PATTERN.matcher(password).matches();
-    }}
+}
