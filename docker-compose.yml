@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+### DATABASES
   mariadb:
     build: ./docker/mariadb
     container_name: grapes-mariadb
@@ -25,7 +26,7 @@ services:
       - mongodb_data:/data/db
     command: ["--auth"]  # To activate authentication
 
-
+### Exchange
   rabbitmq:
     build: ./docker/rabbitmq
     container_name: grapes-rabbitmq
@@ -39,6 +40,7 @@ services:
       - "5672:5672"
       - "15673:15672"
 
+### MONITORING
   sonarqube:
     image: sonarqube:lts-community
     container_name: grapes-sonarqube
@@ -78,6 +80,91 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
+
+
+### BACKEND
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8090:8090"
+    depends_on:
+      - mongodb
+      - mariadb
+      - data-mining-service
+      - auth-service
+      - sales-service
+      - payment-service
+      - chat-service
+
+  auth-service:
+    build: ./auth-service/auth-backend
+    container_name: auth-backend
+    ports:
+      - "8091:8091"
+    depends_on:
+      - mongodb
+      - mariadb
+
+  sales-service:
+    build: ./sales-service
+    container_name: sales-backend
+    ports:
+      - "8092:8092"
+    depends_on:
+      - mariadb
+
+  payment-service:
+    build: ./payment-service/payment-backend
+    container_name: payment-backend
+    ports:
+      - "8094:8094"
+    depends_on:
+      - mariadb
+
+  chat-service:
+    build: ./chat-service
+    container_name: chat-backend
+    ports:
+      - "8095:8095"
+    depends_on:
+      - mariadb
+
+  data-mining-service:
+    build: ./data-mining-service
+    container_name: data-mining-backend
+    ports:
+      - "8096:8096"
+    depends_on:
+      - mongodb
+      - mariadb
+
+### FRONTEND
+
+  frontend-web:
+    build: ./frontend-web
+    container_name: grapes-frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - api-gateway
+
+  frontend-auth:
+    build: ./auth-service/auth-frontend
+    container_name: auth-frontend
+    ports:
+      - "3002:81"
+    depends_on:
+      - api-gateway
+
+  frontend-payment:
+    build: ./payment-service/payment-frontend
+    container_name: payment-frontend
+    ports:
+      - "3003:82"
+    depends_on:
+      - api-gateway
 
 volumes:
   mariadb_data:
