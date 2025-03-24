@@ -27,6 +27,7 @@ fun EmailSentScreen(
     tripAddress: String,
     viewModel: EmailSentViewModel = viewModel()
 ) {
+
     // Log the details of the trip received for debugging
     Log.d("EmailSentScreen", "Trip ID: $tripId, Trip Name: $tripName, Trip Address: $tripAddress")
 
