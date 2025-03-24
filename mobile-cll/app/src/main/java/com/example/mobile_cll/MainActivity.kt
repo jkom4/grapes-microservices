@@ -16,8 +16,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = "home") {
                 composable("home") { HomeScreen(navController) }
-                composable("trip_details/{id}") { backStackEntry ->
-                    TripDetailsScreen(navController)
+                composable("trip_details/{id}") { backStackEntry -> TripDetailsScreen(navController)
                 }
             }
         }
