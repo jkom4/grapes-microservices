@@ -23,7 +23,6 @@ fun EmailSentScreen(navController: NavController, viewModel: EmailSentViewModel 
             navController.navigate("home")
         }
     }
-
     Scaffold(
         content = { paddingValues ->
             Column(
