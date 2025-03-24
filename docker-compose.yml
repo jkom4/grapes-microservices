@@ -90,6 +90,7 @@ services:
   api-gateway:
     build: ./api-gateway
     image: grapeshub/api-gateway:latest
+
     container_name: api-gateway
     ports:
       - "8090:8090"
