@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - develop
-
+  workflow_dispatch:  # Allows you to manually launch
 jobs:
   sonar:
     name: Analyze with SonarQube
