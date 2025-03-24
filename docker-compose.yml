@@ -4,6 +4,7 @@ services:
 ### DATABASES
   mariadb:
     build: ./docker/mariadb
+    image: grapeshub/mariadb-grapes:latest
     container_name: grapes-mariadb
     environment:
       MARIADB_ROOT_PASSWORD: SparringMASI!
@@ -16,6 +17,7 @@ services:
 
   mongodb:
     build: ./docker/mongodb
+    image: grapeshub/mongodb-grapes:latest
     container_name: grapes-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -29,6 +31,7 @@ services:
 ### Exchange
   rabbitmq:
     build: ./docker/rabbitmq
+    image: mydockerhub/rabbitmq-grapes:latest
     container_name: grapes-rabbitmq
     volumes:
       - ./docker/rabbitmq/volumes/data/:/var/lib/rabbitmq/mnesia
@@ -86,6 +89,7 @@ services:
 
   api-gateway:
     build: ./api-gateway
+    image: grapeshub/api-gateway:latest
     container_name: api-gateway
     ports:
       - "8090:8090"
@@ -100,6 +104,7 @@ services:
 
   auth-service:
     build: ./auth-service/auth-backend
+    image: grapeshub/auth-service-backend:latest
     container_name: auth-backend
     ports:
       - "8091:8091"
@@ -109,6 +114,7 @@ services:
 
   sales-service:
     build: ./sales-service
+    image: grapeshub/sales-service:latest
     container_name: sales-backend
     ports:
       - "8092:8092"
@@ -117,6 +123,7 @@ services:
 
   payment-service:
     build: ./payment-service/payment-backend
+    image: grapeshub/payment-service-backend:latest
     container_name: payment-backend
     ports:
       - "8094:8094"
@@ -125,6 +132,7 @@ services:
 
   chat-service:
     build: ./chat-service
+    image: grapeshub/chat-service:latest
     container_name: chat-backend
     ports:
       - "8095:8095"
@@ -133,6 +141,7 @@ services:
 
   data-mining-service:
     build: ./data-mining-service
+    image: grapeshub/data-mining-service:latest
     container_name: data-mining-backend
     ports:
       - "8096:8096"
@@ -144,6 +153,7 @@ services:
 
   frontend-web:
     build: ./frontend-web
+    image: grapeshub/grapes-frontend:latest
     container_name: grapes-frontend
     ports:
       - "3001:80"
@@ -152,6 +162,7 @@ services:
 
   frontend-auth:
     build: ./auth-service/auth-frontend
+    image: grapeshub/auth-service-frontend:latest
     container_name: auth-frontend
     ports:
       - "3002:81"
@@ -160,6 +171,7 @@ services:
 
   frontend-payment:
     build: ./payment-service/payment-frontend
+    image: grapeshub/payment-service-frontend:latest
     container_name: payment-frontend
     ports:
       - "3003:82"
