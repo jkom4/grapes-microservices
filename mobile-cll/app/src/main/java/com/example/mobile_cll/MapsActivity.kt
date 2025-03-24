@@ -65,6 +65,7 @@ class MapsActivity : AppCompatActivity() {
                 return@getMapAsync
             }
 
+
             // Enable My Location layer
             googleMap.isMyLocationEnabled = true
 
