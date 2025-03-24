@@ -1,0 +1,72 @@
+package grapes.microservices.authservice.dto;
+
+import grapes.microservices.authservice.models.*;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+import java.util.Date;
+import java.util.Map;
+
+
+@Data
+public class UserDTO {
+
+    private String id;
+
+    @NotNull(message = "bankId cannot be null")
+    private String bankId;
+
+    @NotNull(message = "name cannot be null")
+    private String name;
+
+    @NotNull(message = "firstname cannot be null")
+    private String firstName;
+
+    @NotNull(message = "password cannot be null")
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[.;#!?])[A-Za-z\\d.;#!?]+$", message = "Password must contain at least one uppercase letter, one digit, and one special character")
+    @Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters long")
+    private String password;
+
+    @NotNull(message = "email cannot be null")
+    @Email(message = "Email should be valid")
+    private String email;
+
+    @Null
+    private boolean emailVerified;
+
+    @NotNull(message = "phoneNumber cannot be null")
+    private String phoneNumber;
+
+    @Null
+    private boolean phoneVerified;
+
+    @NotNull(message = "nationalId cannot be null")
+    @Size(min = 11, max = 11, message = "National ID must be 11 digits long")
+    private String nationalId;
+
+    @Past(message = "Birth date must be in the past")
+    private Date birthDate;
+
+    private Gender gender;
+
+    @Size(min = 16, max = 16, message = "Card number must be 16 digits long")
+    private String cardNumber;
+
+    @Size(min = 4, max = 4, message = "Pin code must be 4 digits long")
+    private String pinCode;
+
+    private Role role;
+    private String profession;
+    private Map<String, AuthMethod> authMethods;
+    private Address deliveryAddress;
+    private Address billingAddress;
+
+    @Data
+    public static class AuthMethodDTO {
+        private boolean enabled;
+        private String publicKey;
+        private String challenge;
+        private Date lastLogin;
+        private Integer counter;
+        private String token;
+    }
+}
