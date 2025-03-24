@@ -20,7 +20,6 @@ class MainActivity : ComponentActivity() {
                     TripDetailsScreen(navController)
                 }
             }
-
         }
     }
 }
