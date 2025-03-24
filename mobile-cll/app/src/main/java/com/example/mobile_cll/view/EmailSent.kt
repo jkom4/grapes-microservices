@@ -68,7 +68,7 @@ fun EmailSentScreen(
                 Icon(
                     imageVector = Icons.Outlined.CheckCircle,
                     contentDescription = "Success Icon",
-                    tint = Color(0xFF4CAF50),  // Green tint for success
+                    tint = Color(0xFF4CAF50),
                     modifier = Modifier.size(80.dp)
                 )
 
