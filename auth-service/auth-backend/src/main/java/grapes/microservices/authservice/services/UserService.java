@@ -1,11 +1,14 @@
 package grapes.microservices.authservice.services;
 
+import java.util.Base64;
 import java.util.regex.Pattern;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.repositories.UserRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +52,7 @@ public class UserService {
         if (!pattern.matcher(user.getEmail()).matches()) {
             throw new IllegalArgumentException("Email is not valid");
         }
-
+        user.encryptData();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);

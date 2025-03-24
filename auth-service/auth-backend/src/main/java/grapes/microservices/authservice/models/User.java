@@ -1,6 +1,5 @@
 package grapes.microservices.authservice.models;
 
-import com.mongodb.lang.Nullable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.*;
@@ -102,5 +101,29 @@ public class User {
         this.deliveryAddress = updatedUser.deliveryAddress;
         this.billingAddress = updatedUser.billingAddress;
     }
+
+    /**
+     * Check if all constraints are respected
+     * email : valid email
+     * password : at least 8 characters, one uppercase letter, one digit, one special character
+     * nationalId : 11 digits
+     * cardNumber : 16 digits
+     * pinCode : 4 digits
+     * birthDate : in the past
+     * phoneNumber : valid phone number
+     */
+    public boolean validateData() {
+        return true;
+    }
+
+    /**
+     * Encrypt sensitive data
+     * National ID, Card Number, PIN Code → Stocker chiffré avec une clé sécurisée (AES-256).
+     */
+    public void encryptData() {
+        //TODO
+    }
+
+    //TODO :  bloquer l'accès au mot de passe quand on récupère un utilisateur en db
 }
 
