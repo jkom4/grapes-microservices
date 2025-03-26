@@ -64,7 +64,7 @@ fun TripInfoCard(navController: NavController?, tripId: String, customerName: St
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Button(
-                        onClick = { /* Action pour appeler le client */ },
+                        onClick = { /* Call customer */ },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.padding(8.dp)

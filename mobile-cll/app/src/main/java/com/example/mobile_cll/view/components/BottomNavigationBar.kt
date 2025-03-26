@@ -35,7 +35,7 @@ fun BottomNavigationBar(navController: NavController?) {
             IconButton(onClick = { navController?.navigate("map") }) {
                 Icon(Icons.Filled.LocationOn, contentDescription = "Map", tint = Color.White)
             }
-            IconButton(onClick = { /* Action Language */ }) {
+            IconButton(onClick = { /* Account route */ }) {
                 Icon(Icons.Filled.AccountCircle, contentDescription = "Account", tint = Color.White)
             }
         }

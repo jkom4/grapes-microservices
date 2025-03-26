@@ -4,12 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mobile_cll.model.Order
@@ -18,15 +17,6 @@ import com.example.mobile_cll.view.components.BottomNavigationBar
 import com.example.mobile_cll.view.components.TopSection
 import com.example.mobile_cll.view.components.TripCard
 
-/**
- * Composable displaying the HomeScreen with:
- * - A top section showing the number of trips (define in view > components).
- * - A tab bar to switch between "Current" and "Completed" trips.
- * - A list of trips shown using a LazyColumn with different details.
- * - A bottom navigation bar for navigation between screens (define in view > components).
- *
- * @param navController The navigation controller that allows navigation between screens.
- */
 @Composable
 fun HomeScreen(navController: NavController) {
     val trips = List(10) { index ->
@@ -38,36 +28,30 @@ fun HomeScreen(navController: NavController) {
         )
     }
 
+    var selectedTabIndex by remember { mutableStateOf(0) }
+
     Column(modifier = Modifier.fillMaxSize()) {
-        // Pass the number of trips to TopSection
         TopSection(tripCount = trips.size)
 
         TabRow(
-            selectedTabIndex = 0,
-            modifier = Modifier
-                .fillMaxWidth(),
+            selectedTabIndex = selectedTabIndex,
+            modifier = Modifier.fillMaxWidth(),
             containerColor = Color(0xFF4CAD7E),
             contentColor = Color.White
         ) {
             Tab(
                 text = {
-                    Text(
-                        "Current",
-                        style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
-                    )
+                    Text("Current", style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold))
                 },
-                selected = true,
-                onClick = {}
+                selected = selectedTabIndex == 0,
+                onClick = { selectedTabIndex = 0 }
             )
             Tab(
                 text = {
-                    Text(
-                        "Completed",
-                        style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
-                    )
+                    Text("Completed", style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold))
                 },
-                selected = false,
-                onClick = {}
+                selected = selectedTabIndex == 1,
+                onClick = { selectedTabIndex = 1 }
             )
         }
 
@@ -81,12 +65,6 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
-/**
- * Function to get a list of orders for a specific trip.
- *
- * @param tripId The ID of the trip for which orders are to be fetched.
- * @return A list of orders for the specified trip.
- */
 fun getOrdersForTrip(tripId: String): List<Order> {
     return orders.filter { it.tripId == tripId }
 }
