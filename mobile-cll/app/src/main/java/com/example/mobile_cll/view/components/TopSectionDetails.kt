@@ -13,6 +13,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+/**
+ * Composable displaying a top section with:
+ * - A back button that navigates to the home screen
+ * - A title indicating the order details screen
+ *
+ * @param navController The navigation controller used to navigate back to the home screen.
+ */
 @Composable
 fun TopSectionDetails(navController: NavController?) {
     Column(

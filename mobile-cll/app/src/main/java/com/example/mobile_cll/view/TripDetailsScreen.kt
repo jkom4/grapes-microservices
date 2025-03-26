@@ -2,8 +2,8 @@ package com.example.mobile_cll.view
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +18,15 @@ import com.example.mobile_cll.model.Trip
 import com.example.mobile_cll.viewmodel.TripDetailsViewModel
 import com.example.mobile_cll.view.components.*
 
+/**
+ * Composable displaying the Trip Details screen with:
+ * - Trip information card (define in view > components).
+ * - A list of orders associated with the trip (define in view > components).
+ * - A button to confirm the trip (when all scans are done).
+ *
+ * @param navController The navigation controller that allows navigation between screens.
+ * @param viewModel The view model that holds the trip details and logic for the screen.
+ */
 @Composable
 fun TripDetailsScreen(
     navController: NavController?,
@@ -27,12 +36,9 @@ fun TripDetailsScreen(
     tripAddress: String,
     viewModel: TripDetailsViewModel = viewModel()
 ) {
-    Log.d("TripDetailsScreen", "Received trip -> id: $tripId, name: $tripName, distance: $tripDistance, address: $tripAddress")
 
-    // Mettre à jour le voyage dans le ViewModel
-    viewModel.updateTrip(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
+    viewModel.loadId(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
 
-    // Obtenez l'état de chargement et les données du voyage et des commandes
     val trip = viewModel.trip
     val orders = viewModel.orders ?: emptyList()
     val deliveryRequestCount = viewModel.deliveryRequestCount

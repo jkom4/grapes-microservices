@@ -14,15 +14,22 @@ import com.example.mobile_cll.view.HomeScreen
 import com.example.mobile_cll.view.ScanView
 import com.example.mobile_cll.view.TripDetailsScreen
 
+/**
+ * MainActivity is the entry point of the application.
+ * It sets up the navigation for the app and defines the start destination.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
+            // Initialize the NavController for navigation between screens
 
+            // Set up the NavHost for managing navigation
             NavHost(navController = navController, startDestination = "home") {
+                // Home screen route
                 composable("home") { HomeScreen(navController) }
-
+                // Trip details screen route with dynamic trip ID
                 composable(
                     route = "trip_details/{id}/{name}/{distance}/{address}",
                     arguments = listOf(
@@ -37,8 +44,7 @@ class MainActivity : ComponentActivity() {
                     val tripDistance = backStackEntry.arguments?.getString("distance") ?: ""
                     val tripAddress = backStackEntry.arguments?.getString("address") ?: ""
 
-                    Log.d("NavHost", "TripDetails args -> id: $tripId, name: $tripName, distance: $tripDistance, address: $tripAddress")
-
+                    // Pass the navController to TripDetailsScreen
                     TripDetailsScreen(
                         navController = navController,
                         tripId = tripId,
@@ -54,4 +60,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

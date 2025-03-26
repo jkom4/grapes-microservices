@@ -17,9 +17,18 @@ import androidx.navigation.NavController
 import com.example.mobile_cll.model.Order
 import com.example.mobile_cll.model.Trip
 
+/**
+ * Composable displaying a trip card with:
+ * - Trip details
+ * - Total quantity of items in the trip
+ * - Navigation to the trip details screen
+ *
+ * @param trip The trip object containing details like name, address, and distance.
+ * @param orders The list of orders associated with trips, used to calculate the total quantity.
+ * @param navController The navigation controller to navigate to the trip details screen.
+ */
 @Composable
 fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
-    // 🔹 Calcul du total des quantités de produits commandés
     val totalQuantity = orders.filter { it.tripId == trip.id }.sumOf { it.quantity }
 
     Card(
