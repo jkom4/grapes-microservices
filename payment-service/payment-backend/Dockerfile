@@ -1,6 +1,4 @@
-FROM openjdk:21-jdk-slim
+FROM ubuntu:latest
 LABEL authors="jkom"
-WORKDIR /app
-COPY target/*.jar app.jar
-EXPOSE 8094
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+ENTRYPOINT ["top", "-b"]

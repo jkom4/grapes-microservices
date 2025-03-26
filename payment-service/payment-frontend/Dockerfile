@@ -1,12 +1,4 @@
-FROM node:18 AS build
-LABEL authors="jkom"
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install
-COPY . .
-RUN npm run build && ls
+FROM ubuntu:latest
+LABEL authors="komjj"
 
-FROM nginx:alpine
-COPY --from=build /app/build /usr/share/nginx/html
-EXPOSE 82
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["top", "-b"]

@@ -1,0 +1,38 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+    <changeSet id="1" author="grapes">
+        <createTable tableName="paiement">
+            <column name="id_paiement" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_transaction" type="BIGINT"/>
+            <column name="nom_marchand" type="VARCHAR(100)"/>
+            <column name="date_heure" type="DATETIME"/>
+            <column name="montant" type="DECIMAL(10,2)"/>
+            <column name="statut" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="grapes">
+        <createTable tableName="log_paiement">
+            <column name="id_log" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_paiement" type="BIGINT"/>
+            <column name="date_heure_log" type="DATETIME"/>
+            <column name="type_evenement" type="VARCHAR(100)"/>
+            <column name="description" type="TEXT"/>
+            <column name="localisation_ip" type="VARCHAR(45)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="3" author="grapes">
+        <createTable tableName="marchand">
+            <column name="nom_marchand" type="VARCHAR(100)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="secteur_activite" type="VARCHAR(100)"/>
+            <column name="adresse_marchand" type="VARCHAR(255)"/>
+            <column name="numero_tva" type="VARCHAR(50)"/>
+            <column name="date_inscription" type="DATE"/>
+            <column name="statut_marchand" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
