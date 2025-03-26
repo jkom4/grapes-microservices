@@ -14,6 +14,17 @@ import com.example.mobile_cll.model.Order
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QrCodeScanner
 
+/**
+ * Composable displaying an order card with:
+ * - ID of the order
+ * - Product description
+ * - Quantity of the product
+ * - A button that triggers the scanning action
+ *
+ * @param order The order object that contains the order's details such as ID, product description, and quantity.
+ * @param onScanClick A lambda function that is triggered when the scan button is clicked, passing the order ID as a parameter.
+ */
+
 @Composable
 fun OrderCard(order: Order, onScanClick: (String) -> Unit) {
     Card(

@@ -15,11 +15,20 @@ import androidx.navigation.NavController
 import com.example.mobile_cll.viewmodel.TripDetailsViewModel
 import com.example.mobile_cll.view.components.*
 
+/**
+ * Composable displaying the Trip Details screen with:
+ * - Trip information card (define in view > components).
+ * - A list of orders associated with the trip (define in view > components).
+ * - A button to confirm the trip (when all scans are done).
+ *
+ * @param navController The navigation controller that allows navigation between screens.
+ * @param viewModel The view model that holds the trip details and logic for the screen.
+ */
 @Composable
 fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewModel = viewModel()) {
-    // Récupérer l'ID du voyage
+    // Retrieve the trip ID from the navigation arguments
     val tripId = navController?.currentBackStackEntry?.arguments?.getString("id") ?: ""
-    viewModel.updateTripId(tripId)
+    viewModel.loadId(tripId)
 
     val trip = viewModel.trip
     val orders = viewModel.orders
@@ -33,9 +42,11 @@ fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewM
                 modifier = Modifier
                     .padding(paddingValues)
             ) {
+                // Show a loading indicator while the data is loading
                 if (viewModel.isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 } else {
+                    // Display trip info if available
                     trip?.let {
                         TripInfoCard(
                             navController = navController,
@@ -49,6 +60,7 @@ fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewM
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // Display orders and delivery request count
                     Column(
                         modifier = Modifier
                             .padding(16.dp)
@@ -58,18 +70,20 @@ fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewM
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        // List of orders for the trip
                         orders.forEach { order ->
                             OrderCard(order = order, onScanClick = { viewModel.onScanClick(order.id) })
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        // Button to confirm the trip
                         Button(
-                            onClick = { /* Action pour confirmer */ },
+                            onClick = { /* Action for confirming the trip */ },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)), // Vert
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)), // Green color
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
@@ -78,7 +92,7 @@ fun TripDetailsScreen(navController: NavController?, viewModel: TripDetailsViewM
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            }
+                        }
                     }
                 }
             }

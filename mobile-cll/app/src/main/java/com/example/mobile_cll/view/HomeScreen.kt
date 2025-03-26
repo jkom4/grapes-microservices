@@ -18,6 +18,15 @@ import com.example.mobile_cll.view.components.BottomNavigationBar
 import com.example.mobile_cll.view.components.TopSection
 import com.example.mobile_cll.view.components.TripCard
 
+/**
+ * Composable displaying the HomeScreen with:
+ * - A top section showing the number of trips (define in view > components).
+ * - A tab bar to switch between "Current" and "Completed" trips.
+ * - A list of trips shown using a LazyColumn with different details.
+ * - A bottom navigation bar for navigation between screens (define in view > components).
+ *
+ * @param navController The navigation controller that allows navigation between screens.
+ */
 @Composable
 fun HomeScreen(navController: NavController) {
     val trips = List(10) { index ->
@@ -30,7 +39,8 @@ fun HomeScreen(navController: NavController) {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopSection()
+        // Pass the number of trips to TopSection
+        TopSection(tripCount = trips.size)
 
         TabRow(
             selectedTabIndex = 0,
@@ -63,7 +73,7 @@ fun HomeScreen(navController: NavController) {
 
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(trips) { trip ->
-                TripCard(trip = trip, orders = getOrdersForTrip(trip.id), navController = navController) // ✅ CORRECTION
+                TripCard(trip = trip, orders = getOrdersForTrip(trip.id), navController = navController)
             }
         }
 
@@ -71,6 +81,12 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
+/**
+ * Function to get a list of orders for a specific trip.
+ *
+ * @param tripId The ID of the trip for which orders are to be fetched.
+ * @return A list of orders for the specified trip.
+ */
 fun getOrdersForTrip(tripId: String): List<Order> {
     return orders.filter { it.tripId == tripId }
 }
