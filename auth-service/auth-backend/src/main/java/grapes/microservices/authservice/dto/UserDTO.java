@@ -69,14 +69,4 @@ public class UserDTO {
     private Map<String, AuthMethod> authMethods;
     private Address deliveryAddress;
     private Address billingAddress;
-
-    @Data
-    public static class AuthMethodDTO {
-        private boolean enabled;
-        private String publicKey;
-        private String challenge;
-        private Date lastLogin;
-        private Integer counter;
-        private String token;
-    }
 }
