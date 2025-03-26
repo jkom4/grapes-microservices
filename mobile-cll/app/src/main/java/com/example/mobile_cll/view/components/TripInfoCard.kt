@@ -19,7 +19,7 @@ import androidx.navigation.NavController
 import com.example.mobile_cll.model.Trip
 
 /**
- * Composable displaying a trip info card with:
+ * Composable displaying a trip info card with :
  * - Trip details
  * - A call button for the customer
  *
@@ -82,11 +82,11 @@ fun TripInfoCard(
                             }
                             // Use the context to start the intent
                             context.startActivity(intent)
-                        },
+                                  },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.padding(8.dp)
-                    ){
+                    ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
