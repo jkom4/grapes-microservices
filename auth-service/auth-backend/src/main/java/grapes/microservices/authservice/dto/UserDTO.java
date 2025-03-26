@@ -36,13 +36,13 @@ public class UserDTO {
     private String email;
 
     @Null
-    private boolean emailVerified;
+    private boolean emailVerified = false;
 
     @NotNull(message = "phoneNumber cannot be null")
     private String phoneNumber;
 
     @Null
-    private boolean phoneVerified;
+    private boolean phoneVerified = false;
 
     @NotNull(message = "nationalId cannot be null")
     @Size(min = 11, max = 11, message = "National ID must be 11 digits long")
@@ -52,6 +52,8 @@ public class UserDTO {
     @Past(message = "Birth date must be in the past")
     @NotNull(message = "birthDate cannot be null")
     private Date birthDate;
+
+    private double age;
 
     @NotNull(message = "gender cannot be null")
     private Gender gender;

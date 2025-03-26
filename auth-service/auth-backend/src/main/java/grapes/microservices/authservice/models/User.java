@@ -45,11 +45,11 @@ public class User {
     @Email(message = "Email should be valid")
     private String email;
 
-    private boolean emailVerified;
+    private boolean emailVerified = false;
 
     private String phoneNumber;
 
-    private boolean phoneVerified;
+    private boolean phoneVerified = false;
 
     @Size(min = 11, max = 11, message = "National ID must be 11 digits long")
     @NotNull(message = "nationalId cannot be null")
@@ -59,8 +59,6 @@ public class User {
     @NotNull
     @Past(message = "Birth date must be in the past")
     private Date birthDate;
-
-    private double age;
 
     @NotNull(message = "gender cannot be null")
     private Gender gender;

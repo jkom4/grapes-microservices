@@ -18,6 +18,7 @@ public interface UserMapper {
     @Mapping(source = "id", target = "id", qualifiedByName = "stringToObjectId")
     User toEntity(UserDTO dto);
 
+    @Mapping(target = "age", expression = "java(computeAge(user.getBirthDate()))")
     @Mapping(source = "id", target = "id", qualifiedByName = "objectIdToString")
     UserDTO toDTO(User user);
 
@@ -51,6 +52,7 @@ public interface UserMapper {
 
         int totalDaysInYear = now.isLeapYear() ? 366 : 365;
 
+        // 30.4375 is the mean of number of days in a month
         return years + ((months * 30.4375 + days) / totalDaysInYear);
     }
 }
