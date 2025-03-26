@@ -18,6 +18,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mobile_cll.model.Trip
 
+/**
+ * Composable displaying a trip info card with:
+ * - Trip details
+ * - A call button for the customer
+ *
+ * @param navController The navigation controller to manage navigation between screens.
+ * @param tripId The unique identifier of the trip.
+ * @param customerName The name of the customer associated with the trip.
+ * @param address The address of the trip's destination.
+ * @param orderId The unique identifier of the order associated with the trip.
+ * @param trip The trip object containing details like name and distance.
+ */
 @Composable
 fun TripInfoCard(navController: NavController?, tripId: String, customerName: String, address: String, orderId: String, trip: Trip) {
     val context = LocalContext.current
@@ -57,7 +69,7 @@ fun TripInfoCard(navController: NavController?, tripId: String, customerName: St
                 ) {
                     Button(
                         onClick = {
-                            // Launch the phone call using Intent.ACTION_DIAL
+                            // Initiating a phone call using Intent.ACTION_DIAL
                             val intent = Intent(Intent.ACTION_DIAL).apply {
                                 data = Uri.parse("tel:0648953161")
                             }

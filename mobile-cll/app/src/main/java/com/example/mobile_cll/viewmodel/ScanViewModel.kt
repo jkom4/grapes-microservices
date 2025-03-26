@@ -4,30 +4,31 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 
 class ScanViewModel : ViewModel() {
-    // State variables to hold the scan code and error status
-    var scanCode by mutableStateOf("") // Holds the scanned code, initially empty
+    // Holds the scanned code
+    var scanCode by mutableStateOf("")
+        private set // Prevents external modification
+
+    // Indicates if there's an error (e.g., empty code)
+    var isError by mutableStateOf(false)
         private set
 
-    var isError by mutableStateOf(false) // Flag indicating if there's an error (empty code)
-        private set
-
-    // Update the scan code and reset error flag
+    // Updates the scan code and resets the error state
     fun onScanCodeChange(newCode: String) {
         scanCode = newCode
-        isError = false // Reset error when the code changes
+        isError = false
     }
 
-    // Submit the scanned code, check for errors (empty code)
+    // Validates and submits the scanned code
     fun onSubmitScanCode() {
         if (scanCode.isEmpty()) {
-            isError = true // Set error if code is empty
+            isError = true // Mark as error if empty
         } else {
-            submitScanCode(scanCode) // Submit the scan code if valid
+            submitScanCode(scanCode)
         }
     }
 
-    // Simulate submitting the scan code (e.g., send to server or process)
+    // Simulates submission of the scanned code
     private fun submitScanCode(code: String) {
-        println("Code submitted: $code") // Mock submission, print the code
+        println("Code submitted: $code")
     }
 }

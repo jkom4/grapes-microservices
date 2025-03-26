@@ -6,82 +6,73 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
-import com.example.mobile_cll.model.* // Ensure Trip and Order classes are imported
+import com.example.mobile_cll.model.*
 
+/**
+ * ViewModel to manage the details of a specific trip.
+ * Handles fetching trip details, loading orders, and managing loading state.
+ */
 class TripDetailsViewModel : ViewModel() {
-
-    // State variables for trip details, loading status, and orders
-    var tripId by mutableStateOf("") // Trip ID, initially empty
-        private set
-    var trip by mutableStateOf<Trip?>(null) // Holds the trip object, initially null
-        private set
-    var isLoading by mutableStateOf(true) // Flag indicating loading state
-        private set
-    var orders by mutableStateOf<List<Order>>(emptyList()) // List of orders for the trip
+    // The ID of the trip being viewed
+    var tripId by mutableStateOf("")
         private set
 
-    // Update the trip ID and trigger loading the trip details
-    fun updateTripId(id: String) {
-        Log.d("TripDetailsViewModel", "updateTripId called with id: $id")
-        tripId = id
-        loadTripDetails()
-    }
+    // The trip details object
+    var trip by mutableStateOf<Trip?>(null)
+        private set
 
-    // Simulate loading trip details (fetching data)
-    private fun loadTripDetails() {
-        Log.d("TripDetailsViewModel", "Loading trip details for tripId: $tripId")
-        viewModelScope.launch {
-            isLoading = true // Start loading
+    // The loading state of the trip details
+    var isLoading by mutableStateOf(true)
+        private set
 
-            delay(500) // Simulate network delay
+    // List of orders associated with the trip
+    var orders by mutableStateOf<List<Order>>(emptyList())
+        private set
 
-            // Mock data for trip and orders
-            trip = Trip(
-                id = tripId,
-                name = "John Doe",
-                distance = "15 mi",
-                address = "6391 Elgin St. Celina, Delaware 10299"
-            )
+    /**
+     * Loads the trip details and associated orders.
+     * This simulates an API call with a delay.
+     */
 
-            orders = listOf(
-                Order(id = "1", productDescription = "Product A", tripId = tripId, quantity = 2, scannedAt = null),
-                Order(id = "2", productDescription = "Product B", tripId = tripId, quantity = 3, scannedAt = null),
-                Order(id = "3", productDescription = "Product C", tripId = tripId, quantity = 5, scannedAt = null)
-            )
-
-            Log.d("TripDetailsViewModel", "Trip loaded: $trip, Orders: $orders")
-
-            isLoading = false // End loading
-        }
-    }
-
-    // Computed property to return the count of orders
+    // Returns the number of delivery requests (orders) for the trip
     val deliveryRequestCount: Int
         get() = orders.size
 
-    // Placeholder function for scan action (no action defined yet)
+    /**
+     * Function called when the scan button is clicked for an order.
+     *
+     * @param orderId The ID of the order to be processed.
+     */
     fun onScanClick(orderId: String) {
+        // Handle scan action for the order
     }
 
-    // Update the trip with new data (if changed)
-    fun updateTrip(trip: Trip) {
+    /**
+     * This function updates the current trip details and loads associated orders.
+     * It checks if the trip passed is different from the current one, and if so, it updates the trip details.
+     */
+    fun loadId(trip: Trip) {
+        // Check if the trip passed is different from the current one
         if (this@TripDetailsViewModel.trip != trip) {
             Log.d("TripDetailsViewModel", "updateTrip called with trip: $trip")
-            viewModelScope.launch {
-                isLoading = true // Start loading
-                delay(500) // Simulate network delay
 
-                // Update trip and orders
+            // Start loading the trip details asynchronously
+            viewModelScope.launch {
+                isLoading = true // Indicate that the loading process has started
+                delay(500) // Simulate a delay for updating
+
+                // Update the current trip details
                 this@TripDetailsViewModel.trip = trip
+
+                // Load orders associated with the trip
                 orders = listOf(
                     Order(id = "1", productDescription = "Product A", tripId = tripId, quantity = 2, scannedAt = null),
                     Order(id = "2", productDescription = "Product B", tripId = tripId, quantity = 3, scannedAt = null),
                     Order(id = "3", productDescription = "Product C", tripId = tripId, quantity = 5, scannedAt = null)
                 )
 
-                Log.d("TripDetailsViewModel", "Trip updated: $trip, Orders: $orders")
-
-                isLoading = false // End loading
+                // Mark loading as complete
+                isLoading = false // Indicate that the loading process is finished
             }
         }
     }

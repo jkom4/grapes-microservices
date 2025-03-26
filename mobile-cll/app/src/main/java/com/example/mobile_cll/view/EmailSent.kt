@@ -10,15 +10,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.navigation.NavController
 import com.example.mobile_cll.viewmodel.EmailSentViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import android.util.Log
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.ui.platform.LocalContext
-import com.example.mobile_cll.MapsActivity
 
+/**
+ * Composable screen that displays a success message after an email is sent.
+ * This screen will navigate back to the home screen after a delay.
+ */
 @Composable
 fun EmailSentScreen(
     navController: NavController,
@@ -28,33 +30,11 @@ fun EmailSentScreen(
     viewModel: EmailSentViewModel = viewModel()
 ) {
 
-    // Log the details of the trip received for debugging
-    Log.d("EmailSentScreen", "Trip ID: $tripId, Trip Name: $tripName, Trip Address: $tripAddress")
-
     val shouldNavigate = viewModel.shouldNavigate.value  // Observe navigation state
     val context = LocalContext.current
 
-    // LaunchedEffect to navigate to the MapsActivity after a delay if navigation flag is true
-    LaunchedEffect(shouldNavigate) {
-        if (shouldNavigate) {
-            // Create an Intent to start MapsActivity, passing necessary trip information
-            val intent = Intent(context, MapsActivity::class.java).apply {
-                putExtra("tripId", tripId)
-                putExtra("tripName", tripName)
-                putExtra("tripAddress", tripAddress)
-                putExtra("cameFromEmail", true)
-            }
-            // Start the MapsActivity with the intent
-            context.startActivity(intent)
-        }
-    }
 
-    // LaunchedEffect to trigger the navigation after a delay in the view model
-    LaunchedEffect(Unit) {
-        viewModel.handleNavigationAfterDelay()
-    }
-
-    // Scaffold used to structure the layout
+    // Scaffold to provide a standard screen layout.
     Scaffold(
         content = { paddingValues ->
             // Main content of the screen, centered vertically and horizontally
@@ -85,7 +65,7 @@ fun EmailSentScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Display secondary message indicating email sent to the customer
+                // Text showing additional information
                 Text(
                     text = "An email has been sent to the customer",
                     fontSize = 16.sp,

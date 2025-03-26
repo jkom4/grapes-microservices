@@ -14,12 +14,18 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.example.mobile_cll.ScanCodeInput
 import com.example.mobile_cll.view.components.TopSectionScan
 
+/**
+ * This composable displays a scan input screen with a text field to input the scan code.
+ * It also includes a submit button that triggers an action when clicked.
+ */
 @Composable
 fun ScanView(navController: NavController?) {
+    // State to hold the current scan code and error flag.
     var scanCode by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // Scaffold provides the basic structure of the screen (with top bar, content, etc.).
     Scaffold(
         topBar = { TopSectionScan(navController) },
         content = { paddingValues ->
@@ -31,11 +37,12 @@ fun ScanView(navController: NavController?) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Scan Code Input Field
+                // Input for the scan code, with an error flag to show validation message.
                 ScanCodeInput(
                     scanCode = scanCode,
                     isError = isError,
                     onScanCodeChange = { newCode ->
+                        // Updates scan code and resets error when the code changes
                         scanCode = newCode
                         isError = false
                     }
@@ -43,17 +50,18 @@ fun ScanView(navController: NavController?) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Submit Button
+                // The Submit Button, only enabled when the scan code is not empty.
                 SubmitButton(
                     scanCode = scanCode,
                     onClick = {
-                        // Check if scanCode is not empty and submit the scan code
+                        // Validates if the scan code is not empty before submitting.
                         if (scanCode.isNotEmpty()) {
-                            submitScanCode(scanCode) // Submit the code
-                            navController?.popBackStack() // Navigate back after submission
-                            keyboardController?.hide() // Hide the keyboard after submission
+                            submitScanCode(scanCode)
+                            navController?.popBackStack()
+                            keyboardController?.hide()
                         } else {
-                            isError = true // Show error if the scanCode is empty
+                            // If scan code is empty, show an error
+                            isError = true
                         }
                     }
                 )
@@ -61,7 +69,9 @@ fun ScanView(navController: NavController?) {
         }
     )
 }
-
+/**
+ * Submit button composable that is enabled only when scan code is not empty.
+ */
 @Composable
 fun SubmitButton(
     scanCode: String,
@@ -71,17 +81,21 @@ fun SubmitButton(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),
-        enabled = scanCode.isNotEmpty() // Enable button only if scanCode is not empty
+        enabled = scanCode.isNotEmpty()
     ) {
+        // Text displayed inside the button
         Text("Submit", fontSize = 16.sp, color = Color.White)
     }
 }
 
-// Function to handle scan code submission
+// Function to simulate the submission of the scan code (e.g., printing it to the console).
 fun submitScanCode(code: String) {
     println("Code submitted: $code")
 }
 
+/**
+ * Preview function for ScanView composable to see a preview of this screen.
+ */
 @Preview
 @Composable
 fun ScanViewPreview() {

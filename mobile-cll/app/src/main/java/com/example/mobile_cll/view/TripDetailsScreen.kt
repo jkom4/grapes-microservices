@@ -1,6 +1,5 @@
 package com.example.mobile_cll.view
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +18,15 @@ import com.example.mobile_cll.model.Trip
 import com.example.mobile_cll.viewmodel.TripDetailsViewModel
 import com.example.mobile_cll.view.components.*
 
+/**
+ * Composable displaying the Trip Details screen with:
+ * - Trip information card (define in view > components).
+ * - A list of orders associated with the trip (define in view > components).
+ * - A button to confirm the trip (when all scans are done).
+ *
+ * @param navController The navigation controller that allows navigation between screens.
+ * @param viewModel The view model that holds the trip details and logic for the screen.
+ */
 @Composable
 fun TripDetailsScreen(
     navController: NavController?,
@@ -28,12 +36,10 @@ fun TripDetailsScreen(
     tripAddress: String,
     viewModel: TripDetailsViewModel = viewModel()
 ) {
-    Log.d("TripDetailsScreen", "Received trip -> id: $tripId, name: $tripName, distance: $tripDistance, address: $tripAddress")
 
-    // Update trip data in the ViewModel
     viewModel.updateTrip(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
 
-    // Get the trip and orders data, and loading state
+    // Retrieve the trip ID from the navigation arguments
     val trip = viewModel.trip
     val orders = viewModel.orders ?: emptyList()
     val deliveryRequestCount = viewModel.deliveryRequestCount
@@ -59,7 +65,7 @@ fun TripDetailsScreen(
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 } else {
-                    // Show trip details if available
+                    // Display trip info if available
                     trip?.let {
                         TripInfoCard(
                             navController = navController,
@@ -83,7 +89,6 @@ fun TripDetailsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
 
-                    // Display list of orders
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -128,7 +133,6 @@ fun TripDetailsScreen(
             }
         }
     )
-
     // AlertDialog that shows when not all orders are scanned
     if (showAlertDialog) {
         AlertDialog(

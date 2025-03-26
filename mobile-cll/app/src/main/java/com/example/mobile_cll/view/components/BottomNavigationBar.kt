@@ -15,6 +15,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import com.example.mobile_cll.MapsActivity
 
+/**
+ * Composable displaying a bottom navigation bar with:
+ * - A home icon that navigates to the home screen
+ * - A map icon that navigates to the map screen
+ * - An account icon that navigates to the account screen
+ *
+ * @param navController The navigation controller that allows navigation between screens.
+ */
+
 @Composable
 fun BottomNavigationBar(navController: NavController?, context: Context) {
     BottomAppBar(containerColor = Color(0xFF4CAD7E)) {
