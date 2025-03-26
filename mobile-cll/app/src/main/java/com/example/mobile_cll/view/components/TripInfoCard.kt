@@ -19,7 +19,7 @@ import androidx.navigation.NavController
 import com.example.mobile_cll.model.Trip
 
 /**
- * Composable displaying a trip info card with :
+ * Composable displaying a trip info card with:
  * - Trip details
  * - A call button for the customer
  *
@@ -31,7 +31,14 @@ import com.example.mobile_cll.model.Trip
  * @param trip The trip object containing details like name and distance.
  */
 @Composable
-fun TripInfoCard(navController: NavController?, tripId: String, customerName: String, address: String, orderId: String, trip: Trip) {
+fun TripInfoCard(
+    navController: NavController?,
+    tripId: String,
+    customerName: String,
+    address: String,
+    orderId: String,
+    trip: Trip
+) {
     val context = LocalContext.current
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -69,11 +76,11 @@ fun TripInfoCard(navController: NavController?, tripId: String, customerName: St
                 ) {
                     Button(
                         onClick = {
-                            // Lancer l'appel téléphonique en utilisant Intent.ACTION_DIAL
+                            // Initiating a phone call using Intent.ACTION_DIAL
                             val intent = Intent(Intent.ACTION_DIAL).apply {
                                 data = Uri.parse("tel:0648953161")
                             }
-                            // Utilisez le contexte pour démarrer l'intention
+                            // Use the context to start the intent
                             context.startActivity(intent)
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),

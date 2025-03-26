@@ -39,6 +39,7 @@ fun TripDetailsScreen(
 
     viewModel.loadId(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
 
+    // Retrieve the trip ID from the navigation arguments
     val trip = viewModel.trip
     val orders = viewModel.orders ?: emptyList()
     val deliveryRequestCount = viewModel.deliveryRequestCount
@@ -53,11 +54,11 @@ fun TripDetailsScreen(
                     .padding(paddingValues)
                     .fillMaxSize()
             ) {
-                // Si le ViewModel est en train de charger les données, afficher un indicateur de chargement
+                // Show a loading indicator while the data is loading
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 } else {
-                    // Si les données du voyage sont disponibles, affichez-les
+                    // Display trip info if available
                     trip?.let {
                         TripInfoCard(
                             navController = navController,
@@ -71,7 +72,7 @@ fun TripDetailsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Afficher le nombre de demandes de livraison
+                    // Display orders and delivery request count
                     Column(
                         modifier = Modifier
                             .padding(16.dp)

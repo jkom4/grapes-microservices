@@ -53,8 +53,9 @@ class MainActivity : ComponentActivity() {
                         tripAddress = tripAddress
                     )
                 }
-
+                // Scan screen route
                 composable("scan") { ScanView(navController) }
+                // EmailSent screen route
                 composable("emailsent") { EmailSentScreen(navController) }
             }
         }

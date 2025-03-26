@@ -15,15 +15,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 
+/**
+ * Composable screen that displays a success message after an email is sent.
+ * This screen will navigate back to the home screen after a delay.
+ */
 @Composable
 fun EmailSentScreen(navController: NavController, viewModel: EmailSentViewModel = viewModel()) {
 
+    // Launches an effect to handle navigation after a delay.
     LaunchedEffect(Unit) {
         viewModel.handleNavigationAfterDelay {
-            navController.navigate("home")
+            navController.navigate("home") // Navigate back to the home screen after 5 seconds.
         }
     }
 
+    // Scaffold to provide a standard screen layout.
     Scaffold(
         content = { paddingValues ->
             Column(
@@ -33,6 +39,7 @@ fun EmailSentScreen(navController: NavController, viewModel: EmailSentViewModel 
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                // Success icon indicating the email was sent successfully
                 Icon(
                     imageVector = Icons.Outlined.CheckCircle,
                     contentDescription = "Success Icon",
@@ -40,8 +47,9 @@ fun EmailSentScreen(navController: NavController, viewModel: EmailSentViewModel 
                     modifier = Modifier.size(80.dp)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp)) // Space between icon and text
 
+                // Text showing the success message
                 Text(
                     text = "Successful",
                     fontSize = 22.sp,
@@ -49,8 +57,9 @@ fun EmailSentScreen(navController: NavController, viewModel: EmailSentViewModel 
                     color = Color.Black
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp)) // Space between lines of text
 
+                // Text showing additional information
                 Text(
                     text = "An email has been sent to the customer",
                     fontSize = 16.sp,
