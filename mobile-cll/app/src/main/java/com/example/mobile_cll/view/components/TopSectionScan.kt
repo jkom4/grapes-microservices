@@ -13,6 +13,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+/**
+ * TopSectionScan is a Composable function that displays the top section of the screen,
+ * including a back button and a title. It uses a Column and Row to position its contents.
+ *
+ * @param navController A NavController used to navigate back to the home screen.
+ */
 @Composable
 fun TopSectionScan(navController: NavController?) {
     Column(

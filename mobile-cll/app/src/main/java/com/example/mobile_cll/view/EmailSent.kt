@@ -16,6 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.ui.platform.LocalContext
+import com.example.mobile_cll.MapsActivity
 
 /**
  * Composable screen that displays a success message after an email is sent.
@@ -33,6 +34,23 @@ fun EmailSentScreen(
     val shouldNavigate = viewModel.shouldNavigate.value  // Observe navigation state
     val context = LocalContext.current
 
+    LaunchedEffect(Unit) {
+        viewModel.handleNavigationAfterDelay()
+    }
+    // LaunchedEffect to navigate to the MapsActivity after a delay if navigation flag is true
+    LaunchedEffect(shouldNavigate) {
+        if (shouldNavigate) {
+            // Create an Intent to start MapsActivity, passing necessary trip information
+            val intent = Intent(context, MapsActivity::class.java).apply {
+                putExtra("tripId", tripId)
+                putExtra("tripName", tripName)
+                putExtra("tripAddress", tripAddress)
+                putExtra("cameFromEmail", true)
+            }
+            // Start the MapsActivity with the intent
+            context.startActivity(intent)
+        }
+    }
 
     // Scaffold to provide a standard screen layout.
     Scaffold(
@@ -74,4 +92,5 @@ fun EmailSentScreen(
             }
         }
     )
+
 }

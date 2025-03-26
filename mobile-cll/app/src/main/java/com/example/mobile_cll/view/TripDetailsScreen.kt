@@ -37,7 +37,7 @@ fun TripDetailsScreen(
     viewModel: TripDetailsViewModel = viewModel()
 ) {
 
-    viewModel.updateTrip(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
+    viewModel.loadId(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
 
     // Retrieve the trip ID from the navigation arguments
     val trip = viewModel.trip

@@ -8,8 +8,11 @@ import com.example.mobile_cll.model.LocationManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.tasks.OnSuccessListener
 
+/**
+ * MapsViewModel manages the location-related data for the MapsActivity.
+ * It retrieves and updates the user's location, the client's location, and the delivery center's location.
+ */
 class MapsViewModel(application: Application) : AndroidViewModel(application) {
 
     // FusedLocationProviderClient instance to access location services
