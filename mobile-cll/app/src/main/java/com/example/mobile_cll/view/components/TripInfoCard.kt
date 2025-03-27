@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -19,7 +18,7 @@ import androidx.navigation.NavController
 import com.example.mobile_cll.model.Trip
 
 /**
- * Composable displaying a trip info card with:
+ * Composable displaying a trip info card with :
  * - Trip details
  * - A call button for the customer
  *
@@ -49,11 +48,11 @@ fun TripInfoCard(navController: NavController?, tripId: String, customerName: St
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = trip.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Text(text = "Dist: ${trip.distance}", fontSize = 12.sp, color = Color.Gray)
+                    Text(text = "Dist: ${trip.distance}", fontSize = 12.sp, color = MaterialTheme.colorScheme.tertiary)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Text(text = trip.address, fontSize = 12.sp, color = Color.Gray)
+                Text(text = trip.address, fontSize = 12.sp, color = MaterialTheme.colorScheme.tertiary)
                 Spacer(modifier = Modifier.height(4.dp))
 
             }
@@ -75,24 +74,24 @@ fun TripInfoCard(navController: NavController?, tripId: String, customerName: St
                             }
                             // Use the context to start the intent
                             context.startActivity(intent)
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),
+                                  },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.padding(8.dp)
-                    ){
+                    ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Call,
                                 contentDescription = "Call",
-                                tint = Color.White,
+                                tint = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "Call customer",
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )

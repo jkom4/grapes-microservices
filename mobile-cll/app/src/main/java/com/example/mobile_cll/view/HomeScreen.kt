@@ -8,10 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -21,7 +20,7 @@ import com.example.mobile_cll.model.Trip
 import com.example.mobile_cll.view.components.BottomNavigationBar
 import com.example.mobile_cll.view.components.TopSection
 import com.example.mobile_cll.view.components.TripCard
-
+import androidx.compose.runtime.setValue
 
 // Initialization of orders
 val orders = listOf(
@@ -56,44 +55,45 @@ fun HomeScreen(navController: NavController) {
         )
     }
 
+    // Stores the currently selected tab index as a state variable.
+    var selectedTabIndex by remember { mutableStateOf(0) }
     // State for search query
     var searchQuery by remember { mutableStateOf("") }
-    var selectedTabIndex by remember { mutableStateOf(0) }
 
-    // Filter trips based on search query (filter by address)
     val filteredTrips = trips.filter {
         it.address.contains(searchQuery, ignoreCase = true)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
+        // Pass the number of trips to TopSection
         TopSection(tripCount = trips.size)
 
         TabRow(
             selectedTabIndex = selectedTabIndex,
             modifier = Modifier
                 .fillMaxWidth(),
-            containerColor = Color(0xFF4CAD7E),
-            contentColor = Color.White
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
             Tab(
                 text = {
                     Text(
                         "Current",
-                        style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
+                        style = TextStyle(color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                     )
                 },
-                selected = true,
-                onClick = {}
+                selected = selectedTabIndex == 0,
+                onClick = { selectedTabIndex = 0 }
             )
             Tab(
                 text = {
                     Text(
                         "Completed",
-                        style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
+                        style = TextStyle(color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                     )
                 },
-                selected = false,
-                onClick = {}
+                selected = selectedTabIndex == 1,
+                onClick = { selectedTabIndex = 1 }
             )
         }
 
@@ -116,7 +116,7 @@ fun HomeScreen(navController: NavController) {
         // LazyColumn to display a list of filtered trips dynamically
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(trips) { trip ->
-                TripCard(trip = trip, orders = getOrdersForTrip(trip.id), navController = navController) // ✅ CORRECTION
+                TripCard(trip = trip, orders = getOrdersForTrip(trip.id), navController = navController)
             }
         }
 

@@ -1,8 +1,9 @@
 package com.example.mobile_cll.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -79,7 +80,7 @@ fun TripDetailsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Display the delivery request count
+                    // Display orders and delivery request count
                     Column(
                         modifier = Modifier
                             .padding(16.dp)
@@ -117,12 +118,12 @@ fun TripDetailsScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(8.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
                                     text = "Confirm",
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold
                                 )

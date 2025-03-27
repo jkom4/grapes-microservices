@@ -5,16 +5,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.Color
 
 /**
  * This composable creates an input field for scanning the code.
@@ -43,24 +37,25 @@ fun ScanCodeInput(
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Gray,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedBorderColor = Color(0xFF4CAD7E),
-                unfocusedBorderColor = Color(0xFF4CAD7E),
-                cursorColor = Color(0xFF4CAD7E)
+                focusedTextColor = MaterialTheme.colorScheme.onSecondary,
+                unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+                unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
 
         // Display error message if the input is invalid
         if (isError) {
             Text(
-                text = "Please enter a valid scan code",
-                color = Color.Red,
+                text = "Please enter a valid scan code", // Error message
+                color = MaterialTheme.colorScheme.error, // Red text color to indicate an error
                 fontSize = 14.sp,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp) // Add spacing above the error message
             )
         }
     }
 }
+

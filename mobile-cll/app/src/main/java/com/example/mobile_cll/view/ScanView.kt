@@ -23,20 +23,22 @@ fun ScanView(navController: NavController?) {
     // State to hold the current scan code and error flag.
     var scanCode by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
+
+    // Local keyboard controller to hide the keyboard when necessary.
     val keyboardController = LocalSoftwareKeyboardController.current
 
     // Scaffold provides the basic structure of the screen (with top bar, content, etc.).
     Scaffold(
-        topBar = { TopSectionScan(navController) },
+        topBar = { TopSectionScan(navController) }, // Top section of the screen, passing navController.
         content = { paddingValues ->
             Column(
                 modifier = Modifier
-                    .padding(paddingValues)
+                    .padding(paddingValues) // Ensures that the content respects the safe area
                     .padding(16.dp)
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
-            ) {
+            )  {
                 // Input for the scan code, with an error flag to show validation message.
                 ScanCodeInput(
                     scanCode = scanCode,
@@ -48,7 +50,7 @@ fun ScanView(navController: NavController?) {
                     }
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp)) // Adds space between the input and button
 
                 // The Submit Button, only enabled when the scan code is not empty.
                 SubmitButton(
@@ -56,9 +58,9 @@ fun ScanView(navController: NavController?) {
                     onClick = {
                         // Validates if the scan code is not empty before submitting.
                         if (scanCode.isNotEmpty()) {
-                            submitScanCode(scanCode)
-                            navController?.popBackStack()
-                            keyboardController?.hide()
+                            submitScanCode(scanCode) // Action to submit the scan code
+                            navController?.popBackStack() // Navigate back after submitting
+                            keyboardController?.hide() // Hide the keyboard
                         } else {
                             // If scan code is empty, show an error
                             isError = true
@@ -69,6 +71,7 @@ fun ScanView(navController: NavController?) {
         }
     )
 }
+
 /**
  * Submit button composable that is enabled only when scan code is not empty.
  */
@@ -80,11 +83,11 @@ fun SubmitButton(
     Button(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
         enabled = scanCode.isNotEmpty()
     ) {
         // Text displayed inside the button
-        Text("Submit", fontSize = 16.sp, color = Color.White)
+        Text("Submit", fontSize = 16.sp, color = MaterialTheme.colorScheme.onPrimary)
     }
 }
 
@@ -99,5 +102,5 @@ fun submitScanCode(code: String) {
 @Preview
 @Composable
 fun ScanViewPreview() {
-    ScanView(navController = null)
+    ScanView(navController = null) // Preview the screen with no navigation controller
 }

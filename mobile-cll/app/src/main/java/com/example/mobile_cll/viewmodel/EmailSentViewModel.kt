@@ -15,13 +15,12 @@ class EmailSentViewModel : ViewModel() {
     var shouldNavigate = mutableStateOf(false)
 
     /**
-     * This function waits for 5 seconds before triggering the provided navigation callback.
-     *
-     * @param onNavigationComplete The callback function that gets triggered after the delay.
-     */
+     * This function waits for 3 seconds before triggering the provided navigation callback.
+     * */
     fun handleNavigationAfterDelay() {
+        // Launch a coroutine to handle the delay
         viewModelScope.launch {
-            delay(5000) // Wait for 5 seconds
+            delay(3000) // Wait for 3 seconds
             shouldNavigate.value = true // Set navigation flag to true after delay
         }
     }
