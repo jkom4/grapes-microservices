@@ -1,0 +1,8 @@
+package com.example.mobile_cll.model
+
+data class Order(
+    val id: String,
+    val productDescription: String,
+    val quantity: Int,
+    val tripId: String,
+)
