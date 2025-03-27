@@ -20,7 +20,6 @@ import androidx.compose.material.icons.outlined.CheckCircle
  */
 @Composable
 fun EmailSentScreen(navController: NavController, viewModel: EmailSentViewModel = viewModel()) {
-
     // Launches an effect to handle navigation after a delay.
     LaunchedEffect(Unit) {
         viewModel.handleNavigationAfterDelay {
