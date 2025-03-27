@@ -10,11 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mobile_cll.model.Order
 import com.example.mobile_cll.model.Trip
@@ -52,14 +49,14 @@ fun HomeScreen(navController: NavController) {
             selectedTabIndex = selectedTabIndex,
             modifier = Modifier
                 .fillMaxWidth(),
-            containerColor = Color(0xFF4CAD7E),
-            contentColor = Color.White
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
             Tab(
                 text = {
                     Text(
                         "Current",
-                        style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
+                        style = TextStyle(color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                     )
                 },
                 selected = selectedTabIndex == 0,
@@ -69,7 +66,7 @@ fun HomeScreen(navController: NavController) {
                 text = {
                     Text(
                         "Completed",
-                        style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold)
+                        style = TextStyle(color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                     )
                 },
                 selected = selectedTabIndex == 1,

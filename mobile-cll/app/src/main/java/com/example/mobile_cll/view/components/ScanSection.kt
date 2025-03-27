@@ -9,8 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.Color
-
 /**
  * This composable creates an input field for scanning the code.
  * It displays an error message when the input is invalid.
@@ -38,13 +36,13 @@ fun ScanCodeInput(
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Gray,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedBorderColor = Color(0xFF4CAD7E),
-                unfocusedBorderColor = Color(0xFF4CAD7E),
-                cursorColor = Color(0xFF4CAD7E)
+                focusedTextColor = MaterialTheme.colorScheme.onSecondary,
+                unfocusedTextColor = MaterialTheme.colorScheme.tertiary,
+                focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+                unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -52,7 +50,7 @@ fun ScanCodeInput(
         if (isError) {
             Text(
                 text = "Please enter a valid scan code", // Error message
-                color = Color.Red, // Red text color to indicate an error
+                color = MaterialTheme.colorScheme.error, // Red text color to indicate an error
                 fontSize = 14.sp,
                 modifier = Modifier.padding(top = 4.dp) // Add spacing above the error message
             )

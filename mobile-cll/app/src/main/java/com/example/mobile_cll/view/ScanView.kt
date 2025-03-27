@@ -5,7 +5,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,10 +33,10 @@ fun ScanView(navController: NavController?) {
             Column(
                 modifier = Modifier
                     .padding(paddingValues) // Ensures that the content respects the safe area
-                    .padding(16.dp) // Adds padding inside the content
-                    .fillMaxSize(), // Makes the column fill the available space
-                horizontalAlignment = Alignment.CenterHorizontally, // Centers the content horizontally
-                verticalArrangement = Arrangement.Center // Centers the content vertically
+                    .padding(16.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 // Input for the scan code, with an error flag to show validation message.
                 ScanCodeInput(
@@ -58,7 +57,7 @@ fun ScanView(navController: NavController?) {
                     onClick = {
                         // Validates if the scan code is not empty before submitting.
                         if (scanCode.isNotEmpty()) {
-                            submitScanCode(scanCode) // Action to submit the scan code
+                            submitScanCode(scanCode)
                             navController?.popBackStack() // Navigate back after submitting
                             keyboardController?.hide() // Hide the keyboard
                         } else {
@@ -81,13 +80,13 @@ fun SubmitButton(
     onClick: () -> Unit
 ) {
     Button(
-        onClick = onClick, // Trigger the onClick action when the button is clicked
-        modifier = Modifier.fillMaxWidth(), // Button takes up the full width of its parent
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)), // Custom green color for the button
-        enabled = scanCode.isNotEmpty() // Button is enabled only when there's a scan code
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+        enabled = scanCode.isNotEmpty()
     ) {
         // Text displayed inside the button
-        Text("Submit", fontSize = 16.sp, color = Color.White)
+        Text("Submit", fontSize = 16.sp, color = MaterialTheme.colorScheme.onPrimary)
     }
 }
 

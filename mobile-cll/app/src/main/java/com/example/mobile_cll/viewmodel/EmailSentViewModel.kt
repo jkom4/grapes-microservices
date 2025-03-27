@@ -18,7 +18,7 @@ class EmailSentViewModel : ViewModel() {
     fun handleNavigationAfterDelay(onNavigationComplete: () -> Unit) {
         // Launch a coroutine to handle the delay
         viewModelScope.launch {
-            delay(5000) // Wait for 5 seconds
+            delay(3000) // Wait for 3 seconds
             onNavigationComplete() // Trigger the navigation callback
         }
     }

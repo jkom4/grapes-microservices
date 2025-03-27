@@ -5,7 +5,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +42,7 @@ fun EmailSentScreen(navController: NavController, viewModel: EmailSentViewModel 
                 Icon(
                     imageVector = Icons.Outlined.CheckCircle,
                     contentDescription = "Success Icon",
-                    tint = Color(0xFF4CAF50),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(80.dp)
                 )
 
@@ -54,7 +53,7 @@ fun EmailSentScreen(navController: NavController, viewModel: EmailSentViewModel 
                     text = "Successful",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSecondary
                 )
 
                 Spacer(modifier = Modifier.height(8.dp)) // Space between lines of text
@@ -63,7 +62,7 @@ fun EmailSentScreen(navController: NavController, viewModel: EmailSentViewModel 
                 Text(
                     text = "An email has been sent to the customer",
                     fontSize = 16.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
         }
