@@ -3,45 +3,34 @@ package com.example.mobile_cll
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.mobile_cll.ui.theme.MobileCLLTheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.mobile_cll.view.HomeScreen
+import com.example.mobile_cll.view.TripDetailsScreen
 
+/**
+ * MainActivity is the entry point of the application.
+ * It sets up the navigation for the app and defines the start destination.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            MobileCLLTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            // Initialize the NavController for navigation between screens
+            val navController = rememberNavController()
+
+            // Set up the NavHost for managing navigation
+            NavHost(navController = navController, startDestination = "home") {
+                // Home screen route
+                composable("home") { HomeScreen(navController) }
+
+                // Trip details screen route with dynamic trip ID
+                composable("trip_details/{id}") { backStackEntry ->
+                    // Pass the navController to TripDetailsScreen
+                    TripDetailsScreen(navController)
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MobileCLLTheme {
-        Greeting("Android")
     }
 }

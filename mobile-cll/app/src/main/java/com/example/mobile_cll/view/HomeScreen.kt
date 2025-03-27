@@ -1,0 +1,76 @@
+package com.example.mobile_cll.view
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.mobile_cll.model.Order
+import com.example.mobile_cll.model.Trip
+import com.example.mobile_cll.view.components.BottomNavigationBar
+import com.example.mobile_cll.view.components.TopSection
+import com.example.mobile_cll.view.components.TripCard
+
+@Composable
+fun HomeScreen(navController: NavController) {
+    val trips = List(10) { index ->
+        Trip(
+            id = "$index",
+            name = "John Doe $index",
+            distance = "${10 + index} mi",
+            address = "6391 Elgin St. Celina, Delaware 10299",
+        )
+    }
+
+    var selectedTabIndex by remember { mutableStateOf(0) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        TopSection(tripCount = trips.size)
+
+        TabRow(
+            selectedTabIndex = selectedTabIndex,
+            modifier = Modifier.fillMaxWidth(),
+            containerColor = Color(0xFF4CAD7E),
+            contentColor = Color.White
+        ) {
+            Tab(
+                text = {
+                    Text("Current", style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold))
+                },
+                selected = selectedTabIndex == 0,
+                onClick = { selectedTabIndex = 0 }
+            )
+            Tab(
+                text = {
+                    Text("Completed", style = TextStyle(color = Color.White, fontWeight = FontWeight.Bold))
+                },
+                selected = selectedTabIndex == 1,
+                onClick = { selectedTabIndex = 1 }
+            )
+        }
+
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(trips) { trip ->
+                TripCard(trip = trip, orders = getOrdersForTrip(trip.id), navController = navController)
+            }
+        }
+
+        BottomNavigationBar(navController)
+    }
+}
+
+fun getOrdersForTrip(tripId: String): List<Order> {
+    return orders.filter { it.tripId == tripId }
+}
+
+val orders = listOf(
+    Order(id = "1", tripId = "123", productDescription = "Product A", quantity = 10),
+    Order(id = "2", tripId = "123", productDescription = "Product B", quantity = 5),
+    Order(id = "3", tripId = "456", productDescription = "Product C", quantity = 8)
+)
