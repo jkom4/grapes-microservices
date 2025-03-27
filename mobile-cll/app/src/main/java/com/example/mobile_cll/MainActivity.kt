@@ -71,7 +71,10 @@ class MainActivity : ComponentActivity() {
                         val tripName = backStackEntry.arguments?.getString("tripName") ?: ""
                         val tripAddress = backStackEntry.arguments?.getString("tripAddress") ?: ""
 
-                        Log.d("NavHost", "Trip ID: $tripId, Trip Name: $tripName, Trip Address: $tripAddress")
+                        Log.d(
+                            "NavHost",
+                            "Trip ID: $tripId, Trip Name: $tripName, Trip Address: $tripAddress"
+                        )
 
                         // Pass the data to EmailSentScreen
                         EmailSentScreen(navController, tripId, tripName, tripAddress)

@@ -15,6 +15,9 @@ import com.google.android.gms.maps.model.LatLng
  */
 class MapsViewModel(application: Application) : AndroidViewModel(application) {
 
+    val LATITUDE = 50.6201326
+    val LONGITUDE = 5.5816244
+
     // FusedLocationProviderClient instance to access location services
     private val fusedLocationProviderClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(application)
 
@@ -30,8 +33,9 @@ class MapsViewModel(application: Application) : AndroidViewModel(application) {
     private val _clientLocation = MutableLiveData<LatLng>()
     val clientLocation: LiveData<LatLng> get() = _clientLocation
 
+
     init {
-        _deliveryCenter.value = LatLng(50.6201326, 5.5816244) // Set initial delivery center location
+        _deliveryCenter.value = LatLng(LATITUDE, LONGITUDE) // Set initial delivery center location
 
         // Retrieve the user's last known location
         fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->

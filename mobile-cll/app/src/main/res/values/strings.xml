@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">Mobile-CLL</string>
     <string name="title_activity_maps">MapsActivity</string>
-    <string name="google_maps_api_key">AIzaSyBqg7du7dziAQGTMxeqd4NHyFltZfrRmaU</string>
 </resources>

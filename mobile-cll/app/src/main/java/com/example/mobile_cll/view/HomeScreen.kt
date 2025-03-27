@@ -106,10 +106,10 @@ fun HomeScreen(navController: NavController) {
                 .fillMaxWidth()
                 .padding(16.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color(0xFF4CAD7E),
-                unfocusedBorderColor = Color(0xFF4CAD7E),
-                focusedLabelColor = Color.Black,
-                unfocusedLabelColor = Color(0xFF4CAD7E)
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.primary
             )
         )
 

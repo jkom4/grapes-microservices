@@ -143,9 +143,9 @@ fun TripDetailsScreen(
             confirmButton = {
                 Button(
                     onClick = { showAlertDialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("OK", color = Color.White)
+                    Text("OK", color = MaterialTheme.colorScheme.onPrimary)
                 }
             },
             dismissButton = {
@@ -157,9 +157,9 @@ fun TripDetailsScreen(
                             "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
                         )
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Continue Anyway", color = Color.White)
+                    Text("Continue Anyway", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         )
