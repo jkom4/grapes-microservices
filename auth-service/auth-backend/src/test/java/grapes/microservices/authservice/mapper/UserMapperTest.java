@@ -36,7 +36,7 @@ class UserMapperTest {
     }
 
     @Test
-    void testComputeAge_forExactYears() {
+    void computeAge_forExactYears() {
         LocalDate birthDate = LocalDate.of(1995, 3, 25);
         Date date = Date.from(birthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
@@ -47,7 +47,7 @@ class UserMapperTest {
     }
 
     @Test
-    void testComputeAge_withLeapYear() {
+    void computeAge_withLeapYear() {
         // With a leap year, the age should be 25.0 in 2025
         LocalDate birthDate = LocalDate.of(2000, 2, 29);
         Date date = Date.from(birthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -59,7 +59,7 @@ class UserMapperTest {
     }
 
     @Test
-    void testComputeAge_forUnderage() {
+    void computeAge_forUnderage() {
         // Minor born in 2007, should be 18 years old in 2025
         LocalDate birthDate = LocalDate.of(2007, 3, 25);
         Date date = Date.from(birthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -70,13 +70,13 @@ class UserMapperTest {
     }
 
     @Test
-    void testComputeAge_withNoBirthDate() {
+    void computeAge_withNoBirthDate() {
         // Test for a null birthdate (although in production this should not happen)
         assertThrows(IllegalArgumentException.class, () -> userMapper.computeAge(null));
     }
 
     @Test
-    void testToEntity_withValidDTO() {
+    void toEntity_withValidDTO() {
         // Given a valid UserDTO
         UserDTO dto = new UserDTO();
         dto.setBankId("bank123");

@@ -55,7 +55,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testRegisterUser_Success() throws Exception {
+    void registerUser_Success() throws Exception {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(false);
         when(userRepository.save(user)).thenReturn(user);
 
@@ -67,7 +67,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testRegisterUser_EmailAlreadyExists() {
+    void registerUser_EmailAlreadyExists() {
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.registerUser(user));
@@ -76,7 +76,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testRegisterUser_WeakPassword() {
+    void registerUser_WeakPassword() {
         user.setPassword("weak");
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.registerUser(user));
@@ -85,7 +85,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testGetUserById_Success() {
+    void getUserById_Success() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
 
         User retrievedUser = userService.getUserById(String.valueOf(user.getId()));
@@ -95,7 +95,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testGetUserById_UserNotFound() {
+    void getUserById_UserNotFound() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.empty());
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.getUserById(String.valueOf(user.getId())));
@@ -104,7 +104,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testGetUserByEmail_Success() {
+    void getUserByEmail_Success() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(java.util.Optional.of(user));
 
         User retrievedUser = userService.getUserByEmail(user.getEmail());
@@ -114,7 +114,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testGetUserByEmail_UserNotFound() {
+    void getUserByEmail_UserNotFound() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(java.util.Optional.empty());
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.getUserByEmail(user.getEmail()));
@@ -123,7 +123,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testEditUser_Success() throws Exception {
+    void editUser_Success() throws Exception {
         User updatedUser = new User();
         updatedUser.setFirstName("Jack");
         ObjectId id = new ObjectId("67e13f0735d02563d11c04b6");
@@ -139,7 +139,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testEditUser_PasswordNotStrongEnough() {
+    void editUser_PasswordNotStrongEnough() {
         User updatedUser = new User();
         ObjectId id = new ObjectId("67e13f0735d02563d11c04b6");
         updatedUser.setId(id);
@@ -152,7 +152,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testDisableUser_Success() {
+    void disableUser_Success() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
 
         System.out.println(user.isActive());
@@ -162,7 +162,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void testDisableUser_UserNotFound() {
+    void disableUser_UserNotFound() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.empty());
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.disableUser(String.valueOf(user.getId())));

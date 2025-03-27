@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserTest {
 
     @Test
-    public void testUserCreation() {
+    public void userCreation() {
         User user = new User();
         user.setName("John");
         user.setFirstName("Doe");

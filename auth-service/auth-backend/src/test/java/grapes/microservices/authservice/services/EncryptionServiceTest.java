@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class EncryptionServiceTest {
 
     @Test
-    void testEncrypt() throws Exception {
+    void encryptSuccess() throws Exception {
         String originalData = "SensitiveData123";
         String encryptedData = EncryptionService.encrypt(originalData);
 
@@ -17,7 +17,7 @@ class EncryptionServiceTest {
     }
 
     @Test
-    void testDecrypt() throws Exception {
+    void decryptSuccess() throws Exception {
         String originalData = "SensitiveData123";
         String encryptedData = EncryptionService.encrypt(originalData);
 
@@ -28,7 +28,7 @@ class EncryptionServiceTest {
     }
 
     @Test
-    void testEncryptDecryptConsistency() throws Exception {
+    void encryptDecryptConsistency() throws Exception {
         String originalData = "SensitiveData123";
         String encryptedData = EncryptionService.encrypt(originalData);
         String decryptedData = EncryptionService.decrypt(encryptedData);
@@ -37,35 +37,35 @@ class EncryptionServiceTest {
     }
 
     @Test
-    void testEncryptNullData() throws IllegalArgumentException {
+    void encryptNullData() throws IllegalArgumentException {
         assertThrows(IllegalArgumentException.class, () -> EncryptionService.encrypt(null));
     }
 
     @Test
-    void testDecryptNullData() throws IllegalArgumentException {
+    void decryptNullData() throws IllegalArgumentException {
         assertThrows(IllegalArgumentException.class, () -> EncryptionService.decrypt(null));
     }
 
     @Test
-    void testDecryptInvalidData() {
+    void decryptInvalidData() {
         String invalidEncryptedData = "InvalidEncryptedData";
         assertThrows(Exception.class, () -> EncryptionService.decrypt(invalidEncryptedData), "Decrypting invalid data should throw an exception.");
     }
 
     @Test
-    void testEncryptEmptyData() throws IllegalArgumentException {
+    void encryptEmptyData() throws IllegalArgumentException {
         assertThrows(IllegalArgumentException.class, () -> EncryptionService.encrypt(""));
 
     }
 
     @Test
-    void testDecryptEmptyData() throws IllegalArgumentException {
+    void decryptEmptyData() throws IllegalArgumentException {
         assertThrows(IllegalArgumentException.class, () -> EncryptionService.decrypt(""));
 
     }
 
     @Test
-    void testKeyGeneration() {
+    void keyGeneration() {
         byte[] key = new byte[32];
         new SecureRandom().nextBytes(key);
 
