@@ -40,6 +40,7 @@ public class UserServiceTest {
         Address address = new Address();
         user = new User();
         user.setId(new ObjectId("67e13f0735d02563d11c04b6"));
+        user.setActive(true);
         user.setFirstName("John");
         user.setName("Doe");
         user.setBillingAddress(address);
@@ -151,19 +152,20 @@ public class UserServiceTest {
     }
 
     @Test
-    void testDeleteUser_Success() {
+    void testDisableUser_Success() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
 
-        userService.deleteUser(String.valueOf(user.getId()));
-
-        verify(userRepository, times(1)).delete(user);
+        System.out.println(user.isActive());
+        userService.disableUser(String.valueOf(user.getId()));
+        System.out.println(user.isActive());
+        assertFalse(user.isActive());
     }
 
     @Test
-    void testDeleteUser_UserNotFound() {
+    void testDisableUser_UserNotFound() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.empty());
 
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.deleteUser(String.valueOf(user.getId())));
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.disableUser(String.valueOf(user.getId())));
 
         assertEquals("No user found with this ID", thrown.getMessage());
     }

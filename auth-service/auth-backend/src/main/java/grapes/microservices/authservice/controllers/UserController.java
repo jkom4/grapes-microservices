@@ -5,8 +5,10 @@ import grapes.microservices.authservice.dto.UserDTO;
 import grapes.microservices.authservice.mapper.UserMapper;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
@@ -37,7 +39,8 @@ public class UserController {
     private static final Logger logger = AuthLogger.getLogger();
 
 
-    @PostMapping("/register")
+    @Transactional
+    @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
         logger.info("Received request to register a user: {}", userDTO);
         try {
@@ -53,20 +56,36 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable String id) {
-        logger.info("Received request to delete user with ID: {}", id);
+    @Transactional
+    @PutMapping(value = "/disable/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> disable(@PathVariable String id) {
+        logger.info("Received request to disable user with ID: {}", id);
         try {
-            userService.deleteUser(id);
-            logger.info("User successfully deleted with ID: {}", id);
-            return ResponseEntity.ok().build();
+            User disableUser = userService.disableUser(id);
+            logger.info("User successfully disabled with ID: {}", id);
+            return ResponseEntity.ok(userMapper.toDTO(disableUser));
         } catch (IllegalArgumentException e) {
-            logger.warn("Error during user deletion: {}", e.getMessage());
+            logger.warn("Error during user deactivation: {}", e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PutMapping("/update")
+    @Transactional
+    @PutMapping(value = "/enable/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> enable(@PathVariable String id) {
+        logger.info("Received request to enable user with ID: {}", id);
+        try {
+            User enabledUser = userService.enableUser(id);
+            logger.info("User successfully enabled with ID: {}", id);
+            return ResponseEntity.ok(userMapper.toDTO(enabledUser));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Error during user activation: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Transactional
+    @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO) {
         logger.info("Received request to update user: {}", userDTO);
         try {
@@ -81,7 +100,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/email")
+    @PostMapping(value = "/email", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getUserByEmail(@RequestBody EmailDTO emailDTO) {
         logger.info("Received request to get user by email: {}", emailDTO.getEmail());
         try {
@@ -94,7 +113,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getUserById(@PathVariable String id) {
         logger.info("Received request to get user by ID: {}", id);
         try {

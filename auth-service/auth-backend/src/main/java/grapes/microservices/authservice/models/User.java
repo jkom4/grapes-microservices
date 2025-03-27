@@ -1,5 +1,6 @@
 package grapes.microservices.authservice.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import grapes.microservices.authservice.services.EncryptionService;
 import grapes.microservices.authservice.utils.AuthLogger;
 import jakarta.persistence.Embedded;
@@ -28,6 +29,10 @@ public class User {
     private ObjectId id;
 
     @NotNull
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private boolean isActive;
+
+    @NotNull
     private String bankId;
 
     @NotNull
@@ -45,11 +50,13 @@ public class User {
     @Email(message = "Email should be valid")
     private String email;
 
-    private boolean emailVerified = false;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private boolean emailVerified;
 
     private String phoneNumber;
 
-    private boolean phoneVerified = false;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private boolean phoneVerified;
 
     @Size(min = 11, max = 11, message = "National ID must be 11 digits long")
     @NotNull(message = "nationalId cannot be null")

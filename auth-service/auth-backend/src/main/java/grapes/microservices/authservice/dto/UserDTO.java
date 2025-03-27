@@ -15,6 +15,10 @@ public class UserDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String id;
 
+    @NotNull
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private boolean isActive;
+
     @NotNull(message = "bankId cannot be null")
     private String bankId;
 
@@ -36,13 +40,15 @@ public class UserDTO {
     private String email;
 
     @Null
-    private boolean emailVerified = false;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private boolean emailVerified;
 
     @NotNull(message = "phoneNumber cannot be null")
     private String phoneNumber;
 
     @Null
-    private boolean phoneVerified = false;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private boolean phoneVerified;
 
     @NotNull(message = "nationalId cannot be null")
     @Size(min = 11, max = 11, message = "National ID must be 11 digits long")

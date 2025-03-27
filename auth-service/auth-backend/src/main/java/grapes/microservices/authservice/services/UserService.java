@@ -3,6 +3,7 @@ package grapes.microservices.authservice.services;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.repositories.UserRepository;
 import grapes.microservices.authservice.utils.AuthLogger;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class UserService {
      * @param user the user to register
      * @return the registered user
      */
+    @Transactional
     public User registerUser(User user) throws Exception {
         logger.info("Attempting to register user with email: {}", user.getEmail());
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -97,6 +99,7 @@ public class UserService {
      * @return The updated user.
      * @throws IllegalArgumentException if no user is found with the provided ID.
      */
+    @Transactional
     public User editUser(User updatedUser) throws Exception {
         User user;
         if (updatedUser.getId() != null) {
@@ -120,19 +123,48 @@ public class UserService {
     }
 
     /**
-     * Deletes a user by their ID.
+     * Disable a user by their ID.
      *
      * @param idStr The ID of the user to delete.
      * @throws IllegalArgumentException if no user is found with the provided ID.
      */
-    public void deleteUser(String idStr) throws IllegalArgumentException {
+    @Transactional
+    public User disableUser(String idStr) throws IllegalArgumentException {
         if (idStr == null) {
-            logger.error("Deletion failed: ID cannot be null");
+            logger.error("Deactivation failed: ID cannot be null");
             throw new IllegalArgumentException("ID cannot be null");
         }
         User user = getUserById(idStr);
-        logger.info("Attempting to delete user with ID: {}", idStr);
-        userRepository.delete(user);
-        logger.info("User with ID: {} deleted successfully", idStr);
+        if (!user.isActive()) {
+            throw new IllegalArgumentException("Deactivation failed : this user is already disabled");
+        }
+        logger.info("Attempting to disable user with ID: {}", idStr);
+        // Set user status to false
+        user.setActive(false);
+        logger.info("User with ID: {} disabled successfully", idStr);
+        return userRepository.save(user);
+    }
+
+    /**
+     * Enable (reactivate) a user by their ID.
+     *
+     * @param idStr The ID of the user to reactivate.
+     * @throws IllegalArgumentException if no user is found with the provided ID.
+     */
+    @Transactional
+    public User enableUser(String idStr) throws IllegalArgumentException {
+        if (idStr == null) {
+            logger.error("Reactivation failed: ID cannot be null");
+            throw new IllegalArgumentException("ID cannot be null");
+        }
+        User user = getUserById(idStr);
+        if (user.isActive()) {
+            throw new IllegalArgumentException("Activation failed : this user is already enabled");
+        }
+        logger.info("Attempting to enable user with ID: {}", idStr);
+        // Set user status to true
+        user.setActive(true);
+        logger.info("User with ID: {} enabled successfully", idStr);
+        return userRepository.save(user);
     }
 }
