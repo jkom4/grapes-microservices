@@ -85,4 +85,4 @@ jobs:
         working-directory: ./data-mining-service
         run: |
           pip install -r requirements.txt
-     
+
