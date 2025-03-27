@@ -3,15 +3,27 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
 
-    <changeSet author="jobelin.kom" id="20250316-1">
-        <createTable tableName="transactions">
-            <column name="id" type="BIGINT" autoIncrement="true">
+    <changeSet author="jobelin.kom" id="20250324-1">
+        <createTable tableName="article">
+            <column name="id" type="INT" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="client_id" type="VARCHAR(255)"/>
-            <column name="amount" type="double"/>
-            <column name="transaction_date" type="DATE"/>
-            <column name="status" type="VARCHAR(255)"/>
+            <column name="category_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="family_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="price_kg" type="DECIMAL(10,2)"/>
+            <column name="price_unit" type="DECIMAL(10,2)"/>
+            <column name="stock_kg" type="DECIMAL(10,2)"/>
+            <column name="stock_unit" type="DECIMAL(10,2)"/>
+            <column name="origin" type="VARCHAR(100)"/>
+            <column name="picture_path" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>
