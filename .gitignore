@@ -28,6 +28,6 @@
 hs_err_pid*
 replay_pid*
 
-# Ignore les fichiers de données générés par MariaDB
-docker/mariadb/volumes/mariadb_data/
-
+# Password and env properties
+.env
+*.env
