@@ -115,7 +115,7 @@ fun HomeScreen(navController: NavController) {
 
         // LazyColumn to display a list of filtered trips dynamically
         LazyColumn(modifier = Modifier.weight(1f)) {
-            items(trips) { trip ->
+            items(filteredTrips) { trip ->
                 TripCard(trip = trip, orders = getOrdersForTrip(trip.id), navController = navController)
             }
         }
