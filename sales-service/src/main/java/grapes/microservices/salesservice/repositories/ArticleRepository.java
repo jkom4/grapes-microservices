@@ -14,5 +14,5 @@ public interface ArticleRepository extends JpaRepository<Article, Integer> {
 
     List<Article> findByFamilyId(Integer familyId);
 
-    List<Article> findByNameContainingIgnoreCase(String name); // Recherche partielle par nom
+    List<Article> findByNameContainingIgnoreCase(String name); // partial search by name
 }

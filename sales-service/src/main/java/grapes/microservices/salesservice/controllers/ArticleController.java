@@ -1,7 +1,10 @@
 package grapes.microservices.salesservice.controllers;
 
 import grapes.microservices.salesservice.dto.ArticleDTO;
+import grapes.microservices.salesservice.mapper.ArticleMapper;
+import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.services.ArticleService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -9,80 +12,72 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/articles", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ArticleController {
 
     private final ArticleService articleService;
+    private final ArticleMapper articleMapper = ArticleMapper.INSTANCE;
 
     public ArticleController(ArticleService articleService) {
         this.articleService = articleService;
     }
 
-    // Endpoint pour obtenir tous les articles
+    // Get all articles
     @GetMapping
     public ResponseEntity<List<ArticleDTO>> getAllArticles() {
-        return ResponseEntity.ok(articleService.getAllArticles());
+        List<Article> articles = articleService.getAllArticles();
+        List<ArticleDTO> dtos = articles.stream()
+                .map(articleMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
-    // ✅ Endpoint de recherche d'articles par nom avec gestion d'erreurs
+    // Search articles by name
     @GetMapping("/search")
     public ResponseEntity<?> searchArticlesByName(@RequestParam String name) {
         if (name == null || name.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Le champ 'name' ne peut pas être vide.");
+            return ResponseEntity.badRequest().body("The 'name' field cannot be empty.");
         }
 
-        List<ArticleDTO> results = articleService.searchByName(name);
+        List<Article> results = articleService.searchByName(name);
 
         if (results.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Aucun article trouvé avec le nom : '" + name + "'");
+                    .body("No items found with the name: '" + name + "'");
         }
 
-        return ResponseEntity.ok(
-                Map.of(
-                        "message", "Article(s) trouvé(s) avec succès.",
-                        "data", results
-                )
-        );
+        List<ArticleDTO> dtos = results.stream()
+                .map(articleMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
-    // Endpoint pour créer un article
+    // Create article
     @PostMapping
-    public ResponseEntity<?> createArticle(@Valid @RequestBody ArticleDTO articleDTO) {
-        ArticleDTO createdArticle = articleService.createArticle(articleDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                Map.of(
-                        "message", "Article ajouté avec succès.",
-                        "data", createdArticle
-                )
-        );
+    @Transactional
+    public ResponseEntity<ArticleDTO> createArticle(@Valid @RequestBody ArticleDTO articleDTO) {
+        Article article = articleMapper.toEntity(articleDTO);
+        Article created = articleService.createArticle(article);
+        return ResponseEntity.status(HttpStatus.CREATED).body(articleMapper.toDTO(created));
     }
 
-
-    // ✅ Modification d'un article avec gestion d'erreurs et message de succès
-   // @PreAuthorize("hasRole('ADMIN')") A ACTIVER SI ON A LE ROLE
+    // Update article
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<?> updateArticle(
             @PathVariable Integer id,
             @Valid @RequestBody ArticleDTO articleDTO) {
-
         try {
-            ArticleDTO updatedArticle = articleService.updateArticle(id, articleDTO);
-            return ResponseEntity.ok(
-                    Map.of(
-                            "message", "Article mis à jour avec succès.",
-                            "data", updatedArticle
-                    )
-            );
+            Article entity = articleMapper.toEntity(articleDTO);
+            Article updated = articleService.updateArticle(id, entity);
+            return ResponseEntity.ok(articleMapper.toDTO(updated));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Erreur de validation : " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Erreur : " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

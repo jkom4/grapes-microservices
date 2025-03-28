@@ -19,7 +19,7 @@ public class Article {
     private Integer id;
 
     @Column(name = "category_id", nullable = false)
-    private Integer categoryId;  // Modification ici : Utilisation de categoryId au lieu de category_id
+    private Integer categoryId;
 
     @Column(name = "family_id", nullable = false)
     private Integer familyId;

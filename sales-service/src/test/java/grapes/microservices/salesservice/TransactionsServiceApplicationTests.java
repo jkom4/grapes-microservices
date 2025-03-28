@@ -69,6 +69,31 @@ class TransactionsServiceApplicationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.name").value("pomme modifiée"));
+                .andExpect(jsonPath("$.name").value("pomme modifying"));
+    }
+
+    @Test
+    void testSearchArticleByName() throws Exception {
+        mockMvc.perform(get("/articles/search")
+                        .param("name", "kiwi"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].name").value("kiwi"));
+    }
+
+    @Test
+    void testSearchArticleWithEmptyName() throws Exception {
+        mockMvc.perform(get("/articles/search")
+                        .param("name", " "))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("The 'name' field cannot be empty."));
+    }
+
+    @Test
+    void testSearchArticleNotFound() throws Exception {
+        mockMvc.perform(get("/articles/search")
+                        .param("name", "mangue"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("No items found with the name: 'mangue'"));
     }
 }
