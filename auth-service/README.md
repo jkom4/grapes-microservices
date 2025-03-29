@@ -32,12 +32,18 @@ db.find()
     cd auth-service/backend
     ```
 
-2. Run the following command to start the **MongoDB** and **Spring Boot** services:
+2. Export your environment variables:
+
+    ```bash
+    export GRAPES_TWILIO_API_SECRET="your-twilio-api-key" 
+    ```
+
+3. Run the following command to start the **MongoDB** and **Spring Boot** services:
 
     ```bash
     docker-compose up -d mongodb auth-service
     ```
-3. Install dependencies and run the project:
+4. Install dependencies and run the project:
 
     ```bash
     mvn clean install
