@@ -39,7 +39,7 @@ public class Article {
     @Column(name = "stock_kg", precision = 10, scale = 2)
     private BigDecimal stockKg;
 
-    @Column(name = "stock_unit", precision = 10, scale = 2)
+    @Column(name = "unit_stock", precision = 10, scale = 2)
     private BigDecimal stockUnit;
 
     @Column(length = 100)
