@@ -8,20 +8,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity  // To active @preauthorize
 public class SecurityConfig {
-    private static final String[] SWAGGER_PATHS = {"/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/swagger-ui/**"};
 
+    private static final String[] SWAGGER_PATHS = {
+            "/swagger-ui.html",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/webjars/swagger-ui/**"
+    };
+
+    /**
+     * Swagger configuration to permit authentification with JWT
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
         return new OpenAPI()
-                .addSecurityItem(new SecurityRequirement()
-                        .addList(securitySchemeName))
+                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName, new SecurityScheme()
                                 .name(securitySchemeName)
@@ -29,14 +38,23 @@ public class SecurityConfig {
                                 .scheme("bearer")
                                 .bearerFormat("JWT")));
     }
+
+    /**
+     * Rule of security configuration
+     */
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(SWAGGER_PATHS).permitAll()
-                        //.anyRequest().authenticated());
-                        .anyRequest().permitAll());
+                        .requestMatchers("/articles/**").permitAll()// public Swagger
+                       // .requestMatchers("/articles/**").authenticated()  // Articles :  authentification required
+                        .anyRequest().permitAll()                         // others accessibles
+                );
+
+        // ⚠️ To complete with JWT configuration if he works (filter, etc.)
+
         return http.build();
     }
 }
