@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 /**
  * This composable creates an input field for scanning the code.
  * It displays an error message when the input is invalid.

@@ -178,4 +178,5 @@
                                  referencedTableName="delivery" referencedColumnNames="id"
                                  constraintName="fk_deliverypicture_delivery"/>
     </changeSet>
+
 </databaseChangeLog>
