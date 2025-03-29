@@ -6,12 +6,7 @@ on:
       - main
       - develop
       - sprint-1
-    paths:
-      - 'api-gateway/**'
-      - 'auth-service/auth-backend/**'
-      - 'data-mining-service/**'
-      - 'payment-service/payment-backend/**'
-      - 'sales-service/**'
+
 
 jobs:
   check-admins:
@@ -53,27 +48,27 @@ jobs:
       # 🔹 Test Api-gateway (Spring Boot)
       - name: Run Tests for Api Gateway (Java)
         working-directory: ./api-gateway
-        run: mvn validate
+        run: mvn validate test
 
       # 🔹 Test Auth (Spring Boot)
       - name: Run Tests for Auth Service (Java)
         working-directory: ./auth-service/auth-backend
-        run: mvn validate
+        run: mvn validate test
 
       # 🔹 Chat Service (Spring Boot)
       - name: Run Tests for Chat Service (Java)
         working-directory: ./chat-service
-        run: mvn validate
+        run: mvn validate test
 
       # 🔹 Test Payment (Spring Boot)
       - name: Run Tests for Payment Service (Java)
         working-directory: ./payment-service/payment-backend
-        run: mvn validate
+        run: mvn validate test
 
       # 🔹 Test Sales (Spring Boot)
       - name: Run Tests for Sales Service (Java)
         working-directory: ./sales-service
-        run: mvn validate
+        run: mvn validate test
 
       # 🔹 Test Data Mining (Python)
       - name: 🐍 Set up Python

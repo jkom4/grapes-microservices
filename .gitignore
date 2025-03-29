@@ -30,3 +30,7 @@ replay_pid*
 # Password and env properties
 .env
 *.env
+
+# Volumes
+docker/*/volumes/
+**/docker/volumes/
