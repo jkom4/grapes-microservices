@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,7 +38,7 @@ fun ScanView(navController: NavController?) {
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
-            ) {
+            )  {
                 // Input for the scan code, with an error flag to show validation message.
                 ScanCodeInput(
                     scanCode = scanCode,
@@ -57,7 +58,7 @@ fun ScanView(navController: NavController?) {
                     onClick = {
                         // Validates if the scan code is not empty before submitting.
                         if (scanCode.isNotEmpty()) {
-                            submitScanCode(scanCode)
+                            submitScanCode(scanCode) // Action to submit the scan code
                             navController?.popBackStack() // Navigate back after submitting
                             keyboardController?.hide() // Hide the keyboard
                         } else {

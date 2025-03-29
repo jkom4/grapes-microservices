@@ -30,14 +30,7 @@ import com.example.mobile_cll.model.Trip
  * @param trip The trip object containing details like name and distance.
  */
 @Composable
-fun TripInfoCard(
-    navController: NavController?,
-    tripId: String,
-    customerName: String,
-    address: String,
-    orderId: String,
-    trip: Trip
-) {
+fun TripInfoCard(navController: NavController?, tripId: String, customerName: String, address: String, orderId: String, trip: Trip) {
     val context = LocalContext.current
     Card(
         shape = RoundedCornerShape(12.dp),

@@ -8,6 +8,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,10 +45,17 @@ fun TripDetailsScreen(
     val orders = viewModel.orders ?: emptyList()
     val deliveryRequestCount = viewModel.deliveryRequestCount
     val isLoading = viewModel.isLoading
+    val context = LocalContext.current
+
+    // State for showing the AlertDialog
+    var showAlertDialog by remember { mutableStateOf(false) }
+
+    // Function to check if all orders are scanned
+    val areAllOrdersScanned = orders.all { it.isScanned } // Assumes 'isScanned' is a property of Order
 
     Scaffold(
         topBar = { TopSectionDetails(navController) },
-        bottomBar = { BottomNavigationBar(navController) },
+        bottomBar = { BottomNavigationBar(navController, context) },
         content = { paddingValues ->
             Column(
                 modifier = Modifier
@@ -95,7 +104,17 @@ fun TripDetailsScreen(
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(
-                                onClick = { navController?.navigate("emailsent") },
+                                onClick = {
+                                    if (areAllOrdersScanned) {
+                                        // Navigate to EmailSentScreen with trip data as parameters
+                                        navController?.navigate(
+                                            "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
+                                        )
+                                    } else {
+                                        // Show the alert dialog if not all orders are scanned
+                                        showAlertDialog = true
+                                    }
+                                },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(8.dp),
@@ -115,4 +134,34 @@ fun TripDetailsScreen(
             }
         }
     )
+    // AlertDialog that shows when not all orders are scanned
+    if (showAlertDialog) {
+        AlertDialog(
+            onDismissRequest = { showAlertDialog = false },
+            title = { Text("Incomplete Orders") },
+            text = { Text("Please scan all orders before confirming.") },
+            confirmButton = {
+                Button(
+                    onClick = { showAlertDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("OK", color = MaterialTheme.colorScheme.onPrimary)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        // Close the alert dialog and navigate to the EmailSentScreen
+                        showAlertDialog = false
+                        navController?.navigate(
+                            "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
+                        )
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Continue Anyway", color = MaterialTheme.colorScheme.onPrimary)
+                }
+            }
+        )
+    }
 }

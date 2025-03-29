@@ -29,7 +29,6 @@ class TripDetailsViewModel : ViewModel() {
     var orders by mutableStateOf<List<Order>>(emptyList())
         private set
 
-
     /**
      * Loads the trip details and associated orders.
      * This simulates an API call with a delay.
@@ -67,13 +66,10 @@ class TripDetailsViewModel : ViewModel() {
 
                 // Load orders associated with the trip
                 orders = listOf(
-                    Order("1", "Product A", tripId = trip.id, quantity = 2),
-                    Order("2", "Product B", tripId = trip.id, quantity = 3),
-                    Order("3", "Product C", tripId = trip.id, quantity = 5)
+                    Order(id = "1", productDescription = "Product A", tripId = tripId, quantity = 2, scannedAt = null),
+                    Order(id = "2", productDescription = "Product B", tripId = tripId, quantity = 3, scannedAt = null),
+                    Order(id = "3", productDescription = "Product C", tripId = tripId, quantity = 5, scannedAt = null)
                 )
-
-                // Log the trip update and associated orders
-                Log.d("TripDetailsViewModel", "Trip updated: $trip, Orders: $orders")
 
                 // Mark loading as complete
                 isLoading = false // Indicate that the loading process is finished

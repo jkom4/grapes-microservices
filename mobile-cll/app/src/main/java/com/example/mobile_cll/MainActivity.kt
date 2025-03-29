@@ -1,6 +1,7 @@
 package com.example.mobile_cll
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.NavType
@@ -57,7 +58,27 @@ class MainActivity : ComponentActivity() {
                     // Scan screen route
                     composable("scan") { ScanView(navController) }
                     // EmailSent screen route
-                    composable("emailsent") { EmailSentScreen(navController) }
+                    composable(
+                        "emailsent?tripId={tripId}&tripName={tripName}&tripAddress={tripAddress}",
+                        arguments = listOf(
+                            navArgument("tripId") { type = NavType.StringType },
+                            navArgument("tripName") { type = NavType.StringType },
+                            navArgument("tripAddress") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        // Retrieve optional parameters passed to the route
+                        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+                        val tripName = backStackEntry.arguments?.getString("tripName") ?: ""
+                        val tripAddress = backStackEntry.arguments?.getString("tripAddress") ?: ""
+
+                        Log.d(
+                            "NavHost",
+                            "Trip ID: $tripId, Trip Name: $tripName, Trip Address: $tripAddress"
+                        )
+
+                        // Pass the data to EmailSentScreen
+                        EmailSentScreen(navController, tripId, tripName, tripAddress)
+                    }
                 }
             }
         }
