@@ -1,5 +1,6 @@
 package com.example.mobile_cll.view.components
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,33 +35,40 @@ fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable { navController.navigate("trip_details/${trip.id}") }
+            .clickable {
+
+                val encodedName = Uri.encode(trip.name)
+                val encodedDistance = Uri.encode(trip.distance)
+                val encodedAddress = Uri.encode(trip.address)
+
+                navController.navigate("trip_details/${trip.id}/$encodedName/$encodedDistance/$encodedAddress")
+            }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text(text = trip.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(text = "Dist: ${trip.distance}", fontSize = 14.sp, color = Color.Gray)
+                Text(text = "Dist: ${trip.distance}", fontSize = 14.sp, color = MaterialTheme.colorScheme.tertiary)
             }
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(text = trip.address, fontSize = 14.sp, color = Color.Gray)
+            Text(text = trip.address, fontSize = 14.sp, color = MaterialTheme.colorScheme.tertiary)
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = "Qty: $totalQuantity",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF4CAD7E)
+                color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
 
             Box(
                 modifier = Modifier
-                    .background(Color(0xFF4CAD7E), shape = RoundedCornerShape(4.dp))
+                    .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(4.dp))
                     .padding(8.dp)
                     .align(Alignment.End)
             ) {
-                Text(text = trip.id, color = Color.White, fontWeight = FontWeight.Bold)
+                Text(text = trip.id, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
             }
         }
     }

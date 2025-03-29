@@ -6,7 +6,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,28 +47,28 @@ fun OrderCard(order: Order, onScanClick: (String) -> Unit) {
 
                 Button(
                     onClick = { onScanClick(order.id) },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E)),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.padding(start = 8.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.QrCodeScanner,
                         contentDescription = "Scan",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Scan",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Text("Product: ${order.productDescription}", fontSize = 12.sp, color = Color.Gray)
-            Text("Quantity: ${order.quantity}", fontSize = 12.sp, color = Color.Gray)
+            Text("Product: ${order.productDescription}", fontSize = 12.sp, color = MaterialTheme.colorScheme.tertiary )
+            Text("Quantity: ${order.quantity}", fontSize = 12.sp, color = MaterialTheme.colorScheme.tertiary)
         }
     }
 }

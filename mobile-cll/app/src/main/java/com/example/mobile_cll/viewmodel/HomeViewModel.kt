@@ -30,4 +30,5 @@ class HomeViewModel : ViewModel() {
     fun navigateToTripDetails(tripId: String) {
         // Implement navigation logic to the trip details screen
     }
+
 }
