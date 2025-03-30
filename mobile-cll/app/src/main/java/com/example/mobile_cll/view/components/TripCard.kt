@@ -28,7 +28,7 @@ import com.example.mobile_cll.model.Trip
  */
 @Composable
 fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
-    val totalQuantity = orders.filter { it.tripId == trip.id }.sumOf { it.quantity }
+    val orderSize = orders.size
 
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -36,7 +36,6 @@ fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable {
-
                 val encodedName = Uri.encode(trip.name)
                 val encodedDistance = Uri.encode(trip.distance)
                 val encodedAddress = Uri.encode(trip.address)
@@ -55,7 +54,7 @@ fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Qty: $totalQuantity",
+                text = "Qty: $orderSize",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -73,3 +72,4 @@ fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
         }
     }
 }
+

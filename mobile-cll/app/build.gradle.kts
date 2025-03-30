@@ -70,4 +70,7 @@ dependencies {
     implementation ("androidx.compose.ui:ui-tooling-preview:1.4.0")
     implementation ("androidx.compose.runtime:runtime-livedata:1.4.0")
     implementation ("androidx.compose.material:material-icons-extended:1.4.0")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.4.3")
 }

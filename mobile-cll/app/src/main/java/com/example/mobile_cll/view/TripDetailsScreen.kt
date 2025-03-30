@@ -1,14 +1,12 @@
 package com.example.mobile_cll.view
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -16,8 +14,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mobile_cll.model.Trip
-import com.example.mobile_cll.viewmodel.TripDetailsViewModel
 import com.example.mobile_cll.view.components.*
+import com.example.mobile_cll.viewmodel.TripDetailsViewModel
+import com.example.mobile_cll.viewmodel.TripDetailsViewModelFactory
 
 /**
  * Composable displaying the Trip Details screen with:
@@ -35,14 +34,13 @@ fun TripDetailsScreen(
     tripName: String,
     tripDistance: String,
     tripAddress: String,
-    viewModel: TripDetailsViewModel = viewModel()
+    viewModel: TripDetailsViewModel = viewModel(factory = TripDetailsViewModelFactory(LocalContext.current))
 ) {
-
     viewModel.loadId(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
 
     // Retrieve the trip ID from the navigation arguments
     val trip = viewModel.trip
-    val orders = viewModel.orders ?: emptyList()
+    val orders = viewModel.orders
     val deliveryRequestCount = viewModel.deliveryRequestCount
     val isLoading = viewModel.isLoading
     val context = LocalContext.current
@@ -51,7 +49,7 @@ fun TripDetailsScreen(
     var showAlertDialog by remember { mutableStateOf(false) }
 
     // Function to check if all orders are scanned
-    val areAllOrdersScanned = orders.all { it.isScanned } // Assumes 'isScanned' is a property of Order
+    val areAllOrdersScanned = orders.all { it.isScanned }
 
     Scaffold(
         topBar = { TopSectionDetails(navController) },
@@ -106,11 +104,15 @@ fun TripDetailsScreen(
                             Button(
                                 onClick = {
                                     if (areAllOrdersScanned) {
+                                        // AlertDialog that shows when not all orders are scanned
+                                        println("showAlertDialog = $showAlertDialog") // Debug
                                         // Navigate to EmailSentScreen with trip data as parameters
                                         navController?.navigate(
                                             "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
                                         )
                                     } else {
+                                        // AlertDialog that shows when not all orders are scanned
+                                        println("showAlertDialog = $showAlertDialog") // Debug
                                         // Show the alert dialog if not all orders are scanned
                                         showAlertDialog = true
                                     }
@@ -134,7 +136,8 @@ fun TripDetailsScreen(
             }
         }
     )
-    // AlertDialog that shows when not all orders are scanned
+
+
     if (showAlertDialog) {
         AlertDialog(
             onDismissRequest = { showAlertDialog = false },

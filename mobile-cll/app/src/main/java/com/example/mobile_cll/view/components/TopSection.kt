@@ -3,12 +3,15 @@ package com.example.mobile_cll.view.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mobile_cll.model.DatabaseHelper
+import com.example.mobile_cll.model.Repository.DriverRepository
 
 /**
  * Composable displaying a top section with:
@@ -19,6 +22,12 @@ import androidx.compose.ui.unit.sp
  */
 @Composable
 fun TopSection(tripCount: Int) {
+    val context = LocalContext.current
+    val databaseHelper = remember { DatabaseHelper(context) }
+    val driverRepository = remember { DriverRepository(databaseHelper) }
+
+    val driver by remember { mutableStateOf(driverRepository.getDriver()) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -28,8 +37,14 @@ fun TopSection(tripCount: Int) {
         horizontalAlignment = Alignment.Start
     ) {
         Spacer(modifier = Modifier.height(35.dp))
-        Text("Hello Mathys", fontSize = 18.sp, color = MaterialTheme.colorScheme.onPrimary)
         Text(
+            // Fetch and display the driver's name
+            "Hello ${driver?.firstName ?: "Driver"}",
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.onPrimary
+        )
+        Text(
+            // Fetch and display to do
             "$tripCount ${if (tripCount == 1) "trip" else "trips"} to do",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,

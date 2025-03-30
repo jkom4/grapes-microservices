@@ -1,2 +1,33 @@
 package com.example.mobile_cll.viewmodel
 
+import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.mobile_cll.model.DatabaseHelper
+import com.example.mobile_cll.repository.OrderRepository
+import com.example.mobile_cll.repository.TripRepository
+
+/**
+ * Factory class for creating instances of HomeViewModel.
+ *
+ * @param context The context to initialize the DatabaseHelper.
+ */
+class HomeViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+
+    /**
+     * Creates an instance of HomeViewModel with the necessary repositories.
+     *
+     * @param modelClass The ViewModel class to be created.
+     * @return An instance of HomeViewModel.
+     * @throws IllegalArgumentException If the ViewModel class is unknown.
+     */
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
+            val databaseHelper = DatabaseHelper(context)
+            val repository = TripRepository(databaseHelper)
+            @Suppress("UNCHECKED_CAST")
+            return HomeViewModel(repository, orderRepository = OrderRepository(databaseHelper)) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}

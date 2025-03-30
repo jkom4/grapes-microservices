@@ -1,16 +1,22 @@
-package com.example.mobile_cll.model.Repository
+package com.example.mobile_cll.repository
 
+import com.example.mobile_cll.model.DatabaseHelper
 import com.example.mobile_cll.model.Order
 
-class OrderRepository  {
-    private val orders = listOf(
-        Order(id = "1", productDescription = "Product A", tripId = "101", quantity = 2, scannedAt = null),
-        Order(id = "2", productDescription = "Product B", tripId = "102", quantity = 3, scannedAt = null),
-        Order(id = "3", productDescription = "Product C", tripId = "101", quantity = 5, scannedAt = null)
-    )
+/**
+ * OrderRepository is responsible for interacting with the database to fetch order-related data.
+ *
+ * @param databaseHelper The helper class that handles database operations.
+ */
+class OrderRepository(private val databaseHelper: DatabaseHelper) {
 
-    suspend fun getOrdersForTrip(tripId: String): List<Order> {
-        return orders.filter { it.tripId == tripId }
+    /**
+     * Retrieves all orders associated with a given trip.
+     *
+     * @param tripId The ID of the trip for which to fetch orders.
+     * @return A list of orders for the specified trip.
+     */
+    fun getOrdersForTrip(tripId: String): List<Order> {
+        return databaseHelper.getOrdersForTrip(tripId)
     }
-
 }
