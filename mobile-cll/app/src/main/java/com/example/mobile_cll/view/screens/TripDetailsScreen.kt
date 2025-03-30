@@ -1,4 +1,4 @@
-package com.example.mobile_cll.view
+package com.example.mobile_cll.view.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mobile_cll.model.Trip
+import com.example.mobile_cll.model.entities.Trip
 import com.example.mobile_cll.view.components.*
 import com.example.mobile_cll.viewmodel.TripDetailsViewModel
 import com.example.mobile_cll.viewmodel.TripDetailsViewModelFactory

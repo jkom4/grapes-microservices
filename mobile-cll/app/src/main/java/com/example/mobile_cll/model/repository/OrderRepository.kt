@@ -1,7 +1,7 @@
 package com.example.mobile_cll.repository
 
 import com.example.mobile_cll.model.DatabaseHelper
-import com.example.mobile_cll.model.Order
+import com.example.mobile_cll.model.entities.Order
 
 /**
  * OrderRepository is responsible for interacting with the database to fetch order-related data.

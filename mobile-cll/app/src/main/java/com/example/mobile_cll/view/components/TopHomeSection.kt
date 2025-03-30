@@ -11,7 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobile_cll.model.DatabaseHelper
-import com.example.mobile_cll.model.Repository.DriverRepository
+import com.example.mobile_cll.model.repository.DriverRepository
 
 /**
  * Composable displaying a top section with:

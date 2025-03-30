@@ -5,6 +5,9 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.example.mobile_cll.model.entities.Driver
+import com.example.mobile_cll.model.entities.Order
+import com.example.mobile_cll.model.entities.Trip
 
 /**
  * DatabaseHelper is a helper class for managing SQLite database operations in an Android application.

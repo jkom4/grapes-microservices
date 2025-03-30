@@ -1,4 +1,4 @@
-package com.example.mobile_cll.view
+package com.example.mobile_cll.view.screens
 
 import android.content.Context
 import android.location.Geocoder
@@ -59,8 +59,8 @@ class MapView(
      * @param userLocation The LatLng representing the user's location.
      */
     fun updateMapWithUserLocation(userLocation: LatLng) {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
-        }
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
+    }
     /**
      * Converts a given address to a LatLng (latitude and longitude) using the Geocoder.
      *

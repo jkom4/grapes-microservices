@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.mobile_cll.model.Trip
+import com.example.mobile_cll.model.entities.Trip
 
 /**
  * Composable displaying a trip info card with :

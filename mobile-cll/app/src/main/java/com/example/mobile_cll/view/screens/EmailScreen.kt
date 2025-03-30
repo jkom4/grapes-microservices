@@ -1,4 +1,4 @@
-package com.example.mobile_cll.view
+package com.example.mobile_cll.view.screens
 
 import android.content.Intent
 import androidx.compose.foundation.layout.*

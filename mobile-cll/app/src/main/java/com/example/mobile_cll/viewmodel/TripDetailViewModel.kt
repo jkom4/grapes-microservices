@@ -5,8 +5,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mobile_cll.model.Order
-import com.example.mobile_cll.model.Trip
+import com.example.mobile_cll.model.entities.Order
+import com.example.mobile_cll.model.entities.Trip
 import com.example.mobile_cll.repository.OrderRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

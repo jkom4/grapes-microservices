@@ -1,7 +1,7 @@
-package com.example.mobile_cll.model.Repository
+package com.example.mobile_cll.model.repository
 
 import com.example.mobile_cll.model.DatabaseHelper
-import com.example.mobile_cll.model.Driver
+import com.example.mobile_cll.model.entities.Driver
 
 /**
  * DriverRepository is responsible for interacting with the database to fetch driver-related data.

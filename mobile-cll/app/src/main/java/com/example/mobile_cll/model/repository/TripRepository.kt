@@ -1,7 +1,7 @@
 package com.example.mobile_cll.repository
 
 import com.example.mobile_cll.model.DatabaseHelper
-import com.example.mobile_cll.model.Trip
+import com.example.mobile_cll.model.entities.Trip
 
 /**
  * TripRepository is responsible for interacting with the database to fetch trip-related data.

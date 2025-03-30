@@ -1,4 +1,4 @@
-package com.example.mobile_cll.model
+package com.example.mobile_cll.model.entities
 
 /**
  * Data class representing a Trip in the system.

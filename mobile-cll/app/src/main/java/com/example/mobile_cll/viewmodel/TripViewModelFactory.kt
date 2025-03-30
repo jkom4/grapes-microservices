@@ -12,7 +12,7 @@ import com.example.mobile_cll.repository.TripRepository
  *
  * @param context The context to initialize the DatabaseHelper.
  */
-class HomeViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+class TripViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
 
     /**
      * Creates an instance of HomeViewModel with the necessary repositories.
@@ -22,11 +22,11 @@ class HomeViewModelFactory(private val context: Context) : ViewModelProvider.Fac
      * @throws IllegalArgumentException If the ViewModel class is unknown.
      */
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(TripViewModel::class.java)) {
             val databaseHelper = DatabaseHelper(context)
             val repository = TripRepository(databaseHelper)
             @Suppress("UNCHECKED_CAST")
-            return HomeViewModel(repository, orderRepository = OrderRepository(databaseHelper)) as T
+            return TripViewModel(repository, orderRepository = OrderRepository(databaseHelper)) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

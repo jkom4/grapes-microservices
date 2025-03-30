@@ -1,4 +1,4 @@
-package com.example.mobile_cll.view
+package com.example.mobile_cll.view.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,8 +20,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mobile_cll.view.components.BottomNavigationBar
 import com.example.mobile_cll.view.components.TopSection
 import com.example.mobile_cll.view.components.TripCard
-import com.example.mobile_cll.viewmodel.HomeViewModel
-import com.example.mobile_cll.viewmodel.HomeViewModelFactory
+import com.example.mobile_cll.viewmodel.TripViewModel
+import com.example.mobile_cll.viewmodel.TripViewModelFactory
 
 /**
  * Composable displaying the HomeScreen with:
@@ -36,7 +36,7 @@ import com.example.mobile_cll.viewmodel.HomeViewModelFactory
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(LocalContext.current))
+    viewModel: TripViewModel = viewModel(factory = TripViewModelFactory(LocalContext.current))
 ) {
     val context = LocalContext.current
     val trips by viewModel.trips.observeAsState(initial = emptyList())

@@ -4,8 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mobile_cll.model.Order
-import com.example.mobile_cll.model.Trip
+import com.example.mobile_cll.model.entities.Order
+import com.example.mobile_cll.model.entities.Trip
 import com.example.mobile_cll.repository.OrderRepository
 import com.example.mobile_cll.repository.TripRepository
 import kotlinx.coroutines.launch
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
  * ViewModel to manage the data and logic for the Home screen.
  * Handles fetching trips and navigation logic.
  */
-class HomeViewModel(
+class TripViewModel(
     private val tripRepository: TripRepository,
     private val orderRepository: OrderRepository
 ) : ViewModel() {

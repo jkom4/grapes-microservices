@@ -1,4 +1,4 @@
-package com.example.mobile_cll.model
+package com.example.mobile_cll.model.entities
 
 /**
  * Data class representing an Order in the system.

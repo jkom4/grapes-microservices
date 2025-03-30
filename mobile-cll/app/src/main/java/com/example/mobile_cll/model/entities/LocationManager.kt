@@ -1,4 +1,4 @@
-package com.example.mobile_cll.model
+package com.example.mobile_cll.model.entities
 
 import android.Manifest
 import android.content.Context

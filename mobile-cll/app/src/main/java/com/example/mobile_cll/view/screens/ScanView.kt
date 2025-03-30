@@ -1,4 +1,4 @@
-package com.example.mobile_cll.view
+package com.example.mobile_cll.view.screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mobile_cll.model.DatabaseHelper
-import com.example.mobile_cll.model.Order
 import com.example.mobile_cll.repository.OrderRepository
 import com.example.mobile_cll.ScanCodeInput
 import com.example.mobile_cll.view.components.TopSectionScan
