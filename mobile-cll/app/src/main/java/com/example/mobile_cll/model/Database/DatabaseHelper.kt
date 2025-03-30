@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 
 /**
  * DatabaseHelper is a helper class for managing SQLite database operations in an Android application.
@@ -15,7 +16,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     companion object {
         // Database constants
         private const val DATABASE_NAME = "TripDatabase.db"
-        private const val DATABASE_VERSION = 10
+        private const val DATABASE_VERSION = 11
         private const val TABLE_TRIPS = "trips"
         private const val TABLE_ORDERS = "orders"
         private const val TABLE_DRIVERS = "drivers"
@@ -32,6 +33,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_QUANTITY = "quantity"
         private const val COLUMN_TRIP_ID = "tripId"
         private const val COLUMN_SCANNED_AT = "scannedAt"
+        private const val COLUMN_IS_SCANNED = "isScanned"
 
         // Columns for drivers table
         private const val COLUMN_DRIVER_ID = "id"
@@ -78,6 +80,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 $COLUMN_QUANTITY INTEGER,
                 $COLUMN_TRIP_ID TEXT,
                 $COLUMN_SCANNED_AT TEXT,
+                $COLUMN_IS_SCANNED INTEGER DEFAULT 0,
                 FOREIGN KEY ($COLUMN_TRIP_ID) REFERENCES $TABLE_TRIPS($COLUMN_ID)
             )
         """.trimIndent()
@@ -223,6 +226,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 put(COLUMN_QUANTITY, order.quantity)
                 put(COLUMN_TRIP_ID, order.tripId)
                 put(COLUMN_SCANNED_AT, order.scannedAt)
+                put(COLUMN_IS_SCANNED, order.isScanned)
             }
             db.insert(TABLE_ORDERS, null, orderValues)
         }
@@ -294,7 +298,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                     productDescription = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRODUCT_DESCRIPTION)),
                     quantity = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_QUANTITY)),
                     tripId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TRIP_ID)),
-                    scannedAt = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_SCANNED_AT))
+                    scannedAt = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SCANNED_AT))?.toLongOrNull(),
+                    isScanned = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_SCANNED)) == 1
                 )
                 orderList.add(order)
             } while (cursor.moveToNext())
@@ -346,5 +351,28 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
     }
 
+    fun updateScannedAt(orderId: String, timestamp: Long) {
+        val db = writableDatabase
+        val currentTimestamp = timestamp.toString()
 
+        val values = ContentValues().apply {
+            put(COLUMN_SCANNED_AT, currentTimestamp)
+            put(COLUMN_IS_SCANNED, 1)
+        }
+
+        val rowsUpdated = db.update(
+            TABLE_ORDERS,
+            values,
+            "$COLUMN_ORDER_ID = ?",
+            arrayOf(orderId)
+        )
+
+        if (rowsUpdated > 0) {
+            Log.d("Update", "Order scannedAt and isScanned updated successfully for orderId: $orderId")
+        } else {
+            Log.e("UpdateError", "Failed to update scannedAt and isScanned for orderId: $orderId")
+        }
+
+        db.close()
+    }
 }

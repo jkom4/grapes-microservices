@@ -19,13 +19,15 @@ import com.example.mobile_cll.viewmodel.TripDetailsViewModel
 import com.example.mobile_cll.viewmodel.TripDetailsViewModelFactory
 
 /**
- * Composable displaying the Trip Details screen with:
- * - Trip information card (define in view > components).
- * - A list of orders associated with the trip (define in view > components).
- * - A button to confirm the trip (when all scans are done).
+ * Composable function that displays the details of a trip, including trip information,
+ * associated orders, and a confirmation button. It also handles navigation and loading states.
  *
- * @param navController The navigation controller that allows navigation between screens.
- * @param viewModel The view model that holds the trip details and logic for the screen.
+ * @param navController The navigation controller for handling navigation between screens, nullable.
+ * @param tripId The unique identifier of the trip.
+ * @param tripName The name of the trip (e.g., customer name).
+ * @param tripDistance The distance of the trip.
+ * @param tripAddress The address of the trip destination.
+ * @param viewModel The ViewModel providing trip data, defaults to an instance created with TripDetailsViewModelFactory.
  */
 @Composable
 fun TripDetailsScreen(
@@ -38,18 +40,21 @@ fun TripDetailsScreen(
 ) {
     viewModel.loadId(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
 
-    // Retrieve the trip ID from the navigation arguments
-    val trip = viewModel.trip
-    val orders = viewModel.orders
-    val deliveryRequestCount = viewModel.deliveryRequestCount
-    val isLoading = viewModel.isLoading
+    val trip by viewModel.trip
+    val orders by viewModel.orders // Must be a State or MutableStateFlow
+    val deliveryRequestCount by viewModel.deliveryRequestCount
+    val isLoading by viewModel.isLoading
     val context = LocalContext.current
 
-    // State for showing the AlertDialog
     var showAlertDialog by remember { mutableStateOf(false) }
+    val areAllOrdersScanned by remember { derivedStateOf { orders.all { it.isScanned } } }
 
-    // Function to check if all orders are scanned
-    val areAllOrdersScanned = orders.all { it.isScanned }
+    // Reload data after a scan
+    LaunchedEffect(navController) {
+        navController?.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("scannedOrderId")?.observeForever { _ ->
+            viewModel.loadId(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
+        }
+    }
 
     Scaffold(
         topBar = { TopSectionDetails(navController) },
@@ -60,11 +65,9 @@ fun TripDetailsScreen(
                     .padding(paddingValues)
                     .fillMaxSize()
             ) {
-                // Show a loading indicator while the data is loading
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 } else {
-                    // Display trip info if available
                     trip?.let {
                         TripInfoCard(
                             navController = navController,
@@ -78,7 +81,6 @@ fun TripDetailsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Display orders and delivery request count
                     Column(
                         modifier = Modifier
                             .padding(16.dp)
@@ -95,7 +97,12 @@ fun TripDetailsScreen(
                     ) {
                         items(orders.size) { index ->
                             val order = orders[index]
-                            OrderCard(order = order, onScanClick = { navController?.navigate("scan") })
+                            OrderCard(
+                                order = order,
+                                onScanClick = {
+                                    navController?.navigate("scan/${order.id}/$tripId")
+                                }
+                            )
                             Spacer(modifier = Modifier.height(4.dp))
                         }
 
@@ -104,16 +111,10 @@ fun TripDetailsScreen(
                             Button(
                                 onClick = {
                                     if (areAllOrdersScanned) {
-                                        // AlertDialog that shows when not all orders are scanned
-                                        println("showAlertDialog = $showAlertDialog") // Debug
-                                        // Navigate to EmailSentScreen with trip data as parameters
                                         navController?.navigate(
                                             "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
                                         )
                                     } else {
-                                        // AlertDialog that shows when not all orders are scanned
-                                        println("showAlertDialog = $showAlertDialog") // Debug
-                                        // Show the alert dialog if not all orders are scanned
                                         showAlertDialog = true
                                     }
                                 },
@@ -137,7 +138,7 @@ fun TripDetailsScreen(
         }
     )
 
-
+    // Alert dialog shown when not all orders are scanned
     if (showAlertDialog) {
         AlertDialog(
             onDismissRequest = { showAlertDialog = false },
@@ -154,7 +155,6 @@ fun TripDetailsScreen(
             dismissButton = {
                 Button(
                     onClick = {
-                        // Close the alert dialog and navigate to the EmailSentScreen
                         showAlertDialog = false
                         navController?.navigate(
                             "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"

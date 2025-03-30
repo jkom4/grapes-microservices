@@ -17,11 +17,5 @@ data class Order(
     val quantity: Int,
     val tripId: String,
     var scannedAt: Long?=null,
-) {
-    /**
-     * A computed property that returns whether the order has been scanned.
-     * It checks if the `scannedAt` field is non-null.
-     */
-    val isScanned: Boolean
-        get() = scannedAt != null
-}
+    var isScanned: Boolean = false,
+)

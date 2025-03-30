@@ -19,4 +19,10 @@ class OrderRepository(private val databaseHelper: DatabaseHelper) {
     fun getOrdersForTrip(tripId: String): List<Order> {
         return databaseHelper.getOrdersForTrip(tripId)
     }
+
+    fun updateScannedAt(order: Order, timestamp: Long) {
+        order.scannedAt = timestamp
+        order.isScanned = true
+        databaseHelper.updateScannedAt(order.id, timestamp)
+    }
 }
