@@ -73,4 +73,11 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
     implementation ("androidx.compose.runtime:runtime-livedata:1.4.3")
+    implementation ("androidx.navigation:navigation-compose:2.6.0")
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.6.0")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.6.0")
+    implementation ("io.coil-kt:coil:2.2.2")
+    implementation ("io.coil-kt:coil-compose:2.2.2")
+    implementation ("com.github.gcacace:signature-pad:1.3.1")
+
 }

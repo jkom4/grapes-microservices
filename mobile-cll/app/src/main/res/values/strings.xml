@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Mobile-CLL</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="title_activity_completed_order">CompletedOrderActivity</string>
 </resources>

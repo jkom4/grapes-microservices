@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.mobile_cll.model.entities.Trip
 import com.example.mobile_cll.view.components.*
 import com.example.mobile_cll.viewmodel.TripDetailsViewModel
@@ -57,7 +58,9 @@ fun TripDetailsScreen(
     }
 
     Scaffold(
-        topBar = { TopSectionDetails(navController) },
+        topBar = {
+            TopSection(navController = rememberNavController(), title = "Details")
+        },
         bottomBar = { BottomNavigationBar(navController, context) },
         content = { paddingValues ->
             Column(

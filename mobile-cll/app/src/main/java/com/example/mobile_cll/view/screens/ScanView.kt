@@ -11,10 +11,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.mobile_cll.model.DatabaseHelper
 import com.example.mobile_cll.repository.OrderRepository
 import com.example.mobile_cll.ScanCodeInput
-import com.example.mobile_cll.view.components.TopSectionScan
+import com.example.mobile_cll.view.components.TopSection
 
 /**
  * Composable function that provides a UI for scanning an order code. It allows the user to input
@@ -50,7 +51,9 @@ fun ScanView(
     }
 
     Scaffold(
-        topBar = { TopSectionScan(navController) },
+        topBar = {
+            TopSection(navController = rememberNavController(), title = "Scan")
+        },
         content = { paddingValues ->
             Column(
                 modifier = Modifier

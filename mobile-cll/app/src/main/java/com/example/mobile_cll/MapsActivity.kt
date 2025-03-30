@@ -1,6 +1,7 @@
 package com.example.mobile_cll
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -116,7 +117,13 @@ class MapsActivity : AppCompatActivity() {
      * Displays a toast message when the button is clicked.
      */
     fun onArrivedButtonClick(view: android.view.View) {
-        Toast.makeText(this, "Arrived at destination", Toast.LENGTH_SHORT).show()
-        // Additional actions (e.g., navigation) can be added here
+        val intent = Intent(this, CompletedOrderActivity::class.java).apply {
+            putExtra("tripId", tripId)
+            putExtra("tripName", tripName)
+            putExtra("tripAddress", tripAddress)
+        }
+        startActivity(intent)
+        finish()
     }
+
 }

@@ -8,22 +8,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
-/**
- * TopSectionScan is a Composable function that displays the top section of the screen,
- * including a back button and a title. It uses a Column and Row to position its contents.
- *
- * @param navController A NavController used to navigate back to the home screen.
- */
 @Composable
-fun TopSectionScan(navController: NavController?) {
+fun TopSection(
+    navController: NavController?,
+    title: String
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
+            .background(Color(0xFF4CAD7E))
             .padding(16.dp)
             .height(60.dp)
     ) {
@@ -33,16 +31,20 @@ fun TopSectionScan(navController: NavController?) {
         ) {
             IconButton(
                 onClick = { navController?.navigate("home") },
-                modifier = Modifier.align(Alignment.Bottom)
+                modifier = Modifier
+                    .align(Alignment.Bottom)
+                    .offset(y = 20.dp)
             ) {
-                Icon(Icons.Filled.ArrowBackIosNew, contentDescription = "Back", tint = MaterialTheme.colorScheme.onPrimary)
+                Icon(Icons.Filled.ArrowBackIosNew, contentDescription = "Back", tint = Color.White)
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Scan",
+                text = title,
                 fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.align(Alignment.Bottom)
+                color = Color.White,
+                modifier = Modifier
+                    .align(Alignment.Bottom)
+                    .offset(y = 10.dp)
             )
         }
     }
