@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -11,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextStyle
@@ -25,7 +27,7 @@ import com.example.mobile_cll.viewmodel.TripViewModelFactory
 
 /**
  * Composable displaying the HomeScreen with:
- * - A top section showing the number of trips.
+ * - A top section showing the number of trips and their status.
  * - A tab bar to switch between "Current" and "Completed" trips.
  * - A list of trips shown using a LazyColumn with different details.
  * - A bottom navigation bar for navigation between screens.
@@ -42,15 +44,23 @@ fun HomeScreen(
     val trips by viewModel.trips.observeAsState(initial = emptyList())
     val ordersForTrips by viewModel.ordersForTrips.observeAsState(initial = emptyMap())
 
-    // Stores the currently selected tab index as a state variable.
+    // State for the currently selected tab index (0 = Current, 1 = Completed)
     var selectedTabIndex by remember { mutableStateOf(0) }
-    // State for search query
+    // State for the search query
     var searchQuery by remember { mutableStateOf("") }
 
-    val filteredTrips = trips.filter {
-        it.address.contains(searchQuery, ignoreCase = true)
+    // Filter trips based on the tab and search query
+    val filteredTrips = trips.filter { trip ->
+        val matchesSearch = trip.address.contains(searchQuery, ignoreCase = true)
+        val matchesTab = when (selectedTabIndex) {
+            0 -> !trip.isFinished // Current: isFinished = false
+            1 -> trip.isFinished  // Completed: isFinished = true
+            else -> true
+        }
+        matchesSearch && matchesTab
     }
 
+    // Load orders for each displayed trip
     filteredTrips.forEach { trip ->
         if (!ordersForTrips.containsKey(trip.id)) {
             viewModel.getOrdersForTrip(trip.id)
@@ -58,14 +68,23 @@ fun HomeScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Pass the number of trips to TopSection
-        TopSection(tripCount = filteredTrips.size)
+        // Display the number of filtered trips and their status in TopSection
+        TopSection(
+            tripCount = filteredTrips.size,
+            isFinished = selectedTabIndex == 1
+        )
 
         TabRow(
             selectedTabIndex = selectedTabIndex,
             modifier = Modifier.fillMaxWidth(),
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
         ) {
             Tab(
                 text = {
@@ -89,7 +108,6 @@ fun HomeScreen(
             )
         }
 
-        // Search bar for filtering trips by address
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
@@ -105,7 +123,6 @@ fun HomeScreen(
             )
         )
 
-        // LazyColumn to display a list of filtered trips dynamically
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(filteredTrips) { trip ->
                 val orders = ordersForTrips[trip.id] ?: emptyList()

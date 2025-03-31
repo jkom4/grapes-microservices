@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.mobile_cll.model.DatabaseHelper
 import com.example.mobile_cll.model.repository.DriverRepository
 
@@ -21,7 +22,10 @@ import com.example.mobile_cll.model.repository.DriverRepository
  * @param tripCount The number of trips to display in the message. It determines whether the message uses "trip" or "trips" based on the count.
  */
 @Composable
-fun TopSection(tripCount: Int) {
+fun TopSection(
+    tripCount: Int,
+    isFinished: Boolean = false
+) {
     val context = LocalContext.current
     val databaseHelper = remember { DatabaseHelper(context) }
     val driverRepository = remember { DriverRepository(databaseHelper) }
@@ -32,7 +36,7 @@ fun TopSection(tripCount: Int) {
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primary)
-            .height(130.dp)
+            .height(160.dp)
             .padding(horizontal = 35.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.Start
     ) {
@@ -44,11 +48,11 @@ fun TopSection(tripCount: Int) {
             color = MaterialTheme.colorScheme.onPrimary
         )
         Text(
-            // Fetch and display to do
-            "$tripCount ${if (tripCount == 1) "trip" else "trips"} to do",
+            text = "$tripCount trips ${if (isFinished) "done" else "to do"}",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimary
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.padding(top = 16.dp)
         )
     }
 }
