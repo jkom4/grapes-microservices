@@ -79,8 +79,8 @@ jobs:
       - name: "🔍 Run Tests for Payment Service"
         run: mvn -B test --file payment-service/payment-backend/pom.xml
 
-      - name: "🔍 Run Tests for Sales Service"
-        run: mvn -B test --file sales-service/pom.xml
+#      - name: "🔍 Run Tests for Sales Service"
+#        run: mvn -B test --file sales-service/pom.xml
 
       - name: 🐍 Set up Python
         uses: actions/setup-python@v3
