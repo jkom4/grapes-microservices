@@ -29,7 +29,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class EmailService {
 
-    private final String COMPANY_MAIL = "cameron.noupoue@student.hepl.be";
+    @Value("${company.mail}")
+    private String COMPANY_MAIL;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 

@@ -26,7 +26,7 @@ class ChallengeServiceTest {
     }
 
     @Test
-    public void testSaveChallengeForUser() {
+    public void saveChallengeForUser() {
         String challenge = "Test Challenge";
         ChallengeWithTimestamp challengeWithTimestamp = challengeService.saveChallengeForUser(user.getEmail(), challenge);
         String savedChallenge = challengeWithTimestamp.getChallenge();
@@ -34,7 +34,7 @@ class ChallengeServiceTest {
     }
 
     @Test
-    public void testGetChallengeForUserCacheMiss() {
+    public void getChallengeForUserCacheMiss() {
         String email = "user2@example.com";
         String result = challengeService.getChallengeForUser(email).getChallenge();
 

@@ -15,7 +15,7 @@ public class ChallengeWithTimestamp {
     private String challenge;
     private long timestamp;
 
-    private int VALIDITY_PERIOD = 180 * 1000;
+    private int VALIDITY_PERIOD = 180 * 1000; //the first number is the number of seconds the challenge is valid for
 
     public ChallengeWithTimestamp(String challenge) {
         this.challenge = challenge;
