@@ -28,18 +28,8 @@ public class AuthController {
     private UserService userService;
 
     @Autowired
-    private SessionService sessionService;
-
-    @Autowired
     private TokenService tokenService;
 
-    /**
-     * Endpoint for user login
-     * Generates and sends a challenge to the user's email if the credentials are correct
-     * @param email the email of the user
-     * @param password the password of the user
-     * @return a response entity with the result of the login attempt
-     */
     @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password, @RequestParam AuthMethod authMethod) throws IOException {
         try {
@@ -58,13 +48,7 @@ public class AuthController {
         }
     }
 
-
-    /**
-     * Endpoint for user logout
-     * Removes the session from the Redis database
-     * @param token the JWT token
-     * @return a response entity with the result of the logout attempt
-     */
+    // TODO : implement CSRF protection and remove the comment then
     /*@PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
         if (token == null || !token.startsWith("Bearer ")) {
@@ -81,14 +65,6 @@ public class AuthController {
         }
     }*/
 
-
-    /**
-     * Endpoint to verify the challenge and get a JWT.
-     * This method takes the challenge submitted by the user and generates a JWT.
-     * @param email the email of the user
-     * @param submittedChallenge the challenge submitted by the user
-     * @return a response entity with the JWT if the challenge is correct
-     */
     @PostMapping(value  = "/verify-challenge", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> verifyChallenge(@RequestParam String email, @RequestParam String submittedChallenge, @RequestParam AuthMethod authMethod, HttpServletResponse response) {
         User user = userService.getUserByEmail(email);
@@ -111,13 +87,7 @@ public class AuthController {
         }
     }
 
-
-    /**
-     * Endpoint to refresh the JWT token
-     * This method takes the refresh token and generates a new JWT
-     * @param refreshToken the refresh token
-     * @return a response entity with the new JWT
-     */
+    // TODO : implement CSRF protection
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken) {
         if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
