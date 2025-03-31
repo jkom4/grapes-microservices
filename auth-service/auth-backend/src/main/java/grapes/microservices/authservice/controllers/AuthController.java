@@ -5,6 +5,8 @@ import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.UserService;
 import grapes.microservices.authservice.services.auth.AbstractAuthProvider;
 import grapes.microservices.authservice.services.auth.AuthMethodService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,7 +60,7 @@ public class AuthController {
      * @return a response entity with the JWT if the challenge is correct
      */
     @PostMapping(value  = "/verify-challenge", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> verifyChallenge(@RequestParam String email, @RequestParam String submittedChallenge, @RequestParam AuthMethod authMethod) {
+    public ResponseEntity<String> verifyChallenge(@RequestParam String email, @RequestParam String submittedChallenge, @RequestParam AuthMethod authMethod, HttpServletResponse response) {
         User user = userService.getUserByEmail(email);
         if (user == null) {
             return ResponseEntity.status(400).body("User not found.");
@@ -66,6 +68,13 @@ public class AuthController {
         try {
             AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
             String token = authProvider.processChallenge(user, submittedChallenge);
+            Cookie cookie = new Cookie("JWT", token);
+            cookie.setHttpOnly(true);
+            //cookie.setSecure(true); //when HTTPS is enabled
+            cookie.setPath("/");
+            cookie.setMaxAge(24 * 60 * 60);
+
+            response.addCookie(cookie);
             return ResponseEntity.ok(token);
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(e.getMessage());
