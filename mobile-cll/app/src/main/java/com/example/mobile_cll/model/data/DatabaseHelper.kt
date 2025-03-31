@@ -20,7 +20,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     companion object {
         // Database constants
         private const val DATABASE_NAME = "TripDatabase.db"
-        private const val DATABASE_VERSION = 14
+        private const val DATABASE_VERSION = 20
         private const val TABLE_TRIPS = "trips"
         private const val TABLE_ORDERS = "orders"
         private const val TABLE_DRIVERS = "drivers"
