@@ -49,7 +49,7 @@ jobs:
 
       - name: "📦 Install Frontend Dependencies"
         run: |
-          cd frontend
+          cd frontend-web
           npm install
   
 
