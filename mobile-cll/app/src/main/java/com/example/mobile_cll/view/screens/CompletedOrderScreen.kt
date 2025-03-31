@@ -39,13 +39,12 @@ fun CompletedOrderScreen(
     val isDoorstepDelivery by viewModel.isDoorstepDelivery.collectAsState()
     val signatureBitmap by viewModel.signatureBitmap.collectAsState()
     val showSignatureDialog by viewModel.showSignatureDialog.collectAsState()
-    val saveStatus by viewModel.saveStatus.collectAsState() // Ajout pour observer le statut de l'enregistrement
+    val saveStatus by viewModel.saveStatus.collectAsState()
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> uri?.let { viewModel.addImage(it) } }
 
-    // Afficher un Toast et naviguer après un enregistrement réussi
     LaunchedEffect(saveStatus) {
         saveStatus?.let { status ->
             if (status == "Success") {
@@ -114,16 +113,14 @@ fun CompletedOrderScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    // Ajouter des logs pour afficher les données avant l'envoi
                     Log.d("CompletedOrderScreen", "Données avant enregistrement :")
-                    Log.d("CompletedOrderScreen", "tripId: $tripId") // Changement de orderId à tripId
+                    Log.d("CompletedOrderScreen", "tripId: $tripId")
                     Log.d("CompletedOrderScreen", "deliveryStatusId: 1")
                     Log.d("CompletedOrderScreen", "comment: $commentState")
                     Log.d("CompletedOrderScreen", "imageUris: $imageUris")
                     Log.d("CompletedOrderScreen", "isDoorstepDelivery: $isDoorstepDelivery")
                     Log.d("CompletedOrderScreen", "signatureBitmap: ${signatureBitmap != null}")
 
-                    // Appeler saveDeliveryForTrip
                     viewModel.saveDeliveryForTrip(
                         tripId = tripId,
                         deliveryStatusId = 1
