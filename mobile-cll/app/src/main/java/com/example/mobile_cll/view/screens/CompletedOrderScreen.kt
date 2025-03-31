@@ -1,6 +1,7 @@
 package com.example.mobile_cll.view
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -22,9 +23,15 @@ import com.example.mobile_cll.view.components.BottomNavigationBar
 import com.example.mobile_cll.view.components.SignaturePadComponent
 import com.example.mobile_cll.view.components.TopSection
 import com.example.mobile_cll.viewmodel.CompletedOrderViewModel
+import com.example.mobile_cll.viewmodel.CompletedOrderViewModelFactory
 
 @Composable
-fun CompletedOrderScreen(viewModel: CompletedOrderViewModel = viewModel(), navController: NavController) {
+fun CompletedOrderScreen(
+    navController: NavController,
+    tripId: String,
+    viewModel: CompletedOrderViewModel = viewModel(factory = CompletedOrderViewModelFactory(LocalContext.current))
+) {
+    Log.d("CompletedOrderScreen", "tripId reçu au début: $tripId")
     val context = LocalContext.current
 
     val commentState by viewModel.commentState.collectAsState()
@@ -32,10 +39,20 @@ fun CompletedOrderScreen(viewModel: CompletedOrderViewModel = viewModel(), navCo
     val isDoorstepDelivery by viewModel.isDoorstepDelivery.collectAsState()
     val signatureBitmap by viewModel.signatureBitmap.collectAsState()
     val showSignatureDialog by viewModel.showSignatureDialog.collectAsState()
+    val saveStatus by viewModel.saveStatus.collectAsState() // Ajout pour observer le statut de l'enregistrement
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> uri?.let { viewModel.addImage(it) } }
+
+    // Afficher un Toast et naviguer après un enregistrement réussi
+    LaunchedEffect(saveStatus) {
+        saveStatus?.let { status ->
+            if (status == "Success") {
+                navController.navigate("lastScreen")
+            }
+        }
+    }
 
     Scaffold(
         topBar = { TopSection(navController, "Valid Order") },
@@ -96,7 +113,22 @@ fun CompletedOrderScreen(viewModel: CompletedOrderViewModel = viewModel(), navCo
 
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { navController.navigate("lastScreen") }, // Navigation vers LastScreen
+                onClick = {
+                    // Ajouter des logs pour afficher les données avant l'envoi
+                    Log.d("CompletedOrderScreen", "Données avant enregistrement :")
+                    Log.d("CompletedOrderScreen", "tripId: $tripId") // Changement de orderId à tripId
+                    Log.d("CompletedOrderScreen", "deliveryStatusId: 1")
+                    Log.d("CompletedOrderScreen", "comment: $commentState")
+                    Log.d("CompletedOrderScreen", "imageUris: $imageUris")
+                    Log.d("CompletedOrderScreen", "isDoorstepDelivery: $isDoorstepDelivery")
+                    Log.d("CompletedOrderScreen", "signatureBitmap: ${signatureBitmap != null}")
+
+                    // Appeler saveDeliveryForTrip
+                    viewModel.saveDeliveryForTrip(
+                        tripId = tripId,
+                        deliveryStatusId = 1
+                    )
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E))
             ) {

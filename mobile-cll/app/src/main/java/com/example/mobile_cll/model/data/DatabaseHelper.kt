@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.example.mobile_cll.model.entities.Delivery
 import com.example.mobile_cll.model.entities.Driver
 import com.example.mobile_cll.model.entities.Order
 import com.example.mobile_cll.model.entities.Trip
@@ -19,16 +20,18 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     companion object {
         // Database constants
         private const val DATABASE_NAME = "TripDatabase.db"
-        private const val DATABASE_VERSION = 11
+        private const val DATABASE_VERSION = 14
         private const val TABLE_TRIPS = "trips"
         private const val TABLE_ORDERS = "orders"
         private const val TABLE_DRIVERS = "drivers"
+        private const val TABLE_DELIVERY = "delivery"
 
         // Columns for trips table
         private const val COLUMN_ID = "id"
         private const val COLUMN_NAME = "name"
         private const val COLUMN_DISTANCE = "distance"
         private const val COLUMN_ADDRESS = "address"
+        private const val COLUMN_IS_FINISHED = "isFinished"
 
         // Columns for orders table
         private const val COLUMN_ORDER_ID = "id"
@@ -55,6 +58,18 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_STREET = "street"
         private const val COLUMN_LAST_NAME = "last_name"
         private const val COLUMN_FIRST_NAME = "first_name"
+
+        // Columns for delivery table
+        private const val COLUMN_DELIVERY_ID = "id"
+        private const val COLUMN_DELIVERY_ORDER_ID = "order_id"
+        private const val COLUMN_DELIVERY_USER_ID = "user_id"
+        private const val COLUMN_DELIVERY_STATUS_ID = "delivery_status_id"
+        private const val COLUMN_DELIVERY_DATE = "delivery_date"
+        private const val COLUMN_DELIVERED_AT = "delivered_at"
+        private const val COLUMN_DELIVERY_COMMENT = "comment"
+        private const val COLUMN_DELIVERY_DOORSTEP = "doorstep"
+        private const val COLUMN_DELIVERY_SIGNATURE = "signature"
+        private const val COLUMN_DELIVERY_PHOTO = "photo"
     }
 
     /**
@@ -70,7 +85,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 $COLUMN_ID TEXT PRIMARY KEY,
                 $COLUMN_NAME TEXT,
                 $COLUMN_DISTANCE TEXT,
-                $COLUMN_ADDRESS TEXT
+                $COLUMN_ADDRESS TEXT,
+                $COLUMN_IS_FINISHED INTEGER DEFAULT 0
             )
         """.trimIndent()
         db.execSQL(createTripsTableQuery)
@@ -93,14 +109,14 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val createDriversTableQuery = """
             CREATE TABLE $TABLE_DRIVERS (
                 $COLUMN_DRIVER_ID INTEGER PRIMARY KEY,
-                $COLUMN_ROLE_DELIVERER INTEGER,  -- BOOLEAN stocké comme INTEGER (0 ou 1)
+                $COLUMN_ROLE_DELIVERER INTEGER,
                 $COLUMN_PHONE TEXT,
-                $COLUMN_PHONE_CONF INTEGER,  -- BOOLEAN stocké comme INTEGER (0 ou 1)
+                $COLUMN_PHONE_CONF INTEGER, 
                 $COLUMN_EMAIL TEXT,
-                $COLUMN_EMAIL_CONF INTEGER,  -- BOOLEAN stocké comme INTEGER (0 ou 1)
-                $COLUMN_CREATED_AT TEXT,  -- DATETIME stocké comme TEXT
-                $COLUMN_IS_RGPD_ACCEPTED INTEGER,  -- BOOLEAN stocké comme INTEGER (0 ou 1)
-                $COLUMN_RGPD_ACCEPTED_AT TEXT,  -- DATETIME stocké comme TEXT
+                $COLUMN_EMAIL_CONF INTEGER,
+                $COLUMN_CREATED_AT TEXT,
+                $COLUMN_IS_RGPD_ACCEPTED INTEGER,
+                $COLUMN_RGPD_ACCEPTED_AT TEXT,
                 $COLUMN_PASSWORD_HASH TEXT,
                 $COLUMN_COUNTRY TEXT,
                 $COLUMN_CITY TEXT,
@@ -111,6 +127,24 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             )
         """.trimIndent()
         db.execSQL(createDriversTableQuery)
+
+        val createDeliveryTableQuery = """
+            CREATE TABLE $TABLE_DELIVERY (
+                $COLUMN_DELIVERY_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COLUMN_DELIVERY_ORDER_ID TEXT,
+                $COLUMN_DELIVERY_USER_ID INTEGER,
+                $COLUMN_DELIVERY_STATUS_ID INTEGER,
+                $COLUMN_DELIVERY_DATE TEXT,
+                $COLUMN_DELIVERED_AT TEXT,
+                $COLUMN_DELIVERY_COMMENT TEXT,
+                $COLUMN_DELIVERY_DOORSTEP INTEGER,
+                $COLUMN_DELIVERY_SIGNATURE BLOB,
+                $COLUMN_DELIVERY_PHOTO BLOB,
+                FOREIGN KEY ($COLUMN_DELIVERY_ORDER_ID) REFERENCES $TABLE_ORDERS($COLUMN_ORDER_ID),
+                FOREIGN KEY ($COLUMN_DELIVERY_USER_ID) REFERENCES $TABLE_DRIVERS($COLUMN_DRIVER_ID)
+            )
+        """.trimIndent()
+        db.execSQL(createDeliveryTableQuery)
 
         // Insert initial data into the database
         insertInitialData(db)
@@ -129,6 +163,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL("DROP TABLE IF EXISTS $TABLE_ORDERS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TRIPS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_DRIVERS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_DELIVERY")
         onCreate(db)
     }
 
@@ -141,16 +176,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     private fun insertInitialData(db: SQLiteDatabase) {
         // Insert trips
         val trips = listOf(
-            Trip("1", "Mathys", "10 mi", "Rue Joseph Truffaut 31, 4000 Liege"),
-            Trip("2", "Cameron", "11 mi", "Avenue Louise 54, 1050 Bruxelles"),
-            Trip("3", "Daive", "12 mi", "Chaussée de Charleroi 17, 1060 Bruxelles"),
-            Trip("4", "Jobelin", "13 mi", "Rue du Trône 12, 1000 Bruxelles"),
-            Trip("5", "Dounia", "14 mi", "Boulevard Anspach 20, 1000 Bruxelles"),
-            Trip("6", "Nassim", "15 mi", "Rue Neuve 123, 1000 Bruxelles"),
-            Trip("7", "Benjamin", "16 mi", "Place Flagey 18, 1050 Bruxelles"),
-            Trip("8", "Nasser", "17 mi", "Rue de la Loi 200, 1040 Bruxelles"),
-            Trip("9", "Charles", "18 mi", "Avenue de Tervuren 300, 1150 Bruxelles"),
-            Trip("10", "Test", "19 mi", "Rue Royale 25, 1000 Bruxelles")
+            Trip("1", "Mathys", "10 mi", "Rue Joseph Truffaut 31, 4000 Liege", false),
+            Trip("2", "Cameron", "11 mi", "Avenue Louise 54, 1050 Bruxelles", false),
+            Trip("3", "Daive", "12 mi", "Chaussée de Charleroi 17, 1060 Bruxelles", false),
+            Trip("4", "Jobelin", "13 mi", "Rue du Trône 12, 1000 Bruxelles", false),
+            Trip("5", "Dounia", "14 mi", "Boulevard Anspach 20, 1000 Bruxelles", false),
+            Trip("6", "Nassim", "15 mi", "Rue Neuve 123, 1000 Bruxelles", false),
+            Trip("7", "Benjamin", "16 mi", "Place Flagey 18, 1050 Bruxelles", false),
+            Trip("8", "Nasser", "17 mi", "Rue de la Loi 200, 1040 Bruxelles", false),
+            Trip("9", "Charles", "18 mi", "Avenue de Tervuren 300, 1150 Bruxelles", false),
+            Trip("10", "Test", "19 mi", "Rue Royale 25, 1000 Bruxelles", false)
         )
 
         trips.forEach { trip ->
@@ -159,9 +194,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 put(COLUMN_NAME, trip.name)
                 put(COLUMN_DISTANCE, trip.distance)
                 put(COLUMN_ADDRESS, trip.address)
+                put(COLUMN_IS_FINISHED, if (trip.isFinished) 1 else 0)
             }
             db.insert(TABLE_TRIPS, null, values)
         }
+
 
         // Insert orders
         val orders = listOf(
@@ -272,7 +309,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                     id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)),
                     name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
                     distance = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DISTANCE)),
-                    address = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ADDRESS))
+                    address = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ADDRESS)),
+                    isFinished = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FINISHED)) == 1
                 )
                 tripList.add(trip)
             } while (cursor.moveToNext())
@@ -281,6 +319,49 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         cursor.close()
         db.close()
         return tripList
+    }
+
+    fun updateTripFinished(tripId: String, isFinished: Boolean) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_IS_FINISHED, if (isFinished) 1 else 0)
+        }
+
+        val rowsUpdated = db.update(
+            TABLE_TRIPS,
+            values,
+            "$COLUMN_ID = ?",
+            arrayOf(tripId)
+        )
+
+        if (rowsUpdated > 0) {
+            Log.d("DatabaseHelper", "Trip $tripId finished : $isFinished")
+        } else {
+            Log.e("DatabaseHelper", "Error update trip: $tripId")
+        }
+
+        db.close()
+    }
+
+
+    fun getTrip(tripId: String): Trip? {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_TRIPS WHERE $COLUMN_ID = ?", arrayOf(tripId))
+        var trip: Trip? = null
+
+        if (cursor.moveToFirst()) {
+            trip = Trip(
+                id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                distance = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DISTANCE)),
+                address = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ADDRESS)),
+                isFinished = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_FINISHED)) == 1
+            )
+        }
+
+        cursor.close()
+        db.close()
+        return trip
     }
 
     /**
@@ -376,6 +457,28 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             Log.e("UpdateError", "Failed to update scannedAt and isScanned for orderId: $orderId")
         }
 
+    }
+    /**
+     * Inserts a new delivery record into the delivery table.
+     *
+     * @param delivery The Delivery object to insert.
+     * @return The row ID of the newly inserted delivery record.
+     */
+    fun insertDelivery(delivery: Delivery): Long {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_DELIVERY_ORDER_ID, delivery.orderId)
+            put(COLUMN_DELIVERY_USER_ID, delivery.userId)
+            put(COLUMN_DELIVERY_STATUS_ID, delivery.deliveryStatusId)
+            put(COLUMN_DELIVERY_DATE, delivery.deliveryDate)
+            put(COLUMN_DELIVERED_AT, delivery.deliveredAt)
+            put(COLUMN_DELIVERY_COMMENT, delivery.comment)
+            put(COLUMN_DELIVERY_DOORSTEP, if (delivery.doorstep) 1 else 0)
+            put(COLUMN_DELIVERY_SIGNATURE, delivery.signature)
+            put(COLUMN_DELIVERY_PHOTO, delivery.photo)
+        }
+        val rowId = db.insert(TABLE_DELIVERY, null, values)
         db.close()
+        return rowId
     }
 }

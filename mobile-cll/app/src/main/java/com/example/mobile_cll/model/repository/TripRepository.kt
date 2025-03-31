@@ -18,4 +18,24 @@ class TripRepository(private val databaseHelper: DatabaseHelper) {
     fun getAllTrips(): List<Trip> {
         return databaseHelper.getAllTrips()
     }
+
+    /**
+     * Retrieves a specific trip by its ID.
+     *
+     * @param tripId The ID of the trip to retrieve.
+     * @return The Trip object if found, or null if not found.
+     */
+    fun getTrip(tripId: String): Trip? {
+        return databaseHelper.getTrip(tripId)
+    }
+
+    /**
+     * Updates the isFinished status of a trip.
+     *
+     * @param tripId The ID of the trip to update.
+     * @param isFinished The new value for isFinished (true for finished, false otherwise).
+     */
+    fun updateTripFinished(tripId: String, isFinished: Boolean) {
+        databaseHelper.updateTripFinished(tripId, isFinished)
+    }
 }

@@ -117,6 +117,7 @@ class MapsActivity : AppCompatActivity() {
      * Displays a toast message when the button is clicked.
      */
     fun onArrivedButtonClick(view: android.view.View) {
+        Log.d("MapsActivity", "tripId avant transmission: $tripId")
         val intent = Intent(this, CompletedOrderActivity::class.java).apply {
             putExtra("tripId", tripId)
             putExtra("tripName", tripName)

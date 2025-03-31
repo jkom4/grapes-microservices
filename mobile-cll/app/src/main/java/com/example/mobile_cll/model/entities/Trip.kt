@@ -14,4 +14,5 @@ data class Trip(
     val name: String,
     val distance: String,
     val address: String,
+    val isFinished: Boolean = false
 )
