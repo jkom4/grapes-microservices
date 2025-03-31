@@ -74,7 +74,7 @@ public class UserDTO {
 
     private Role role;
     private String profession;
-    private Map<String, AuthMethod> authMethods;
+    private Map<String, AuthMean> authMethods;
     private Address deliveryAddress;
     private Address billingAddress;
 }

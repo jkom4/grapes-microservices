@@ -17,16 +17,10 @@ import grapes.microservices.authservice.utils.AuthLogger;
 /**
  * UserController handles HTTP requests related to user management.
  * It provides endpoints for user registration, retrieval, update, and deletion.
- * Endpoints:
- * - POST /auth/users/register → Register a new user.
- * - DELETE /auth/users/delete/{id} → Delete a user by ID.
- * - PUT /auth/users/update → Update an existing user.
- * - POST /auth/users/email → Retrieve a user by email.
- * - GET /auth/users/{id} → Retrieve a user by ID.
  * @author  Cameron
  */
 @RestController
-@RequestMapping("/auth/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
