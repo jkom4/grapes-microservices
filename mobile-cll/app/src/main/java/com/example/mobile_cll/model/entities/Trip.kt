@@ -8,6 +8,7 @@ package com.example.mobile_cll.model.entities
  * @param name The name of the trip.
  * @param distance The distance covered by the trip.
  * @param address The address associated with the trip.
+ * @param isFinished To indicate if the order is finished or no.
  */
 data class Trip(
     val id: String,

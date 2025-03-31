@@ -4,13 +4,29 @@ import android.content.Context
 import com.example.mobile_cll.model.DatabaseHelper
 import com.example.mobile_cll.model.entities.Delivery
 
+/**
+ * Repository class for handling Delivery-related database operations.
+ *
+ * @param context The application context used to initialize the database helper.
+ */
 class DeliveryRepository(context: Context) {
     private val databaseHelper = DatabaseHelper(context)
 
+    /**
+     * Inserts a new delivery record into the database.
+     *
+     * @param delivery The delivery entity to be inserted.
+     * @return The ID of the inserted delivery record.
+     */
     suspend fun insertDelivery(delivery: Delivery): Long {
         return databaseHelper.insertDelivery(delivery)
     }
 
+    /**
+     * Retrieves the driver's ID from the database.
+     *
+     * @return The driver's ID if found, otherwise null.
+     */
     suspend fun getDriverId(): Int? {
         return databaseHelper.getDriver()?.id
     }

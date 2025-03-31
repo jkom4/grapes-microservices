@@ -13,12 +13,15 @@ import com.example.mobile_cll.ui.theme.MobileCLLTheme
 import com.example.mobile_cll.view.CompletedOrderScreen
 import com.example.mobile_cll.view.LastScreen
 
+/**
+ * Activity that manages the navigation for the completed order process.
+ */
 class CompletedOrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val tripId = intent.getStringExtra("tripId") ?: "0"
-        Log.d("CompletedOrderActivity", "tripId reçu brut: ${intent.getStringExtra("tripId")}")
-        Log.d("CompletedOrderActivity", "tripId après gestion: $tripId")
+        Log.d("CompletedOrderActivity", "Received tripId: ${intent.getStringExtra("tripId")}")
+        Log.d("CompletedOrderActivity", "Processed tripId: $tripId")
 
         setContent {
             val navController = rememberNavController()
@@ -29,7 +32,7 @@ class CompletedOrderActivity : ComponentActivity() {
                         arguments = listOf(navArgument("tripId") { type = androidx.navigation.NavType.StringType })
                     ) { backStackEntry ->
                         val tripIdArg = backStackEntry.arguments?.getString("tripId") ?: "0"
-                        Log.d("CompletedOrderActivity", "tripId dans NavHost: $tripIdArg")
+                        Log.d("CompletedOrderActivity", "tripId in NavHost: $tripIdArg")
                         CompletedOrderScreen(
                             navController = navController,
                             tripId = tripIdArg
@@ -39,7 +42,8 @@ class CompletedOrderActivity : ComponentActivity() {
                         LastScreen(navController, this@CompletedOrderActivity)
                     }
                 }
-                // Navigation explicite pour passer tripId correctement
+
+                // Explicit navigation to correctly pass tripId
                 LaunchedEffect(Unit) {
                     navController.navigate("completedOrder/$tripId") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = true }

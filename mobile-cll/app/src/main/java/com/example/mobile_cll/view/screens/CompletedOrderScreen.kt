@@ -25,15 +25,24 @@ import com.example.mobile_cll.view.components.TopSection
 import com.example.mobile_cll.viewmodel.CompletedOrderViewModel
 import com.example.mobile_cll.viewmodel.CompletedOrderViewModelFactory
 
+/**
+ * Screen to display the completed order form.
+ * Allows users to add comments, upload images, provide a signature, and submit the order.
+ *
+ * @param navController Navigation controller to handle navigation.
+ * @param tripId ID of the trip for which the order is completed.
+ * @param viewModel ViewModel to manage UI state and business logic.
+ */
 @Composable
 fun CompletedOrderScreen(
     navController: NavController,
     tripId: String,
     viewModel: CompletedOrderViewModel = viewModel(factory = CompletedOrderViewModelFactory(LocalContext.current))
 ) {
-    Log.d("CompletedOrderScreen", "tripId reçu au début: $tripId")
+    Log.d("CompletedOrderScreen", "tripId receive in start: $tripId")
     val context = LocalContext.current
 
+    // Collect UI state from ViewModel
     val commentState by viewModel.commentState.collectAsState()
     val imageUris by viewModel.imageUris.collectAsState()
     val isDoorstepDelivery by viewModel.isDoorstepDelivery.collectAsState()
@@ -41,10 +50,17 @@ fun CompletedOrderScreen(
     val showSignatureDialog by viewModel.showSignatureDialog.collectAsState()
     val saveStatus by viewModel.saveStatus.collectAsState()
 
+    /**
+     * Image picker launcher that allows users to select an image from their device.
+     * The selected image URI is added to the ViewModel.
+     */
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> uri?.let { viewModel.addImage(it) } }
 
+    /**
+     * Observes the save status and navigates to the last screen if the save is successful.
+     */
     LaunchedEffect(saveStatus) {
         saveStatus?.let { status ->
             if (status == "Success") {
@@ -66,6 +82,9 @@ fun CompletedOrderScreen(
             Text("Completed Order", fontSize = 22.sp, color = Color.Black)
             Spacer(modifier = Modifier.height(16.dp))
 
+            /**
+             * Input field for adding a comment.
+             */
             Text("Add a comment", fontSize = 16.sp, color = Color.Gray)
             TextField(
                 value = commentState,
@@ -79,6 +98,10 @@ fun CompletedOrderScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
             Text("Click Pictures of the product", fontSize = 16.sp, color = Color.Gray)
+
+            /**
+             * Displays selected images in a horizontal list.
+             */
             LazyRow {
                 items(imageUris) { uri ->
                     Image(
@@ -92,6 +115,10 @@ fun CompletedOrderScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            /**
+             * Button to open the image picker and select photos.
+             */
             Button(
                 onClick = { imagePicker.launch("image/*") },
                 modifier = Modifier.fillMaxWidth(),
@@ -101,6 +128,10 @@ fun CompletedOrderScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            /**
+             * Switch to enable or disable doorstep delivery.
+             */
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Switch(
                     checked = isDoorstepDelivery,
@@ -111,6 +142,11 @@ fun CompletedOrderScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            /**
+             * Button to submit the completed order form.
+             * Logs the input data before submitting it.
+             */
             Button(
                 onClick = {
                     Log.d("CompletedOrderScreen", "Données avant enregistrement :")
@@ -133,6 +169,9 @@ fun CompletedOrderScreen(
             }
         }
 
+        /**
+         * Dialog for collecting user signature.
+         */
         if (showSignatureDialog) {
             AlertDialog(
                 onDismissRequest = { viewModel.dismissSignatureDialog() },

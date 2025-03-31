@@ -6,6 +6,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.mobile_cll.model.DatabaseHelper
 import com.example.mobile_cll.repository.TripRepository
 
+/**
+ * Factory class for creating an instance of [CompletedOrderViewModel].
+ * Ensures the ViewModel is instantiated with the required dependencies.
+ */
 class CompletedOrderViewModelFactory(
     private val context: Context
 ) : ViewModelProvider.Factory {

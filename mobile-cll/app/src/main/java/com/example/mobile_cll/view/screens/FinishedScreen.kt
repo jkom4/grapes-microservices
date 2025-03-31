@@ -17,6 +17,13 @@ import android.app.Activity
 import androidx.navigation.NavController
 import com.example.mobile_cll.MainActivity
 
+/**
+ * Composable function representing the last screen of the application.
+ * This screen displays a success message and automatically navigates back to MainActivity after 3 seconds.
+ *
+ * @param navController The navigation controller used for navigation within the app.
+ * @param activity The activity instance used to start a new intent.
+ */
 @Composable
 fun LastScreen(
     navController: NavController,

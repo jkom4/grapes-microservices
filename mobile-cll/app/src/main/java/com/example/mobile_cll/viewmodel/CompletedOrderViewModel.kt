@@ -17,6 +17,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * ViewModel responsible for handling completed orders.
+ * Manages comments, images, doorstep deliveries, and signatures.
+ */
 class CompletedOrderViewModel(
     private val context: Context,
     private val tripRepository: TripRepository
@@ -42,36 +46,65 @@ class CompletedOrderViewModel(
 
     private val databaseHelper = DatabaseHelper(context)
 
+    /**
+     * Updates the comment state.
+     * @param comment The comment to set.
+     */
     fun updateComment(comment: String) {
         _commentState.value = comment
     }
 
+    /**
+     * Adds an image URI to the list.
+     * @param uri The image URI.
+     */
     fun addImage(uri: Uri) {
         _imageUris.value = _imageUris.value + uri
     }
 
+    /**
+     * Toggles doorstep delivery and updates the signature dialog visibility.
+     * @param isChecked True if doorstep delivery is enabled.
+     */
     fun toggleDoorstepDelivery(isChecked: Boolean) {
         _isDoorstepDelivery.value = isChecked
-        // Ouvrir le dialog si coché, le fermer si décoché
         _showSignatureDialog.value = isChecked
     }
 
+    /**
+     * Updates the signature bitmap.
+     * @param bitmap The new signature bitmap.
+     */
     fun updateSignature(bitmap: Bitmap?) {
         _signatureBitmap.value = bitmap
     }
 
+    /**
+     * Shows the signature dialog.
+     */
     fun showSignatureDialog() {
         _showSignatureDialog.value = true
     }
 
+    /**
+     * Dismisses the signature dialog.
+     */
     fun dismissSignatureDialog() {
         _showSignatureDialog.value = false
     }
 
+    /**
+     * Clears the saved signature bitmap.
+     */
     fun clearSignature() {
         _signatureBitmap.value = null
     }
 
+    /**
+     * Saves delivery data for a given trip.
+     * @param tripId The trip identifier.
+     * @param deliveryStatusId The delivery status ID.
+     */
     fun saveDeliveryForTrip(
         tripId: String,
         deliveryStatusId: Int
@@ -81,15 +114,13 @@ class CompletedOrderViewModel(
                 val userId = databaseHelper.getDriver()?.id ?: throw IllegalStateException("No driver found")
                 val orders = databaseHelper.getOrdersForTrip(tripId)
                 if (orders.isEmpty()) {
-                    Log.e("CompletedOrderViewModel", "Aucune commande trouvée pour tripId: $tripId")
-                    _saveStatus.value = "Error: Aucune commande trouvée"
+                    Log.e("CompletedOrderViewModel", "No orders found for tripId: $tripId")
+                    _saveStatus.value = "Error: No orders found"
                     return@launch
                 }
 
                 val photoByteArray = _imageUris.value.firstOrNull()?.let { uri ->
-                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                        inputStream.readBytes()
-                    }
+                    context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
                 }
 
                 val signatureByteArray = _signatureBitmap.value?.let { bitmap ->
@@ -99,8 +130,7 @@ class CompletedOrderViewModel(
                 }
 
                 val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                val currentDateTime = Date()
-                val formattedDateTime = formatter.format(currentDateTime)
+                val formattedDateTime = formatter.format(Date())
 
                 var allSuccess = true
                 orders.forEach { order ->
@@ -116,20 +146,10 @@ class CompletedOrderViewModel(
                         photo = photoByteArray
                     )
 
-                    Log.d("CompletedOrderViewModel", "Données à insérer pour orderId: ${order.id}")
-                    Log.d("CompletedOrderViewModel", "orderId: ${delivery.orderId}")
-                    Log.d("CompletedOrderViewModel", "userId: ${delivery.userId}")
-                    Log.d("CompletedOrderViewModel", "deliveryStatusId: ${delivery.deliveryStatusId}")
-                    Log.d("CompletedOrderViewModel", "deliveryDate: ${delivery.deliveryDate}")
-                    Log.d("CompletedOrderViewModel", "deliveredAt: ${delivery.deliveredAt}")
-                    Log.d("CompletedOrderViewModel", "comment: ${delivery.comment}")
-                    Log.d("CompletedOrderViewModel", "doorstep: ${delivery.doorstep}")
-                    Log.d("CompletedOrderViewModel", "signature: ${delivery.signature?.size ?: "null"} bytes")
-                    Log.d("CompletedOrderViewModel", "photo: ${delivery.photo?.size ?: "null"} bytes")
-
+                    Log.d("CompletedOrderViewModel", "Saving data for orderId: ${order.id}")
                     val rowId = databaseHelper.insertDelivery(delivery)
                     if (rowId == -1L) {
-                        Log.e("CompletedOrderViewModel", "Échec de l'insertion pour orderId: ${order.id}")
+                        Log.e("CompletedOrderViewModel", "Failed to insert for orderId: ${order.id}")
                         allSuccess = false
                     }
                 }
@@ -137,19 +157,20 @@ class CompletedOrderViewModel(
                 if (allSuccess) {
                     tripRepository.updateTripFinished(tripId, true)
                     val updatedTrip = tripRepository.getTrip(tripId)
-                    Log.d("CompletedOrderViewModel", "Trip après mise à jour : $updatedTrip")
+                    Log.d("CompletedOrderViewModel", "Trip updated: $updatedTrip")
                     _saveStatus.value = "Success"
                 } else {
-                    _saveStatus.value = "Error: Échec de l'enregistrement"
+                    _saveStatus.value = "Error: Save failed"
                 }
 
+                // Reset state after saving
                 _commentState.value = ""
                 _imageUris.value = emptyList()
                 _isDoorstepDelivery.value = false
                 _signatureBitmap.value = null
 
             } catch (e: Exception) {
-                Log.e("CompletedOrderViewModel", "Erreur lors de l'enregistrement: ${e.message}")
+                Log.e("CompletedOrderViewModel", "Error saving: ${e.message}")
                 _saveStatus.value = "Error: ${e.message}"
             }
         }

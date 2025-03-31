@@ -13,6 +13,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+/**
+ * A composable component representing the top section of a screen with a title and a back button.
+ *
+ * @param navController The navigation controller used to navigate back.
+ * @param title The title displayed in the top section.
+ */
 @Composable
 fun TopSection(
     navController: NavController?,
@@ -21,7 +27,7 @@ fun TopSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF4CAD7E))
+            .background(MaterialTheme.colorScheme.primary)
             .padding(16.dp)
             .height(60.dp)
     ) {
@@ -35,13 +41,17 @@ fun TopSection(
                     .align(Alignment.Bottom)
                     .offset(y = 20.dp)
             ) {
-                Icon(Icons.Filled.ArrowBackIosNew, contentDescription = "Back", tint = Color.White)
+                Icon(
+                    Icons.Filled.ArrowBackIosNew,
+                    contentDescription = "Back", // Accessibility description
+                    tint = MaterialTheme.colorScheme.onPrimary // White icon color
+                )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = title,
                 fontSize = 20.sp,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier
                     .align(Alignment.Bottom)
                     .offset(y = 10.dp)
