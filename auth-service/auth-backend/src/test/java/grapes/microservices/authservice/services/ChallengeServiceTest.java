@@ -1,5 +1,6 @@
 package grapes.microservices.authservice.services;
 
+import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,14 +28,15 @@ class ChallengeServiceTest {
     @Test
     public void testSaveChallengeForUser() {
         String challenge = "Test Challenge";
-        String savedChallenge = challengeService.saveChallengeForUser(user.getEmail(), challenge);
+        ChallengeWithTimestamp challengeWithTimestamp = challengeService.saveChallengeForUser(user.getEmail(), challenge);
+        String savedChallenge = challengeWithTimestamp.getChallenge();
         assertEquals(challenge, savedChallenge);
     }
 
     @Test
     public void testGetChallengeForUserCacheMiss() {
         String email = "user2@example.com";
-        String result = challengeService.getChallengeForUser(email);
+        String result = challengeService.getChallengeForUser(email).getChallenge();
 
         assertNull(result);
     }

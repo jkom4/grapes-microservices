@@ -1,5 +1,6 @@
 package grapes.microservices.authservice.services.auth;
 
+import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.EmailService;
 import grapes.microservices.authservice.services.TokenService;
@@ -33,12 +34,15 @@ public class EmailAuthProvider extends AbstractAuthProvider{
 
     @Override
     public boolean verifyChallenge(User user, String submittedChallenge) {
-        String storedChallenge = challengeService.getChallengeForUser(user.getEmail());
-
+        ChallengeWithTimestamp storedChallenge = challengeService.getChallengeForUser(user.getEmail());
         if (storedChallenge == null) {
             throw new RuntimeException("Challenge not found.");
         }
-        if (storedChallenge.equals(submittedChallenge)) {
+        if (storedChallenge.isExpired()) {
+            challengeService.evictChallengeCache(user.getEmail());
+            throw new RuntimeException("Challenge has expired.");
+        }
+        if (storedChallenge.getChallenge().equals(submittedChallenge)) {
             return true;
         }
         throw new RuntimeException("Challenge does not match");

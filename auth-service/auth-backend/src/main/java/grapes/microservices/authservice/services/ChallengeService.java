@@ -1,5 +1,6 @@
 package grapes.microservices.authservice.services;
 
+import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import lombok.NoArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -23,8 +24,8 @@ public class ChallengeService {
      * @return the saved challenge
      */
     @CachePut(value = "challenges", key = "#email")
-    public String saveChallengeForUser(String email, String challenge) {
-        return challenge;
+    public ChallengeWithTimestamp saveChallengeForUser(String email, String challenge) {
+        return new ChallengeWithTimestamp(challenge);
     }
 
 
@@ -34,7 +35,7 @@ public class ChallengeService {
      * @return the challenge for the user, or null if not found
      */
     @Cacheable(value = "challenges", key = "#email")
-    public String getChallengeForUser(String email) {
+    public ChallengeWithTimestamp getChallengeForUser(String email) {
         return null;
     }
 
