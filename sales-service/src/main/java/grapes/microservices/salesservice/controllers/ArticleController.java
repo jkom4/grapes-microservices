@@ -4,6 +4,7 @@ import grapes.microservices.salesservice.dto.ArticleDTO;
 import grapes.microservices.salesservice.mapper.ArticleMapper;
 import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.services.ArticleService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -35,13 +36,19 @@ public class ArticleController {
 
     // @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<ArticleDTO>> getAllArticles() {
-        List<Article> articles = articleService.getAllArticles();
-        List<ArticleDTO> dtos = articles.stream()
-                .map(articleMapper::toDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+    public ResponseEntity<?> getAllArticles() {
+        try {
+            List<Article> articles = articleService.getAllArticles();
+            List<ArticleDTO> dtos = articles.stream()
+                    .map(articleMapper::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving all articles.");
+        }
     }
+
 
     /**
      * Retrieves all available (in-stock) articles with pagination and optional sorting.
@@ -54,34 +61,45 @@ public class ArticleController {
      */
     // @PreAuthorize("hasRole('USER')") // TODO: activate when security is in place
     @GetMapping("/available")
-    public ResponseEntity<Page<ArticleDTO>> getAvailableArticles(@ParameterObject Pageable pageable) {
-        Page<Article> available = articleService.getAvailableArticles(pageable);
-        Page<ArticleDTO> dtoPage = available.map(articleMapper::toDTO);
-
-        return ResponseEntity.ok(dtoPage);
+    public ResponseEntity<?> getAvailableArticles(@ParameterObject Pageable pageable) {
+        try {
+            Page<Article> available = articleService.getAvailableArticles(pageable);
+            Page<ArticleDTO> dtoPage = available.map(articleMapper::toDTO);
+            return ResponseEntity.ok(dtoPage);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving available articles.");
+        }
     }
+
 
 
     //  Search articles by name
     //@PreAuthorize("hasRole('USER')")
     @GetMapping("/search")
     public ResponseEntity<?> searchArticlesByName(@RequestParam String name) {
-        if (name == null || name.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("The 'name' field cannot be empty.");
+        try {
+            if (name == null || name.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("The 'name' field cannot be empty.");
+            }
+
+            List<Article> results = articleService.searchByName(name);
+
+            if (results.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No items found with the name: '" + name + "'");
+            }
+
+            List<ArticleDTO> dtos = results.stream()
+                    .map(articleMapper::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while searching articles.");
         }
-
-        List<Article> results = articleService.searchByName(name);
-
-        if (results.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No items found with the name: '" + name + "'");
-        }
-
-        List<ArticleDTO> dtos = results.stream()
-                .map(articleMapper::toDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
     }
+
 
     //  Create article
     // @PreAuthorize("hasRole('ADMIN')")
@@ -99,6 +117,7 @@ public class ArticleController {
     //  Update
     // @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<?> updateArticle(
             @PathVariable Integer id,
             @Valid @RequestBody ArticleDTO articleDTO) {

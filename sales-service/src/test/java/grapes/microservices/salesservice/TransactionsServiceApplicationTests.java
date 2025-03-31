@@ -104,4 +104,19 @@ class TransactionsServiceApplicationTests {
                 .andExpect(jsonPath("$").isArray());
     }
 
+    @Test
+    void testGetAvailableArticlesWithPagination() throws Exception {
+        mockMvc.perform(get("/articles/available")
+                        .param("page", "0")
+                        .param("size", "5")
+                        .param("sort", "name,asc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[5]").doesNotExist()) //  5 results
+                .andExpect(jsonPath("$.content[0].stockKg").isNumber())
+                .andExpect(jsonPath("$.content[0].stockUnit").isNumber());
+    }
+
+
+
 }
