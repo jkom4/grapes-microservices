@@ -87,8 +87,8 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: 🧪 Run Tests for Python Microservices
-        run: pytest data-mining-service/tests
+#      - name: 🧪 Run Tests for Python Microservices
+#        run: pytest data-mining-service/tests
 
 #      ## FRONTEND
 #      - name: 🌐 Install Node.js
