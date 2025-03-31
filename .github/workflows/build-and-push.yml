@@ -2,6 +2,10 @@ name: Build, Test, Push & Deploy (Docker)
 
 on:
   workflow_dispatch:  # Allows you to manually launch
+
+permissions:
+  id-token: write
+  contents: read
 jobs:
   build:
     name: Build Microservices
