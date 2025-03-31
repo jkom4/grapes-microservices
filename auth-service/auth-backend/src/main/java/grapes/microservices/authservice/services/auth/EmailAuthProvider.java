@@ -3,8 +3,10 @@ package grapes.microservices.authservice.services.auth;
 import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.EmailService;
+import grapes.microservices.authservice.services.SessionService;
 import grapes.microservices.authservice.services.TokenService;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +55,9 @@ public class EmailAuthProvider extends AbstractAuthProvider{
         boolean isValid = verifyChallenge(user, submittedChallenge);
         if (isValid) {
             challengeService.evictChallengeCache(user.getEmail());
-            return tokenService.generateToken(user.getEmail());
+            String token = tokenService.generateToken(user.getEmail());
+            sessionService.saveSession(user.getId().toHexString(), token);
+            return token;
         }
         throw new RuntimeException("The challenge is not valid.");
     }

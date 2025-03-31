@@ -1,20 +1,19 @@
 package grapes.microservices.authservice.services;
 
 import grapes.microservices.authservice.utils.AuthLogger;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
@@ -30,6 +29,9 @@ public class TokenService {
 
     @Value("${auth.service.jwt.secret.key}")
     private String secretKey;
+
+    @Autowired
+    private SessionService sessionService;
 
     private SecretKey SECRET_KEY;
 
@@ -86,5 +88,37 @@ public class TokenService {
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(SECRET_KEY)
                 .compact();
+    }
+
+    /**
+     * Get the refresh token for the given user ID from the session service
+     * @param userId the user ID
+     * @return the refresh token
+     */
+    public String getRefreshToken(String userId) {
+        String refreshToken = sessionService.getRefresh(userId);
+        if (refreshToken == null) {
+            throw new RuntimeException("Refresh token not found.");
+        }
+        return refreshToken;
+    }
+
+    /**
+     * Extracts the user ID from the given token
+     * @param token the token to extract the user ID from
+     * @return the user ID
+     */
+    public String extractUserId(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSECRET_KEY())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            return claims.getSubject();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

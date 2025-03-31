@@ -2,18 +2,18 @@ package grapes.microservices.authservice.controllers;
 
 import grapes.microservices.authservice.models.AuthMethod;
 import grapes.microservices.authservice.models.User;
+import grapes.microservices.authservice.services.SessionService;
+import grapes.microservices.authservice.services.TokenService;
 import grapes.microservices.authservice.services.UserService;
 import grapes.microservices.authservice.services.auth.AbstractAuthProvider;
 import grapes.microservices.authservice.services.auth.AuthMethodService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -26,6 +26,12 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SessionService sessionService;
+
+    @Autowired
+    private TokenService tokenService;
 
     /**
      * Endpoint for user login
@@ -51,6 +57,30 @@ public class AuthController {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }
+
+
+    /**
+     * Endpoint for user logout
+     * Removes the session from the Redis database
+     * @param token the JWT token
+     * @return a response entity with the result of the logout attempt
+     */
+    /*@PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body("Invalid token");
+        }
+        try {
+            token = token.substring(7); // Deletes
+            String userId = tokenService.extractUserId(token);
+
+            sessionService.deleteSession(userId);
+            return ResponseEntity.ok("Logged out successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }*/
+
 
     /**
      * Endpoint to verify the challenge and get a JWT.
@@ -79,5 +109,30 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
+    }
+
+
+    /**
+     * Endpoint to refresh the JWT token
+     * This method takes the refresh token and generates a new JWT
+     * @param refreshToken the refresh token
+     * @return a response entity with the new JWT
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken) {
+        if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body("Invalid token");
+        }
+
+        refreshToken = refreshToken.substring(7);
+        String userId = tokenService.extractUserId(refreshToken);
+
+        String storedRefreshToken = tokenService.getRefreshToken(userId);
+        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+            return ResponseEntity.status(403).body("Invalid refresh token");
+        }
+        String email = userService.getUserById(userId).getEmail();
+        String newAccessToken = tokenService.generateToken(email);
+        return ResponseEntity.ok(newAccessToken);
     }
 }
