@@ -1,7 +1,9 @@
 package grapes.microservices.authservice.security;
 
+import grapes.microservices.authservice.utils.AuthLogger;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,12 +29,15 @@ public class AESConfig {
 
     private static final String AES_ALGORITHM = "AES";
 
+    private static final Logger logger = AuthLogger.getLogger();
+
     @PostConstruct
     public void init() {
         if (aesKeyBase64 != null) {
             aesKey = Base64.getDecoder().decode(aesKeyBase64);
-            System.out.println("AES Key loaded: " + Base64.getEncoder().encodeToString(aesKey));
+            logger.info("AES Key loaded.");
         } else {
+            logger.error("AES key is not configured properly.");
             System.err.println("AES key is not configured properly.");
         }
     }

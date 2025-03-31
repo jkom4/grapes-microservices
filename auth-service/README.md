@@ -34,9 +34,24 @@ db.find()
 
 2. Export your environment variables:
 
+   ```bash
+   nano ~/.zshrc
+   ```
+   And add the following lines at the end:
     ```bash
     export GRAPES_TWILIO_API_SECRET="your-twilio-api-key" 
+    export GRAPES_AES_KEY="your-aes-key"
+    export GRAPES_JWT_SECRET_KEY="your-jwt-secret-key"
     ```
+
+   Get your twilio/sendgrip api key [here](https://app.sendgrid.com/settings/api_keys)
+   Get your AES and JWT keys in the console at the first start of the service
+
+   ```bash
+    source ~/.zshrc
+    ```
+
+    *Note that the `GRAPES_AES_KEY` must be a 16-character string.* (you can find a generated key that you can paste in the console when you start the service)
 
 3. Run the following command to start the **MongoDB** and **Spring Boot** services:
 
