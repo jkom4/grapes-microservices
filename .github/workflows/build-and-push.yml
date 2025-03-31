@@ -1,0 +1,135 @@
+name: Build, Test, Push & Deploy (Docker)
+
+on:
+  workflow_dispatch:  # Allows you to manually launch
+jobs:
+  build:
+    name: Build & Test Microservices
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🛠️ Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: 🔍 Run Tests for Java Microservices
+        # DskipTests to skip running tests during the build process.
+        run: |
+          mvn -B clean install -DskipTests --file api-gateway/pom.xml
+          mvn -B clean install -DskipTests --file auth-service/auth-backend/pom.xml
+          mvn -B clean install -DskipTests --file chat-service/pom.xml
+          mvn -B clean install -DskipTests --file payment-service/payment-backend/pom.xml
+          mvn -B clean install -DskipTests --file sales-service/pom.xml
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: 🧪 Run Tests for Python Microservices
+        run: pip install -r data-mining-service/requirements.txt
+
+      ## FRONTEND
+      - name: 🌐 Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 🧪 Run Frontend Tests
+        run: |
+          cd frontend
+          npm install
+          
+
+  test :
+    name: Test Microservices
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🛠️ Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: 🔍 Run Tests for Java Microservices
+        # DskipTests to skip running tests during the build process.
+        run: |
+          mvn -B test --file api-gateway/pom.xml
+          mvn -B test --file auth-service/auth-backend/pom.xml
+          mvn -B test --file chat-service/pom.xml
+          mvn -B test --file payment-service/payment-backend/pom.xml
+          mvn -B test --file sales-service/pom.xml
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: 🧪 Run Tests for Python Microservices
+        run: pytest data-mining-service/tests
+
+      ## FRONTEND
+      - name: 🌐 Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 🧪 Run Frontend Tests
+        run: |
+          npm run test  
+
+  docker-build-and-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - tests
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🔑 Log in to Docker Hub
+        run: echo "${{ secrets.AZURE_ACR_PASSWORD }}" | docker login ${{ secrets.AZURE_ACR_LOGIN_SERVER }} -u ${{ secrets.AZURE_ACR_USERNAME }} --password-stdin
+
+      - name: 🐳 Build & Push Images (via Docker Compose)
+        run: |
+          docker-compose build mariadb 
+          docker-compose push mariadb
+
+#          docker-compose build mariadb mongodb rabbitmq api-gateway auth-service sales-service payment-service chat-service data-mining-service frontend-web frontend-auth frontend-payment
+#          docker-compose push mariadb mongodb rabbitmq api-gateway auth-service sales-service payment-service chat-service data-mining-service frontend-web frontend-auth frontend-payment
+
+#  deploy:
+#    name: Deploy on Azure VM (Manual)
+#    runs-on: ubuntu-latest
+#    needs:
+#      - build
+#      - tests
+#    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
+#
+#    steps:
+#      - name: 📥 Checkout repository
+#        uses: actions/checkout@v3
+#
+#      - name: 🔑 SSH into Azure VM and Deploy
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.AZURE_VM_IP }}
+#          username: ${{ secrets.AZURE_VM_USER }}
+#          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+#          script: |
+#            cd grapes-microservices  # Path to project
+#            git pull origin main  # Update project
+#            docker-compose pull  # get new images from registry(grapes hub)
+#            docker-compose down
+#            docker-compose up -d
