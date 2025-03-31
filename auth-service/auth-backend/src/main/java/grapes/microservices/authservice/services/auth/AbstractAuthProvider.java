@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.ChallengeService;
-import grapes.microservices.authservice.services.EmailService;
-import grapes.microservices.authservice.services.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,13 +12,11 @@ import org.springframework.stereotype.Service;
 /**
  * Abstract class for authentication providers
  * Contains the basic methods for authentication and challenge verification
+ * @author Cameron
  */
 @Service
 @RequiredArgsConstructor
 public abstract class AbstractAuthProvider {
-
-    @Autowired
-    private TokenService tokenService;
 
     @Autowired
     protected ChallengeService challengeService;
@@ -33,21 +29,11 @@ public abstract class AbstractAuthProvider {
 
     /**
      * Verifies the challenge submitted by the user
-     * @param email the email of the user
+     * @param user the email of the user
      * @param submittedChallenge the challenge submitted by the user
      * @return true if the challenge is correct, false otherwise
      */
-    public boolean verifyChallenge(String email, String submittedChallenge) {
-        String storedChallenge = challengeService.getChallengeForUser(email);
-
-        if (storedChallenge == null) {
-            throw new RuntimeException("Challenge not found.");
-        }
-        if (storedChallenge.equals(submittedChallenge)) {
-            return true;
-        }
-        throw new RuntimeException("Challenge does not match");
-    }
+    public abstract boolean verifyChallenge(User user, String submittedChallenge);
 
     /**
      * Processes the challenge submitted by the user
@@ -56,13 +42,7 @@ public abstract class AbstractAuthProvider {
      * @param submittedChallenge the challenge submitted by the user
      * @return the generated token
      */
-    public String processChallenge(User user, String submittedChallenge) {
-        boolean isValid = verifyChallenge(user.getEmail(), submittedChallenge);
-        if (isValid) {
-            return tokenService.generateToken(user.getEmail());
-        }
-        throw new RuntimeException("The challenge is not valid.");
-    }
+    public abstract String processChallenge(User user, String submittedChallenge);
 
     /**
      * Generates a random challenge

@@ -7,6 +7,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.*;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,7 +23,7 @@ import java.util.Map;
 @Document(collection = "users")
 public class User {
 
-    private static Logger logger = AuthLogger.getLogger();
+    private static Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
     private static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 

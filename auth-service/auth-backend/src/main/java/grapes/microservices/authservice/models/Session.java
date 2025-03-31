@@ -16,7 +16,6 @@ public class Session {
 
     @Id
     private String id;
-
     private String userId;
     private String token;
     private LocalDateTime issuedAt;

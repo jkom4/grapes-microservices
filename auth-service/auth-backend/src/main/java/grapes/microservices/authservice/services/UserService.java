@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class UserService {
     @Autowired
     private final UserRepository userRepository;
 
-    private static final Logger logger = AuthLogger.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
     /**
      * Register a new user and verify the password strength and email uniqueness

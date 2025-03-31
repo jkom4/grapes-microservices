@@ -8,6 +8,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -32,8 +33,14 @@ public class TokenService {
 
     private SecretKey SECRET_KEY;
 
-    private static final Logger logger = AuthLogger.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
+    /**
+     * Initializes the service by loading the secret key
+     * If the secret key is not configured properly, a new one is generated
+     * If a new key is generated, it is printed in the console
+     * If a new key is generated, the application will stop
+     */
     @PostConstruct
     public void init() throws NoSuchAlgorithmException {
         if (secretKey == null) {
@@ -50,10 +57,12 @@ public class TokenService {
                 logger.error("Error loading JWT secret key: " + e.getMessage());
                 logger.info("Generating new JWT secret key...");
 
+                // Generate a new secret key
                 KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
                 keyGenerator.init(256);
                 SECRET_KEY = keyGenerator.generateKey();
 
+                // Display the new secret key and stop the application
                 secretKey = Base64.getEncoder().encodeToString(SECRET_KEY.getEncoded());
                 System.out.println("Generated new JWT secret key: " + secretKey);
                 System.out.println("Please put this in your environment variables.");

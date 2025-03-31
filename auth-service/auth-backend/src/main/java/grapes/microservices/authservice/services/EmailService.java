@@ -12,12 +12,17 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 /**
  * Service for sending emails
+ * This service uses the SendGrid API to send emails
+ * The SendGrid API key must be configured in the application.properties file
+ * @see <a href="https://sendgrid.com/docs/API_Reference/api_v3.html">SendGrid API</a>
+ * @author Cameron
  */
 @Service
 @Getter
@@ -26,7 +31,7 @@ public class EmailService {
 
     private final String COMPANY_MAIL = "cameron.noupoue@student.hepl.be";
 
-    private static final Logger logger = AuthLogger.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
     @Value("${sendgrid.api.key}")
     private String apiKey;
@@ -52,7 +57,7 @@ public class EmailService {
             Email from = new Email(COMPANY_MAIL);
             Email to = new Email(recipientMail);
             topic = "Grapes Auth service - " + topic;
-            message = "Hello,\n\n" + message + "\n\nBest regards,\nGRAPES Auth service";
+            message = "Hello,\n\n" + message + "\n\nBest regards,\nGrapes Auth service";
             Content content = new Content("text/plain", message);
             Mail mail = new Mail(from, topic, to, content);
 
@@ -63,7 +68,6 @@ public class EmailService {
             request.setBody(mail.build());
             Response response = sg.api(request);
             logger.info("Mail sent, status : " + response.getStatusCode());
-            logger.info("Mail sent, body : " + response.getBody());
             logger.info("Mail sent, headers : " + response.getHeaders());
         } catch (Exception e) {
             logger.error("Failed to send email to: {}", recipientMail);

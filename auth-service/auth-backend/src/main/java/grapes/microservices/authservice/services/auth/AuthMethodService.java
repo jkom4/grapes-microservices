@@ -4,6 +4,11 @@ import grapes.microservices.authservice.models.AuthMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for getting the authentication provider for a given authentication method
+ * Used to abstract the process of getting the authentication provider
+ * @author Cameron
+ */
 @Service
 public class AuthMethodService {
 

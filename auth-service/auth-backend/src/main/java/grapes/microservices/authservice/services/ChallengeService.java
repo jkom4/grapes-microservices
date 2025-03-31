@@ -1,12 +1,15 @@
 package grapes.microservices.authservice.services;
 
 import lombok.NoArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for managing challenges
+ * Service for managing challenges in the cache
+ * Challenges are used to authenticate users
+ * @author Cameron
  */
 @NoArgsConstructor
 @Service
@@ -34,4 +37,12 @@ public class ChallengeService {
     public String getChallengeForUser(String email) {
         return null;
     }
+
+    /**
+     * Evict the challenge cache for a specific user.
+     * This method will be invoked when the challenge is validated.
+     * @param email the email of the user whose challenge cache should be evicted
+     */
+    @CacheEvict(value = "challenges", key = "#email")
+    public void evictChallengeCache(String email) {}
 }

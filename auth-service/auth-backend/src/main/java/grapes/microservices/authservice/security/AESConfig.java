@@ -4,6 +4,7 @@ import grapes.microservices.authservice.utils.AuthLogger;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +30,7 @@ public class AESConfig {
 
     private static final String AES_ALGORITHM = "AES";
 
-    private static final Logger logger = AuthLogger.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
     @PostConstruct
     public void init() {
