@@ -1,0 +1,38 @@
+package grapes.microservices.authservice.services;
+
+import grapes.microservices.authservice.models.User;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
+import static org.junit.jupiter.api.Assertions.*;
+
+class ChallengeServiceTest {
+
+    private ChallengeService challengeService;
+
+    private final User user = new User();
+
+    @BeforeEach
+    public void setUp() {
+        String email = "user@example.com";
+        user.setEmail(email);
+        MockitoAnnotations.openMocks(this);
+        challengeService = new ChallengeService();
+
+    }
+
+    @Test
+    public void testSaveChallengeForUser() {
+        String challenge = "Test Challenge";
+        String savedChallenge = challengeService.saveChallengeForUser(user.getEmail(), challenge);
+        assertEquals(challenge, savedChallenge);
+    }
+
+    @Test
+    public void testGetChallengeForUserCacheMiss() {
+        String email = "user2@example.com";
+        String result = challengeService.getChallengeForUser(email);
+
+        assertNull(result);
+    }
+}
