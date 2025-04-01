@@ -62,32 +62,47 @@ jobs:
       # 🔹 Test Api-gateway
       - name: Run Tests for Api Gateway
         working-directory: ./api-gateway
-        run: mvn -B test || echo "::warning::Api Gateway tests failed"
-        continue-on-error: true
+        run: mvn -B test || {
+          echo "::error::Api Gateway tests failed"
+          echo "tests_failed=true" >> $GITHUB_OUTPUT
+          exit 1  
+          }
 
       # 🔹 Test Auth Service
       - name: Run Tests for Auth Service
         working-directory: ./auth-service/auth-backend
-        run: mvn -B test || echo "::warning::Auth Service tests failed"
-        continue-on-error: true
+        run: mvn -B test || {
+          echo "::error::Auth Service tests failed"
+          echo "tests_failed=true" >> $GITHUB_OUTPUT
+          exit 1  
+          }
 
       # 🔹 Test Chat Service
       - name: Run Tests for Chat Service
         working-directory: ./chat-service
-        run: mvn -B test || echo "::warning::Chat Service tests failed"
-        continue-on-error: true
+        run: mvn -B test || {
+          echo "::error::Chat Service tests failed"
+          echo "tests_failed=true" >> $GITHUB_OUTPUT
+          exit 1  
+          }
 
       # 🔹 Test Payment Service
       - name: Run Tests for Payment Service
         working-directory: ./payment-service/payment-backend
-        run: mvn -B test || echo "::warning::Payment Service tests failed"
-        continue-on-error: true
+        run: mvn -B test || {
+          echo "::error::Payment Service tests failed"
+          echo "tests_failed=true" >> $GITHUB_OUTPUT
+          exit 1  # Fait échouer cette étape
+          }
 
       # 🔹 Test Sales Service
       - name: Run Tests for Sales Service
         working-directory: ./sales-service
-        run: mvn -B test || echo "::warning::Sales Service tests failed"
-        continue-on-error: true
+        run: mvn -B test || {
+          echo "::error::Sales Service tests failed"
+          echo "tests_failed=true" >> $GITHUB_OUTPUT
+          exit 1  # Fait échouer cette étape
+          }
 
       # 🔹 Test Data Mining (Python)
       - name: 🐍 Set up Python
@@ -99,21 +114,23 @@ jobs:
         working-directory: ./data-mining-service
         run: |
           pip install -r requirements.txt
-          pytest || echo "::warning::Data Mining tests failed"
-        continue-on-error: true
+          pytest || {
+            echo "::error::Data-Mining Service tests failed"
+            echo "tests_failed=true" >> $GITHUB_OUTPUT
+            exit 1  # Fait échouer cette étape
+          }
 
       # ⚠️ Final status report
       - name: Determine overall status
         id: status_check
         run: |
           if [[ "${{ steps.admin_check.outputs.failure }}" == "true" ]] || \
-             [[ "${{ steps.test_files.outputs.failure }}" == "true" ]]; then
-            echo "::error::Validation checks failed"
-            echo "final_status=failure" >> $GITHUB_OUTPUT
+             [[ "${{ steps.test_files.outputs.failure }}" == "true" ]] || \
+             "${{ contains(join(steps.*.outputs), 'tests_failed=true' }}"; then
+            echo "::error::Validation or tests failed"
             exit 1
-          else
-            echo "final_status=success" >> $GITHUB_OUTPUT
           fi
+          
 
       - name: Report status
         if: always()
