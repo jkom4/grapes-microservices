@@ -101,8 +101,7 @@ jobs:
         run: mvn -B test || {
           echo "::error::Sales Service tests failed"
           echo "tests_failed=true" >> $GITHUB_OUTPUT
-          exit 1  # Fait échouer cette étape
-          }
+          exit 1
 
       # 🔹 Test Data Mining (Python)
       - name: 🐍 Set up Python
@@ -117,7 +116,7 @@ jobs:
           pytest || {
             echo "::error::Data-Mining Service tests failed"
             echo "tests_failed=true" >> $GITHUB_OUTPUT
-            exit 1  # Fait échouer cette étape
+            exit 1 
           }
 
       # ⚠️ Final status report
