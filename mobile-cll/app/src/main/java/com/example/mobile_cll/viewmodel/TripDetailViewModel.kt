@@ -46,7 +46,6 @@ class TripDetailsViewModel(private val orderRepository: OrderRepository) : ViewM
             Log.d("TripDetailsViewModel", "loadId called with trip: $trip, forceRefresh: $forceRefresh")
             viewModelScope.launch {
                 _isLoading.value = true
-                delay(500) // Simulate network latency (optional)
                 _trip.value = trip
                 _tripId.value = trip.id
                 _orders.value = orderRepository.getOrdersForTrip(trip.id)

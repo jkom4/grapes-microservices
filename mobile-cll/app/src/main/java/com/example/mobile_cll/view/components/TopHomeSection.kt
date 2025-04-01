@@ -11,7 +11,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mobile_cll.model.DatabaseHelper
-import com.example.mobile_cll.model.repository.DriverRepository
+import com.example.mobile_cll.model.DeliveryDriverSeeder
+import com.example.mobile_cll.model.repository.DeliveryDriverRepository
 
 /**
  * Composable displaying a top section with:
@@ -24,7 +25,7 @@ import com.example.mobile_cll.model.repository.DriverRepository
 fun TopSection(tripCount: Int) {
     val context = LocalContext.current
     val databaseHelper = remember { DatabaseHelper(context) }
-    val driverRepository = remember { DriverRepository(databaseHelper) }
+    val driverRepository = remember { DeliveryDriverRepository(databaseHelper) }
 
     val driver by remember { mutableStateOf(driverRepository.getDriver()) }
 
