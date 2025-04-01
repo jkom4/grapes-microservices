@@ -115,22 +115,14 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
-      - name: Azure Login via OIDC
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: 🔑 Log in to Docker Hub
+        run: echo "${{ secrets.AZURE_ACR_PASSWORD }}" | docker login ${{ secrets.AZURE_ACR_LOGIN_SERVER }} -u ${{ secrets.AZURE_ACR_USERNAME }} --password-stdin
 
-      - name: Login to ACR
+      - name: 🐳 Build & Push Images (via Docker Compose)
         run: |
-          az acr login --name grapeshub
+          docker-compose build mariadb 
 
-      - name: Build and Push Docker Image
-        run: |
-          compose build mariadb
-          docker compose push mariadb
 
 #          docker-compose build mariadb mongodb rabbitmq api-gateway auth-service sales-service payment-service chat-service data-mining-service frontend-web frontend-auth frontend-payment
 #          docker-compose push mariadb mongodb rabbitmq api-gateway auth-service sales-service payment-service chat-service data-mining-service frontend-web frontend-auth frontend-payment

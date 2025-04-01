@@ -8,6 +8,7 @@ on:
       - sprint-*
   workflow_dispatch:  # Allows you to manually launch
 
+
 # 🔑 Explicite Permissions
 permissions:
   checks: write
