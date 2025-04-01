@@ -35,7 +35,7 @@ public class AuthController {
         try {
             User user = userService.getUserByEmail(email);
             if (user == null || !user.verifyPassword(password)) {
-                return ResponseEntity.status(400).body("Credentials are incorrect.");
+                return ResponseEntity.status(401).body("Credentials are incorrect.");
             }
             AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
             authProvider.sendChallenge(user);

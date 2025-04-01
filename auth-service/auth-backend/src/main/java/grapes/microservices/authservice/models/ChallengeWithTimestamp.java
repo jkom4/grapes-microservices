@@ -15,7 +15,7 @@ public class ChallengeWithTimestamp {
     private String challenge;
     private long timestamp;
 
-    private int VALIDITY_PERIOD = 180 * 1000; //the first number is the number of seconds the challenge is valid for
+    private int VALIDITY_PERIOD = 180; //in seconds
 
     public ChallengeWithTimestamp(String challenge) {
         this.challenge = challenge;
@@ -27,6 +27,6 @@ public class ChallengeWithTimestamp {
      * @return true if the challenge has expired
      */
     public boolean isExpired() {
-        return System.currentTimeMillis() - timestamp > VALIDITY_PERIOD;
+        return System.currentTimeMillis() - timestamp > VALIDITY_PERIOD * 1000L;
     }
 }

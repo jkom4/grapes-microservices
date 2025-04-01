@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Service for sending emails
@@ -32,6 +34,8 @@ public class EmailService {
     @Value("${company.mail}")
     private String COMPANY_MAIL;
 
+    private final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+
     private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
     @Value("${sendgrid.api.key}")
@@ -39,7 +43,7 @@ public class EmailService {
 
     @PostConstruct
     public void init() {
-        if (apiKey == null) {
+        if (apiKey == null || apiKey.isBlank()) {
             logger.error("SendGrid API key is not configured properly.");
             System.err.println("SendGrid API key is not configured properly.");
         }
@@ -54,6 +58,9 @@ public class EmailService {
      */
     public void sendMail(String recipientMail, String topic, String message) throws IOException {
         try {
+            if ( !isValidEmail(recipientMail) || isValidEmail( COMPANY_MAIL ) ) {
+                throw new IllegalArgumentException("Invalid email address : " + recipientMail + " or " + COMPANY_MAIL);
+            }
             logger.info("Attempting to send email to: {}", recipientMail);
             Email from = new Email(COMPANY_MAIL);
             Email to = new Email(recipientMail);
@@ -74,5 +81,17 @@ public class EmailService {
             logger.error("Failed to send email to: {}", recipientMail);
             throw e;
         }
+    }
+
+    /**
+     * Check if the email address is valid
+     * @param email the email address to check
+     * @return true if the email address is valid
+     */
+    private static boolean isValidEmail(String email) {
+        String regex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 }
