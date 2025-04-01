@@ -12,7 +12,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mobile_cll.model.DatabaseHelper
-import com.example.mobile_cll.model.repository.DriverRepository
+import com.example.mobile_cll.model.DeliveryDriverSeeder
+import com.example.mobile_cll.model.repository.DeliveryDriverRepository
 
 /**
  * Composable displaying a top section with:
@@ -28,9 +29,9 @@ fun TopSection(
 ) {
     val context = LocalContext.current
     val databaseHelper = remember { DatabaseHelper(context) }
-    val driverRepository = remember { DriverRepository(databaseHelper) }
+    val driverRepository = remember { DeliveryDriverRepository(databaseHelper) }
 
-    val driver by remember { mutableStateOf(driverRepository.getDriver()) }
+    val driver by remember { mutableStateOf(driverRepository.getDeliveryDriver()) }
 
     Column(
         modifier = Modifier
@@ -41,12 +42,15 @@ fun TopSection(
         horizontalAlignment = Alignment.Start
     ) {
         Spacer(modifier = Modifier.height(35.dp))
-        Text(
-            // Fetch and display the driver's name
-            "Hello ${driver?.firstName ?: "Driver"}",
-            fontSize = 18.sp,
-            color = MaterialTheme.colorScheme.onPrimary
-        )
+        if (driver != null) {
+            Text(
+                "Hello ${driver!!.firstName}",
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        } else {
+            throw IllegalStateException("Driver information is missing or incomplete. Application cannot proceed without a valid driver name.")
+        }
         Text(
             text = "$tripCount trips ${if (isFinished) "done" else "to do"}",
             fontSize = 28.sp,

@@ -11,7 +11,7 @@ import com.example.mobile_cll.repository.TripRepository
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel to manage the data and logic for the Home screen.
+ * ViewModel to manage the data and logic for the Home screen (in my home, I display all Trips so, this code is the Viewmodel to homepage.
  * Handles fetching trips and navigation logic.
  */
 class TripViewModel(
@@ -26,9 +26,7 @@ class TripViewModel(
     private val _ordersForTrips = MutableLiveData<Map<String, List<Order>>>()
     val ordersForTrips: LiveData<Map<String, List<Order>>> = _ordersForTrips
 
-    init {
-        fetchTrips()
-    }
+    init { fetchTrips() }
 
     /**
      * Function to fetch the list of trips.
@@ -66,6 +64,6 @@ class TripViewModel(
      * @param tripId The ID of the trip to navigate to.
      */
     fun navigateToTripDetails(tripId: String) {
-        // Implement navigation logic to the trip details screen
+        // TODO : Implement navigation logic to the trip details screen
     }
 }

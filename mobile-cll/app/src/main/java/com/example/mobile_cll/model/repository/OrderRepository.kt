@@ -1,6 +1,7 @@
 package com.example.mobile_cll.repository
 
 import com.example.mobile_cll.model.DatabaseHelper
+import com.example.mobile_cll.model.DatabaseOperations
 import com.example.mobile_cll.model.entities.Order
 
 /**
@@ -9,7 +10,7 @@ import com.example.mobile_cll.model.entities.Order
  * @param databaseHelper The helper class that handles database operations.
  */
 class OrderRepository(private val databaseHelper: DatabaseHelper) {
-
+    private val dbOperations = DatabaseOperations(databaseHelper)
     /**
      * Retrieves all orders associated with a given trip.
      *
@@ -17,12 +18,12 @@ class OrderRepository(private val databaseHelper: DatabaseHelper) {
      * @return A list of orders for the specified trip.
      */
     fun getOrdersForTrip(tripId: String): List<Order> {
-        return databaseHelper.getOrdersForTrip(tripId)
+        return dbOperations.getOrdersForTrip(tripId)
     }
 
     fun updateScannedAt(order: Order, timestamp: Long) {
         order.scannedAt = timestamp
         order.isScanned = true
-        databaseHelper.updateScannedAt(order.id, timestamp)
+        dbOperations.updateScannedAt(order.id, timestamp)
     }
 }

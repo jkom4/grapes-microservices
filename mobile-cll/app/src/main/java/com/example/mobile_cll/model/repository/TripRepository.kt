@@ -1,6 +1,7 @@
 package com.example.mobile_cll.repository
 
 import com.example.mobile_cll.model.DatabaseHelper
+import com.example.mobile_cll.model.DatabaseOperations
 import com.example.mobile_cll.model.entities.Trip
 
 /**
@@ -9,6 +10,7 @@ import com.example.mobile_cll.model.entities.Trip
  * @param databaseHelper The helper class that handles database operations.
  */
 class TripRepository(private val databaseHelper: DatabaseHelper) {
+    private val dbOperations = DatabaseOperations(databaseHelper)
 
     /**
      * Retrieves all trips from the database.
@@ -16,7 +18,7 @@ class TripRepository(private val databaseHelper: DatabaseHelper) {
      * @return A list of all trips.
      */
     fun getAllTrips(): List<Trip> {
-        return databaseHelper.getAllTrips()
+        return dbOperations.getAllTrips()
     }
 
     /**
@@ -26,7 +28,7 @@ class TripRepository(private val databaseHelper: DatabaseHelper) {
      * @return The Trip object if found, or null if not found.
      */
     fun getTrip(tripId: String): Trip? {
-        return databaseHelper.getTrip(tripId)
+        return dbOperations.getTrip(tripId)
     }
 
     /**
@@ -36,6 +38,6 @@ class TripRepository(private val databaseHelper: DatabaseHelper) {
      * @param isFinished The new value for isFinished (true for finished, false otherwise).
      */
     fun updateTripFinished(tripId: String, isFinished: Boolean) {
-        databaseHelper.updateTripFinished(tripId, isFinished)
+        dbOperations.updateTripFinished(tripId, isFinished)
     }
 }

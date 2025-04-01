@@ -149,7 +149,7 @@ fun CompletedOrderScreen(
              */
             Button(
                 onClick = {
-                    Log.d("CompletedOrderScreen", "Données avant enregistrement :")
+                    Log.d("CompletedOrderScreen", "Datas before recording :")
                     Log.d("CompletedOrderScreen", "tripId: $tripId")
                     Log.d("CompletedOrderScreen", "deliveryStatusId: 1")
                     Log.d("CompletedOrderScreen", "comment: $commentState")
