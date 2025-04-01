@@ -1,6 +1,6 @@
 FROM openjdk:21-jdk-slim
 LABEL authors="jkom"
 WORKDIR /app
-COPY target/api-gateway.jar app.jar
-EXPOSE 8080
+COPY target/*.jar app.jar
+EXPOSE 8090
 ENTRYPOINT ["java", "-jar", "app.jar"]

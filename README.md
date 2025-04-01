@@ -43,7 +43,6 @@ grapes-microservices/
 1. **Clone the repository**
 
    Clone this repository on your machine :
-
     ```bash
     git clone https://github.com/jkom4/grapes-microservices.git
     cd grapes-microservices
@@ -62,7 +61,8 @@ grapes-microservices/
 3. **Start specific services
 
    If you wish to start only certain services, you can do so by specifying the desired services as follows:
-    ```bash
+    
+   ```bash
     docker-compose up -d api-gateway auth-service payment-service
     ```
 
@@ -87,7 +87,7 @@ Swagger is used for API documentation. You can access it via the following links
 - **Swagger API Gateway** : [http://localhost:8090/swagger-ui/index.html](http://localhost:8090/swagger-ui/index.html)
 - **Swagger Auth Service** : [http://localhost:8091/swagger-ui/index.html](http://localhost:8091/swagger-ui/index.html)
 - **Swagger Sales Service** : [http://localhost:8092/swagger-ui/index.html](http://localhost:8092/swagger-ui/index.html)
-- **Swagger Payment Service** : [http://localhost:8094/swagger-ui/index.htmlr](http://localhost:8094/swagger-ui/index.html)
+- **Swagger Payment Service** : [http://localhost:8094/swagger-ui/index.html](http://localhost:8094/swagger-ui/index.html)
 
 ## Stop services
 

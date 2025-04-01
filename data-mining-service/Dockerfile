@@ -10,9 +10,14 @@ COPY data/ /app/data/
 
 # Install R packages
 RUN R -e "install.packages(c('dplyr', 'ggplot2', 'lubridate', 'tidyr', 'stringi', 'mongolite'), repos='http://cran.rstudio.com/')"
+# Install Python dependancy
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entrypoint script
 COPY entrypoint.R /app/entrypoint.R
 
 # Set the entrypoint to run the R script
 ENTRYPOINT ["Rscript", "entrypoint.R"]
+# Execute API
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8096"]

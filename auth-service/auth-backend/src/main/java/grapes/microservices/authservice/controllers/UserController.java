@@ -1,0 +1,129 @@
+package grapes.microservices.authservice.controllers;
+
+import grapes.microservices.authservice.dto.EmailDTO;
+import grapes.microservices.authservice.dto.UserDTO;
+import grapes.microservices.authservice.mapper.UserMapper;
+import grapes.microservices.authservice.models.User;
+import grapes.microservices.authservice.services.UserService;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import grapes.microservices.authservice.utils.AuthLogger;
+
+/**
+ * UserController handles HTTP requests related to user management.
+ * It provides endpoints for user registration, retrieval, update, and deletion.
+ * Endpoints:
+ * - POST /auth/users/register → Register a new user.
+ * - DELETE /auth/users/delete/{id} → Delete a user by ID.
+ * - PUT /auth/users/update → Update an existing user.
+ * - POST /auth/users/email → Retrieve a user by email.
+ * - GET /auth/users/{id} → Retrieve a user by ID.
+ * @author  Cameron
+ */
+@RestController
+@RequestMapping("/auth/users")
+@RequiredArgsConstructor
+public class UserController {
+
+    @Autowired
+    private final UserService userService;
+
+    @Autowired
+    private final UserMapper userMapper;
+
+    private static final Logger logger = AuthLogger.getLogger();
+
+
+    @Transactional
+    @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
+        logger.info("Received request to register a user: {}", userDTO);
+        try {
+            User savedUser = userService.registerUser(userMapper.toEntity(userDTO));
+            logger.info("User successfully registered: {}", savedUser);
+            return ResponseEntity.ok(userMapper.toDTO(savedUser));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Error during user registration: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unknown error during user registration", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    @PutMapping(value = "/disable/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> disable(@PathVariable String id) {
+        logger.info("Received request to disable user with ID: {}", id);
+        try {
+            User disableUser = userService.disableUser(id);
+            logger.info("User successfully disabled with ID: {}", id);
+            return ResponseEntity.ok(userMapper.toDTO(disableUser));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Error during user deactivation: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Transactional
+    @PutMapping(value = "/enable/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> enable(@PathVariable String id) {
+        logger.info("Received request to enable user with ID: {}", id);
+        try {
+            User enabledUser = userService.enableUser(id);
+            logger.info("User successfully enabled with ID: {}", id);
+            return ResponseEntity.ok(userMapper.toDTO(enabledUser));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Error during user activation: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Transactional
+    @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO) {
+        logger.info("Received request to update user: {}", userDTO);
+        try {
+            User updatedUser = userService.editUser(userMapper.toEntity(userDTO));
+            logger.info("User successfully updated: {}", updatedUser);
+            return ResponseEntity.ok(userMapper.toDTO(updatedUser));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Error during user update: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping(value = "/email", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getUserByEmail(@RequestBody EmailDTO emailDTO) {
+        logger.info("Received request to get user by email: {}", emailDTO.getEmail());
+        try {
+            User user = userService.getUserByEmail(emailDTO.getEmail());
+            logger.info("User found by email: {}", user);
+            return ResponseEntity.ok(userMapper.toDTO(user));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Error during fetching user by email: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getUserById(@PathVariable String id) {
+        logger.info("Received request to get user by ID: {}", id);
+        try {
+            User user = userService.getUserById(id);
+            logger.info("User found by ID: {}", user);
+            return ResponseEntity.ok(userMapper.toDTO(user));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Error during fetching user by ID: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+}
+
