@@ -92,7 +92,7 @@ jobs:
         run: mvn -B test || {
           echo "::error::Payment Service tests failed"
           echo "tests_failed=true" >> $GITHUB_OUTPUT
-          exit 1  # Fait échouer cette étape
+          exit 1  
           }
 
       # 🔹 Test Sales Service
@@ -126,9 +126,12 @@ jobs:
         run: |
           if [[ "${{ steps.admin_check.outputs.failure }}" == "true" ]] || \
              [[ "${{ steps.test_files.outputs.failure }}" == "true" ]] || \
-             "${{ contains(join(steps.*.outputs), 'tests_failed=true' }}"; then
-            echo "::error::Validation or tests failed"
-            exit 1
+             [[ "${{ contains(fromJson(toJson(steps.*.outputs)), 'tests_failed=true') }}" == "true" ]]; then
+              echo "::error::Validation or tests failed"
+              echo "final_status=failure" >> $GITHUB_OUTPUT
+              exit 1
+          else
+              echo "final_status=success" >> $GITHUB_OUTPUT
           fi
           
 
