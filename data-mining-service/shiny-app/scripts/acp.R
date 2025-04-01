@@ -1,4 +1,8 @@
 # acp.R
+# Purpose: Performs Principal Component Analysis (PCA) and generates the necessary plots.
+# Imports: FactoMineR for performing PCA, factoextra for visualizing PCA results, dplyr for data manipulation.
+# Returns: A list containing the PCA results and various plots.
+
 
 library(FactoMineR)  # For performing PCA
 library(factoextra) # For visualizing PCA results

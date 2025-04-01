@@ -1,4 +1,7 @@
 # clustering.R
+# Purpose: Performs k-means clustering and generates the necessary plots.
+# Imports: dplyr for data manipulation, ggplot2 for creating plots, factoextra for visualizing clustering results.
+# Returns: A list containing the clustering plots and a summary table.
 
 library(dplyr)      # For data manipulation
 library(ggplot2)   # For creating plots

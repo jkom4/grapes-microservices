@@ -1,3 +1,6 @@
+# Purpose: Defines the user interface for the Shiny application, including tabs for PCA, clustering, customer segment validation, and multiple linear regression.
+# Imports: shiny for creating the Shiny app, shinythemes for applying themes.
+
 library(shiny)        # For creating the Shiny app
 library(shinythemes)  # For applying themes to the Shiny app
 

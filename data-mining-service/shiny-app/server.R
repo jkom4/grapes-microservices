@@ -1,4 +1,8 @@
 # server.R
+
+# Purpose: Manages the server logic for the Shiny application, including loading data, running analyses, and rendering results.
+# Imports: shiny for creating the Shiny app, shinythemes for applying themes, dplyr for data manipulation, ggplot2 for creating plots, mongolite for connecting to MongoDB.
+
 library(shiny)        # For creating the Shiny app
 library(shinythemes)  # For applying themes to the Shiny app
 library(dplyr)        # For data manipulation

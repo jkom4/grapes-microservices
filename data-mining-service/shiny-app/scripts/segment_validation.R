@@ -1,5 +1,9 @@
 # segment_validation.R
 
+# Purpose: Validates customer segments using k-means clustering and chi-square tests.
+# Imports: dplyr for data manipulation, ggplot2 for creating plots.
+# Returns: A list containing the cluster table, chi-square test results, and functions to create bar and mosaic plots.
+
 library(dplyr)  # For data manipulation
 library(ggplot2) # For creating plots
 
