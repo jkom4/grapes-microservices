@@ -12,12 +12,7 @@ object DeliverySeeder {
      */
     fun seed(db: SQLiteDatabase) {
         /*
-        val deliveries = listOf(
-            Delivery("1_1", 1, 1, "2025-03-30", null, "Test comment", true, null, null)
-        )
-        deliveries.forEach { delivery ->
-            db.insert("delivery", null, delivery.toContentValues())
-        }
+            This is for POST
         */
     }
 }

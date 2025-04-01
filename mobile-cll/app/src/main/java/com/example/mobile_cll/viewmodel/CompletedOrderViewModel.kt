@@ -114,7 +114,7 @@ class CompletedOrderViewModel(
     ) {
         viewModelScope.launch {
             try {
-                val userId = dbOperations.getDriver()?.id ?: throw IllegalStateException("No driver found")
+                val userId = dbOperations.getDeliveryDriver()?.id ?: throw IllegalStateException("No driver found")
                 val orders = dbOperations.getOrdersForTrip(tripId)
                 if (orders.isEmpty()) {
                     Log.e("CompletedOrderViewModel", "No orders found for tripId: $tripId")

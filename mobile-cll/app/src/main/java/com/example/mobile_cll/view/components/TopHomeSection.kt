@@ -27,7 +27,7 @@ fun TopSection(tripCount: Int) {
     val databaseHelper = remember { DatabaseHelper(context) }
     val driverRepository = remember { DeliveryDriverRepository(databaseHelper) }
 
-    val driver by remember { mutableStateOf(driverRepository.getDriver()) }
+    val driver by remember { mutableStateOf(driverRepository.getDeliveryDriver()) }
 
     Column(
         modifier = Modifier

@@ -121,7 +121,7 @@ class DatabaseOperations(private val dbHelper: DatabaseHelper) {
     }
 
     // Method to fetch the current driver
-    fun getDriver(): DeliveryDriver? {
+    fun getDeliveryDriver(): DeliveryDriver? {
         val db = dbHelper.readableDatabase
         val cursor = db.rawQuery("SELECT * FROM ${DatabaseHelper.TABLE_DRIVERS} LIMIT 1", null)
 

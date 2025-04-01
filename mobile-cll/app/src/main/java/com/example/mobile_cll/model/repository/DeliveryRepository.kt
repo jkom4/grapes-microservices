@@ -28,7 +28,7 @@ class DeliveryRepository(context: Context) {
      *
      * @return The driver's ID if found, otherwise null.
      */
-    suspend fun getDriverId(): Int? {
-        return dbOperations.getDriver()?.id
+    suspend fun getDeliveryDriverId(): Int? {
+        return dbOperations.getDeliveryDriver()?.id
     }
 }

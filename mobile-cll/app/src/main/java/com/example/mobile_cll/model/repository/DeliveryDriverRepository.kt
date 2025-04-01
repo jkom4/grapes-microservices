@@ -16,7 +16,7 @@ class DeliveryDriverRepository(private val databaseHelper: DatabaseHelper) {
      *
      * @return A Driver object if found, or null if no driver data is available.
      */
-    fun getDriver(): DeliveryDriver? {
-        return dbOperations.getDriver()
+    fun getDeliveryDriver(): DeliveryDriver? {
+        return dbOperations.getDeliveryDriver()
     }
 }
