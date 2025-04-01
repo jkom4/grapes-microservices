@@ -6,6 +6,7 @@ on:
       - main
       - develop
       - sprint-*
+  workflow_dispatch:  # Allows you to manually launch
 
 # 🔑 Explicite Permissions
 permissions:
