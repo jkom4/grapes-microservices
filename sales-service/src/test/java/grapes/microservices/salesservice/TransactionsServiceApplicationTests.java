@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class TransactionsServiceApplicationTests {
 
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -116,7 +117,4 @@ class TransactionsServiceApplicationTests {
                 .andExpect(jsonPath("$.content[0].stockKg").isNumber())
                 .andExpect(jsonPath("$.content[0].stockUnit").isNumber());
     }
-
-
-
 }
