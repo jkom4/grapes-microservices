@@ -9,11 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import com.example.mobile_cll.databinding.ActivityMapsBinding
-import com.example.mobile_cll.view.screens.MapView
-import com.example.mobile_cll.viewmodel.MapsViewModel
+import com.example.mobile_cll.views.screens.MapView
+import com.example.mobile_cll.viewmodels.MapsViewModel
 import com.google.android.gms.maps.SupportMapFragment
 import android.util.Log
-import android.widget.Toast
 
 /**
  * MapsActivity is responsible for displaying a map and handling trip-related information.

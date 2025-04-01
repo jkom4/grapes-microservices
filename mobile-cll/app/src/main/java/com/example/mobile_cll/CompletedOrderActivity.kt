@@ -10,8 +10,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mobile_cll.ui.theme.MobileCLLTheme
-import com.example.mobile_cll.view.CompletedOrderScreen
-import com.example.mobile_cll.view.LastScreen
+import com.example.mobile_cll.views.CompletedOrderScreen
+import com.example.mobile_cll.views.LastScreen
 
 /**
  * Activity that manages the navigation for the completed order process.

@@ -9,12 +9,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.mobile_cll.model.DatabaseHelper
+import com.example.mobile_cll.models.DatabaseHelper
 import com.example.mobile_cll.ui.theme.MobileCLLTheme
-import com.example.mobile_cll.view.screens.EmailSentScreen
-import com.example.mobile_cll.view.screens.HomeScreen
-import com.example.mobile_cll.view.screens.ScanView
-import com.example.mobile_cll.view.screens.TripDetailsScreen
+import com.example.mobile_cll.views.screens.EmailSentScreen
+import com.example.mobile_cll.views.screens.HomeScreen
+import com.example.mobile_cll.views.screens.ScanView
+import com.example.mobile_cll.views.screens.TripDetailsScreen
 
 /**
  * Main entry point of the application, responsible for setting up navigation and the UI theme.
