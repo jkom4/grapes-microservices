@@ -41,11 +41,7 @@ fun BottomNavigationBar(navController: NavController?, context: Context) {
             }) {
                 Icon(Icons.Filled.LocationOn, contentDescription = "Map", tint = MaterialTheme.colorScheme.onPrimary)
             }
-            IconButton(onClick = {
-                // Use Intent to navigate to MapsActivity
-                val intent = Intent(context, SettingsActivity::class.java)
-                context.startActivity(intent)
-            }) {
+            IconButton(onClick = {}) {
                 Icon(Icons.Filled.AccountCircle, contentDescription = "Account", tint = MaterialTheme.colorScheme.onPrimary)
             }
         }
