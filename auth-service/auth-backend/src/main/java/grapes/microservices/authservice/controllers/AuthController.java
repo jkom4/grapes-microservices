@@ -37,12 +37,9 @@ public class AuthController {
             if (user == null || !user.verifyPassword(password)) {
                 return ResponseEntity.status(400).body("Credentials are incorrect.");
             }
-            if (!user.isEmailVerified()) {
-                return ResponseEntity.status(400).body("The email is not verified.");
-            }
             AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
             authProvider.sendChallenge(user);
-            return ResponseEntity.ok("Challenge sent to user by mail.");
+            return ResponseEntity.ok("Challenge sent to user by : " + authMethod.getName());
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
@@ -74,9 +71,16 @@ public class AuthController {
         try {
             AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
             String token = authProvider.processChallenge(user, submittedChallenge);
+            switch (authMethod) {
+                case EMAIL:
+                    if (!user.isEmailVerified()) {
+                        user.setEmailVerified(true);
+                    }
+                    break;
+            }
             Cookie cookie = new Cookie("JWT", token);
             cookie.setHttpOnly(true);
-            //cookie.setSecure(true); //when HTTPS is enabled
+            //cookie.setSecure(true); // TODO : remove comment when HTTPS is enabled
             cookie.setPath("/");
             cookie.setMaxAge(24 * 60 * 60);
 
@@ -88,7 +92,7 @@ public class AuthController {
     }
 
     // TODO : implement CSRF protection
-    @PostMapping("/refresh")
+    /*@PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken) {
         if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body("Invalid token");
@@ -104,5 +108,5 @@ public class AuthController {
         String email = userService.getUserById(userId).getEmail();
         String newAccessToken = tokenService.generateToken(email);
         return ResponseEntity.ok(newAccessToken);
-    }
+    }*/
 }

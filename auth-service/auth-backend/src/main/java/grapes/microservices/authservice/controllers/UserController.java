@@ -39,6 +39,7 @@ public class UserController {
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
         logger.info("Received request to register a user: {}", userDTO);
         try {
+            userDTO.setActive(true);
             User savedUser = userService.registerUser(userMapper.toEntity(userDTO));
             logger.info("User successfully registered: {}", savedUser);
             return ResponseEntity.ok(userMapper.toDTO(savedUser));
