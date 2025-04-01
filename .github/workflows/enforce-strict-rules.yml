@@ -62,46 +62,27 @@ jobs:
       # 🔹 Test Api-gateway
       - name: Run Tests for Api Gateway
         working-directory: ./api-gateway
-        run: mvn -B test || {
-          echo "::error::Api Gateway tests failed"
-          echo "tests_failed=true" >> $GITHUB_OUTPUT
-          exit 1  
-          }
+        run: mvn -B validate test
 
       # 🔹 Test Auth Service
       - name: Run Tests for Auth Service
         working-directory: ./auth-service/auth-backend
-        run: mvn -B test || {
-          echo "::error::Auth Service tests failed"
-          echo "tests_failed=true" >> $GITHUB_OUTPUT
-          exit 1  
-          }
+        run: mvn -B validate test
 
       # 🔹 Test Chat Service
       - name: Run Tests for Chat Service
         working-directory: ./chat-service
-        run: mvn -B test || {
-          echo "::error::Chat Service tests failed"
-          echo "tests_failed=true" >> $GITHUB_OUTPUT
-          exit 1  
-          }
+        run: mvn -B validate test
 
       # 🔹 Test Payment Service
       - name: Run Tests for Payment Service
         working-directory: ./payment-service/payment-backend
-        run: mvn -B test || {
-          echo "::error::Payment Service tests failed"
-          echo "tests_failed=true" >> $GITHUB_OUTPUT
-          exit 1  
-          }
+        run: mvn -B validate test
 
       # 🔹 Test Sales Service
       - name: Run Tests for Sales Service
         working-directory: ./sales-service
-        run: mvn -B test || {
-          echo "::error::Sales Service tests failed"
-          echo "tests_failed=true" >> $GITHUB_OUTPUT
-          exit 1
+        run: mvn -B validate test
 
       # 🔹 Test Data Mining (Python)
       - name: 🐍 Set up Python
@@ -113,11 +94,7 @@ jobs:
         working-directory: ./data-mining-service
         run: |
           pip install -r requirements.txt
-          pytest || {
-            echo "::error::Data-Mining Service tests failed"
-            echo "tests_failed=true" >> $GITHUB_OUTPUT
-            exit 1 
-          }
+          pytest
 
       # ⚠️ Final status report
       - name: Determine overall status
