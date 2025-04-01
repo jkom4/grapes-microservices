@@ -36,7 +36,13 @@ class TripViewModel(
      */
     fun fetchTrips() {
         viewModelScope.launch {
-            _trips.value = tripRepository.getAllTrips()
+            try {
+                _trips.value = tripRepository.getAllTrips()
+            } catch (e: Exception) {
+                // Log the error and handle it appropriately
+                _trips.value = emptyList()
+                println("Error fetching trips: ${'$'}{e.message}")
+            }
         }
     }
 
