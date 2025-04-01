@@ -58,7 +58,7 @@ public class EmailService {
      */
     public void sendMail(String recipientMail, String topic, String message) throws IOException {
         try {
-            if ( !isValidEmail(recipientMail) || isValidEmail( COMPANY_MAIL ) ) {
+            if ( !isValidEmail(recipientMail) || !isValidEmail( COMPANY_MAIL ) ) {
                 throw new IllegalArgumentException("Invalid email address : " + recipientMail + " or " + COMPANY_MAIL);
             }
             logger.info("Attempting to send email to: {}", recipientMail);

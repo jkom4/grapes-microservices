@@ -3,10 +3,8 @@ package grapes.microservices.authservice.services.auth;
 import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.EmailService;
-import grapes.microservices.authservice.services.SessionService;
 import grapes.microservices.authservice.services.TokenService;
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
