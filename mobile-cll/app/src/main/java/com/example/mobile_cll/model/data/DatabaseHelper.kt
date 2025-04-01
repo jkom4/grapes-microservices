@@ -14,7 +14,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     companion object {
         // Database constants
         private const val DATABASE_NAME = "TripDatabase.db"
-        private const val DATABASE_VERSION = 19
+        private const val DATABASE_VERSION = 24
         const val TABLE_TRIPS = "trips"
         const val TABLE_ORDERS = "orders"
         const val TABLE_DRIVERS = "drivers"
@@ -170,7 +170,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     private fun insertInitialData(db: SQLiteDatabase) {
         TripSeeder.seed(db)
         OrderSeeder.seed(db)
-        DriverSeeder.seed(db)
+        DeliveryDriverSeeder.seed(db)
         DeliverySeeder.seed(db)
     }
 }

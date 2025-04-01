@@ -38,12 +38,15 @@ fun TopSection(tripCount: Int) {
         horizontalAlignment = Alignment.Start
     ) {
         Spacer(modifier = Modifier.height(35.dp))
-        Text(
-            // Fetch and display the driver's name
-            "Hello ${driver?.firstName ?: "Driver"}",
-            fontSize = 18.sp,
-            color = MaterialTheme.colorScheme.onPrimary
-        )
+        if (driver != null) {
+            Text(
+                "Hello ${driver!!.firstName}",
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        } else {
+            throw IllegalStateException("Driver information is missing or incomplete. Application cannot proceed without a valid driver name.")
+        }
         Text(
             // Fetch and display to do
             "$tripCount ${if (tripCount == 1) "trip" else "trips"} to do",

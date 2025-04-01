@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mobile_cll.model.DatabaseHelper
+import com.example.mobile_cll.model.DatabaseOperations
 import com.example.mobile_cll.model.entities.Delivery
 import com.example.mobile_cll.repository.TripRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -100,6 +101,8 @@ class CompletedOrderViewModel(
         _signatureBitmap.value = null
     }
 
+    private val dbOperations = DatabaseOperations(DatabaseHelper(context))
+
     /**
      * Saves delivery data for a given trip.
      * @param tripId The trip identifier.
@@ -111,8 +114,8 @@ class CompletedOrderViewModel(
     ) {
         viewModelScope.launch {
             try {
-                val userId = databaseHelper.getDriver()?.id ?: throw IllegalStateException("No driver found")
-                val orders = databaseHelper.getOrdersForTrip(tripId)
+                val userId = dbOperations.getDriver()?.id ?: throw IllegalStateException("No driver found")
+                val orders = dbOperations.getOrdersForTrip(tripId)
                 if (orders.isEmpty()) {
                     Log.e("CompletedOrderViewModel", "No orders found for tripId: $tripId")
                     _saveStatus.value = "Error: No orders found"
@@ -147,7 +150,7 @@ class CompletedOrderViewModel(
                     )
 
                     Log.d("CompletedOrderViewModel", "Saving data for orderId: ${order.id}")
-                    val rowId = databaseHelper.insertDelivery(delivery)
+                    val rowId = dbOperations.insertDelivery(delivery)
                     if (rowId == -1L) {
                         Log.e("CompletedOrderViewModel", "Failed to insert for orderId: ${order.id}")
                         allSuccess = false
