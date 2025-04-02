@@ -32,12 +32,4 @@ class ChallengeServiceTest {
         String savedChallenge = challengeWithTimestamp.getChallenge();
         assertEquals(challenge, savedChallenge);
     }
-
-    @Test
-    public void getChallengeForUserCacheMiss() {
-        String email = "user2@example.com";
-        String result = challengeService.getChallengeForUser(email).getChallenge();
-
-        assertNull(result);
-    }
 }

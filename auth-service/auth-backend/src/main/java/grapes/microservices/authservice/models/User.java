@@ -3,6 +3,7 @@ package grapes.microservices.authservice.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import grapes.microservices.authservice.services.EncryptionService;
 import grapes.microservices.authservice.utils.AuthLogger;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.*;
@@ -57,6 +58,7 @@ public class User {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private boolean emailVerified;
 
+    @Column(unique = true)
     private String phoneNumber;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

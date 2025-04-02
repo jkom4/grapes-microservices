@@ -27,6 +27,7 @@ class UserMapperTest {
         user.setId(new ObjectId("65f1a9a2a9b77b1e37bcabc1"));
         user.setName("Doe");
         user.setFirstName("John");
+        user.setBirthDate(new Date(1000000000000L));
 
         UserDTO dto = userMapper.toDTO(user);
 

@@ -43,6 +43,6 @@ class UserTest {
     @Test
     void verifyPassword_IncorrectPassword_ThrowsException() {
         when(passwordEncoder.matches("wrongPassword", "hashedPassword")).thenReturn(false);
-        assertThrows(RuntimeException.class, () -> user.verifyPassword("wrongPassword"), "Incorrect password provided");
+        assertFalse(user.verifyPassword("wrongPassword"));
     }
 }

@@ -41,6 +41,10 @@ public class UserService {
             logger.error("Registration failed: an account already exists with this email: {}", user.getEmail());
             throw new IllegalArgumentException("Already exists an account with this email");
         }
+        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+            logger.error("Registration failed: an account already exists with this phone number: {}", user.getPhoneNumber());
+            throw new IllegalArgumentException("Already exists an account with this phone number");
+        }
         if(isValid(user)) {
             user.encryptUser();
             logger.info("User registered successfully with email: {}", user.getEmail());

@@ -43,5 +43,6 @@ public class SessionService {
 
     public void deleteSession(String userId) {
         redisTemplate.delete("session:" + userId);
+        redisTemplate.delete("refresh:" + userId);
     }
 }

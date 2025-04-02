@@ -28,6 +28,9 @@ public class AuthController {
     private UserService userService;
 
     @Autowired
+    private SessionService sessionService;
+
+    @Autowired
     private TokenService tokenService;
 
     @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -78,6 +81,8 @@ public class AuthController {
                     }
                     break;
             }
+            //reset session
+            sessionService.deleteSession(user.getId().toHexString());
             Cookie cookie = new Cookie("JWT", token);
             cookie.setHttpOnly(true);
             //cookie.setSecure(true); // TODO : remove comment when HTTPS is enabled

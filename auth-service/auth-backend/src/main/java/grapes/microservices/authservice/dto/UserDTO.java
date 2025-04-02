@@ -3,6 +3,8 @@ package grapes.microservices.authservice.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import grapes.microservices.authservice.models.*;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.util.Date;
@@ -36,6 +38,7 @@ public class UserDTO {
 
     @NotNull(message = "email cannot be null")
     @Email(message = "Email should be valid")
+    @Column(unique = true)
     @Schema(description = "Email from the user", example = "user@example.com", format = "email")
     private String email;
 
@@ -44,6 +47,7 @@ public class UserDTO {
     private boolean emailVerified;
 
     @NotNull(message = "phoneNumber cannot be null")
+    @Column(unique = true)
     private String phoneNumber;
 
     @Null

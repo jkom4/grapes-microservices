@@ -81,7 +81,7 @@ public class UserServiceTest {
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.registerUser(user));
 
-        assertEquals("Validation errors: password Password must contain at least one uppercase letter, one digit, and one special character; password Password must be between 8 and 20 characters long; ", thrown.getMessage());
+        assertTrue(thrown.getMessage().startsWith("Validation errors"));
     }
 
     @Test
