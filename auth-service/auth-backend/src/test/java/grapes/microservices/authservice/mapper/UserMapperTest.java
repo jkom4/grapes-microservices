@@ -21,19 +21,20 @@ class UserMapperTest {
 
     private final UserMapper userMapper = UserMapper.INSTANCE;
 
-//    @Test
-//    void shouldMapUserToDTO() {
-//        User user = new User();
-//        user.setId(new ObjectId("65f1a9a2a9b77b1e37bcabc1"));
-//        user.setName("Doe");
-//        user.setFirstName("John");
-//
-//        UserDTO dto = userMapper.toDTO(user);
-//
-//        assertEquals("65f1a9a2a9b77b1e37bcabc1", dto.getId());
-//        assertEquals("Doe", dto.getName());
-//        assertEquals("John", dto.getFirstName());
-//    }
+    @Test
+    void shouldMapUserToDTO() {
+        User user = new User();
+        user.setId(new ObjectId("65f1a9a2a9b77b1e37bcabc1"));
+        user.setName("Doe");
+        user.setFirstName("John");
+        user.setBirthDate(new Date(1000000000000L));
+
+        UserDTO dto = userMapper.toDTO(user);
+
+        assertEquals("65f1a9a2a9b77b1e37bcabc1", dto.getId());
+        assertEquals("Doe", dto.getName());
+        assertEquals("John", dto.getFirstName());
+    }
 
     @Test
     void computeAge_forExactYears() {
