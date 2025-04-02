@@ -6,6 +6,9 @@ import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.services.ArticleService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,46 +28,94 @@ public class ArticleController {
         this.articleService = articleService;
     }
 
-    // Get all articles
+    /**
+     * Retrieves all articles without pagination.
+     *
+     * @return a {@link ResponseEntity} containing a list of {@link ArticleDTO}
+     */
+
+    // @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<ArticleDTO>> getAllArticles() {
-        List<Article> articles = articleService.getAllArticles();
-        List<ArticleDTO> dtos = articles.stream()
-                .map(articleMapper::toDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+    public ResponseEntity<?> getAllArticles() {
+        try {
+            List<Article> articles = articleService.getAllArticles();
+            List<ArticleDTO> dtos = articles.stream()
+                    .map(articleMapper::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving all articles.");
+        }
     }
 
-    // Search articles by name
+
+    /**
+     * Retrieves all available (in-stock) articles with pagination and optional sorting.
+     * Supports parameters like page, size, and sort.
+     *
+     * Example: /articles/available?page=0&size=10&sort=name,asc
+     *
+     * @param pageable the pagination and sorting information (Spring automatically maps query params)
+     * @return a {@link ResponseEntity} containing a paginated list of {@link ArticleDTO}
+     */
+    // @PreAuthorize("hasRole('USER')") // TODO: activate when security is in place
+    @GetMapping("/available")
+    public ResponseEntity<?> getAvailableArticles(@ParameterObject Pageable pageable) {
+        try {
+            Page<Article> available = articleService.getAvailableArticles(pageable);
+            Page<ArticleDTO> dtoPage = available.map(articleMapper::toDTO);
+            return ResponseEntity.ok(dtoPage);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving available articles.");
+        }
+    }
+
+
+
+    //  Search articles by name
+    //@PreAuthorize("hasRole('USER')")
     @GetMapping("/search")
     public ResponseEntity<?> searchArticlesByName(@RequestParam String name) {
-        if (name == null || name.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("The 'name' field cannot be empty.");
+        try {
+            if (name == null || name.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("The 'name' field cannot be empty.");
+            }
+
+            List<Article> results = articleService.searchByName(name);
+
+            if (results.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No items found with the name: '" + name + "'");
+            }
+
+            List<ArticleDTO> dtos = results.stream()
+                    .map(articleMapper::toDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while searching articles.");
         }
-
-        List<Article> results = articleService.searchByName(name);
-
-        if (results.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No items found with the name: '" + name + "'");
-        }
-
-        List<ArticleDTO> dtos = results.stream()
-                .map(articleMapper::toDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
     }
 
-    // Create article
+
+    //  Create article
+    // @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    @Transactional
-    public ResponseEntity<ArticleDTO> createArticle(@Valid @RequestBody ArticleDTO articleDTO) {
-        Article article = articleMapper.toEntity(articleDTO);
-        Article created = articleService.createArticle(article);
-        return ResponseEntity.status(HttpStatus.CREATED).body(articleMapper.toDTO(created));
+    public ResponseEntity<?> createArticle(@Valid @RequestBody ArticleDTO articleDTO) {
+        try {
+            Article article = articleMapper.toEntity(articleDTO);
+            Article created = articleService.createArticle(article);
+            return ResponseEntity.status(HttpStatus.CREATED).body(articleMapper.toDTO(created));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
-    // Update article
+    //  Update
+    // @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<?> updateArticle(
