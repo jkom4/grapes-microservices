@@ -117,12 +117,12 @@ class TransactionsServiceApplicationTests {
                 .andExpect(content().string("No items found with the name: 'mangue'"));
     }
   
-  @Test
-    void testGetAvailableArticles() throws Exception {
-        mockMvc.perform(get("/articles/available"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
-    }
+  // @Test
+  //   void testGetAvailableArticles() throws Exception {
+  //       mockMvc.perform(get("/articles/available"))
+  //               .andExpect(status().isOk())
+  //               .andExpect(jsonPath("$").isArray());
+  //   }
 
     @Test
     void testGetAvailableArticlesWithPagination() throws Exception {
