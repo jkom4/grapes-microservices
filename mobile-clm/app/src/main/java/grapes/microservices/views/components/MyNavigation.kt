@@ -1,22 +1,19 @@
-package grapes.microservices.view.components
+package grapes.microservices.views.components
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import grapes.microservices.Screen
-import grapes.microservices.model.repository.ArticleRepository
-import grapes.microservices.view.screens.HomeScreen
-import grapes.microservices.viewmodel.HomeViewModel
+import grapes.microservices.views.screens.home.HomeScreen
 
 @Composable
-fun Navigation() {
+fun MyNavigation() {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
         composable(route = Screen.HomeScreen.route) {
-            val homeVM = HomeViewModel(ArticleRepository())
-            HomeScreen(navController, homeVM)
+            HomeScreen(navController)
         }
 //        composable("details") {
 //            DetailsScreen()
