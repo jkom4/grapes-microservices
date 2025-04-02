@@ -1,4 +1,3 @@
-
 # Auth-Service
 
 This project implements an **authentication service** with **Spring Boot** for the backend and **React** for the frontend.
