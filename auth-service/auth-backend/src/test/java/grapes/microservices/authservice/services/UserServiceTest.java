@@ -75,14 +75,14 @@ public class UserServiceTest {
         assertEquals("Already exists an account with this email", thrown.getMessage());
     }
 
-//    @Test
-//    void registerUser_WeakPassword() {
-//        user.setPassword("weak");
-//
-//        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.registerUser(user));
-//
-//        assertEquals("Validation errors: password Password must contain at least one uppercase letter, one digit, and one special character; password Password must be between 8 and 20 characters long; ", thrown.getMessage());
-//    }
+    @Test
+    void registerUser_WeakPassword() {
+        user.setPassword("weak");
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.registerUser(user));
+
+        assertTrue(thrown.getMessage().startsWith("Validation errors"));
+    }
 
     @Test
     void getUserById_Success() {

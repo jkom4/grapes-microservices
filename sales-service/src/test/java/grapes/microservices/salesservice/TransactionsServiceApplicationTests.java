@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -12,9 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles(value = "test")
 class TransactionsServiceApplicationTests {
-
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -55,7 +55,7 @@ class TransactionsServiceApplicationTests {
             {
               "categoryId": 1,
               "familyId": 1,
-              "name": "pomme modifiée",
+              "name": "pomme modifying",
               "description": "modif test",
               "priceKg": 3.99,
               "priceUnit": 2.49,
@@ -75,6 +75,25 @@ class TransactionsServiceApplicationTests {
 
     @Test
     void testSearchArticleByName() throws Exception {
+        String articleJson = """
+            {
+              "categoryId": 1,
+              "familyId": 1,
+              "name": "kiwi",
+              "description": "fruit vitaminé",
+              "priceKg": 2.99,
+              "priceUnit": 1.50,
+              "stockKg": 10.0,
+              "stockUnit": 5.0,
+              "origin": "Nouvelle-Zélande",
+              "picturePath": "kiwi.jpg"
+            }
+        """;
+
+        mockMvc.perform(post("/articles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(articleJson));
+
         mockMvc.perform(get("/articles/search")
                         .param("name", "kiwi"))
                 .andExpect(status().isOk())
@@ -97,8 +116,8 @@ class TransactionsServiceApplicationTests {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("No items found with the name: 'mangue'"));
     }
-
-    @Test
+  
+  @Test
     void testGetAvailableArticles() throws Exception {
         mockMvc.perform(get("/articles/available"))
                 .andExpect(status().isOk())
@@ -117,4 +136,6 @@ class TransactionsServiceApplicationTests {
                 .andExpect(jsonPath("$.content[0].stockKg").isNumber())
                 .andExpect(jsonPath("$.content[0].stockUnit").isNumber());
     }
+
+
 }
