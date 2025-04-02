@@ -1,7 +1,6 @@
 package grapes.microservices.salesservice.services;
 
 import grapes.microservices.salesservice.dto.CartItemViewDTO;
-import grapes.microservices.salesservice.dto.CartRequestDTO;
 import grapes.microservices.salesservice.dto.CartResponseDTO;
 import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.models.OrderItem;
@@ -43,31 +42,28 @@ public class CartService {
      * @return the created {@link OrderItem} entity saved in the database
      * @throws IllegalArgumentException if the article doesn't exist or if stock is insufficient
      */
-    public OrderItem addToCart(CartRequestDTO request) {
-        Article article = articleRepository.findById(request.getArticleId())
-                .orElseThrow(() -> new IllegalArgumentException("Article not found with ID: " + request.getArticleId()));
+    public OrderItem addToCart(OrderItem item) {
+        Article article = articleRepository.findById(item.getArticleId())
+                .orElseThrow(() -> new IllegalArgumentException("Article not found with ID: " + item.getArticleId()));
 
-        // Validate stock availability
-        if (request.getQuantityKg() != null && request.getQuantityKg().compareTo(article.getStockKg()) > 0) {
+        // Stock validation
+        if (item.getQuantityKg() != null && item.getQuantityKg().compareTo(article.getStockKg()) > 0) {
             throw new IllegalArgumentException("Not enough stock in kg for article: " + article.getName());
         }
 
-        if (request.getQuantity() != null && request.getQuantity().compareTo(article.getStockUnit()) > 0) {
+        if (item.getQuantity() != null && item.getQuantity().compareTo(article.getStockUnit()) > 0) {
             throw new IllegalArgumentException("Not enough stock in unit for article: " + article.getName());
         }
 
-        // Build and persist the order item
-        OrderItem item = OrderItem.builder()
-                .articleId(article.getId())
-                .orderId(request.getOrderId())
-                .quantityKg(request.getQuantityKg())
-                .quantity(request.getQuantity())
-                .price(article.getPriceKg() != null ? article.getPriceKg() : article.getPriceUnit())
-                .isScanned(false)
-                .build();
+        // Set price according to quantity type
+        BigDecimal price = item.getQuantityKg() != null ? article.getPriceKg() : article.getPriceUnit();
+
+        item.setPrice(price);
+        item.setScanned(false); // ✅ Correction ici
 
         return orderItemRepository.save(item);
     }
+
 
     public CartResponseDTO getCartContent(Integer orderId) {
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);

@@ -42,4 +42,9 @@ public class OrderItem {
 
     @Column(name = "is_scanned", nullable = false)
     private boolean isScanned;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", insertable = false, updatable = false)
+    private Order order;
+
 }

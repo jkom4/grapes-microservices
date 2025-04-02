@@ -8,8 +8,7 @@ import java.util.List;
 /**
  * DTO used to return all items in the cart along with the total price.
  */
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

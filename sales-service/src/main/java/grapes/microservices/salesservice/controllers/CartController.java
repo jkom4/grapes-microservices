@@ -7,6 +7,8 @@ import grapes.microservices.salesservice.models.Order;
 import grapes.microservices.salesservice.models.OrderItem;
 import grapes.microservices.salesservice.services.CartService;
 import grapes.microservices.salesservice.services.OrderService;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,80 +16,111 @@ import java.io.FileNotFoundException;
 
 /**
  * Controller responsible for handling shopping cart operations,
- * including creating temporary orders (carts) and adding items to them.
+ * including creating temporary orders (carts), adding/removing items,
+ * confirming payment, and retrieving orders.
  */
 @RestController
 @RequestMapping("/cart")
 public class CartController {
 
-    private final CartService cartService;
-    private final OrderService orderService;
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private OrderService orderService;
 
     /**
-     * Constructor for CartController.
-     *
-     * @param cartService  service handling cart operations (adding items)
-     * @param orderService service handling order creation
-     */
-    public CartController(CartService cartService, OrderService orderService) {
-        this.cartService = cartService;
-        this.orderService = orderService;
-    }
-
-    /**
-     * Adds an article to the user's cart (represented as a temporary order).
-     * The item is linked to an existing orderId.
-     *
-     * @param request the DTO containing the orderId, articleId, and quantity
-     * @return the saved {@link OrderItem} representing the cart item
+     * Adds an article to the user's cart (temporary order).
      */
     @PostMapping("/add")
-    public ResponseEntity<OrderItem> addToCart(@RequestBody CartRequestDTO request) {
-        OrderItem item = cartService.addToCart(request);
-        return ResponseEntity.ok(item);
-    }
-
-    /**
-     * Initializes a new empty cart by creating a temporary order
-     * with isPaid = false and isFinished = false.
-     *
-     * @param request the DTO containing the userId
-     * @return the newly created {@link Order} representing the cart
-     */
-    @PostMapping("/init")
-    public ResponseEntity<Order> initCart(@RequestBody CreateOrderRequestDTO request) {
-        Order newOrder = orderService.createTemporaryOrder(request.getUserId());
-        return ResponseEntity.ok(newOrder);
-    }
-
-    @GetMapping("/{orderId}")
-    public ResponseEntity<CartResponseDTO> getCart(@PathVariable Integer orderId) {
-        CartResponseDTO cart = cartService.getCartContent(orderId);
-        return ResponseEntity.ok(cart);
-    }
-
-
-    @DeleteMapping("/remove/{itemId}")
-    public ResponseEntity<?> removeItemFromCart(@PathVariable Integer itemId) {
+    @Transactional
+    public ResponseEntity<?> addToCart(@RequestBody CartRequestDTO request) {
         try {
-            cartService.removeFromCart(itemId);
-            return ResponseEntity.noContent().build(); // 204
+            OrderItem item = OrderItem.builder()
+                    .orderId(request.getOrderId())
+                    .articleId(request.getArticleId())
+                    .quantity(request.getQuantity())
+                    .quantityKg(request.getQuantityKg())
+                    .build();
+
+            OrderItem saved = cartService.addToCart(item);
+            return ResponseEntity.ok(saved);
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Unexpected error: " + e.getMessage());
         }
     }
 
+
+    /**
+     * Initializes a new cart (temporary order).
+     */
+    @PostMapping("/init")
+    @Transactional
+    public ResponseEntity<?> initCart(@RequestBody CreateOrderRequestDTO request) {
+        try {
+            Order newOrder = orderService.createTemporaryOrder(request.getUserId());
+            return ResponseEntity.ok(newOrder);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to initialize cart: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Retrieves the contents of a cart for a given order ID.
+     */
+    @GetMapping("/{orderId}")
+    public ResponseEntity<?> getCart(@PathVariable Integer orderId) {
+        try {
+            CartResponseDTO cart = cartService.getCartContent(orderId);
+            return ResponseEntity.ok(cart);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to fetch cart: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Removes a specific item from the cart.
+     */
+    @DeleteMapping("/remove/{itemId}")
+    @Transactional
+    public ResponseEntity<?> removeItemFromCart(@PathVariable Integer itemId) {
+        try {
+            cartService.removeFromCart(itemId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to remove item: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Clears all items from a cart by order ID.
+     */
     @DeleteMapping("/clear/{orderId}")
+    @Transactional
     public ResponseEntity<?> clearCart(@PathVariable Integer orderId) {
         try {
             cartService.clearCart(orderId);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to clear cart: " + e.getMessage());
         }
     }
 
+    /**
+     * Finalizes the payment: verifies stock, updates quantities,
+     * generates invoice, and clears cart.
+     */
     @PostMapping("/pay/{orderId}")
+    @Transactional
     public ResponseEntity<?> simulatePayment(@PathVariable Integer orderId) {
         try {
             orderService.finalizePaymentAndClearCart(orderId);
@@ -95,21 +128,24 @@ public class CartController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.internalServerError().body("Invoice file generation failed: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Unexpected error: " + e.getMessage());
         }
     }
 
+    /**
+     * Retrieves order details by ID.
+     */
     @GetMapping("/orders/{id}")
-    public ResponseEntity<Order> getOrder(@PathVariable Integer id) {
+    public ResponseEntity<?> getOrder(@PathVariable Integer id) {
         try {
             Order order = orderService.getOrderById(id);
             return ResponseEntity.ok(order);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to fetch order: " + e.getMessage());
         }
     }
-
-
-
-
 }
