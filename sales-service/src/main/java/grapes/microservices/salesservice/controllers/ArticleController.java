@@ -66,6 +66,8 @@ public class ArticleController {
     /**
      * Searches articles by name (partial match).
      */
+
+
     @GetMapping("/search")
     public ResponseEntity<?> searchArticlesByName(@RequestParam String name) {
         try {
@@ -79,6 +81,7 @@ public class ArticleController {
                         .body("No items found with the name: '" + name + "'");
             }
 
+
             List<ArticleDTO> dtos = results.stream()
                     .map(articleMapper::toDTO)
                     .collect(Collectors.toList());
@@ -88,6 +91,7 @@ public class ArticleController {
                     .body("An error occurred while searching articles.");
         }
     }
+
 
     /**
      * Creates a new article (admin only).
@@ -103,6 +107,7 @@ public class ArticleController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
 
     /**
      * Updates an existing article by ID (admin only).
