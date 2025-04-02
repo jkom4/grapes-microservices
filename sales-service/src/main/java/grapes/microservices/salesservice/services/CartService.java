@@ -59,7 +59,7 @@ public class CartService {
         BigDecimal price = item.getQuantityKg() != null ? article.getPriceKg() : article.getPriceUnit();
 
         item.setPrice(price);
-        item.setScanned(false); // ✅ Correction ici
+        item.setScanned(false);
 
         return orderItemRepository.save(item);
     }

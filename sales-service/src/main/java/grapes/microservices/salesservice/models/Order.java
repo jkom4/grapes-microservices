@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "`order`") // mot-clé réservé, donc entouré de backticks
+@Table(name = "`order`")
 @Getter
 @Setter
 @NoArgsConstructor
