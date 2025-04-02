@@ -1,0 +1,146 @@
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  height: 85vh;
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.container {
+  background: white;
+  border: 1px solid #e0e0e0;
+  width: 350px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 20px;
+  text-align: center;
+}
+
+.left-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.left-logo img {
+  max-height: 140px;
+  max-width: 140px;
+  object-fit: contain;
+}
+
+.amount {
+  font-size: 24px;
+  font-weight: bold;
+  color: black;
+  margin-bottom: 10px;
+}
+
+.merchant {
+  color: #6c757d;
+  margin-bottom: 15px;
+}
+
+.input-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Specific styling for card number input */
+.card-number-input {
+  letter-spacing: 2px; /* Space out the numbers slightly */
+  font-family: monospace; /* Better readability for numbers */
+}
+
+/* Optional: Add a bottom bar effect */
+.card-number-input:focus {
+  border-bottom: 2px solid #007bff; /* Blue bar on focus */
+}
+
+.required {
+  color: red;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+  display: block;
+  text-align: left;
+  margin-top: 5px;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.card-icons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.card-icons img {
+  height: 24px;
+}
+
+.security-note {
+  color: #6c757d;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+/* Add these new styles */
+.card-number-group {
+  display: flex;
+  gap: 10px; /* Space between inputs */
+  justify-content: space-between;
+}
+
+.card-part {
+  width: 23%; /* Adjust width for 4 inputs */
+  padding: 10px;
+  border: none;
+  border-bottom: 2px solid #ced4da; /* Bar under each part */
+  border-radius: 0;
+  text-align: center;
+}
+
+.card-part:focus {
+  border-bottom: 2px solid #007bff; /* Blue bar on focus */
+  outline: none;
+}
+.error {
+  color: red;
+  font-size: 12px;
+  display: block;
+  text-align: left;
+  margin-top: 5px;
+
+}
