@@ -1,3 +1,14 @@
+
+# Use Python Image for Backend
+FROM python:3.10
+LABEL authors="jkom"
+WORKDIR /app
+COPY backend/ .
+
+# Execute API
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8096"]
+
+
 # Use an official R base image
 FROM rocker/verse:latest
 
@@ -20,4 +31,4 @@ COPY entrypoint.R /app/entrypoint.R
 # Set the entrypoint to run the R script
 ENTRYPOINT ["Rscript", "entrypoint.R"]
 # Execute API
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8096"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "9090"]
