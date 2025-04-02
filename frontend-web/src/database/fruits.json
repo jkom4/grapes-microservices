@@ -1,0 +1,22 @@
+{
+  "fruits": [
+    {
+      "id": 1,
+      "name": "Banane de Melun",
+      "rating": 4.8,
+      "image": "fruit.png"
+    },
+    {
+      "id": 2,
+      "name": "Kiwi du Jura",
+      "rating": 4.8,
+      "image": "fruit.png"
+    },
+    {
+      "id": 3,
+      "name": "Fraises de Paris",
+      "rating": 4.8,
+      "image": "fruit.png"
+    }
+  ]
+}
