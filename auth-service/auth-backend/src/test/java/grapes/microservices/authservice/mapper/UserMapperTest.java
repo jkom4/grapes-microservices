@@ -21,6 +21,7 @@ class UserMapperTest {
 
     private final UserMapper userMapper = UserMapper.INSTANCE;
 
+
     @Test
     void shouldMapUserToDTO() {
         User user = new User();
