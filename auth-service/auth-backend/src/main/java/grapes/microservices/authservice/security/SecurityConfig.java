@@ -14,7 +14,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private static final String[] SWAGGER_PATHS = {"/auth/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/swagger-ui/**"};
+    // TODO: remove paths when security is in place
+    private static final String[] SWAGGER_PATHS = {"/users/**" ,"/auth/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/swagger-ui/**"};
 
     @Bean
     public OpenAPI customOpenAPI() {

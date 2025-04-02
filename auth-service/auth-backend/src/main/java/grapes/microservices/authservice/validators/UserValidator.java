@@ -9,6 +9,11 @@ import lombok.Data;
 import org.springframework.stereotype.Component;
 import java.util.Set;
 
+/**
+ * UserValidator provides a validator for User entities.
+ * This validator ensures that a user respects all constraints before processing.
+ * @author Cameron
+ */
 @Component
 @Data
 public class UserValidator {

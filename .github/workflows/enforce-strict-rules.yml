@@ -64,20 +64,24 @@ jobs:
         working-directory: ./api-gateway
         run: mvn -B validate test -Dspring.profiles.active=test
 
+
       # 🔹 Test Auth Service
       - name: Run Tests for Auth Service
         working-directory: ./auth-service/auth-backend
         run: mvn -B validate test -Dspring.profiles.active=test
+
 
       # 🔹 Test Chat Service
       - name: Run Tests for Chat Service
         working-directory: ./chat-service
         run: mvn -B validate test -Dspring.profiles.active=test
 
+
       # 🔹 Test Payment Service
       - name: Run Tests for Payment Service
         working-directory: ./payment-service/payment-backend
         run: mvn -B validate test -Dspring.profiles.active=test
+
 
       # 🔹 Test Sales Service
       - name: Run Tests for Sales Service

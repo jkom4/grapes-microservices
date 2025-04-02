@@ -15,7 +15,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles(value = "test")
 class TransactionsServiceApplicationTests {
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -117,4 +116,5 @@ class TransactionsServiceApplicationTests {
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("No items found with the name: 'mangue'"));
     }
+
 }
