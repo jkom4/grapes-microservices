@@ -1,6 +1,7 @@
 package com.example.mobile_cll
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -8,11 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import com.example.mobile_cll.databinding.ActivityMapsBinding
-import com.example.mobile_cll.view.MapView
-import com.example.mobile_cll.viewmodel.MapsViewModel
+import com.example.mobile_cll.views.screens.MapView
+import com.example.mobile_cll.viewmodels.MapsViewModel
 import com.google.android.gms.maps.SupportMapFragment
 import android.util.Log
-import android.widget.Toast
 
 /**
  * MapsActivity is responsible for displaying a map and handling trip-related information.
@@ -116,7 +116,14 @@ class MapsActivity : AppCompatActivity() {
      * Displays a toast message when the button is clicked.
      */
     fun onArrivedButtonClick(view: android.view.View) {
-        Toast.makeText(this, "Arrived at destination", Toast.LENGTH_SHORT).show()
-        // Additional actions (e.g., navigation) can be added here
+        Log.d("MapsActivity", "tripId avant transmission: $tripId")
+        val intent = Intent(this, CompletedOrderActivity::class.java).apply {
+            putExtra("tripId", tripId)
+            putExtra("tripName", tripName)
+            putExtra("tripAddress", tripAddress)
+        }
+        startActivity(intent)
+        finish()
     }
+
 }

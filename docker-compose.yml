@@ -4,11 +4,12 @@ services:
 ### DATABASES
   mariadb:
     build: ./docker/mariadb
+    env_file: .env
     image: grapeshub/mariadb-grapes:latest
     container_name: grapes-mariadb
     environment:
       MARIADB_ROOT_PASSWORD: SparringMASI!
-      MARIADB_USER: module
+      MARIADB_USER: root
       MARIADB_PASSWORD: SparringMASI!
     ports:
       - "3306:3306"
@@ -17,6 +18,7 @@ services:
 
   mongodb:
     build: ./docker/mongodb
+    env_file: .env
     image: grapeshub/mongodb-grapes:latest
     container_name: grapes-mongodb
     environment:
@@ -31,6 +33,7 @@ services:
 ### Exchange
   rabbitmq:
     build: ./docker/rabbitmq
+    env_file: .env
     image: mydockerhub/rabbitmq-grapes:latest
     container_name: grapes-rabbitmq
     volumes:
@@ -89,6 +92,7 @@ services:
 
   api-gateway:
     build: ./api-gateway
+    env_file: .env
     image: grapeshub/api-gateway:latest
 
     container_name: api-gateway
@@ -105,6 +109,7 @@ services:
 
   auth-service:
     build: ./auth-service/auth-backend
+    env_file: .env
     image: grapeshub/auth-service-backend:latest
     container_name: auth-backend
     ports:
@@ -115,6 +120,7 @@ services:
 
   sales-service:
     build: ./sales-service
+    env_file: .env
     image: grapeshub/sales-service:latest
     container_name: sales-backend
     ports:
@@ -124,6 +130,7 @@ services:
 
   payment-service:
     build: ./payment-service/payment-backend
+    env_file: .env
     image: grapeshub/payment-service-backend:latest
     container_name: payment-backend
     ports:
@@ -133,6 +140,7 @@ services:
 
   chat-service:
     build: ./chat-service
+    env_file: .env
     image: grapeshub/chat-service:latest
     container_name: chat-backend
     ports:
