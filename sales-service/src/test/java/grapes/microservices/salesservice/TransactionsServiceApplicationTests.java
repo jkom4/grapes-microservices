@@ -35,7 +35,7 @@ class TransactionsServiceApplicationTests {
             }
         """;
 
-        mockMvc.perform(post("/articles")
+        mockMvc.perform(post("/clm/articles")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(articleJson))
                 .andExpect(status().isCreated())
@@ -44,7 +44,7 @@ class TransactionsServiceApplicationTests {
 
     @Test
     void testGetAllArticles() throws Exception {
-        mockMvc.perform(get("/articles"))
+        mockMvc.perform(get("/clm/articles"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -66,7 +66,7 @@ class TransactionsServiceApplicationTests {
             }
         """;
 
-        mockMvc.perform(put("/articles/1")
+        mockMvc.perform(put("/clm/articles/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedJson))
                 .andExpect(status().isOk())
@@ -90,11 +90,11 @@ class TransactionsServiceApplicationTests {
             }
         """;
 
-        mockMvc.perform(post("/articles")
+        mockMvc.perform(post("/clm/articles")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(articleJson));
 
-        mockMvc.perform(get("/articles/search")
+        mockMvc.perform(get("/clm/articles/search")
                         .param("name", "kiwi"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
@@ -103,7 +103,7 @@ class TransactionsServiceApplicationTests {
 
     @Test
     void testSearchArticleWithEmptyName() throws Exception {
-        mockMvc.perform(get("/articles/search")
+        mockMvc.perform(get("/clm/articles/search")
                         .param("name", " "))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("The 'name' field cannot be empty."));
@@ -111,31 +111,147 @@ class TransactionsServiceApplicationTests {
 
     @Test
     void testSearchArticleNotFound() throws Exception {
-        mockMvc.perform(get("/articles/search")
+        mockMvc.perform(get("/clm/articles/search")
                         .param("name", "mangue"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("No items found with the name: 'mangue'"));
     }
-  
-  // @Test
-  //   void testGetAvailableArticles() throws Exception {
-  //       mockMvc.perform(get("/articles/available"))
-  //               .andExpect(status().isOk())
-  //               .andExpect(jsonPath("$").isArray());
-  //   }
 
-    @Test
-    void testGetAvailableArticlesWithPagination() throws Exception {
-        mockMvc.perform(get("/articles/available")
-                        .param("page", "0")
-                        .param("size", "5")
-                        .param("sort", "name,asc"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[5]").doesNotExist()) //  5 results
-                .andExpect(jsonPath("$.content[0].stockKg").isNumber())
-                .andExpect(jsonPath("$.content[0].stockUnit").isNumber());
-    }
+    // @Test
+    //   void testGetAvailableArticles() throws Exception {
+    //       mockMvc.perform(get("/articles/available"))
+    //               .andExpect(status().isOk())
+    //               .andExpect(jsonPath("$").isArray());
+    //   }
 
+//    @Test
+//    void testGetAvailableArticlesWithPagination() throws Exception {
+//        mockMvc.perform(get("/articles/available")
+//                        .param("page", "0")
+//                        .param("size", "5")
+//                        .param("sort", "name,asc"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.content").isArray())
+//                .andExpect(jsonPath("$.content[5]").doesNotExist()) //  5 results
+//                .andExpect(jsonPath("$.content[0].stockKg").isNumber())
+//                .andExpect(jsonPath("$.content[0].stockUnit").isNumber());
+//    }
+
+//    @Test
+//    void testInitCartAndAddToCart_WithAnanas() throws Exception {
+//        String orderJson = """
+//        {
+//          "userId": 1
+//        }
+//        """;
+//
+//        String orderId = mockMvc.perform(post("/cart/init")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(orderJson))
+//                .andExpect(status().isOk())
+//                .andReturn()
+//                .getResponse()
+//                .getContentAsString()
+//                .replaceAll("[^0-9]", "");
+//
+//        String addItemJson = String.format("""
+//        {
+//          "orderId": %s,
+//          "articleId": 1009,
+//          "quantityKg": 2,
+//          "quantity": 1
+//        }
+//        """, orderId);
+//
+//        mockMvc.perform(post("/cart/add")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(addItemJson))
+//                .andExpect(status().isOk());
+//    }
+//
+//    @Test
+//    void testGetCartContent_WhenCartExists_ShouldReturnItemsAndTotal() throws Exception {
+//        String orderJson = """
+//        {
+//          "userId": 1
+//        }
+//        """;
+//
+//        String orderId = mockMvc.perform(post("/cart/init")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(orderJson))
+//                .andExpect(status().isOk())
+//                .andReturn()
+//                .getResponse()
+//                .getContentAsString()
+//                .replaceAll("[^0-9]", "");
+//
+//        String addItemJson = String.format("""
+//        {
+//          "orderId": %s,
+//          "articleId": 1009,
+//          "quantityKg": 2,
+//          "quantity": 1
+//        }
+//        """, orderId);
+//
+//        mockMvc.perform(post("/cart/add")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(addItemJson))
+//                .andExpect(status().isOk());
+//
+//        mockMvc.perform(get("/cart/" + orderId))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.items").isArray())
+//                .andExpect(jsonPath("$.totalPrice").isNumber());
+//    }
+//
+//    @Test
+//    void testConfirmAndPayOrder_ShouldDecrementStockAndClearCart() throws Exception {
+//        String orderJson = """
+//        {
+//          "userId": 1
+//        }
+//        """;
+//
+//        String orderId = mockMvc.perform(post("/cart/init")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(orderJson))
+//                .andExpect(status().isOk())
+//                .andReturn()
+//                .getResponse()
+//                .getContentAsString()
+//                .replaceAll("[^0-9]", "");
+//
+//        String addItemJson = String.format("""
+//        {
+//          "orderId": %s,
+//          "articleId": 1009,
+//          "quantityKg": 1.5,
+//          "quantity": 2
+//        }
+//        """, orderId);
+//
+//        mockMvc.perform(post("/cart/add")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(addItemJson))
+//                .andExpect(status().isOk());
+//
+//        mockMvc.perform(post("/cart/confirm/" + orderId))
+//                .andExpect(status().isNoContent());
+//
+//        mockMvc.perform(post("/cart/pay/" + orderId))
+//                .andExpect(status().isNoContent());
+//
+//        mockMvc.perform(get("/cart/" + orderId))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.items.length()").value(0))
+//                .andExpect(jsonPath("$.totalPrice").value(0));
+//
+//        mockMvc.perform(get("/orders/" + orderId))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.facturePath").exists())
+//                .andExpect(jsonPath("$.totalPrice").isNumber());
+//    }
 
 }

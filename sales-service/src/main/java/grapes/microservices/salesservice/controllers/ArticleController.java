@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/articles", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/clm/articles", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ArticleController {
 
     private final ArticleService articleService;
@@ -29,12 +29,9 @@ public class ArticleController {
     }
 
     /**
-     * Retrieves all articles without pagination.
-     *
-     * @return a {@link ResponseEntity} containing a list of {@link ArticleDTO}
+     * Retrieves all articles without pagination (admin only).
+     *  // @PreAuthorize("hasRole('ADMIN')")
      */
-
-    // @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<?> getAllArticles() {
         try {
@@ -49,17 +46,11 @@ public class ArticleController {
         }
     }
 
-
     /**
-     * Retrieves all available (in-stock) articles with pagination and optional sorting.
-     * Supports parameters like page, size, and sort.
-     *
-     * Example: /articles/available?page=0&size=10&sort=name,asc
-     *
-     * @param pageable the pagination and sorting information (Spring automatically maps query params)
-     * @return a {@link ResponseEntity} containing a paginated list of {@link ArticleDTO}
+     * Retrieves all available (in-stock) articles with pagination.
+     * This is typically used by client-facing apps.
+     * // @PreAuthorize("hasRole('USER')") // TODO: activate when security is in place
      */
-    // @PreAuthorize("hasRole('USER')") // TODO: activate when security is in place
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableArticles(@ParameterObject Pageable pageable) {
         try {
@@ -72,10 +63,11 @@ public class ArticleController {
         }
     }
 
+    /**
+     * Searches articles by name (partial match).
+     */
 
 
-    //  Search articles by name
-    //@PreAuthorize("hasRole('USER')")
     @GetMapping("/search")
     public ResponseEntity<?> searchArticlesByName(@RequestParam String name) {
         try {
@@ -84,11 +76,11 @@ public class ArticleController {
             }
 
             List<Article> results = articleService.searchByName(name);
-
             if (results.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No items found with the name: '" + name + "'");
             }
+
 
             List<ArticleDTO> dtos = results.stream()
                     .map(articleMapper::toDTO)
@@ -101,8 +93,10 @@ public class ArticleController {
     }
 
 
-    //  Create article
-    // @PreAuthorize("hasRole('ADMIN')")
+    /**
+     * Creates a new article (admin only).
+     *  // @PreAuthorize("hasRole('ADMIN')")
+     */
     @PostMapping
     public ResponseEntity<?> createArticle(@Valid @RequestBody ArticleDTO articleDTO) {
         try {
@@ -114,8 +108,11 @@ public class ArticleController {
         }
     }
 
-    //  Update
-    // @PreAuthorize("hasRole('ADMIN')")
+
+    /**
+     * Updates an existing article by ID (admin only).
+     *  // @PreAuthorize("hasRole('ADMIN')")
+     */
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<?> updateArticle(
