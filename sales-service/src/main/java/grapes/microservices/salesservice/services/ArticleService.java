@@ -2,6 +2,8 @@ package grapes.microservices.salesservice.services;
 
 import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.repositories.ArticleRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,8 +29,7 @@ public class ArticleService {
         }
 
         validateArticleForUpdate(updatedData);
-        updatedData.setId(id); // ✅ Set existing ID
-
+        updatedData.setId(id);
         return articleRepository.save(updatedData);
     }
 
@@ -40,17 +41,25 @@ public class ArticleService {
         return articleRepository.findByNameContainingIgnoreCase(name);
     }
 
-    // ---------- Validation logic ------------
+    /**
+     * Retrieves all available articles that have stock in kg or units greater than 0.
+     *
+     * @param pageable the pagination and sorting configuration
+     * @return a {@link Page} of {@link Article} objects in stock
+     */
+    public Page<Article> getAvailableArticles(Pageable pageable) {
+        return articleRepository.findByStockKgGreaterThanOrStockUnitGreaterThan(
+                BigDecimal.ZERO, BigDecimal.ZERO, pageable);
+    }
+
 
     private void validateArticleForCreation(Article article) {
         if (article.getName() == null || article.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Article name is required.");
         }
-
         if (articleRepository.existsByNameIgnoreCase(article.getName())) {
             throw new IllegalArgumentException("An article with this name already exists.");
         }
-
         validateCommonFields(article);
     }
 
@@ -58,7 +67,6 @@ public class ArticleService {
         if (article.getName() != null && article.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Article name cannot be empty.");
         }
-
         validateCommonFields(article);
     }
 

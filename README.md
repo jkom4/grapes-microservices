@@ -87,7 +87,7 @@ Swagger is used for API documentation. You can access it via the following links
 - **Swagger API Gateway** : [http://localhost:8090/swagger-ui/index.html](http://localhost:8090/swagger-ui/index.html)
 - **Swagger Auth Service** : [http://localhost:8091/swagger-ui/index.html](http://localhost:8091/swagger-ui/index.html)
 - **Swagger Sales Service** : [http://localhost:8092/swagger-ui/index.html](http://localhost:8092/swagger-ui/index.html)
-- **Swagger Payment Service** : [http://localhost:8094/swagger-ui/index.html](http://localhost:8094/swagger-ui/index.html)
+- **Swagger Payment Service** : [http://localhost:8093/swagger-ui/index.html](http://localhost:8094/swagger-ui/index.html)
 
 ## Stop services
 

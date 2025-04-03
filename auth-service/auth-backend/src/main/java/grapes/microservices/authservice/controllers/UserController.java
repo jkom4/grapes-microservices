@@ -7,6 +7,7 @@ import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +18,10 @@ import grapes.microservices.authservice.utils.AuthLogger;
 /**
  * UserController handles HTTP requests related to user management.
  * It provides endpoints for user registration, retrieval, update, and deletion.
- * Endpoints:
- * - POST /auth/users/register → Register a new user.
- * - DELETE /auth/users/delete/{id} → Delete a user by ID.
- * - PUT /auth/users/update → Update an existing user.
- * - POST /auth/users/email → Retrieve a user by email.
- * - GET /auth/users/{id} → Retrieve a user by ID.
  * @author  Cameron
  */
 @RestController
-@RequestMapping("/auth/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -36,7 +31,7 @@ public class UserController {
     @Autowired
     private final UserMapper userMapper;
 
-    private static final Logger logger = AuthLogger.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
 
     @Transactional
@@ -44,6 +39,7 @@ public class UserController {
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
         logger.info("Received request to register a user: {}", userDTO);
         try {
+            userDTO.setActive(true);
             User savedUser = userService.registerUser(userMapper.toEntity(userDTO));
             logger.info("User successfully registered: {}", savedUser);
             return ResponseEntity.ok(userMapper.toDTO(savedUser));
