@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
-import Fruit from "../../utils/models/Articles"; // Make sure your Fruit model is imported
+import Fruit from "../../utils/interface/Fruit";
 import placeholder from "../../assets/images/fruit.png";
 import { useLanguage } from "../../features/LanguageContext";
-import fetchFruits from "../../services/fruitServices";
 
 // PopularSection Component: Fetches and displays a list of popular fruits
-function PopularSection({ limit = 3 }: { limit?: number }) {
+function PopularSection() {
     const { language } = useLanguage(); // State to manage language toggle
-    const [articles, setFruits] = useState<Fruit[]>([]);
+    const [fruits, setFruits] = useState<Fruit[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-
 
     // Text content for the section in both languages
     const text = {
@@ -28,10 +26,18 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
 
     // useEffect hook to fetch fruit data from the API when the component mounts
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchFruits = async () => {
             try {
-                const data = await fetchFruits(limit);
-                setFruits(data); // Set the fruits according to the limit
+                const response = await fetch("http://localhost:3001/fruits");
+                if (!response.ok) {
+                    throw new Error("Failed to fetch fruits");
+                }
+                const data: Fruit[] = await response.json();
+                const mappedData = data.map((fruit: Fruit) => ({
+                    ...fruit,
+                    image: placeholder, // Fallback image for fruit items
+                }));
+                setFruits(mappedData.slice(0, 3)); // Show only the top 3 fruits
                 setLoading(false);
             } catch (err) {
                 setError(err instanceof Error ? err.message : "An error occurred");
@@ -39,9 +45,10 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
             }
         };
 
-        fetchData();
-    }, [limit]); // Re-run when the limit changes
+        fetchFruits();
+    }, []); // Empty dependency array ensures this runs only once on mount
 
+    // Conditional rendering for loading and error states
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -67,32 +74,32 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
 
                 {/* Grid layout for displaying the fruit cards */}
                 <section className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 max-w-screen-lg mx-auto relative z-10">
-                    {articles.map((article: Fruit) => (
+                    {fruits.map((fruit: Fruit) => (
                         <div
-                            key={article.id}
+                            key={fruit.id}
                             className="card bg-white p-5 w-full max-w-[300px] rounded-lg shadow-lg text-center transition-transform duration-300 ease-in-out hover:translate-y-[-5px] mx-auto"
                         >
                             <div className="relative">
                                 {/* Rating badge */}
                                 <div className="absolute top-2 left-2">
                                     <span className="bg-white text-secondary text-sm font-semibold px-3 py-1 rounded-full">
-                                        {article.rating} {text[language].rating}
+                                        {fruit.rating} {text[language].rating}
                                     </span>
                                 </div>
                                 <img
-                                    src={article.picturePath}
-                                    alt={article.name}
+                                    src={fruit.image}
+                                    alt={fruit.name}
                                     className="w-full h-auto rounded-lg mb-4"
                                 />
                                 {/* Price badge */}
                                 <div className="absolute bottom-2 right-2 bg-secondary text-white text-sm font-semibold rounded-full px-3 py-1">
-                                    {article.priceKg} {text[language].price}
+                                    {fruit.price} {text[language].price}
                                 </div>
                             </div>
                             <div className="card-header flex justify-between items-center">
                                 {/* Fruit name */}
                                 <h3 className="text-lg font-semibold text-secondary">
-                                    {article.name}
+                                    {fruit.name}
                                 </h3>
                                 {/* Buy button */}
                                 <button className="buy-btn bg-accent text-white w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm cursor-pointer hover:bg-[#D43F97]">

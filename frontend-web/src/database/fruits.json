@@ -4,19 +4,86 @@
       "id": 1,
       "name": "Banane de Melun",
       "rating": 4.8,
-      "image": "fruit.png"
+      "image": "fruit.png",
+      "price": "10.90"
     },
     {
       "id": 2,
       "name": "Kiwi du Jura",
       "rating": 4.8,
-      "image": "fruit.png"
+      "image": "fruit.png",
+      "price": "10.90"
+
     },
     {
       "id": 3,
       "name": "Fraises de Paris",
       "rating": 4.8,
-      "image": "fruit.png"
+      "image": "fruit.png",
+      "price": "10.90"
+    },
+    {
+      "id": 4,
+      "name": "Banane de Melun",
+      "rating": 4.8,
+      "image": "fruit.png",
+      "price": "10.90"
+    },
+    {
+      "id": 5,
+      "name": "Kiwi du Jura",
+      "rating": 4.8,
+      "image": "fruit.png",
+      "price": "10.90"
+    },
+    {
+      "id": 6,
+      "name": "Fraises de Paris",
+      "rating": 4.8,
+      "image": "fruit.png",
+      "price": "10.90"
+    },
+    {
+      "id": 7,
+      "name": "Banane de Melun",
+      "rating": 4.8,
+      "image": "fruit.png",
+      "price": "10.90"
+    },
+    {
+      "id": 8,
+      "name": "Kiwi du Jura",
+      "rating": 4.8,
+      "image": "fruit.png",
+      "price": "10.90"
+    },
+    {
+      "id": 9,
+      "name": "Fraises de Paris",
+      "rating": 4.8,
+      "image": "fruit.png",
+      "price": "10.90"
+    },
+    {
+      "id": 10,
+      "name": "Banane de Melun",
+      "rating": 4.8,
+      "image": "fruit.png",
+      "price": "10.90"
+    },
+    {
+      "id": 11,
+      "name": "Kiwi du Jura",
+      "rating": 4.8,
+      "image": "fruit.png",
+      "price": "10.90"
+    },
+    {
+      "id": 12,
+      "name": "Fraises de Paris",
+      "rating": 4.8,
+      "image": "fruit.png",
+      "price": "10.90"
     }
   ]
 }
