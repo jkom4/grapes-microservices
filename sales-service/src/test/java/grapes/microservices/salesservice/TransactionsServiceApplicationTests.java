@@ -35,7 +35,7 @@ class TransactionsServiceApplicationTests {
             }
         """;
 
-        mockMvc.perform(post("/articles")
+        mockMvc.perform(post("/clm/articles")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(articleJson))
                 .andExpect(status().isCreated())
@@ -44,7 +44,7 @@ class TransactionsServiceApplicationTests {
 
     @Test
     void testGetAllArticles() throws Exception {
-        mockMvc.perform(get("/articles"))
+        mockMvc.perform(get("/clm/articles"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -66,7 +66,7 @@ class TransactionsServiceApplicationTests {
             }
         """;
 
-        mockMvc.perform(put("/articles/1")
+        mockMvc.perform(put("/clm/articles/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedJson))
                 .andExpect(status().isOk())
@@ -90,11 +90,11 @@ class TransactionsServiceApplicationTests {
             }
         """;
 
-        mockMvc.perform(post("/articles")
+        mockMvc.perform(post("/clm/articles")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(articleJson));
 
-        mockMvc.perform(get("/articles/search")
+        mockMvc.perform(get("/clm/articles/search")
                         .param("name", "kiwi"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
@@ -103,7 +103,7 @@ class TransactionsServiceApplicationTests {
 
     @Test
     void testSearchArticleWithEmptyName() throws Exception {
-        mockMvc.perform(get("/articles/search")
+        mockMvc.perform(get("/clm/articles/search")
                         .param("name", " "))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("The 'name' field cannot be empty."));
@@ -111,7 +111,7 @@ class TransactionsServiceApplicationTests {
 
     @Test
     void testSearchArticleNotFound() throws Exception {
-        mockMvc.perform(get("/articles/search")
+        mockMvc.perform(get("/clm/articles/search")
                         .param("name", "mangue"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("No items found with the name: 'mangue'"));
