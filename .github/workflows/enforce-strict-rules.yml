@@ -20,6 +20,11 @@ jobs:
   check-admins:
     name: Enforce Rules Tests
     runs-on: ubuntu-latest
+    env:  # 
+      SALES_SERVICE_PORT: 8081
+      SALES_DB_URL:  ${{ secrets.SALES_DB_URL }}
+      SALES_DB_USER:  ${{ secrets.SALES_DB_USER }}
+      SALES_DB_PASSWORD:  ${{ secrets.SALES_DB_PASSWORD }}
 
     steps:
       - name: Checkout repository
