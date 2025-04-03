@@ -3,6 +3,7 @@ interface Fruit {
     name: string;
     rating: number;
     image: string;
+    price: string;
 }
 
 export default Fruit;

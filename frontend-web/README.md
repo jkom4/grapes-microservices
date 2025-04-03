@@ -68,3 +68,21 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Architecture 
+
+```
+src/
+│-- assets/               # Contains images, icons, and other static files
+│-- components/           # Reusable components (forms, buttons, etc.)
+│-- features/             # Feature-specific components (e.g., login, dashboard)
+│-- hooks/                # Custom hooks (e.g., useAuth, useFetch)
+│-- layouts/              # Page layouts (e.g., Header, Footer, Sidebar)
+│-- pages/                # Components representing specific pages (e.g., Home, About)
+│-- routes/               # Route management with React Router
+│-- sections/             # Section representing specific parts of a page
+│-- styles/               # CSS/SCSS files or styled-components
+│-- utils/                # Utility functions (helpers, formatters, etc.)
+│-- App.tsx               # Main application component
+│-- index.tsx             # Entry point of the React application
+```
