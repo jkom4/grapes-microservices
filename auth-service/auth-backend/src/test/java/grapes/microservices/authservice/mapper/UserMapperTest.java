@@ -37,6 +37,7 @@ class UserMapperTest {
         assertEquals("John", dto.getFirstName());
     }
 
+
     @Test
     void computeAge_forExactYears() {
         LocalDate birthDate = LocalDate.of(1995, 3, 25);

@@ -254,4 +254,5 @@ class TransactionsServiceApplicationTests {
 //                .andExpect(jsonPath("$.totalPrice").isNumber());
 //    }
 
+
 }

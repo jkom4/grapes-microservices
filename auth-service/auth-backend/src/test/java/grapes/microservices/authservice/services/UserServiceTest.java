@@ -84,6 +84,7 @@ public class UserServiceTest {
         assertTrue(thrown.getMessage().startsWith("Validation errors"));
     }
 
+
     @Test
     void getUserById_Success() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
