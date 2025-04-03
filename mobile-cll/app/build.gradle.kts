@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
-
+ 
 android {
     namespace = "com.example.mobile_cll"
     compileSdk = 35
