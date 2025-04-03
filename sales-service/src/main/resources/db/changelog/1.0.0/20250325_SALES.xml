@@ -178,5 +178,44 @@
                                  referencedTableName="delivery" referencedColumnNames="id"
                                  constraintName="fk_deliverypicture_delivery"/>
     </changeSet>
+    <!-- 16. Table review -->
+    <changeSet author="kilane dounia" id="16">
+        <createTable tableName="review">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_order" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="TEXT"/>
+            <column name="created_at" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
 
+    <!-- 17. Foreign key: review -> order -->
+    <changeSet author="kilane dounia" id="17">
+        <addForeignKeyConstraint
+                baseTableName="review"
+                baseColumnNames="id_order"
+                referencedTableName="order"
+                referencedColumnNames="id"
+                constraintName="fk_review_order"/>
+    </changeSet>
+
+    <!-- 18. Foreign key: review -> user -->
+    <changeSet author="kilane dounia" id="18">
+        <addForeignKeyConstraint
+                baseTableName="review"
+                baseColumnNames="user_id"
+                referencedTableName="user"
+                referencedColumnNames="id"
+                constraintName="fk_review_user"/>
+    </changeSet>
 </databaseChangeLog>
