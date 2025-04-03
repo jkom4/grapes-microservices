@@ -34,3 +34,6 @@ replay_pid*
 # Volumes
 docker/*/volumes/
 **/docker/volumes/
+
+# Invoices
+invoices/*
