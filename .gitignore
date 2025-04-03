@@ -37,3 +37,4 @@ docker/*/volumes/
 
 # Invoices
 invoices/*
+/invoices/

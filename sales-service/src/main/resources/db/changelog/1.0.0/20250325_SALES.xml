@@ -210,12 +210,12 @@
     </changeSet>
 
     <!-- 18. Foreign key: review -> user -->
-    <changeSet author="kilane dounia" id="18">
-        <addForeignKeyConstraint
-                baseTableName="review"
-                baseColumnNames="user_id"
-                referencedTableName="user"
-                referencedColumnNames="id"
-                constraintName="fk_review_user"/>
-    </changeSet>
+<!--    <changeSet author="kilane dounia" id="18">-->
+<!--        <addForeignKeyConstraint-->
+<!--                baseTableName="review"-->
+<!--                baseColumnNames="user_id"-->
+<!--                referencedTableName="user"-->
+<!--                referencedColumnNames="id"-->
+<!--                constraintName="fk_review_user"/>-->
+<!--    </changeSet>-->
 </databaseChangeLog>

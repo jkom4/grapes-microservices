@@ -46,14 +46,14 @@
     </changeSet>
 
     <!-- Foreign Key: paiement.id_transaction -> transaction.id -->
-    <changeSet id="4" author="grapes">
-        <addForeignKeyConstraint
-                baseTableName="paiement"
-                baseColumnNames="id_transaction"
-                referencedTableName="transaction"
-                referencedColumnNames="id"
-                constraintName="fk_paiement_transaction"/>
-    </changeSet>
+<!--    <changeSet id="4" author="grapes">-->
+<!--        <addForeignKeyConstraint-->
+<!--                baseTableName="paiement"-->
+<!--                baseColumnNames="id_transaction"-->
+<!--                referencedTableName="transaction"-->
+<!--                referencedColumnNames="id"-->
+<!--                constraintName="fk_paiement_transaction"/>-->
+<!--    </changeSet>-->
 
     <!-- Foreign Key: paiement.nom_marchand -> marchand.nom_marchand -->
     <changeSet id="5" author="grapes">
