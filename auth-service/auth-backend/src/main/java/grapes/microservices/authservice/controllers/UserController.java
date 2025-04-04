@@ -40,6 +40,7 @@ public class UserController {
         logger.info("Received request to register a user: {}", userDTO);
         try {
             userDTO.setActive(true);
+            userDTO.setLoyaltyPoints(0);
             User savedUser = userService.registerUser(userMapper.toEntity(userDTO));
             logger.info("User successfully registered: {}", savedUser);
             return ResponseEntity.ok(userMapper.toDTO(savedUser));
@@ -118,6 +119,44 @@ public class UserController {
             return ResponseEntity.ok(userMapper.toDTO(user));
         } catch (IllegalArgumentException e) {
             logger.warn("Error during fetching user by ID: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Transactional
+    @PutMapping(value = "/{id}/points/add/{amount}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> addPoints(@PathVariable String id, @PathVariable int amount) {
+        logger.info("Received request to add {} points to user by ID: {}", amount, id);
+        try {
+            userService.addLoyaltyPoints(id, amount);
+            return ResponseEntity.ok(id);
+        } catch (Exception e) {
+            logger.warn("Error during adding point(s) to user : {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Transactional
+    @PutMapping(value = "/{id}/points/remove/{amount}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> removePoints(@PathVariable String id, @PathVariable int amount) {
+        logger.info("Received request to remove {} points to user by ID: {}", amount, id);
+        try {
+            userService.deductLoyaltyPoints(id, amount);
+            return ResponseEntity.ok(id);
+        } catch (Exception e) {
+            logger.warn("Error during adding point(s) to user : {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/points")
+    public ResponseEntity<?> getPoints(@PathVariable String id) {
+        logger.info("Received request to get points from user by ID: {}", id);
+        try {
+            int userPoints = userService.getLoyaltyPoints(id);
+            return ResponseEntity.ok(userPoints);
+        } catch (Exception e) {
+            logger.warn("Error during fetching user's point : {}", e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

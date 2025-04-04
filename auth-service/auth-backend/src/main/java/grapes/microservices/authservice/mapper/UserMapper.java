@@ -16,6 +16,7 @@ public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     @Mapping(source = "id", target = "id", qualifiedByName = "stringToObjectId")
+    @Mapping(source = "loyaltyPoints", target = "loyaltyPoints")
     User toEntity(UserDTO dto);
 
     @Mapping(target = "age", expression = "java(computeAge(user.getBirthDate()))")
