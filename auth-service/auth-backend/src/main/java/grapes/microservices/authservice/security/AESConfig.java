@@ -33,13 +33,15 @@ public class AESConfig {
     private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
     @PostConstruct
-    public void init() {
-        if (aesKeyBase64 != null) {
+    public void init() throws Exception {
+        if (aesKeyBase64 != null && !aesKeyBase64.isEmpty()) {
             aesKey = Base64.getDecoder().decode(aesKeyBase64);
             logger.info("AES Key loaded.");
         } else {
+            aesKey = generateAESKey();
             logger.error("AES key is not configured properly.");
             System.err.println("AES key is not configured properly.");
+            System.out.println("Generated AES key (make sure to put it in .env file) : " + Base64.getEncoder().encodeToString(aesKey));
         }
     }
 
