@@ -10,6 +10,19 @@ This project implements an **authentication service** with **Spring Boot** for t
 - You can access the **Swagger** interface to test the API at the following address:  
   [http://127.0.0.1:8091/swagger-ui/index.html](http://127.0.0.1:8091/swagger-ui/index.html)
 
+### Run mongo sh command
+```bash
+docker exec -it grapes-mongodb mongosh "mongodb://root:SparringMASI%21@localhost:27017/admin"
+```
+
+The main DB is `db_auth` and the main collection is `users`.
+
+To use them is necessary to create a user with the following command:
+```bash
+use db_auth
+db.find()
+```
+
 ### Running the Backend
 
 1. Clone the project and navigate to the **backend** folder:
@@ -19,12 +32,18 @@ This project implements an **authentication service** with **Spring Boot** for t
     cd auth-service/backend
     ```
 
-2. Install dependencies and run the project:
+2. Run the following command to start the **MongoDB** and **Spring Boot** services:
+
+    ```bash
+    docker-compose up -d mongodb auth-service
+    ```
+3. Install dependencies and run the project:
 
     ```bash
     mvn clean install
     mvn spring-boot:run
     ```
+   
 
 ### Main Endpoints
 
