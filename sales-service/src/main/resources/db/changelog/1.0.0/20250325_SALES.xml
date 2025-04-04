@@ -158,6 +158,7 @@
     <changeSet author="kilane dounia" id="12">
         <addForeignKeyConstraint baseTableName="order_item" baseColumnNames="order_id"
                                  referencedTableName="order" referencedColumnNames="id"
+
                                  constraintName="fk_orderitem_order"/>
     </changeSet>
 
