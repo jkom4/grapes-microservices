@@ -6,7 +6,7 @@
 .pnp.js
 
 # directory hidden
-/src/assets/images
+/src/assets/images/*
 
 # testing
 /coverage
