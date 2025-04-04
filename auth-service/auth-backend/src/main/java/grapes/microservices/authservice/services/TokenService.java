@@ -30,6 +30,9 @@ public class TokenService {
     @Value("${auth.service.jwt.secret.key}")
     private String secretKey;
 
+    @Value("${auth.service.jwt.expiration.time}")
+    private long expirationTime;
+
     @Autowired
     private SessionService sessionService;
 
@@ -85,7 +88,7 @@ public class TokenService {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime * 1000))
                 .signWith(SECRET_KEY)
                 .compact();
     }
