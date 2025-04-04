@@ -82,7 +82,8 @@ src/
 │-- routes/               # Route management with React Router
 │-- sections/             # Section representing specific parts of a page
 │-- styles/               # CSS/SCSS files or styled-components
-│-- utils/                # Utility functions (helpers, formatters, etc.)
+│-- services/             # Use to call API endpoints (fetch, ...)
+│-- utils/                # Utility functions (helpers, formatters, models, etc.)
 │-- App.tsx               # Main application component
 │-- index.tsx             # Entry point of the React application
 ```
