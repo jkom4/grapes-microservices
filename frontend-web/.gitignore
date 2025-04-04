@@ -5,6 +5,9 @@
 /.pnp
 .pnp.js
 
+# directory hidden
+/src/assets/images
+
 # testing
 /coverage
 
