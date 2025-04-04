@@ -41,15 +41,18 @@ public class AuthController {
                 return ResponseEntity.status(401).body("Credentials are incorrect.");
             }
             AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
-            authProvider.sendChallenge(user);
-            return ResponseEntity.ok("Challenge sent to user by : " + authMethod.getName());
+            if (authProvider.sendChallenge(user)) {
+                return ResponseEntity.ok("Challenge sent to user by : " + authMethod.getName());
+            } else {
+                return ResponseEntity.status(400).body("Failed to send challenge.");
+            }
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 
     // TODO : implement CSRF protection and remove the comment then
-    /*@PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
         if (token == null || !token.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body("Invalid token");
@@ -63,7 +66,7 @@ public class AuthController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
-    }*/
+    }
 
     @PostMapping(value  = "/verify-challenge", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> verifyChallenge(@RequestParam String email, @RequestParam String submittedChallenge, @RequestParam AuthMethod authMethod, HttpServletResponse response) {
@@ -73,6 +76,9 @@ public class AuthController {
         }
         try {
             AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
+            //reset session
+            sessionService.deleteSession(user.getId().toHexString());
+            //new session
             String token = authProvider.processChallenge(user, submittedChallenge);
             switch (authMethod) {
                 case EMAIL:
@@ -81,8 +87,6 @@ public class AuthController {
                     }
                     break;
             }
-            //reset session
-            sessionService.deleteSession(user.getId().toHexString());
             Cookie cookie = new Cookie("JWT", token);
             cookie.setHttpOnly(true);
             //cookie.setSecure(true); // TODO : remove comment when HTTPS is enabled
@@ -97,7 +101,7 @@ public class AuthController {
     }
 
     // TODO : implement CSRF protection
-    /*@PostMapping("/refresh")
+    @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken) {
         if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body("Invalid token");
@@ -113,5 +117,5 @@ public class AuthController {
         String email = userService.getUserById(userId).getEmail();
         String newAccessToken = tokenService.generateToken(email);
         return ResponseEntity.ok(newAccessToken);
-    }*/
+    }
 }
