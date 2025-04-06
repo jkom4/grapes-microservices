@@ -1,7 +1,7 @@
 // src/pages/LoginPage.js
 import React, { useState, useEffect } from 'react'; // Import React and hooks for state and side effects
 import '../global.css'; // Import global CSS for styling
-import SPMB from '../images/SPMB.png'; // Import logo image for display
+import SPMB from '../images/SMPB.png'; // Import logo image for display
 
 const LoginPage = () => {
     // State to store login form data (username and password)

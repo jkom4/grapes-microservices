@@ -1,6 +1,6 @@
 import React, { useState } from 'react'; // Import React and useState hook for state management
 import '../global.css'; // Import global CSS for styling
-import SPMB from '../images/SPMB.png'; // Import bank logo image
+import SPMB from '../images/SMPB.png'; // Import bank logo image
 
 const PaymentPage = () => {
     // State to manage payment form data (card number split into 4 parts, expiry, and CVC)

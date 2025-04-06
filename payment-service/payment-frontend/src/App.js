@@ -17,17 +17,15 @@ function App() {
     return (
         // BrowserRouter enables client-side routing using the browser's history API
         <BrowserRouter>
-            // Suspense wraps lazy-loaded components and shows a fallback UI during loading
             <Suspense fallback={<div>Loading...</div>}>
-                // Routes is a container for all route definitions in the app
                 <Routes>
-                    // Defines a route for the login page at "/login"
+                    {/*// Defines a route for the login page at "/login"*/}
                     <Route path="/login" element={<LoginPage />} />
-                    // Route for the payment page, accessible at "/payment"
+                    {/*// Route for the payment page, accessible at "/payment"*/}
                     <Route path="/payment" element={<PaymentPage />} />
-                    // Route for payment verification, available at "/verification"
+                    {/*// Route for payment verification, available at "/verification"*/}
                     <Route path="/verification" element={<PaymentVerificationPage />} />
-                    // Catch-all route: redirects any unmatched path to "/login" using Navigate
+                    {/*// Catch-all route: redirects any unmatched path to "/login" using Navigate*/}
                     <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>
             </Suspense>
