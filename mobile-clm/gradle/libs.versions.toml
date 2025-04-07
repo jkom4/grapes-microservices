@@ -2,6 +2,8 @@
 agp = "8.8.0"
 coilCompose = "3.1.0"
 coilNetworkOkhttp = "3.1.0"
+composeRuntime = "1.5.0"
+converterGson = "2.11.0"
 koinAndroid = "3.2.0-beta-1"
 koinAndroidxCompose = "3.2.0-beta-1"
 koinAndroidxNavigation = "3.2.0-beta-1"
@@ -12,6 +14,8 @@ coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
+kotlinxCoroutinesAndroid = "1.10.1"
+kotlinxCoroutinesCore = "1.10.1"
 lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.8.0"
 composeBom = "2024.04.01"
@@ -27,6 +31,8 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-palette-ktx = { module = "androidx.palette:palette-ktx", version.ref = "paletteKtx" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilNetworkOkhttp" }
 coil3-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+compose-runtime = { module = "org.jetbrains.compose:compose-runtime", version.ref = "composeRuntime" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -50,6 +56,9 @@ koin-androidx-navigation = { module = "io.insert-koin:koin-androidx-navigation",
 koin-test-junit4 = { group = "io.insert-koin", name = "koin-test-junit4", version.ref = "koin" }
 
 # --- Retrofit & Networking ---
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+resources = { module = "org.jetbrains.compose.resources:resources", version.ref = "composeRuntime" }
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
 

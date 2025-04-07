@@ -1,3 +1,17 @@
 <resources>
-    <string name="app_name">Mobile-CLM</string>
+    <string name="app_name">Grapes</string>
+    <string name="popular">Popular</string>
+    <string name="for_you">For You</string>
+    <string name="results">Results</string>
+    <string name="category">Category</string>
+    <string name="family">Family</string>
+    <string name="price">Price</string>
+    <string name="rating">Rating</string>
+    <string name="filter_settings">Filter settings</string>
+    <string name="search">Search…</string>
+    <string name="all">all</string>
+    <string name="grapes">Grapes</string>
+    <string name="refresh">Refresh</string>
+    <string name="no_articles_found">No item found</string>
+    <string name="unknown_error">Unknown error has occured</string>
 </resources>

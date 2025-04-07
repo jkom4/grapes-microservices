@@ -15,15 +15,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import grapes.microservices.R
 import grapes.microservices.ui.theme.White
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MySelectableTag(elements: List<String>,
-                   selectedItem: String,
-                   onSelected: (String) -> Unit) {
+                    selectedItem: String,
+                    onSelect: (String) -> Unit) {
     FlowRow (
         horizontalArrangement = Arrangement.spacedBy(7.dp),
         verticalArrangement = Arrangement.spacedBy(7.dp),
@@ -50,13 +52,13 @@ fun MySelectableTag(elements: List<String>,
                     // Handle tag selection (when select the already selected tag, unselect it)
                     .clickable {
                         if (selectedItem == word) {
-                            onSelected("")
+                            onSelect("")
                         } else {
-                            onSelected(word)
+                            onSelect(word)
                         }
                     }
             ) {
-                val text = if (word == "") "all" else word
+                val text = if (word == "") stringResource(R.string.all) else word
                 Text(
                     modifier = Modifier.clip(shape = CircleShape),
                     text = text,

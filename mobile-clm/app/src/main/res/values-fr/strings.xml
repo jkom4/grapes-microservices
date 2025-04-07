@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Grapes</string>
+    <string name="popular">Populaire</string>
+    <string name="for_you">Pour toi</string>
+    <string name="results">Resultats</string>
+    <string name="category">Catégorie</string>
+    <string name="family">Famille</string>
+    <string name="price">Prix</string>
+    <string name="rating">Note</string>
+    <string name="filter_settings">Paramètres de filtrage</string>
+    <string name="search">Recherche…</string>
+    <string name="all">tout</string>
+    <string name="grapes">Grapes</string>
+    <string name="refresh">Actualiser</string>
+    <string name="no_articles_found">Pas d\'article trouvé</string>
+    <string name="unknown_error">Unknown error has occured</string>
+</resources>

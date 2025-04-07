@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -23,22 +24,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import grapes.microservices.R
+import grapes.microservices.models.data.ArticleFilter
 import grapes.microservices.ui.theme.White
 
 @Composable
 fun MyTopBar(
     modifier: Modifier
 ) {
-    // horizontale Bar
     Row(
         modifier = modifier
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Partie gauche : logo + texte
+        // left side : logo + texte
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = painterResource(id = R.drawable.logo_grapes), // Ton logo
@@ -47,27 +49,24 @@ fun MyTopBar(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Grapes",
+                text = stringResource(R.string.grapes),
                 style = MaterialTheme.typography.titleLarge,
             )
         }
 
-        // Partie droite : cloche, panier, avatar
+        // Left side : notification, cart, profil
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Icône de notification (cloche)
-            MyIcon(Icons.Default.Notifications, "Notifications")
+            // notification
+            MyIcon(Icons.Default.Notifications, "Notifications",
+                modifier = Modifier.padding(end = 8.dp))
 
-            Spacer(modifier = Modifier.width(8.dp))
+            // cart
+            MyIcon(Icons.Default.ShoppingCart, "Shopping cart",
+                modifier = Modifier.padding(end = 8.dp))
 
-            // Icône de panier
-            MyIcon(Icons.Default.ShoppingCart, "Shopping cart")
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Avatar (image de profil)
+            // profile
+//            // TODO Replace with true profile image
             MyIcon(Icons.Default.AccountBox, "Account")
-
-//            // TODO Remplacez par une image de profil réelle
 //            Image(
 //                painter = painterResource(id = R.drawable.ic_avatar), // Ton image de profil
 //                contentDescription = "User Avatar",
@@ -80,9 +79,9 @@ fun MyTopBar(
 }
 
 @Composable
-fun MyIcon(imageVector: ImageVector, description : String) {
+private fun MyIcon(imageVector: ImageVector, description : String, modifier: Modifier = Modifier) {
     IconButton(onClick = { },
-        modifier = Modifier
+        modifier = modifier
             .clip(CircleShape)
             .background(color = MaterialTheme.colorScheme.primary)
             .size(35.dp)

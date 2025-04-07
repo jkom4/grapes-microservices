@@ -1,4 +1,4 @@
-package grapes.microservices.views.components
+package grapes.microservices.utils
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
@@ -11,12 +11,21 @@ import grapes.microservices.views.screens.home.HomeScreen
 fun MyNavigation() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
-        composable(route = Screen.HomeScreen.route) {
+    NavHost(navController = navController, startDestination = Screen.Home.route) {
+        composable(route = Screen.Home.route) {
             HomeScreen(navController)
         }
-//        composable("details") {
-//            DetailsScreen()
-//        }
+        composable(route = Screen.Cart.route) {
+
+        }
+        composable(route = Screen.Profile.route) {
+
+        }
+        composable(route = Screen.Settings.route) {
+
+        }
+        composable(route = Screen.Details.route) {
+
+        }
     }
 }

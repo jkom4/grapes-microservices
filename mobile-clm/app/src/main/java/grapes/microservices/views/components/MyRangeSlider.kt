@@ -20,9 +20,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import grapes.microservices.R
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,8 +97,6 @@ fun MyRangeSlider(
 }
 
 
-// --- Exemple d'utilisation et Preview ---
-
 @Preview(showBackground = true)
 @Composable
 fun RangeSliderWithLabelsPreview() {
@@ -109,7 +109,7 @@ fun RangeSliderWithLabelsPreview() {
 
 
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Sélectionnez une plage de prix (€)", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.price), style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
 
             MyRangeSlider(
@@ -122,7 +122,7 @@ fun RangeSliderWithLabelsPreview() {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Text("Sélectionnez une note (continu)", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.rating), style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
 
             var selectedRatingRange by remember { mutableStateOf(0.5f..4.5f) }

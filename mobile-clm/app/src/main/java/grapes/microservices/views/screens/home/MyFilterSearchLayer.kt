@@ -13,10 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -25,36 +22,40 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import grapes.microservices.R
+import grapes.microservices.models.data.ArticleFilter
 import grapes.microservices.ui.theme.White
-import grapes.microservices.viewmodels.HomeViewModel
+import grapes.microservices.viewmodels.home.HomeViewModel
 import grapes.microservices.views.components.MySearchBar
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyFilterSearchLayer(
-    modifier: Modifier
+    modifier: Modifier,
+    currentFilters: ArticleFilter?,
+    viewModel: HomeViewModel
 ) {
     val isBottomSheetOpen = rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val filterSettingsSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-    )
+    val filterSettingsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true,)
+
+    if (currentFilters == null) return
 
     MyFilterSettingsBottomSheet(
         sheetState = filterSettingsSheetState,
-        isSheetOpen = isBottomSheetOpen
+        isSheetOpen = isBottomSheetOpen,
+        initialFilters = currentFilters,
+        onValueChange = { filters ->
+            viewModel.updateFilters(filters)
+        }
     )
 
     Row(
         modifier = modifier
     ) {
-        val viewmodel = koinViewModel<HomeViewModel>()
-        val currentSettings by viewmodel.filterSettings.collectAsState()
-        MySearchBar(modifier = Modifier.weight(1f), query = currentSettings.query,
-            onValueChange = {newQuery ->
-                viewmodel.updateQuery(newQuery)
+        MySearchBar(modifier = Modifier.weight(1f), query = currentFilters.query,
+            onValueChange = {
+                newQuery -> viewModel.updateFilters(currentFilters.copy(query = newQuery))
             })
 
         Spacer(modifier = Modifier.width(20.dp))

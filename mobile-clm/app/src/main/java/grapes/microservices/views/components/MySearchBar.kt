@@ -1,6 +1,5 @@
 package grapes.microservices.views.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,8 +22,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import grapes.microservices.R
 
 @Composable
 fun MySearchBar(modifier: Modifier, query: String, onValueChange: (String) -> Unit) {
@@ -43,7 +44,7 @@ fun MySearchBar(modifier: Modifier, query: String, onValueChange: (String) -> Un
         ),
         placeholder = {
             Text(
-                text = "Search ...",
+                text = stringResource(R.string.search),
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.bodyLarge
             )
@@ -66,6 +67,9 @@ fun MySearchBar(modifier: Modifier, query: String, onValueChange: (String) -> Un
                 CircleShape
             )
 //                .padding(end = 8.dp)
-            .background(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(25.dp))
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(25.dp)
+            )
     )
 }

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -35,7 +36,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ExpandableCard(title :String,
-                   space: Dp,
+                   modifier: Modifier = Modifier,
                    content: @Composable ColumnScope.() -> Unit) {
     val expandedState = remember {
         mutableStateOf(true)
@@ -44,54 +45,57 @@ fun ExpandableCard(title :String,
         targetValue = if (expandedState.value) 180f else 0f
     )
 
-    Card(
-        shape = RoundedCornerShape(0.dp),
-        modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.primaryContainer)
-            .shadow(1.dp)
-            .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = TweenSpec(
-                    durationMillis = 300,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-        colors = CardColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            contentColor = CardDefaults.cardColors().contentColor,
-            disabledContainerColor = CardDefaults.cardColors().disabledContainerColor,
-            disabledContentColor = CardDefaults.cardColors().disabledContentColor,
-        ),
-        onClick = {
-            expandedState.value = !expandedState.value
-        }
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(horizontal = space)
-                .padding(vertical = space / 2)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(title, style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.weight(1f))
-                IconButton(
-                    modifier = Modifier
-                        .rotate(rotationState.value),
-                    onClick = {
-                        expandedState.value = !expandedState.value
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Drop Down Arrow"
+    Box(modifier = modifier) {
+        Card(
+            shape = RoundedCornerShape(0.dp),
+            modifier = modifier
+                .background(color = MaterialTheme.colorScheme.primaryContainer)
+                .shadow(1.dp)
+                .fillMaxWidth()
+                .animateContentSize(
+                    animationSpec = TweenSpec(
+                        durationMillis = 300,
+                        easing = LinearOutSlowInEasing
                     )
-                }
+                ),
+            colors = CardColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                contentColor = CardDefaults.cardColors().contentColor,
+                disabledContainerColor = CardDefaults.cardColors().disabledContainerColor,
+                disabledContentColor = CardDefaults.cardColors().disabledContentColor,
+            ),
+            onClick = {
+                expandedState.value = !expandedState.value
             }
-            AnimatedVisibility(visible = expandedState.value) {
-                content()
+        ) {
+            Column(
+                modifier = Modifier.padding(
+                    horizontal = 16.dp,
+                    vertical = 8.dp
+                )
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(title, style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.weight(1f))
+                    IconButton(
+                        modifier = Modifier
+                            .rotate(rotationState.value),
+                        onClick = {
+                            expandedState.value = !expandedState.value
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Drop Down Arrow"
+                        )
+                    }
+                }
+                AnimatedVisibility(visible = expandedState.value) {
+                    content()
+                }
             }
         }
     }
