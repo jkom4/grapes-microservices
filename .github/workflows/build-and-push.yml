@@ -115,6 +115,13 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
+      - name: Create .env file from GitHub secrets
+        run: |
+          cat <<EOF > .env
+          DB_PASSWORD=${{ secrets.SALES_DB_PASSWORD }}
+          DB_USER=${{ secrets.SALES_DB_USER }}
+          EOF
+          
 
       - name: 🔑 Log in to OCIR
         run:  |

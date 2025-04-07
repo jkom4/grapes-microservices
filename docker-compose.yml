@@ -5,13 +5,9 @@ services:
   mariadb:
     build: ./docker/mariadb
     env_file:
-      - ./.env
+      - .env
     image: grapeshub/mariadb-grapes:latest
     container_name: grapes-mariadb
-    environment:
-      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
-      MARIADB_USER: ${DB_USER}
-      MARIADB_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -23,11 +19,6 @@ services:
       - ./.env
     image: grapeshub/mongodb-grapes:latest
     container_name: grapes-mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-      MONGO_USER_RW: ${MONGO_USER_RW}
-      MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
     ports:
       - "27017:27017"
     volumes:
