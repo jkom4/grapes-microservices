@@ -84,6 +84,10 @@ public class AuthController {
                     if (!user.isEmailVerified()) {
                         user.setEmailVerified(true);
                     }
+                case SMS:
+                    if (!user.isPhoneVerified()) {
+                        user.setPhoneVerified(true);
+                    }
                     break;
             }
             Cookie cookie = new Cookie("JWT", token);
