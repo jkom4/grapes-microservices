@@ -120,6 +120,8 @@ jobs:
           cat <<EOF > .env
           DB_PASSWORD=${{ secrets.SALES_DB_PASSWORD }}
           DB_USER=${{ secrets.SALES_DB_USER }}
+          ORACLE_REGION_ID = ${{ secrets.ORACLE_REGION_ID }}
+          ORACLE_TENANCY_NAMESPACE = ${{ secrets.ORACLE_TENANCY_NAMESPACE }}
           EOF
           
 
