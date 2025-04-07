@@ -6,7 +6,7 @@ services:
     build: ./docker/mariadb
     env_file:
       - .env
-    image: grapeshub/mariadb-grapes:latest
+    image:  ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
     container_name: grapes-mariadb
     ports:
       - "3306:3306"

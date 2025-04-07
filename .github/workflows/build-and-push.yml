@@ -130,7 +130,7 @@ jobs:
       - name: 🐳 Build & Push Images (via Docker Compose)
         run: |
           docker compose build mariadb
-          docker compose push grapeshub/mariadb-grapes:latest
+          docker compose push mariadb
 
 #          docker-compose build mariadb mongodb rabbitmq api-gateway auth-service sales-service payment-service chat-service data-mining-service frontend-web frontend-auth frontend-payment
 #          docker-compose push mariadb mongodb rabbitmq api-gateway auth-service sales-service payment-service chat-service data-mining-service frontend-web frontend-auth frontend-payment
