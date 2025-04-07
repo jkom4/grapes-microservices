@@ -7,6 +7,8 @@ import grapes.microservices.salesservice.repositories.ArticleRepository;
 import grapes.microservices.salesservice.repositories.OrderItemRepository;
 import grapes.microservices.salesservice.repositories.OrderRepository;
 import grapes.microservices.salesservice.utils.InvoiceGenerator;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
@@ -22,11 +24,21 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ArticleRepository articleRepository;
+    private final RabbitTemplate rabbitTemplate;
 
-    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, ArticleRepository articleRepository) {
+    @Autowired
+    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository,
+                        ArticleRepository articleRepository, RabbitTemplate rabbitTemplate) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.articleRepository = articleRepository;
+        this.rabbitTemplate = rabbitTemplate;
+    }
+
+    //  Method to send a message to RabbitMQ
+    public void sendOrderToDeliveryQueue(Integer orderId) {
+        rabbitTemplate.convertAndSend("order-paid-queue", orderId);
+        System.out.println(" Message send to RabbitMQ : Order ID = " + orderId);
     }
 
     public Order createTemporaryOrder(Integer userId) {
@@ -56,6 +68,9 @@ public class OrderService {
 
         orderRepository.save(order);
         orderItemRepository.deleteAll(items);
+
+        //  Send message to rabbitMQ
+        sendOrderToDeliveryQueue(order.getId());
     }
 
     private List<OrderItem> getValidOrderItems(Integer orderId) {

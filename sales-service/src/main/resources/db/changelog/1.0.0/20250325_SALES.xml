@@ -5,6 +5,12 @@
 
     <!-- 1. Table category -->
     <changeSet author="kilane dounia" id="1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="category"/>
+            </not>
+        </preConditions>
+
         <createTable tableName="category">
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -14,6 +20,7 @@
             <column name="picture_path" type="VARCHAR(50)"/>
         </createTable>
     </changeSet>
+
 
     <!-- 2. Table family -->
     <changeSet author="kilane dounia" id="2">
@@ -98,6 +105,24 @@
             </column>
             <column name="label" type="VARCHAR(50)"/>
         </createTable>
+    </changeSet>
+
+    <!--  Insert the 3 status -->
+    <changeSet author="kilane dounia" id="6-1">
+        <insert tableName="delivery_status">
+            <column name="id" valueNumeric="1"/>
+            <column name="label" value="Pending"/>
+        </insert>
+
+        <insert tableName="delivery_status">
+            <column name="id" valueNumeric="2"/>
+            <column name="label" value="In Progress"/>
+        </insert>
+
+        <insert tableName="delivery_status">
+            <column name="id" valueNumeric="3"/>
+            <column name="label" value="Delivered"/>
+        </insert>
     </changeSet>
 
     <!-- 7. Table delivery -->
@@ -208,6 +233,179 @@
                 referencedColumnNames="id"
                 constraintName="fk_review_order"/>
     </changeSet>
+
+    <!-- 20. Insert default categories -->
+    <changeSet author="nassim" id="19">
+        <insert tableName="category">
+            <column name="id" value="1"/>
+            <column name="name" value="Fruits classiques"/>
+            <column name="description" value="Fruits standards du quotidien"/>
+            <column name="picture_path" value="fruits_classiques.jpg"/>
+        </insert>
+
+        <insert tableName="category">
+            <column name="id" value="2"/>
+            <column name="name" value="Fruits exotiques"/>
+            <column name="description" value="Fruits rares et savoureux"/>
+            <column name="picture_path" value="fruits_exotiques.jpg"/>
+        </insert>
+
+        <insert tableName="category">
+            <column name="id" value="4"/>
+            <column name="name" value="Fruits rares"/>
+            <column name="description" value="Produits d'exception et de saison"/>
+            <column name="picture_path" value="fruits_rares.jpg"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="nassim" id="20">
+        <insert tableName="family">
+            <column name="id" value="1"/>
+            <column name="name" value="Fruits d'été"/>
+            <column name="description" value="Fruits disponibles en été"/>
+        </insert>
+        <insert tableName="family">
+            <column name="id" value="2"/>
+            <column name="name" value="Fruits d'hiver"/>
+            <column name="description" value="Fruits disponibles en hiver"/>
+        </insert>
+    </changeSet>
+
+
+    <!-- 19. Insert default articles -->
+    <changeSet author="nassim" id="21">
+        <insert tableName="article">
+            <column name="category_id" value="1"/>
+            <column name="family_id" value="1"/>
+            <column name="name" value="Kiwi"/>
+            <column name="description" value="Petit fruit vert vitaminé"/>
+            <column name="price_kg" valueNumeric="4.50"/>
+            <column name="price_unit" valueNumeric="1.10"/>
+            <column name="stock_kg" valueNumeric="8.00"/>
+            <column name="unit_stock" valueNumeric="12.00"/>
+            <column name="origin" value="Nouvelle-Zélande"/>
+            <column name="picture_path" value="kiwi.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="1"/>
+            <column name="family_id" value="1"/>
+            <column name="name" value="Banane"/>
+            <column name="description" value="Fruit jaune énergétique"/>
+            <column name="price_kg" valueNumeric="2.80"/>
+            <column name="price_unit" valueNumeric="0.70"/>
+            <column name="stock_kg" valueNumeric="10.00"/>
+            <column name="unit_stock" valueNumeric="30.00"/>
+            <column name="origin" value="Colombie"/>
+            <column name="picture_path" value="banane.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="1"/>
+            <column name="family_id" value="1"/>
+            <column name="name" value="Pomme"/>
+            <column name="description" value="Fruit rouge croquant"/>
+            <column name="price_kg" valueNumeric="3.99"/>
+            <column name="price_unit" valueNumeric="1.20"/>
+            <column name="stock_kg" valueNumeric="20.00"/>
+            <column name="unit_stock" valueNumeric="15.00"/>
+            <column name="origin" value="France"/>
+            <column name="picture_path" value="pomme.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="4"/>
+            <column name="family_id" value="1"/>
+            <column name="name" value="Ananas Victoria"/>
+            <column name="description" value="Délicieux petit ananas sucré, parfait pour l'été"/>
+            <column name="price_kg" valueNumeric="5.99"/>
+            <column name="price_unit" valueNumeric="2.50"/>
+            <column name="stock_kg" valueNumeric="15.00"/>
+            <column name="unit_stock" valueNumeric="10.00"/>
+            <column name="origin" value="Réunion"/>
+            <column name="picture_path" value="ananas_victoria.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="1"/>
+            <column name="family_id" value="1"/>
+            <column name="name" value="Fraise"/>
+            <column name="description" value="Fruit rouge sucré, idéal pour les desserts"/>
+            <column name="price_kg" valueNumeric="6.50"/>
+            <column name="price_unit" valueNumeric="2.00"/>
+            <column name="stock_kg" valueNumeric="5.00"/>
+            <column name="unit_stock" valueNumeric="8.00"/>
+            <column name="origin" value="Espagne"/>
+            <column name="picture_path" value="fraise.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="2"/>
+            <column name="family_id" value="2"/>
+            <column name="name" value="Orange"/>
+            <column name="description" value="Agrume riche en vitamine C"/>
+            <column name="price_kg" valueNumeric="3.20"/>
+            <column name="price_unit" valueNumeric="1.00"/>
+            <column name="stock_kg" valueNumeric="18.00"/>
+            <column name="unit_stock" valueNumeric="25.00"/>
+            <column name="origin" value="Maroc"/>
+            <column name="picture_path" value="orange.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="2"/>
+            <column name="family_id" value="2"/>
+            <column name="name" value="Raisin"/>
+            <column name="description" value="Petites grappes sucrées"/>
+            <column name="price_kg" valueNumeric="4.80"/>
+            <column name="price_unit" valueNumeric="1.80"/>
+            <column name="stock_kg" valueNumeric="12.00"/>
+            <column name="unit_stock" valueNumeric="15.00"/>
+            <column name="origin" value="Italie"/>
+            <column name="picture_path" value="raisin.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="2"/>
+            <column name="family_id" value="2"/>
+            <column name="name" value="Poire"/>
+            <column name="description" value="Fruit doux et juteux"/>
+            <column name="price_kg" valueNumeric="3.60"/>
+            <column name="price_unit" valueNumeric="1.30"/>
+            <column name="stock_kg" valueNumeric="14.00"/>
+            <column name="unit_stock" valueNumeric="10.00"/>
+            <column name="origin" value="Belgique"/>
+            <column name="picture_path" value="poire.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="2"/>
+            <column name="family_id" value="2"/>
+            <column name="name" value="Cerise"/>
+            <column name="description" value="Petite douceur rouge, sucrée"/>
+            <column name="price_kg" valueNumeric="7.20"/>
+            <column name="price_unit" valueNumeric="2.90"/>
+            <column name="stock_kg" valueNumeric="7.00"/>
+            <column name="unit_stock" valueNumeric="8.00"/>
+            <column name="origin" value="Turquie"/>
+            <column name="picture_path" value="cerise.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="2"/>
+            <column name="family_id" value="2"/>
+            <column name="name" value="Mangue"/>
+            <column name="description" value="Fruit exotique juteux"/>
+            <column name="price_kg" valueNumeric="5.80"/>
+            <column name="price_unit" valueNumeric="2.30"/>
+            <column name="stock_kg" valueNumeric="9.00"/>
+            <column name="unit_stock" valueNumeric="10.00"/>
+            <column name="origin" value="Brésil"/>
+            <column name="picture_path" value="mangue.jpg"/>
+        </insert>
+    </changeSet>
+
+
 
     <!-- 18. Foreign key: review -> user -->
 <!--    <changeSet author="kilane dounia" id="18">-->

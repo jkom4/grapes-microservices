@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 @Builder
 public class ArticleDTO {
 
+    private Integer id;
+
     @NotNull
     private Integer categoryId;
 
