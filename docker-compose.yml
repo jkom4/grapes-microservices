@@ -16,21 +16,48 @@ services:
     volumes:
       - ./docker/mariadb/volumes/mariadb_data:/var/lib/mysql
 
-  mongodb:
+  mongodb-primary:
     build: ./docker/mongodb
     env_file: .env
     image: grapeshub/mongodb-grapes:latest
-    container_name: grapes-mongodb
+    container_name: grapes-mongodb-primary
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: SparringMASI!
     ports:
       - "27017:27017"
     volumes:
-      - mongodb_data:/data/db
-    command: ["--auth"]  # To activate authentication
+      - mongodb_data_primary:/data/db
+    command: [ "--replSet", "rs0", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
 
-### Exchange
+  mongodb-secondary:
+    build: ./docker/mongodb
+    env_file: .env
+    image: grapeshub/mongodb-grapes:latest
+    container_name: grapes-mongodb-secondary
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: SparringMASI!
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_data_secondary:/data/db
+    command: [ "--replSet", "rs0", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
+
+  mongodb-arbiter:
+    build: ./docker/mongodb
+    env_file: .env
+    image: grapeshub/mongodb-grapes:latest
+    container_name: grapes-mongodb-arbiter
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: SparringMASI!
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongodb_data_arbiter:/data/db
+    command: [ "--replSet", "rs0", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
+  ### Exchange
   rabbitmq:
     build: ./docker/rabbitmq
     env_file: .env
@@ -99,7 +126,7 @@ services:
     ports:
       - "8090:8090"
     depends_on:
-      - mongodb
+      - mongodb-primary
       - mariadb
       - data-mining-service
       - auth-service
@@ -115,7 +142,7 @@ services:
     ports:
       - "8091:8091"
     depends_on:
-      - mongodb
+      - mongodb-primary
       - mariadb
 
   sales-service:
@@ -146,7 +173,7 @@ services:
     ports:
       - "8095:8095"
     depends_on:
-      - mariadb
+      - mongodb-primary
 
   data-mining-service:
     build: ./data-mining-service
@@ -155,7 +182,7 @@ services:
     ports:
       - "8096:8096"
     depends_on:
-      - mongodb
+      - mongodb-primary
       - mariadb
 
 ### FRONTEND
@@ -189,5 +216,7 @@ services:
 
 volumes:
   mariadb_data:
-  mongodb_data:
+  mongodb_data_primary:
+  mongodb_data_secondary:
+  mongodb_data_arbiter:
   sonarqube-data:

@@ -1,19 +1,25 @@
 db = connect("mongodb://localhost:27017/admin");
 
-// Create the root user in the admin database
-db.createUser({
-    user: "root",
-    pwd: "SparringMASI!",
-    roles: [
-        { role: "userAdminAnyDatabase", db: "admin" },
-        { role: "readWriteAnyDatabase", db: "admin" }
-    ]
-});
+// Initialiser le ReplicaSet si ce n'est pas déjà fait
+var status = rs.status();
+if (status.ok === 0) {
+    rs.initiate(
+        {
+            _id: "rs0",
+            members: [
+                { _id: 0, host: "grapes-mongodb-primary:27017" },
+                { _id: 1, host: "grapes-mongodb-secondary:27017" },
+                { _id: 2, host: "grapes-mongodb-arbiter:27017", arbiterOnly: true }
+            ]
+        }
+    );
+    print("✅ ReplicaSet initiated.");
+} else {
+    print("ℹ️ ReplicaSet already initiated.");
+}
 
-// Connect to the auth_db database
 db = connect("mongodb://root:SparringMASI!@localhost:27017/auth_db?authSource=admin");
-db.createCollection("placeholder"); // create a collection to initialize the database
+db.createCollection("placeholder");
 
-// Connect to the chat_db database
 db = connect("mongodb://root:SparringMASI!@localhost:27017/chat_db?authSource=admin");
 db.createCollection("placeholder");
