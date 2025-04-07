@@ -1,27 +1,27 @@
 import React, { useState } from "react";
-import aboutUs1 from "../../assets/images/cameron.png";
-import aboutUs2 from "../../assets/images/jobelin.png";
-import aboutUs3 from "../../assets/images/mathys.png";
-import aboutUs4 from "../../assets/images/benjamin.png";
-import aboutUs5 from "../../assets/images/charles.png";
-import aboutUs6 from "../../assets/images/nasser.png";
-import aboutUs7 from "../../assets/images/dounia.png";
-import aboutUs8 from "../../assets/images/nassim.png";
-import aboutUs9 from "../../assets/images/daive.png";
+import cameronPicture from "../../assets/images/cameron.png";
+import jobelinPicture from "../../assets/images/jobelin.png";
+import mathysPicture from "../../assets/images/mathys.png";
+import benjaminPicture from "../../assets/images/benjamin.png";
+import charlesPicture from "../../assets/images/charles.png";
+import nasserPicture from "../../assets/images/nasser.png";
+import douniaPicture from "../../assets/images/dounia.png";
+import nassimPicture from "../../assets/images/nassim.png";
+import daivePicture from "../../assets/images/daive.png";
 import { useLanguage } from "../../features/LanguageContext";
 
 function WhoAreWeSection(props: any) {
     // Array holding the images of the team members
     const images = [
-        aboutUs1,
-        aboutUs2,
-        aboutUs3,
-        aboutUs4,
-        aboutUs5,
-        aboutUs6,
-        aboutUs7,
-        aboutUs8,
-        aboutUs9,
+        cameronPicture,
+        jobelinPicture,
+        mathysPicture,
+        benjaminPicture,
+        charlesPicture,
+        nasserPicture,
+        douniaPicture,
+        nassimPicture,
+        daivePicture,
     ];
 
     // Group images into sets of 3 for the carousel display
