@@ -133,7 +133,7 @@ public class UserServiceTest {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
 
-        User editedUser = userService.editUser(updatedUser);
+        User editedUser = userService.editUser("67e13f0735d02563d11c04b6", updatedUser);
 
         assertNotNull(editedUser);
         assertEquals("Jack", editedUser.getFirstName());
@@ -147,7 +147,7 @@ public class UserServiceTest {
         updatedUser.setPassword("weakpassword");
 
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.editUser(updatedUser));
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.editUser("67e13f0735d02563d11c04b6", updatedUser));
 
         assertEquals("Validation errors: password Password must contain at least one uppercase letter, one digit, and one special character; ", thrown.getMessage());
     }

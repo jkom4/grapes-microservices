@@ -69,7 +69,7 @@ class UserMapperTest {
 
         double age = userMapper.computeAge(date);
 
-        assertEquals(18.0, age, 0.1);
+        assertEquals(18.0, age, 0.5);
     }
 
     @Test

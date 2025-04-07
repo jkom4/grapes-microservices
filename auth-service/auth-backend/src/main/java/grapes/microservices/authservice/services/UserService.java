@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import static grapes.microservices.authservice.validators.UserValidator.isValid;
@@ -101,17 +102,12 @@ public class UserService {
      * @throws IllegalArgumentException if no user is found with the provided ID.
      */
     @Transactional
-    public User editUser(User updatedUser) throws Exception {
-        User user;
-        if (updatedUser.getId() != null) {
-            user = getUserById(String.valueOf(updatedUser.getId()));
-        } else if (updatedUser.getEmail() != null) {
-            user = getUserByEmail(updatedUser.getEmail());
-        } else {
-            logger.error("Edit failed: ID or email cannot be null");
-            throw new IllegalArgumentException("ID or email cannot be null");
+    public User editUser(String idStr, User updatedUser) throws Exception {
+        User user = getUserById(idStr);
+        if (!user.verifyPassword(updatedUser.getPassword())) {
+            logger.warn("Password verification failed for user: {}", idStr);
+            throw new IllegalArgumentException("Password verification failed");
         }
-
         user.update(updatedUser);
         if(isValid(user)) {
             user.encryptUser();

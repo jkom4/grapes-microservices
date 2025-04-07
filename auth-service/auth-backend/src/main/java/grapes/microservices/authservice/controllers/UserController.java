@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -82,11 +83,27 @@ public class UserController {
     }
 
     @Transactional
-    @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO) {
-        logger.info("Received request to update user: {}", userDTO);
+    @PutMapping(value = "/update/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO, @PathVariable String id) {
+        logger.info("Received request to update user: {}", id);
         try {
-            User updatedUser = userService.editUser(userMapper.toEntity(userDTO));
+            if (userDTO.getPassword() == null) {
+                logger.warn("Password is null in the request body");
+                return ResponseEntity.badRequest().body("Password cannot be null");
+            }
+            User userToUpdate = userMapper.toEntity(userDTO);
+            if (userToUpdate.getId() != null && !userToUpdate.getId().toHexString().equals(id)) {
+                logger.error("User ID in request body does not match path variable: {}", id);
+                return ResponseEntity.badRequest().body("User ID in request body does not match path variable");
+            }
+
+            User updatedUser = userService.editUser(id, userToUpdate);
+
+            if (!updatedUser.getId().toHexString().equals(id)) {
+                logger.error("Updated user ID does not match the requested ID: {}", id);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("The updated user does not match the requested ID.");
+            }
             logger.info("User successfully updated: {}", updatedUser);
             return ResponseEntity.ok(userMapper.toDTO(updatedUser));
         } catch (IllegalArgumentException e) {
