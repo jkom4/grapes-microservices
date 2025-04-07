@@ -1,12 +1,9 @@
-// src/services/fruitService.ts
-import Article from "../utils/models/Articles"; // Import the Article model
-import placeholder from "../assets/images/fruit.png"; // Fallback image
-
-const url = "http://localhost:8092";
+import Article from "../utils/models/Articles";
+import getArticlesAPI from "./httpCommon";
 
 const fetchFruits = async (limit: number = 3): Promise<Article[]> => {
     try {
-        const response = await fetch(`${url}/clm/articles`);
+        const response = await fetch(`${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.articles}`);
 
         if (!response.ok) {
             throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
@@ -20,23 +17,8 @@ const fetchFruits = async (limit: number = 3): Promise<Article[]> => {
         }
 
         const data = JSON.parse(text);
-        // Create instances of Article and limit the number of fruits
-        return data.slice(0, limit).map((item: any) =>
-            new Article(
-                item.id,
-                item.categoryId,
-                item.familyId,
-                item.name,
-                item.description,
-                item.priceKg,
-                item.priceUnit,
-                item.stockKg,
-                item.stockUnit,
-                item.origin,
-                item.picturePath || placeholder, // Fallback to placeholder
-                item.rating || 4 // Default value for rating
-            )
-        );
+
+        return data.slice(0, limit).map((item: any) => Article.parse(item));
     } catch (err) {
         throw new Error(err instanceof Error ? err.message : "An error occurred");
     }

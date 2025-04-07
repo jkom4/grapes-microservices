@@ -1,4 +1,6 @@
-// utils/models/Article.ts
+// src/utils/models/Article.ts
+import placeholder from "../../assets/images/fruit.png"
+
 class Article {
     id: number;
     categoryId: number;
@@ -41,6 +43,22 @@ class Article {
         this.rating = rating;
     }
 
+    static parse(data: any): Article {
+        return new Article(
+            data.id,
+            data.categoryId,
+            data.familyId,
+            data.name,
+            data.description,
+            data.priceKg,
+            data.priceUnit,
+            data.stockKg,
+            data.stockUnit,
+            data.origin,
+            data.picturePath || placeholder,
+            data.rating || 4
+        );
+    }
 }
 
 export default Article;
