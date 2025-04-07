@@ -4,6 +4,8 @@ import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.EmailService;
 import grapes.microservices.authservice.services.TokenService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,10 +18,11 @@ import java.io.IOException;
  */
 @Service
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class EmailAuthProvider extends AbstractAuthProvider{
 
     @Autowired
-    private final EmailService emailService;
+    private EmailService emailService;
 
     @Autowired
     private TokenService tokenService;

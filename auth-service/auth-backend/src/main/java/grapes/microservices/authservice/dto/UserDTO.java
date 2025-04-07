@@ -59,7 +59,7 @@ public class UserDTO {
     @NotNull(message = "birthDate cannot be null")
     private Date birthDate;
 
-    private double age;
+    private int age;
 
     @NotNull(message = "gender cannot be null")
     private Gender gender;

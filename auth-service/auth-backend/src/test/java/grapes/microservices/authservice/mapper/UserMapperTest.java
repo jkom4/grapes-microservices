@@ -46,7 +46,7 @@ class UserMapperTest {
         double age = userMapper.computeAge(date);
 
         // We expect him to be 30 years old if it's 2025, and he has already passed his birthday
-        assertEquals(30.0, age, 0.1);
+        assertEquals(30, age);
     }
 
     @Test
@@ -58,7 +58,7 @@ class UserMapperTest {
         double age = userMapper.computeAge(date);
 
         // In 2025, the age should be 25.0, because February 29, 2000 is not an exact date
-        assertEquals(25.0, age, 0.1);
+        assertEquals(25, age);
     }
 
     @Test
@@ -69,7 +69,7 @@ class UserMapperTest {
 
         double age = userMapper.computeAge(date);
 
-        assertEquals(18.0, age, 0.5);
+        assertEquals(18, age);
     }
 
     @Test

@@ -38,7 +38,7 @@ public interface UserMapper {
      * @param birthDate the birthDate
      * @return the age
      */
-    default double computeAge(Date birthDate) {
+    default int computeAge(Date birthDate) {
         if (birthDate == null) {
             throw new IllegalArgumentException("birthDate cannot be null");
         }
@@ -54,6 +54,7 @@ public interface UserMapper {
         int totalDaysInYear = now.isLeapYear() ? 366 : 365;
 
         // 30.4375 is the mean of number of days in a month
-        return years + ((months * 30.4375 + days) / totalDaysInYear);
+        double ageInYears = years + ((months * 30.4375 + days) / totalDaysInYear);
+        return (int) Math.round(ageInYears);
     }
 }
