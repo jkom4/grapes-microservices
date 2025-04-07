@@ -118,7 +118,7 @@ jobs:
 
       - name: 🔑 Log in to Docker Hub
         run:  |
-          echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login https://${{ secrets.ORACLE_REGION-ID }}.ocir.io \
+          echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login https://${{ secrets.ORACLE_REGION_ID }}.ocir.io \
           -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" --password-stdin
 
       - name: 🐳 Build & Push Images (via Docker Compose)
