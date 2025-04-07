@@ -122,8 +122,8 @@ jobs:
 
       - name: 🐳 Build & Push Images (via Docker Compose)
         run: |
-          docker-compose build mariadb:latest
-          docker push ${{ secrets.OCIR_REGION_ID }}.ocir.io/jkom/grapeshub/mariadb-grapes:latest
+          docker compose build mariadb:latest
+          docker compose push ${{ secrets.OCIR_REGION_ID }}.ocir.io/jkom/grapeshub/mariadb-grapes:latest
 
 #          docker-compose build mariadb mongodb rabbitmq api-gateway auth-service sales-service payment-service chat-service data-mining-service frontend-web frontend-auth frontend-payment
 #          docker-compose push mariadb mongodb rabbitmq api-gateway auth-service sales-service payment-service chat-service data-mining-service frontend-web frontend-auth frontend-payment
