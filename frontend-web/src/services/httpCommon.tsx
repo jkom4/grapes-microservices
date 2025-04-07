@@ -5,4 +5,11 @@ const getArticlesAPI = {
     },
 };
 
-export default getArticlesAPI;
+const searchArticlesAPI = {
+    baseURL: 'http://localhost:8092',
+    endpoints: {
+        search: '/clm/articles/search?name=${query}',
+    },
+};
+
+export { getArticlesAPI, searchArticlesAPI };
