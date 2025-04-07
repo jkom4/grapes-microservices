@@ -1,7 +1,7 @@
 import Article from "../utils/models/Articles";
-import getArticlesAPI from "./httpCommon";
+import {getArticlesAPI} from "./httpCommon";
 
-const fetchFruits = async (limit: number = 3): Promise<Article[]> => {
+const fetchFruits = async (limit: number): Promise<Article[]> => {
     try {
         const response = await fetch(`${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.articles}`);
 
@@ -18,7 +18,7 @@ const fetchFruits = async (limit: number = 3): Promise<Article[]> => {
 
         const data = JSON.parse(text);
 
-        return data.slice(0, limit).map((item: any) => Article.parse(item));
+        return limit ? data.slice(0, limit).map((item: any) => Article.parse(item)) : data.map((item: any) => Article.parse(item));
     } catch (err) {
         throw new Error(err instanceof Error ? err.message : "An error occurred");
     }

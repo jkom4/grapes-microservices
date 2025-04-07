@@ -1,6 +1,5 @@
-// src/components/Navbar.tsx
-
 import React from 'react';
+import { Link } from 'react-router-dom';  // Import Link from react-router-dom
 import { useLanguage } from '../features/LanguageContext';  // Import the custom hook to access the language
 import englishFlag from '../assets/images/english-flag.png';
 import frenchFlag from '../assets/images/french-flag.png';
@@ -15,14 +14,19 @@ function Navbar() {
 
     return (
         <header className="flex justify-between items-center p-4 bg-primary">
-            <a href="/">
+            <Link to="/">
                 <div className="text-lg font-normal">
                     <img src={logo} alt="logo" className="h-auto w-auto" />
                 </div>
-            </a>
+            </Link>
             <nav className="flex gap-8 flex-grow justify-center">
-                <a href="#aboutus" className="text-black text-lg hover:text-accent">{language === 'en' ? 'About Us' : 'À propos'}</a>
-                <a href="/products" className="text-black text-lg hover:text-accent">{language === 'en' ? 'Our Product' : 'Nos Produits'}</a>
+                <a href="#aboutus" className="text-black text-lg hover:text-accent">
+                    {language === 'en' ? 'About Us' : 'À propos'}
+                </a>
+                {/* Use Link to navigate to AllArticles page */}
+                <Link to="/all-articles" className="text-black text-lg hover:text-accent">
+                    {language === 'en' ? 'Our Product' : 'Nos Produits'}
+                </Link>
                 <a href="#" className="text-black text-2xl">
                     <span>🛒</span>
                 </a>
