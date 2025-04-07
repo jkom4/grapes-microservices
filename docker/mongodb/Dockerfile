@@ -1,12 +1,15 @@
 FROM mongo:latest
-LABEL authors="jkom"
+LABEL authors="kilane dounia"
 
-ENV MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
-ENV MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
-
+# Copie tes scripts init
 COPY ./config/init-db.js /docker-entrypoint-initdb.d/
+COPY ./config/init-replica.js /docker-entrypoint-initdb.d/
 
+# Copie ta clé de sécurité
 COPY ./mongo-keyfile /etc/mongo-keyfile
-RUN chmod 600 /etc/mongo-keyfile
 
-EXPOSE ${MONGO_PORT}
+# Fixe les permissions TRES restrictives
+RUN chmod 400 /etc/mongo-keyfile
+
+# Expose port Mongo
+EXPOSE 27017

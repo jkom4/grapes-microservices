@@ -28,7 +28,8 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data_primary:/data/db
-    command: [ "--replSet", "rs0", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
+      - ./docker/mongodb/mongo-keyfile:/etc/mongo-keyfile:ro
+    command: [ "mongod", "--replSet", "rs0", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
 
   mongodb-secondary:
     build: ./docker/mongodb
@@ -42,7 +43,8 @@ services:
       - "27018:27017"
     volumes:
       - mongodb_data_secondary:/data/db
-    command: [ "--replSet", "rs0", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
+      - ./docker/mongodb/mongo-keyfile:/etc/mongo-keyfile:ro
+    command: [ "mongod", "--replSet", "rs0", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
 
   mongodb-arbiter:
     build: ./docker/mongodb
@@ -56,7 +58,8 @@ services:
       - "27019:27017"
     volumes:
       - mongodb_data_arbiter:/data/db
-    command: [ "--replSet", "rs0", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
+      - ./docker/mongodb/mongo-keyfile:/etc/mongo-keyfile:ro
+    command: [ "mongod", "--replSet", "rs0", "--keyFile", "/etc/mongo-keyfile", "--bind_ip_all" ]
   ### Exchange
   rabbitmq:
     build: ./docker/rabbitmq
