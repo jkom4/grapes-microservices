@@ -1,113 +1,108 @@
-// src/pages/PaymentVerificationPage.js
-import React, { useState } from 'react'; // Import React and useState hook for state management
-import '../global.css'; // Import global CSS for styling
-import MASIB from '../images/MASIB.png'; // Import bank logo image
-import VISA from '../images/verified_by_visa.png'; // Import Verified by Visa logo
-import MASTC from '../images/mastercardsecurecode_logo.png'; // Import Mastercard SecureCode logo
+import React, { useState } from 'react';
+import '../global.css';
+import MASIB from '../images/MASIB.png';
+import VISA from '../images/verified_by_visa.png';
+import MASTC from '../images/mastercardsecurecode_logo.png';
+import { PaymentVerification } from '../models/PaymentVerification';
+import { VerificationService } from '../services/VerificationService';
 
 const PaymentVerificationPage = () => {
-    // State to store the payment token (OTP code) entered by the user
+    // State for OTP input and status messages
     const [paymentToken, setPaymentToken] = useState('');
-
-    // State to control the visibility of an error message
     const [showError, setShowError] = useState(false);
-
-    // State to store and display a success message with the verified token
     const [successMessage, setSuccessMessage] = useState(null);
 
-    // Handle form submission for payment verification
+    // Handle verification form submission
     const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent default form submission behavior
+        e.preventDefault();
 
-        // Check if the payment token is empty or just whitespace
+        // Basic validation
         if (paymentToken.trim() === "") {
-            alert("Veuillez entrer le code reçu."); // Alert user to enter the code
+            alert("Please enter the received code.");
             return;
         }
 
         try {
-            // Send POST request to verify the payment token
-            const response = await fetch('https://127.0.0.1:8043/payment', {
-                method: 'POST', // HTTP method
-                headers: {'Content-Type': 'application/json'}, // Specify JSON content type
-                body: JSON.stringify({ paymentToken }) // Send payment token in request body
-            });
+            // Create verification object and submit to service
+            const verification = new PaymentVerification(paymentToken);
+            const success = await VerificationService.verifyPayment(verification);
 
-            if (response.ok) { // Check if response status is 200-299
-                setShowError(false); // Hide any previous error message
-                setSuccessMessage(paymentToken); // Set success message with the token
-                // Redirect to homepage after 3 seconds
+            if (success) {
+                // Handle successful verification
+                setShowError(false);
+                setSuccessMessage(paymentToken);
                 setTimeout(() => {
                     window.location.href = '/';
                 }, 3000);
             } else {
-                setShowError(true); // Show error message if verification fails
+                // Show error on failure
+                setShowError(true);
             }
         } catch (error) {
-            console.error('Error submitting payment:', error); // Log error to console
-            setShowError(true); // Show error message on network/server failure
+            console.error('Error submitting payment:', error);
+            setShowError(true);
         }
     };
 
-    // JSX to render the payment verification UI
     return (
-        <div className="verification-container"> {/* Main container for styling */}
-            <div className="verification-box"> {/* Inner box for content */}
-                <div className="logo-container"> {/* Container for logos */}
-                    <div className="left-logo"> {/* Left-aligned bank logo */}
-                        <img src={MASIB} alt="Logo Banque" /> {/* Display bank logo */}
+        <div className="verification-container">
+            <div className="verification-box">
+                <div className="logo-container">
+                    <div className="left-logo">
+                        <img src={MASIB} alt="Bank Logo" />
                     </div>
-                    <div className="right-logos"> {/* Right-aligned card brand logos */}
-                        <img src={VISA} alt="Verified by Visa" /> {/* Verified by Visa logo */}
-                        <img src={MASTC} alt="MasterCard" /> {/* Mastercard SecureCode logo */}
+                    <div className="right-logos">
+                        <img src={VISA} alt="Verified by Visa" />
+                        <img src={MASTC} alt="MasterCard" />
                     </div>
                 </div>
 
-                {/* Inform user about the verification code */}
                 <p>A verification code has been sent to your registered number.</p>
 
-                <form onSubmit={handleSubmit}> {/* Form with submit handler */}
-                    <div className="form-group"> {/* Merchant name field */}
-                        <label>Marchant name :</label>
-                        <input type="text" value="Grapes" disabled /> {/* Hardcoded, non-editable */}
+                <form onSubmit={handleSubmit}>
+                    {/* Transaction details display (non-editable) */}
+                    <div className="form-group">
+                        <label>Merchant name:</label>
+                        <input type="text" value="Grapes" disabled />
                     </div>
 
-                    <div className="form-group"> {/* Transaction amount field */}
-                        <label>Amount of the transaction :</label>
-                        <input type="text" value="EURO 45.99 €" disabled /> {/* Hardcoded, non-editable */}
+                    <div className="form-group">
+                        <label>Amount of the transaction:</label>
+                        <input type="text" value="EURO 45.99 €" disabled />
                     </div>
 
-                    <div className="form-group"> {/* Card number field */}
-                        <label>Card number :</label>
-                        <input type="text" value="XXXX XXXX XXXX 0237" disabled /> {/* Hardcoded, masked card number */}
+                    <div className="form-group">
+                        <label>Card number:</label>
+                        <input type="text" value="XXXX XXXX XXXX 0237" disabled />
                     </div>
 
-                    <div className="form-group"> {/* OTP input field */}
-                        <label>Entrez le code reçu :</label>
+                    {/* OTP input field */}
+                    <div className="form-group">
+                        <label>Enter the received code:</label>
                         <input
-                            type="text" // Text input for OTP
-                            placeholder="Entrer the OTP code here" // Placeholder text
-                            value={paymentToken} // Controlled input value
-                            onChange={(e) => setPaymentToken(e.target.value)} // Update state on change
+                            type="text"
+                            placeholder="Enter the OTP code here"
+                            value={paymentToken}
+                            onChange={(e) => setPaymentToken(e.target.value)}
                         />
                     </div>
 
-                    <button type="submit">Confirm</button> {/* Submit button */}
+                    <button type="submit">Confirm</button>
                 </form>
 
-                {/* Display error message if verification fails */}
+                {/* Error message display */}
                 {showError && (
                     <p className="error-message">
-                        Paiement échoué, le code n'a pas pu être vérifié.
+                        Payment failed, the code could not be verified.
                     </p>
                 )}
 
-                {/* Display success message if verification succeeds */}
+                {/* Success message with redirect notification */}
                 {successMessage && (
                     <div className="success-message">
                         <p>
-                            Paiement réussi avec le code : <strong>{successMessage}</strong>.<br />
-                            Redirection vers la page d'accueil dans 3 secondes...
+                            Payment successful with code: <strong>{successMessage}</strong>.<br />
+                            Redirecting to homepage in 3 seconds...
                         </p>
                     </div>
                 )}
@@ -116,4 +111,4 @@ const PaymentVerificationPage = () => {
     );
 };
 
-export default PaymentVerificationPage; // Export the component for use in the app
+export default PaymentVerificationPage;
