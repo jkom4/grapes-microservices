@@ -41,8 +41,45 @@ public class SessionService {
         return redisTemplate.opsForValue().get("refresh:" + userId);
     }
 
+    /**
+     * Resets the session for the given user ID
+     * Deletes the session and refresh token from Redis
+     * @param userId the user id
+     */
+    public void resetSession(String userId) {
+        String sessionKey = "session:" + userId;
+        String refreshKey = "refresh:" + userId;
+
+        if (redisTemplate.hasKey(sessionKey)) {
+            redisTemplate.delete(sessionKey);
+        }
+        if (redisTemplate.hasKey(refreshKey)) {
+            redisTemplate.delete(refreshKey);
+        }
+    }
+
+    /**
+     * Deletes the session for the given user ID
+     * @param userId the user id
+     */
     public void deleteSession(String userId) {
-        redisTemplate.delete("session:" + userId);
-        redisTemplate.delete("refresh:" + userId);
+        String sessionKey = "session:" + userId;
+        String refreshKey = "refresh:" + userId;
+
+        if (!redisTemplate.hasKey(sessionKey)) {
+            throw new RuntimeException("Session does not exist");
+        }
+
+        redisTemplate.delete(sessionKey);
+        redisTemplate.delete(refreshKey);
+    }
+
+    /**
+     * Checks if a session is currently open for the given user ID
+     * @param userId the user id
+     * @return true if a session exists, false otherwise
+     */
+    public boolean isSessionOpen(String userId) {
+        return redisTemplate.hasKey("session:" + userId);
     }
 }

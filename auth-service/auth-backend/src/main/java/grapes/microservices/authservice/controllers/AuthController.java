@@ -1,13 +1,13 @@
 package grapes.microservices.authservice.controllers;
 
 import grapes.microservices.authservice.models.AuthMethod;
+import grapes.microservices.authservice.models.AuthResponse;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.SessionService;
 import grapes.microservices.authservice.services.TokenService;
 import grapes.microservices.authservice.services.UserService;
 import grapes.microservices.authservice.services.auth.AbstractAuthProvider;
 import grapes.microservices.authservice.services.auth.AuthMethodService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,6 @@ public class AuthController {
         }
     }
 
-    // TODO : implement CSRF protection and remove the comment then
     @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
         if (token == null || !token.startsWith("Bearer ")) {
@@ -69,7 +68,7 @@ public class AuthController {
     }
 
     @PostMapping(value  = "/verify-challenge", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> verifyChallenge(@RequestParam String email, @RequestParam String submittedChallenge, @RequestParam AuthMethod authMethod, HttpServletResponse response) {
+    public ResponseEntity<?> verifyChallenge(@RequestParam String email, @RequestParam String submittedChallenge, @RequestParam AuthMethod authMethod, HttpServletResponse response) {
         User user = userService.getUserByEmail(email);
         if (user == null) {
             return ResponseEntity.status(400).body("User not found.");
@@ -77,7 +76,7 @@ public class AuthController {
         try {
             AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
             //reset session
-            sessionService.deleteSession(user.getId().toHexString());
+            sessionService.resetSession(user.getId().toHexString());
             //new session
             String token = authProvider.processChallenge(user, submittedChallenge);
             switch (authMethod) {
@@ -94,14 +93,14 @@ public class AuthController {
             cookie.setMaxAge(24 * 60 * 60);
 
             response.addCookie(cookie);
-            return ResponseEntity.ok(token);
+            return ResponseEntity.ok(new AuthResponse(token));
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 
     // TODO : implement CSRF protection
-    @PostMapping("/refresh")
+    /*@PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken) {
         if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body("Invalid token");
@@ -114,8 +113,23 @@ public class AuthController {
         if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
             return ResponseEntity.status(403).body("Invalid refresh token");
         }
-        String email = userService.getUserById(userId).getEmail();
-        String newAccessToken = tokenService.generateToken(email);
+        String newAccessToken = tokenService.generateToken(userId);
         return ResponseEntity.ok(newAccessToken);
+    }
+     */
+
+    @GetMapping(value = "/session", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getSession(@RequestHeader("Authorization") String token) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body("Invalid token");
+        }
+        try {
+            token = token.substring(7); // Deletes "Bearer "
+            String userId = tokenService.extractUserId(token);
+            String session = sessionService.getSession(userId);
+            return ResponseEntity.ok(session);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
     }
 }

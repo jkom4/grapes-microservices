@@ -53,7 +53,7 @@ public class EmailAuthProvider extends AbstractAuthProvider{
         boolean isValid = verifyChallenge(user, submittedChallenge);
         if (isValid) {
             challengeService.evictChallengeCache(user.getEmail());
-            String token = tokenService.generateToken(user.getEmail());
+            String token = tokenService.generateToken(user.getId().toHexString());
             sessionService.saveSession(user.getId().toHexString(), token);
             return token;
         }
