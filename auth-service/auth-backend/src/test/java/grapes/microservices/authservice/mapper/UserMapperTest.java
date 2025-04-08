@@ -49,17 +49,18 @@ class UserMapperTest {
         assertEquals(30, age);
     }
 
-    @Test
-    void computeAge_withLeapYear() {
-        // With a leap year, the age should be 25.0 in 2025
-        LocalDate birthDate = LocalDate.of(2000, 2, 29);
-        Date date = Date.from(birthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+     @Test
+     void computeAge_withLeapYear() {
+         // With a leap year, the age should be 25.0 in 2025
+         LocalDate birthDate = LocalDate.of(2000, 2, 29);
+         Date date = Date.from(birthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        double age = userMapper.computeAge(date);
+         double age = userMapper.computeAge(date);
 
         // In 2025, the age should be 25.0, because February 29, 2000 is not an exact date
         assertEquals(25, age);
     }
+
 
     @Test
     void computeAge_forUnderage() {
