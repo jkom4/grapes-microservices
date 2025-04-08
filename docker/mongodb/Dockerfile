@@ -1,15 +1,15 @@
 FROM mongo:latest
 LABEL authors="kilane dounia"
 
-# Copie tes scripts init
+# Copy the initialization scripts
 COPY ./config/init-db.js /docker-entrypoint-initdb.d/
 COPY ./config/init-replica.js /docker-entrypoint-initdb.d/
 
-# Copie ta clé de sécurité
+# Copy the security key
 COPY ./mongo-keyfile /etc/mongo-keyfile
 
-# Fixe les permissions TRES restrictives
+# Set very restrictive permissions
 RUN chmod 400 /etc/mongo-keyfile
 
-# Expose port Mongo
+# Expose MongoDB port
 EXPOSE 27017

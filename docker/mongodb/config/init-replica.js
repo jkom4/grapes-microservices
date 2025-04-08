@@ -3,7 +3,7 @@ db = connect("mongodb://root:SparringMASI!@grapes-mongodb-primary:27017/admin?au
 try {
     var status = rs.status();
     if (status.ok === 0) {
-        print("🔄 Initiating ReplicaSet...");
+        print("Initiating ReplicaSet...");
         rs.initiate({
             _id: "rs0",
             members: [
@@ -12,12 +12,12 @@ try {
                 { _id: 2, host: "grapes-mongodb-arbiter:27017", arbiterOnly: true }
             ]
         });
-        print("✅ ReplicaSet initiated.");
+        print("ReplicaSet initiated.");
     } else {
-        print("ℹ️ ReplicaSet already initiated.");
+        print("ReplicaSet already initiated.");
     }
 } catch (e) {
-    print("⚠️ Waiting for Mongo to be ready, retrying in a few seconds...");
+    print("Waiting for Mongo to be ready, retrying in a few seconds...");
     sleep(5000); //wait 5 secondes
     rs.initiate({
         _id: "rs0",
@@ -27,5 +27,5 @@ try {
             { _id: 2, host: "grapes-mongodb-arbiter:27017", arbiterOnly: true }
         ]
     });
-    print("✅ ReplicaSet initiated after retry.");
+    print("ReplicaSet initiated after retry.");
 }
