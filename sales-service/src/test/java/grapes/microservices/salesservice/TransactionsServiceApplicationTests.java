@@ -1,6 +1,10 @@
 package grapes.microservices.salesservice;
 
 import com.jayway.jsonpath.JsonPath;
+import grapes.microservices.salesservice.models.Delivery;
+import grapes.microservices.salesservice.models.DeliveryStatus;
+import grapes.microservices.salesservice.repositories.DeliveryRepository;
+import grapes.microservices.salesservice.repositories.DeliveryStatusRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -19,6 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class TransactionsServiceApplicationTests {
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private DeliveryRepository deliveryRepository;
+    @Autowired
+    private DeliveryStatusRepository deliveryStatusRepository;
 
     @Test
     void testGetAllArticles() throws Exception {
@@ -226,6 +236,36 @@ class TransactionsServiceApplicationTests {
                 .andExpect(jsonPath("$.name").value("Banane"))
                 .andExpect(jsonPath("$.origin").value("Colombie"));
     }
+
+
+    @Test
+    void testUpdateDeliveryStatus() throws Exception {
+        if (deliveryStatusRepository.findByLabel("In Progress").isEmpty()) {
+            deliveryStatusRepository.save(DeliveryStatus.builder()
+                    .label("In Progress")
+                    .build());
+        }
+
+        if (deliveryStatusRepository.findByLabel("Pending").isEmpty()) {
+            deliveryStatusRepository.save(DeliveryStatus.builder()
+                    .label("Pending")
+                    .build());
+        }
+
+        Delivery delivery = Delivery.builder()
+                .orderId(8)
+                .userId(1)
+                .deliveryStatusId(deliveryStatusRepository.findByLabel("Pending").get().getId())
+                .deliveryDate(LocalDateTime.now())
+                .build();
+        deliveryRepository.save(delivery);
+
+        mockMvc.perform(patch("/cll/deliveries/update-status/8")
+                        .param("newStatus", "In Progress"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Delivery status updated successfully to: In Progress"));
+    }
+
 
 
 
