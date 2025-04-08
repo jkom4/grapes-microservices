@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-### DATABASES
-  mariadb:
+  ### DATABASES
+  mariadb-master:
     build: ./docker/mariadb
     env_file: .env
     image: grapeshub/mariadb-grapes:latest
-    container_name: grapes-mariadb
+    container_name: grapes-mariadb-master
     environment:
       MARIADB_ROOT_PASSWORD: SparringMASI!
       MARIADB_USER: root
@@ -15,6 +15,34 @@ services:
       - "3306:3306"
     volumes:
       - ./docker/mariadb/volumes/mariadb_data:/var/lib/mysql
+      - ./docker/mariadb/config/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    command:
+      [
+        "--server-id=1",
+        "--log-bin=mysql-bin",
+        "--binlog-do-db=sales_db",
+        "--binlog-do-db=payment_db",
+        "--bind-address=0.0.0.0"
+      ]
+
+  mariadb-slave:
+    image: mariadb:latest
+    container_name: grapes-mariadb-slave
+    environment:
+      MARIADB_ROOT_PASSWORD: SparringMASI!
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docker/mariadb/volumes/mariadb_slave_data:/var/lib/mysql
+    command:
+      [
+        "--server-id=2",
+        "--relay-log=relay-bin",
+        "--read-only=1",
+        "--bind-address=0.0.0.0"
+      ]
+    depends_on:
+      - mariadb-master
 
   mongodb:
     build: ./docker/mongodb
@@ -100,7 +128,7 @@ services:
       - "8090:8090"
     depends_on:
       - mongodb
-      - mariadb
+      - mariadb-master
       - data-mining-service
       - auth-service
       - sales-service
@@ -116,7 +144,7 @@ services:
       - "8091:8091"
     depends_on:
       - mongodb
-      - mariadb
+      - mariadb-master
 
   sales-service:
     build: ./sales-service
@@ -126,7 +154,7 @@ services:
     ports:
       - "8092:8092"
     depends_on:
-      - mariadb
+      - mariadb-master
 
   payment-service:
     build: ./payment-service/payment-backend
@@ -136,7 +164,7 @@ services:
     ports:
       - "8094:8094"
     depends_on:
-      - mariadb
+      - mariadb-master
 
   chat-service:
     build: ./chat-service
@@ -146,7 +174,7 @@ services:
     ports:
       - "8095:8095"
     depends_on:
-      - mariadb
+      - mariadb-master
 
   data-mining-service:
     build: ./data-mining-service
@@ -156,7 +184,7 @@ services:
       - "8096:8096"
     depends_on:
       - mongodb
-      - mariadb
+      - mariadb-master
 
 ### FRONTEND
 
