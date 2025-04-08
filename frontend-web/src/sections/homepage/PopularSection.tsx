@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Fruit from "../../utils/models/Articles"; // Make sure your Fruit model is imported
-import placeholder from "../../assets/images/fruit.png";
 import { useLanguage } from "../../features/LanguageContext";
 import fetchFruits from "../../services/fruitServices";
 
@@ -30,8 +29,8 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await fetchFruits(limit);
-                setFruits(data); // Set the fruits according to the limit
+                const { content } = await fetchFruits(0, limit);
+                setFruits(content); // Set the fruits according to the limit
                 setLoading(false);
             } catch (err) {
                 setError(err instanceof Error ? err.message : "An error occurred");

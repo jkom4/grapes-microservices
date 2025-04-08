@@ -1,25 +1,36 @@
 import Article from "../utils/models/Articles";
-import getArticlesAPI from "./httpCommon";
+import { getArticlesAPI } from "./httpCommon";
 
-const fetchFruits = async (limit: number = 3): Promise<Article[]> => {
+// Fetches paginated articles from the API
+const fetchFruits = async (
+    page: number, // Current page number (0-based index)
+    size: number // Number of articles per page
+): Promise<{ content: Article[]; totalPages: number }> => {
     try {
-        const response = await fetch(`${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.articles}`);
+        // Construct the API URL with pagination parameters
+        const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.availableArticles}?page=${page}&size=${size}`;
 
+        // Make the HTTP request to the API
+        const response = await fetch(url);
+
+        // Check if the response is successful
         if (!response.ok) {
             throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
         }
 
-        const text = await response.text();
+        // Parse the JSON response
+        const data = await response.json();
 
-        const contentType = response.headers.get("Content-Type");
-        if (!contentType || !contentType.includes("application/json")) {
-            throw new Error(`Response is not JSON: ${text.slice(0, 100)}...`);
-        }
+        // Map the response content to Article objects
+        const articles: Article[] = data.content.map((item: any) => Article.parse(item));
 
-        const data = JSON.parse(text);
-
-        return data.slice(0, limit).map((item: any) => Article.parse(item));
+        // Return the paginated articles and total pages
+        return {
+            content: articles, // List of parsed articles
+            totalPages: data.totalPages, // Total number of pages available
+        };
     } catch (err) {
+        // Handle and rethrow any errors with a meaningful message
         throw new Error(err instanceof Error ? err.message : "An error occurred");
     }
 };
