@@ -1,6 +1,6 @@
 FROM mariadb:latest
 LABEL authors="jkom"
-COPY ./config/my.cnf /etc/mysql/conf.d/
+COPY config/master/my.cnf /etc/mysql/conf.d/
 COPY ./config/init-db.sql /docker-entrypoint-initdb.d/
 
 ENV MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
