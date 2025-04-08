@@ -32,7 +32,6 @@ function Navbar() {
                 </a>
             </nav>
             <div className="flex items-center">
-                {/* Language switcher with flags */}
                 <button onClick={() => handleLanguageChange('en')} className="ml-4">
                     <img src={englishFlag} alt="English" className="h-6 w-6 rounded-full cursor-pointer" />
                 </button>
