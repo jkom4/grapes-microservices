@@ -1,7 +1,6 @@
 // DisplayProductSection.tsx
 import React, { useEffect, useState } from "react";
 import Article from "../../utils/models/Articles";
-import placeholder from "../../assets/images/fruit.png";
 import { useLanguage } from "../../features/LanguageContext";
 import fetchFruits from "../../services/fruitServices";
 
@@ -23,8 +22,8 @@ function DisplayProductSection({ limit = 6 }: { limit?: number })  {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await fetchFruits(limit);
-                setArticles(data);
+                const { content } = await fetchFruits(0, limit);
+                setArticles(content);
                 setLoading(false);
             } catch (err) {
                 setError(err instanceof Error ? err.message : "An error occurred");

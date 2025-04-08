@@ -1,23 +1,45 @@
 import Article from "../utils/models/Articles";
-import {searchArticlesAPI} from "./httpCommon";
+import { searchArticlesAPI } from "./httpCommon";
 
-const searchArticles = async (query: string): Promise<Article[]> => {
+// Fetches articles based on a search query with client-side pagination
+const searchArticles = async (
+    query: string, // Search query string
+    page: number, // Current page number (0-based index)
+    size: number // Number of articles per page
+): Promise<{ content: Article[]; totalPages: number }> => {
     try {
-        const response = await fetch(`${searchArticlesAPI.baseURL}${searchArticlesAPI.endpoints.search.replace('${query}', query)}`);
+        // Construct the API URL with search query and pagination parameters
+        const url = `${searchArticlesAPI.baseURL}${searchArticlesAPI.endpoints.search(query)}&page=${page}&size=${size}`;
+        console.log("Fetching URL:", url); // Log the URL for debugging
 
+        // Make the HTTP request to the API
+        const response = await fetch(url);
+
+        // Check if the response is successful
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
         }
 
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-            const data = await response.json();
-            return data.map((item: any) => Article.parse(item));
-        } else {
-            throw new Error("Expected JSON response, but got something else.");
-        }
+        // Parse the JSON response
+        const data = await response.json();
+        console.log("API Response:", data); // Log the raw API response for debugging
+
+        // Since the API returns a raw array, process it directly
+        const allArticles: Article[] = data.map((item: any) => Article.parse(item));
+
+        // Perform client-side pagination
+        const start = page * size; // Calculate the starting index
+        const end = start + size; // Calculate the ending index
+        const paginatedArticles = allArticles.slice(start, end); // Extract the paginated subset
+
+        // Return the paginated articles and total pages
+        return {
+            content: paginatedArticles, // Paginated list of articles
+            totalPages: Math.ceil(allArticles.length / size), // Total pages calculated from total articles
+        };
     } catch (err) {
-        throw new Error(err instanceof Error ? err.message : "An error occurred");
+        // Handle and rethrow any errors with a meaningful message
+        throw new Error(err instanceof Error ? err.message : "An error occurred during search");
     }
 };
 
