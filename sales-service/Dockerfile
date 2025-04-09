@@ -1,7 +1,12 @@
+FROM maven:3.8.5-openjdk-21 AS builder
+WORKDIR /app
+COPY . .
+RUN mvn clean install -DskipTests
+
 FROM openjdk:21-jdk-slim
 LABEL authors="jkom"
 WORKDIR /app
-COPY target/*.jar app.jar
+COPY --from=builder target/*.jar app.jar
 
 
 # Set environment variables
