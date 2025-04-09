@@ -1,6 +1,7 @@
 package grapes.microservices.authservice.services.auth;
 
 import grapes.microservices.authservice.models.AuthMethod;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,10 +11,14 @@ import org.springframework.stereotype.Service;
  * @author Cameron
  */
 @Service
+@AllArgsConstructor
 public class AuthMethodService {
 
     @Autowired
     private EmailAuthProvider emailAuthProvider;
+
+    @Autowired
+    private SmsAuthProvider smsAuthProvider;
     //need to add others here later
 
     /**
@@ -24,6 +29,7 @@ public class AuthMethodService {
     public AbstractAuthProvider getAuthProvider(AuthMethod authMethod) {
         return switch (authMethod) {
             case EMAIL -> emailAuthProvider;
+            case SMS -> smsAuthProvider;
             default -> throw new IllegalArgumentException("Invalid auth method");
         };
     }

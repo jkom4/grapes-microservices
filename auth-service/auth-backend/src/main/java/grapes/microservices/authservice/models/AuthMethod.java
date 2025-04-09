@@ -9,7 +9,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum AuthMethod {
-    EMAIL("EMAIL");
+    EMAIL("EMAIL"),
+    SMS("SMS");
 
     private final String name;
 }

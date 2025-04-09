@@ -3,9 +3,8 @@ package grapes.microservices.authservice.services.auth;
 import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.EmailService;
+import grapes.microservices.authservice.services.SmsService;
 import grapes.microservices.authservice.services.TokenService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,36 +12,35 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 /**
- * EmailAuthProvider is an authentication provider that sends challenges to users via email.
+ * SmsAuthProvider is an authentication provider that sends challenges to users via SMS.
  * @author Cameron
  */
 @Service
 @RequiredArgsConstructor
-@AllArgsConstructor
-public class EmailAuthProvider extends AbstractAuthProvider{
+public class SmsAuthProvider extends AbstractAuthProvider {
 
     @Autowired
-    private EmailService emailService;
+    private final SmsService smsService;
 
     @Autowired
     private TokenService tokenService;
 
     @Override
-    public boolean sendChallenge(User user) throws IOException {
+    public boolean sendChallenge(User user) {
         String challenge = generateChallenge();
-        challengeService.saveChallengeForUser(user.getEmail(), challenge);
+        challengeService.saveChallengeForUser(user.getPhoneNumber(), challenge);
         String message = "Please use the following code to authenticate: " + challenge;
-        return emailService.sendMail(user.getEmail(), "Authentication challenge", message);
+        return smsService.sendSms(user.getPhoneNumber(), message);
     }
 
     @Override
     public boolean verifyChallenge(User user, String submittedChallenge) {
-        ChallengeWithTimestamp storedChallenge = challengeService.getChallengeForUser(user.getEmail());
+        ChallengeWithTimestamp storedChallenge = challengeService.getChallengeForUser(user.getPhoneNumber());
         if (storedChallenge == null) {
             throw new RuntimeException("Challenge not found.");
         }
         if (storedChallenge.isExpired()) {
-            challengeService.evictChallengeCache(user.getEmail());
+            challengeService.evictChallengeCache(user.getPhoneNumber());
             throw new RuntimeException("Challenge has expired.");
         }
         if (storedChallenge.getChallenge().equals(submittedChallenge)) {
@@ -55,7 +53,7 @@ public class EmailAuthProvider extends AbstractAuthProvider{
     public String processChallenge(User user, String submittedChallenge) {
         boolean isValid = verifyChallenge(user, submittedChallenge);
         if (isValid) {
-            challengeService.evictChallengeCache(user.getEmail());
+            challengeService.evictChallengeCache(user.getPhoneNumber());
             String token = tokenService.generateToken(user.getId().toHexString());
             sessionService.saveSession(user.getId().toHexString(), token);
             return token;

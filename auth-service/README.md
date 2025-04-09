@@ -31,19 +31,10 @@ db.find()
     cd auth-service/backend
     ```
 
-2. Export your environment variables:
+2. Fill the `.env` file at the root to export your environment variables:
 
-   ```bash
-   nano ~/.zshrc
-   ```
-   And add the following lines at the end:
-    ```bash
-    export GRAPES_TWILIO_API_SECRET="your-twilio-api-key" 
-    export GRAPES_AES_KEY="your-aes-key"
-    export GRAPES_JWT_SECRET_KEY="your-jwt-secret-key"
-    ```
-
-   Get your twilio/sendgrip api key [here](https://app.sendgrid.com/settings/api_keys)
+   Get your sendgrip api key [here](https://app.sendgrid.com/settings/api_keys)
+   Get your twilio auth token and account SID [here](https://console.twilio.com/)
    Get your AES and JWT keys in the console at the first start of the service
 
    ```bash
