@@ -154,6 +154,7 @@ services:
 
   data-mining-service:
     build: ./data-mining-service
+    env_file: .env
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-mining-service:latest
     container_name: data-mining-backend
     ports:
