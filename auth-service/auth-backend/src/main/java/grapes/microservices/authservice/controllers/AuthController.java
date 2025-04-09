@@ -8,8 +8,7 @@ import grapes.microservices.authservice.services.TokenService;
 import grapes.microservices.authservice.services.UserService;
 import grapes.microservices.authservice.services.auth.AbstractAuthProvider;
 import grapes.microservices.authservice.services.auth.AuthMethodService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,9 +51,10 @@ public class AuthController {
     }
 
     @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
         if (token == null || !token.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body("Invalid token");
+            return ResponseEntity.badRequest().body("Unauthorized");
         }
         try {
             token = token.substring(7); // Deletes
@@ -68,12 +68,9 @@ public class AuthController {
     }
 
     @PostMapping(value  = "/verify-challenge", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> verifyChallenge(@RequestParam String email, @RequestParam String submittedChallenge, @RequestParam AuthMethod authMethod, HttpServletResponse response) {
-        User user = userService.getUserByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(400).body("User not found.");
-        }
+    public ResponseEntity<?> verifyChallenge(@RequestParam String email, @RequestParam String submittedChallenge, @RequestParam AuthMethod authMethod) {
         try {
+            User user = userService.getUserByEmail(email);
             AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
             //reset session
             sessionService.resetSession(user.getId().toHexString());
@@ -90,22 +87,16 @@ public class AuthController {
                     }
                     break;
             }
-            Cookie cookie = new Cookie("JWT", token);
-            cookie.setHttpOnly(true);
-            //cookie.setSecure(true); // TODO : remove comment when HTTPS is enabled
-            cookie.setPath("/");
-            cookie.setMaxAge(24 * 60 * 60);
-
-            response.addCookie(cookie);
             return ResponseEntity.ok(new AuthResponse(token));
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 
-    // TODO : implement CSRF protection
-    /*@PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken) {
+    // TODO : finish refresh token
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+        String refreshToken = request.getHeader("Authorization");
         if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body("Invalid token");
         }
@@ -120,18 +111,21 @@ public class AuthController {
         String newAccessToken = tokenService.generateToken(userId);
         return ResponseEntity.ok(newAccessToken);
     }
-     */
 
     @GetMapping(value = "/session", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getSession(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getSession(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
         if (token == null || !token.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body("Invalid token");
+            return ResponseEntity.badRequest().body("Unauthorized");
         }
         try {
             token = token.substring(7); // Deletes "Bearer "
             String userId = tokenService.extractUserId(token);
             String session = sessionService.getSession(userId);
-            return ResponseEntity.ok(session);
+            if (session == null) {
+                return ResponseEntity.status(404).body("Session not found");
+            }
+            return ResponseEntity.ok(true);
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }

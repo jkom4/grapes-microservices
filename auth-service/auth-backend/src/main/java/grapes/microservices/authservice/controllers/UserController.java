@@ -3,6 +3,7 @@ package grapes.microservices.authservice.controllers;
 import grapes.microservices.authservice.dto.EmailDTO;
 import grapes.microservices.authservice.dto.UserDTO;
 import grapes.microservices.authservice.mapper.UserMapper;
+import grapes.microservices.authservice.models.AmountRequest;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.UserService;
 import jakarta.transaction.Transactional;
@@ -141,11 +142,11 @@ public class UserController {
     }
 
     @Transactional
-    @PutMapping(value = "/{id}/points/add/{amount}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addPoints(@PathVariable String id, @PathVariable int amount) {
+    @PutMapping(value = "/{id}/points/add/", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> addPoints(@PathVariable String id, @RequestBody AmountRequest amount) {
         logger.info("Received request to add {} points to user by ID: {}", amount, id);
         try {
-            userService.addLoyaltyPoints(id, amount);
+            userService.addLoyaltyPoints(id, amount.getAmount());
             return ResponseEntity.ok(id);
         } catch (Exception e) {
             logger.warn("Error during adding point(s) to user : {}", e.getMessage());
@@ -154,11 +155,11 @@ public class UserController {
     }
 
     @Transactional
-    @PutMapping(value = "/{id}/points/remove/{amount}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> removePoints(@PathVariable String id, @PathVariable int amount) {
+    @PutMapping(value = "/{id}/points/remove/", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> removePoints(@PathVariable String id, @RequestBody AmountRequest amount) {
         logger.info("Received request to remove {} points to user by ID: {}", amount, id);
         try {
-            userService.deductLoyaltyPoints(id, amount);
+            userService.deductLoyaltyPoints(id, amount.getAmount());
             return ResponseEntity.ok(id);
         } catch (Exception e) {
             logger.warn("Error during adding point(s) to user : {}", e.getMessage());
