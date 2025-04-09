@@ -24,11 +24,14 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: SparringMASI!
-    ports:
-      - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-    command: ["--auth"]  # To activate authentication
+      - ./docker/mongodb/certs/mongodb.pem:/etc/ssl/mongodb.pem  # Add certificat
+      - ./docker/mongodb/certs/ca.crt:/etc/ssl/ca.crt
+    command: mongod --auth --tlsMode requireTLS --tlsCertificateKeyFile /etc/ssl/mongodb.pem --tlsCAFile /etc/ssl/ca.crt --tlsAllowConnectionsWithoutCertificates --bind_ip 0.0.0.0
+    networks:
+      - backend
+
 
 ### Exchange
   rabbitmq:
@@ -106,6 +109,8 @@ services:
       - sales-service
       - payment-service
       - chat-service
+    networks:
+      - backend
 
   auth-service:
     build: ./auth-service/auth-backend
@@ -117,6 +122,8 @@ services:
     depends_on:
       - mongodb
       - mariadb
+    networks:
+      - backend
 
   sales-service:
     build: ./sales-service
@@ -127,6 +134,8 @@ services:
       - "8092:8092"
     depends_on:
       - mariadb
+    networks:
+     - backend
 
   payment-service:
     build: ./payment-service/payment-backend
@@ -137,6 +146,8 @@ services:
       - "8094:8094"
     depends_on:
       - mariadb
+    networks:
+      - backend
 
   chat-service:
     build: ./chat-service
@@ -147,6 +158,8 @@ services:
       - "8095:8095"
     depends_on:
       - mariadb
+    networks:
+      - backend
 
   data-mining-service:
     build: ./data-mining-service
@@ -157,6 +170,8 @@ services:
     depends_on:
       - mongodb
       - mariadb
+    networks:
+      - backend
 
 ### FRONTEND
 
@@ -168,6 +183,8 @@ services:
       - "3001:80"
     depends_on:
       - api-gateway
+    networks:
+      - backend
 
   frontend-auth:
     build: ./auth-service/auth-frontend
@@ -177,6 +194,8 @@ services:
       - "3002:81"
     depends_on:
       - api-gateway
+    networks:
+      - backend
 
   frontend-payment:
     build: ./payment-service/payment-frontend
@@ -186,8 +205,14 @@ services:
       - "3003:82"
     depends_on:
       - api-gateway
+    networks:
+      - backend
 
 volumes:
   mariadb_data:
   mongodb_data:
   sonarqube-data:
+
+networks:
+  backend:
+    driver: bridge
