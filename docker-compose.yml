@@ -153,8 +153,15 @@ services:
     container_name: sales-backend
     ports:
       - "8092:8092"
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: grapes
+      RABBITMQ_PASSWORD: grapes
     depends_on:
       - mariadb-master
+      - rabbitmq
+
 
   payment-service:
     build: ./payment-service/payment-backend
@@ -219,3 +226,5 @@ volumes:
   mariadb_data:
   mongodb_data:
   sonarqube-data:
+
+

@@ -20,7 +20,7 @@ import java.io.FileNotFoundException;
  * confirming payment, and retrieving orders.
  */
 @RestController
-@RequestMapping("/cll/cart")
+@RequestMapping("/clm/cart")
 public class CartController {
 
     @Autowired
