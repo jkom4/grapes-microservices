@@ -10,7 +10,6 @@ const searchArticles = async (
     try {
         // Construct the API URL with search query and pagination parameters
         const url = `${searchArticlesAPI.baseURL}${searchArticlesAPI.endpoints.search(query)}&page=${page}&size=${size}`;
-        console.log("Fetching URL:", url); // Log the URL for debugging
 
         // Make the HTTP request to the API
         const response = await fetch(url);
@@ -22,7 +21,6 @@ const searchArticles = async (
 
         // Parse the JSON response
         const data = await response.json();
-        console.log("API Response:", data); // Log the raw API response for debugging
 
         // Since the API returns a raw array, process it directly
         const allArticles: Article[] = data.map((item: any) => Article.parse(item));
