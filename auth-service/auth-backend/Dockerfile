@@ -7,7 +7,7 @@ RUN mvn clean install -DskipTests
 FROM eclipse-temurin:21-jdk-alpine
 LABEL authors="jkom"
 WORKDIR /app
-COPY --from=builder target/*.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
 # Set environment variables
 ENV AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
