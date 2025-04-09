@@ -26,6 +26,6 @@ jobs:
           script: |
             cd grapes-microservices
             git pull origin main
-            docker compose pull sales-service
-            docker compose down sales-service
-            docker compose up -d sales-service
+            sudo docker compose pull sales-service
+            sudo docker compose down sales-service
+            sudo docker compose up -d sales-service
