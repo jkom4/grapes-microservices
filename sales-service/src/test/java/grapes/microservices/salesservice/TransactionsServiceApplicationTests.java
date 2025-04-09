@@ -266,7 +266,89 @@ class TransactionsServiceApplicationTests {
                 .andExpect(content().string("Delivery status updated successfully to: In Progress"));
     }
 
+    @Test
+    void testEndToEndOrderPaymentAndDeliveryCreation() throws Exception {
 
+        // Create Family
+        mockMvc.perform(post("/clm/families")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                { "name": "Fruits Test" }
+            """))
+                .andExpect(status().isOk());
 
+        // Create Category
+        mockMvc.perform(post("/clm/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                { "name": "Category Test" }
+            """))
+                .andExpect(status().isOk());
 
+        // Create Article
+        MvcResult articleResult = mockMvc.perform(post("/clm/articles")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                {
+                  "categoryId": 1,
+                  "familyId": 1,
+                  "name": "Ananas",
+                  "description": "Fruit tropical délicieux",
+                  "priceKg": 3.99,
+                  "priceUnit": 1.50,
+                  "stockKg": 15.0,
+                  "stockUnit": 10.0,
+                  "origin": "Costa Rica",
+                  "picturePath": "ananas.jpg"
+                }
+            """))
+                .andExpect(status().isCreated())
+                .andReturn();
+        Integer articleId = JsonPath.read(articleResult.getResponse().getContentAsString(), "$.id");
+
+        // Init Cart
+        MvcResult cartResult = mockMvc.perform(post("/clm/cart/init")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                { "userId": 2 }
+            """))
+                .andExpect(status().isOk())
+                .andReturn();
+        Integer orderId = JsonPath.read(cartResult.getResponse().getContentAsString(), "$.id");
+
+        // Add to Cart
+        mockMvc.perform(post("/clm/cart/add")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(String.format("""
+                {
+                  "orderId": %d,
+                  "articleId": %d,
+                  "quantity": 2
+                }
+            """, orderId, articleId)))
+                .andExpect(status().isOk());
+
+        // Pay Cart
+        mockMvc.perform(post("/clm/cart/pay/" + orderId))
+                .andExpect(status().isOk());
+
+        // MANUALLY simulate delivery creation (simulate RabbitMQ behavior)
+        Delivery delivery = Delivery.builder()
+                .orderId(orderId)
+                .userId(2) // 🛠️ Choose an existing deliveryMan ID
+                .deliveryStatusId(1) // pending
+                .deliveryDate(LocalDateTime.now())
+                .build();
+        deliveryRepository.save(delivery);
+
+        // Now the delivery exists, verify trips
+        mockMvc.perform(get("/cll/trips/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").exists());
+
+        // Then verify products inside trip
+        mockMvc.perform(get("/cll/trips/{tripId}/orders", delivery.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].productDescription").exists());
+    }
 }
