@@ -1,10 +1,10 @@
-FROM maven:3.8.5-openjdk-21 AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /app
 COPY . .
 RUN mvn clean install -DskipTests
 
 
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk-alpine
 LABEL authors="jkom"
 WORKDIR /app
 COPY --from=builder target/*.jar app.jar
