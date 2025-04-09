@@ -1,0 +1,46 @@
+.split-pane > .split-pane-divider {
+  -fx-padding: 0 px 0 px; }
+
+.split-chat-view, .topic-zone {
+  -fx-background-color: #9b14cc; }
+
+.message-zone {
+  -fx-background-color: #ffffff; }
+
+.side-container {
+  -fx-background-color: #610d80; }
+
+.header {
+  -fx-border-color: transparent transparent rgba(0, 0, 0, 0.2) transparent;
+  -fx-border-width: 0 0 1px 0; }
+
+.footer {
+  -fx-border-color: rgba(0, 0, 0, 0.2) transparent transparent transparent;
+  -fx-border-width: 1px 0 0 0; }
+
+.topic-search {
+  -fx-pref-width: 300px;
+  /* Set the width */
+  -fx-background-color: #610d80;
+  /* Light background color */
+  -fx-border-radius: 25px;
+  /* Rounded corners */
+  -fx-background-radius: 25px;
+  /* Match the border radius */
+  -fx-font-size: 12px;
+  /* Text size */
+  -fx-text-fill: white;
+  /* Text color */
+  -fx-focus-color: transparent;
+  /* Remove focus border color */
+  -fx-faint-focus-color: transparent;
+  /* Remove faint focus color */
+  -fx-transition: all 0.3s ease;
+  /* Smooth transitions */
+  -fx-prompt-text-fill: #9b14cc; }
+
+.leave-icon {
+  -fx-opacity: 0.2; }
+
+.card {
+  -fx-background-color: #610d80; }
