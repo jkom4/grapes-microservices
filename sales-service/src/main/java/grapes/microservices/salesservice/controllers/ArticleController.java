@@ -128,4 +128,13 @@ public class ArticleController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @GetMapping("/clm/articles/{id}")
+    public ResponseEntity<ArticleDTO> getArticleById(@PathVariable Integer id) {
+        Article article = articleService.getArticleById(id);
+        return ResponseEntity.ok(articleMapper.toDTO(article));
+    }
+
+
+
 }

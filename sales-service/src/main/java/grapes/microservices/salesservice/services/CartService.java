@@ -9,6 +9,7 @@ import grapes.microservices.salesservice.repositories.OrderItemRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 /**
@@ -38,7 +39,6 @@ public class CartService {
      * It checks stock availability for both unit and kg-based quantities
      * and calculates the price based on the type of quantity.
      *
-     * @param request the DTO containing articleId, orderId, and quantity info
      * @return the created {@link OrderItem} entity saved in the database
      * @throws IllegalArgumentException if the article doesn't exist or if stock is insufficient
      */
@@ -56,7 +56,12 @@ public class CartService {
         }
 
         // Set price according to quantity type
-        BigDecimal price = item.getQuantityKg() != null ? article.getPriceKg() : article.getPriceUnit();
+        BigDecimal price;
+        if (item.getQuantityKg() != null && item.getQuantityKg().compareTo(BigDecimal.ZERO) > 0) {
+            price = article.getPriceKg();
+        } else {
+            price = article.getPriceUnit();
+        }
 
         item.setPrice(price);
         item.setScanned(false);
@@ -68,7 +73,6 @@ public class CartService {
     public CartResponseDTO getCartContent(Integer orderId) {
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
 
-        // 🧠 Mapping OrderItem + fetching article name
         List<CartItemViewDTO> enrichedItems = items.stream()
                 .map(item -> {
                     String name = articleRepository.findById(item.getArticleId())
@@ -78,7 +82,7 @@ public class CartService {
                     return CartItemViewDTO.builder()
                             .id(item.getId())
                             .articleId(item.getArticleId())
-                            .articleName(name) // 🟢 Injected manually here
+                            .articleName(name)
                             .quantityKg(item.getQuantityKg())
                             .quantity(item.getQuantity())
                             .price(item.getPrice())
@@ -86,19 +90,24 @@ public class CartService {
                 })
                 .toList();
 
-        // 💰 Total price calculation
         BigDecimal total = enrichedItems.stream()
                 .map(i -> {
-                    BigDecimal qty = i.getQuantityKg() != null ? i.getQuantityKg() : i.getQuantity();
+                    BigDecimal qty;
+                    if (i.getQuantityKg() != null && i.getQuantityKg().compareTo(BigDecimal.ZERO) > 0) {
+                        qty = i.getQuantityKg();
+                    } else {
+                        qty = i.getQuantity();
+                    }
                     return i.getPrice().multiply(qty);
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return CartResponseDTO.builder()
                 .items(enrichedItems)
-                .totalPrice(total)
+                .totalPrice(total.setScale(2, RoundingMode.HALF_UP))
                 .build();
     }
+
 
 
     public void removeFromCart(Integer itemId) {
