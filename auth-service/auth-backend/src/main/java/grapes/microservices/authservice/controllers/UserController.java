@@ -6,6 +6,7 @@ import grapes.microservices.authservice.mapper.UserMapper;
 import grapes.microservices.authservice.models.AmountRequest;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,9 @@ public class UserController {
     @Autowired
     private final UserMapper userMapper;
 
+    @Autowired
+    private final AuthController authController;
+
     private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
 
@@ -57,7 +61,11 @@ public class UserController {
 
     @Transactional
     @PutMapping(value = "/disable/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> disable(@PathVariable String id) {
+    public ResponseEntity<?> disable(@PathVariable String id, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(!authController.isValidSession(token)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
         logger.info("Received request to disable user with ID: {}", id);
         try {
             User disableUser = userService.disableUser(id);
@@ -71,7 +79,11 @@ public class UserController {
 
     @Transactional
     @PutMapping(value = "/enable/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> enable(@PathVariable String id) {
+    public ResponseEntity<?> enable(@PathVariable String id, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(!authController.isValidSession(token)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
         logger.info("Received request to enable user with ID: {}", id);
         try {
             User enabledUser = userService.enableUser(id);
@@ -85,7 +97,11 @@ public class UserController {
 
     @Transactional
     @PutMapping(value = "/update/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO, @PathVariable String id) {
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO, @PathVariable String id, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(!authController.isValidSession(token)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
         logger.info("Received request to update user: {}", id);
         try {
             if (userDTO.getPassword() == null) {
@@ -116,7 +132,11 @@ public class UserController {
     }
 
     @PostMapping(value = "/email", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getUserByEmail(@RequestBody EmailDTO emailDTO) {
+    public ResponseEntity<?> getUserByEmail(@RequestBody EmailDTO emailDTO, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(!authController.isValidSession(token)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
         logger.info("Received request to get user by email: {}", emailDTO.getEmail());
         try {
             User user = userService.getUserByEmail(emailDTO.getEmail());
@@ -129,7 +149,11 @@ public class UserController {
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getUserById(@PathVariable String id) {
+    public ResponseEntity<?> getUserById(@PathVariable String id, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(!authController.isValidSession(token)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
         logger.info("Received request to get user by ID: {}", id);
         try {
             User user = userService.getUserById(id);
@@ -143,7 +167,11 @@ public class UserController {
 
     @Transactional
     @PutMapping(value = "/{id}/points/add/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> addPoints(@PathVariable String id, @RequestBody AmountRequest amount) {
+    public ResponseEntity<?> addPoints(@PathVariable String id, @RequestBody AmountRequest amount, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(!authController.isValidSession(token)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
         logger.info("Received request to add {} points to user by ID: {}", amount, id);
         try {
             userService.addLoyaltyPoints(id, amount.getAmount());
@@ -156,7 +184,11 @@ public class UserController {
 
     @Transactional
     @PutMapping(value = "/{id}/points/remove/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> removePoints(@PathVariable String id, @RequestBody AmountRequest amount) {
+    public ResponseEntity<?> removePoints(@PathVariable String id, @RequestBody AmountRequest amount, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(!authController.isValidSession(token)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
         logger.info("Received request to remove {} points to user by ID: {}", amount, id);
         try {
             userService.deductLoyaltyPoints(id, amount.getAmount());
@@ -168,7 +200,11 @@ public class UserController {
     }
 
     @GetMapping("/{id}/points")
-    public ResponseEntity<?> getPoints(@PathVariable String id) {
+    public ResponseEntity<?> getPoints(@PathVariable String id, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(!authController.isValidSession(token)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
         logger.info("Received request to get points from user by ID: {}", id);
         try {
             int userPoints = userService.getLoyaltyPoints(id);

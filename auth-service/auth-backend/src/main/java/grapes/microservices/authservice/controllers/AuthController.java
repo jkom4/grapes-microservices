@@ -53,8 +53,8 @@ public class AuthController {
     @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> logout(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        if (token == null || !token.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body("Unauthorized");
+        if(!isValidSession(token)) {
+            return ResponseEntity.status(401).body("Unauthorized");
         }
         try {
             token = token.substring(7); // Deletes
@@ -115,19 +115,36 @@ public class AuthController {
     @GetMapping(value = "/session", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getSession(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
+        try {
+            if (isValidSession(token)) {
+                return ResponseEntity.ok("Session is valid");
+            } else {
+                return ResponseEntity.status(401).body("Session is invalid");
+            }
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
+    /**
+     * Checks if the session is valid
+     * @param token the token to check
+     * @return true if the session is valid, false otherwise
+     */
+    boolean isValidSession(String token) {
         if (token == null || !token.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body("Unauthorized");
+            throw new IllegalArgumentException("Unauthorized");
         }
         try {
             token = token.substring(7); // Deletes "Bearer "
             String userId = tokenService.extractUserId(token);
             String session = sessionService.getSession(userId);
             if (session == null) {
-                return ResponseEntity.status(404).body("Session not found");
+                throw new IllegalArgumentException("Session not found");
             }
-            return ResponseEntity.ok(true);
+            return true;
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 }

@@ -5,6 +5,7 @@ import java.security.SecureRandom;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.ChallengeService;
 import grapes.microservices.authservice.services.SessionService;
+import grapes.microservices.authservice.services.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,9 @@ public abstract class AbstractAuthProvider {
 
     @Autowired
     protected SessionService sessionService;
+
+    @Autowired
+    protected TokenService tokenService;
 
     @Autowired
     protected ChallengeService challengeService;
