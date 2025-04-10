@@ -17,7 +17,7 @@ WORKDIR /app
 
 # Copy the R scripts and data into the container
 COPY scripts-r/generate_data/generate_transaction_data.R /app/scripts-r/generate_data/
-COPY data/ /app/data/
+#COPY data/ /app/data/
 
 # Install R packages
 RUN R -e "install.packages(c('dplyr', 'ggplot2', 'lubridate', 'tidyr', 'stringi', 'mongolite'), repos='http://cran.rstudio.com/')"

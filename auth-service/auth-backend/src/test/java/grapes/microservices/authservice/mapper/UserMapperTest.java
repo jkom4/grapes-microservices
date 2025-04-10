@@ -58,6 +58,7 @@ class UserMapperTest {
          double age = userMapper.computeAge(date);
 
         // In 2025, the age should be 25.0, because February 29, 2000 is not an exact date
+
         assertEquals(25, age);
     }
 
