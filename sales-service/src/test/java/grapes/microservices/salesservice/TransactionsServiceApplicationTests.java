@@ -273,7 +273,7 @@ class TransactionsServiceApplicationTests {
     }
 
     @Test
-    @Ignore('Ce test est temporairement desactivé')
+    @Ignore
     void testEndToEndOrderPaymentAndDeliveryCreation() throws Exception {
 
         // Create Family
