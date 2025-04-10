@@ -3,8 +3,10 @@ package grapes.microservices.salesservice;
 import com.jayway.jsonpath.JsonPath;
 import grapes.microservices.salesservice.models.Delivery;
 import grapes.microservices.salesservice.models.DeliveryStatus;
+import grapes.microservices.salesservice.repositories.CategoryRepository;
 import grapes.microservices.salesservice.repositories.DeliveryRepository;
 import grapes.microservices.salesservice.repositories.DeliveryStatusRepository;
+import grapes.microservices.salesservice.repositories.FamilyRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,6 +31,10 @@ class TransactionsServiceApplicationTests {
     private DeliveryRepository deliveryRepository;
     @Autowired
     private DeliveryStatusRepository deliveryStatusRepository;
+    @Autowired
+    private FamilyRepository familyRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Test
     void testGetAllArticles() throws Exception {
@@ -350,5 +356,49 @@ class TransactionsServiceApplicationTests {
         mockMvc.perform(get("/cll/trips/{tripId}/orders", delivery.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].productDescription").exists());
+    }
+
+    @Test
+    void testCreateAndGetCategories() throws Exception {
+        // Clean up
+        categoryRepository.deleteAll();
+
+        // Create a new category
+        mockMvc.perform(post("/clm/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                                "name": "Fruits Exotiques"
+                            }
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Fruits Exotiques"));
+
+        // Get all categories
+        mockMvc.perform(get("/clm/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Fruits Exotiques"));
+    }
+
+    @Test
+    void testCreateAndGetFamilies() throws Exception {
+        // Clean up
+        familyRepository.deleteAll();
+
+        // Create a new family
+        mockMvc.perform(post("/clm/families")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                                "name": "Fruits"
+                            }
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Fruits"));
+
+        // Get all families
+        mockMvc.perform(get("/clm/families"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Fruits"));
     }
 }
