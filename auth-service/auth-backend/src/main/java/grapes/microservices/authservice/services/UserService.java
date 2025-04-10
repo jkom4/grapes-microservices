@@ -230,4 +230,24 @@ public class UserService {
 
         return user.getLoyaltyPoints();
     }
+
+    /**
+     * Updates the password of a user.
+     * @param user the user to update
+     * @param password the new password
+     * @return the updated user
+     */
+    public User updatePassword(User user, String password) {
+        if (user == null) {
+            logger.error("Password update failed: User cannot be null");
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        if (password == null || password.isEmpty()) {
+            logger.error("Password update failed: Password cannot be null or empty");
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
+
+        user.encryptPassword(password);
+        return userRepository.save(user);
+    }
 }

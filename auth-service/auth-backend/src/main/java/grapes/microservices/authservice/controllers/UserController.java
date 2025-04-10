@@ -4,7 +4,9 @@ import grapes.microservices.authservice.dto.EmailDTO;
 import grapes.microservices.authservice.dto.UserDTO;
 import grapes.microservices.authservice.mapper.UserMapper;
 import grapes.microservices.authservice.models.AmountRequest;
+import grapes.microservices.authservice.models.PasswordRequest;
 import grapes.microservices.authservice.models.User;
+import grapes.microservices.authservice.services.TokenService;
 import grapes.microservices.authservice.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -33,6 +35,9 @@ public class UserController {
 
     @Autowired
     private final UserMapper userMapper;
+
+    @Autowired
+    private final TokenService tokenService;
 
     @Autowired
     private final AuthController authController;
@@ -92,6 +97,31 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             logger.warn("Error during user activation: {}", e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Transactional
+    @PutMapping(value = "/update/password", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updatePassword(@RequestBody PasswordRequest password, HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if(!authController.isValidSession(token)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+        logger.info("Received request to update password");
+        try {
+            if (password.getPassword() == null) {
+                logger.warn("Password is null in the request body");
+                return ResponseEntity.badRequest().body("Password cannot be null");
+            }
+            String idStr = tokenService.extractUserId(token.substring(7));
+            User updatedUser = userService.updatePassword(userService.getUserById(idStr), password.getPassword());
+            logger.info("User password successfully updated: {}", updatedUser);
+            return ResponseEntity.ok(userMapper.toDTO(updatedUser));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Error during password update: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -39,6 +39,9 @@ public class AuthController {
             if (user == null || !user.verifyPassword(password)) {
                 return ResponseEntity.status(401).body("Credentials are incorrect.");
             }
+            if (!user.isValidPassword()) {
+                return ResponseEntity.status(401).body("Password must be changed because it does not meet the security policy.");
+            }
             AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
             if (authProvider.sendChallenge(user)) {
                 return ResponseEntity.ok("Challenge sent to user by : " + authMethod.getName());

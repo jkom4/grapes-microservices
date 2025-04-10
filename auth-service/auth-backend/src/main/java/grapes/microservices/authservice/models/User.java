@@ -27,6 +27,7 @@ public class User {
 
     private static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    private final String PASSWORD_PATTERN = "^(?=.*[A-Z])(?=.*\\d)(?=.*[.;#!?@])[A-Za-z\\d.;#!?@]+$";
 
     @Field("_id")
     @Id
@@ -46,7 +47,7 @@ public class User {
     private String firstName;
 
     @NotNull(message = "password cannot be null")
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[.;#!?@])[A-Za-z\\d.;#!?@]+$", message = "Password must contain at least one uppercase letter, one digit, and one special character")
+    @Pattern(regexp = PASSWORD_PATTERN, message = "Password must contain at least one uppercase letter, one digit, and one special character")
     @Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters long")
     private String password;
 
@@ -165,6 +166,10 @@ public class User {
         }
     }
 
+    public void encryptPassword(String password) {
+        this.password = passwordEncoder.encode(password);
+    }
+
     /**
      * Verify if a password provided by the user matches the stored hashed password.
      * @param rawPassword the password provided by the user
@@ -172,6 +177,10 @@ public class User {
      */
     public boolean verifyPassword(String rawPassword) {
         return passwordEncoder.matches(rawPassword, this.password);
+    }
+
+    public boolean isValidPassword() {
+        return password.matches(PASSWORD_PATTERN);
     }
 }
 
