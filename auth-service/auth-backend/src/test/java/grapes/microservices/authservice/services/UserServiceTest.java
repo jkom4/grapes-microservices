@@ -30,7 +30,7 @@ public class UserServiceTest {
     private User user;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
         when(logger.isInfoEnabled()).thenReturn(true);
         when(logger.isDebugEnabled()).thenReturn(true);
@@ -127,13 +127,14 @@ public class UserServiceTest {
     void editUser_Success() throws Exception {
         User updatedUser = new User();
         updatedUser.setFirstName("Jack");
+        updatedUser.setPassword("Valid123@");
         ObjectId id = new ObjectId("67e13f0735d02563d11c04b6");
         updatedUser.setId(id);
 
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
-
-        User editedUser = userService.editUser(updatedUser);
+        user.encryptUser();
+        User editedUser = userService.editUser("67e13f0735d02563d11c04b6", updatedUser);
 
         assertNotNull(editedUser);
         assertEquals("Jack", editedUser.getFirstName());
@@ -147,9 +148,9 @@ public class UserServiceTest {
         updatedUser.setPassword("weakpassword");
 
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.editUser(updatedUser));
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.editUser("67e13f0735d02563d11c04b6", updatedUser));
 
-        assertEquals("Validation errors: password Password must contain at least one uppercase letter, one digit, and one special character; ", thrown.getMessage());
+        assertEquals("Password verification failed", thrown.getMessage());
     }
 
     @Test

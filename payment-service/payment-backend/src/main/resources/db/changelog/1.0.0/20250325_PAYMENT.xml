@@ -1,29 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
 
-    <!-- Table paiement -->
+    <!-- Table banque -->
     <changeSet id="1" author="grapes">
-        <createTable tableName="paiement">
-            <column name="id_paiement" type="BIGINT">
+        <createTable tableName="banque">
+            <column name="nom_banque" type="VARCHAR(100)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="id_transaction" type="BIGINT"/>
-            <column name="nom_marchand" type="VARCHAR(100)"/>
-            <column name="date_heure" type="DATETIME"/>
-            <column name="montant" type="DECIMAL(10,2)"/>
+            <column name="adresse_banque" type="VARCHAR(255)"/>
+            <column name="pays" type="VARCHAR(100)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Table client -->
+    <changeSet id="2" author="grapes">
+        <createTable tableName="client">
+            <column name="id_client" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nom" type="VARCHAR(100)"/>
+            <column name="prenom" type="VARCHAR(100)"/>
+            <column name="sexe" type="VARCHAR(10)"/>
+            <column name="date_naissance" type="DATE"/>
+            <column name="etat_civil" type="VARCHAR(20)"/>
+            <column name="salaire_mensuel_moyen" type="DECIMAL(10,2)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="mot_de_passe" type="VARCHAR(255)"/>
+            <column name="num_registre_national" type="VARCHAR(50)"/>
+            <column name="numero_telephone" type="VARCHAR(20)"/>
+            <column name="adresse" type="VARCHAR(255)"/>
+            <column name="date_inscription" type="DATE"/>
             <column name="statut" type="VARCHAR(20)"/>
         </createTable>
     </changeSet>
 
-    <!-- Table log_paiement -->
-    <changeSet id="2" author="grapes">
-        <createTable tableName="log_paiement">
+    <!-- Table compte -->
+    <changeSet id="3" author="grapes">
+        <createTable tableName="compte">
+            <column name="numero_de_compte" type="VARCHAR(30)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_client" type="BIGINT"/>
+            <column name="nom_banque" type="VARCHAR(100)"/>
+            <column name="type_authentification" type="VARCHAR(50)"/>
+            <column name="solde" type="DECIMAL(10,2)"/>
+            <column name="date_ouverture" type="DATE"/>
+            <column name="type_compte" type="VARCHAR(20)"/>
+            <column name="statut_compte" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Foreign keys for compte -->
+    <changeSet id="4" author="grapes">
+        <addForeignKeyConstraint baseTableName="compte" baseColumnNames="id_client"
+                                 referencedTableName="client" referencedColumnNames="id_client"
+                                 constraintName="fk_compte_client"/>
+        <addForeignKeyConstraint baseTableName="compte" baseColumnNames="nom_banque"
+                                 referencedTableName="banque" referencedColumnNames="nom_banque"
+                                 constraintName="fk_compte_banque"/>
+    </changeSet>
+
+    <!-- Table transaction -->
+    <changeSet id="5" author="grapes">
+        <createTable tableName="transaction">
+            <column name="id_transaction" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="compte_debiteur" type="VARCHAR(30)"/>
+            <column name="compte_crediteur" type="VARCHAR(30)"/>
+            <column name="banque_debiteur" type="VARCHAR(100)"/>
+            <column name="banque_crediteur" type="VARCHAR(100)"/>
+            <column name="id_client" type="BIGINT"/>
+            <column name="type_transaction" type="VARCHAR(50)"/>
+            <column name="numero_de_compte_client" type="VARCHAR(30)"/>
+            <column name="date_heure_transaction" type="DATETIME"/>
+            <column name="somme_transferee" type="DECIMAL(10,2)"/>
+            <column name="nom_marchand_concerne" type="VARCHAR(100)"/>
+            <column name="secteur_activite_marchand" type="VARCHAR(100)"/>
+            <column name="type_authentification_3DS" type="VARCHAR(50)"/>
+            <column name="statut_3DS" type="VARCHAR(20)"/>
+            <column name="message" type="TEXT"/>
+            <column name="communication" type="VARCHAR(255)"/>
+            <column name="nouvel_etat_compte_debiteur" type="DECIMAL(10,2)"/>
+            <column name="nouvel_etat_compte_crediteur" type="DECIMAL(10,2)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Foreign keys for transaction -->
+    <changeSet id="6" author="grapes">
+        <addForeignKeyConstraint baseTableName="transaction" baseColumnNames="compte_debiteur"
+                                 referencedTableName="compte" referencedColumnNames="numero_de_compte"
+                                 constraintName="fk_transaction_compte_debiteur"/>
+        <addForeignKeyConstraint baseTableName="transaction" baseColumnNames="compte_crediteur"
+                                 referencedTableName="compte" referencedColumnNames="numero_de_compte"
+                                 constraintName="fk_transaction_compte_crediteur"/>
+    </changeSet>
+
+    <!-- Table authentification_otp -->
+    <changeSet id="7" author="grapes">
+        <createTable tableName="authentification_otp">
+            <column name="id_auth_otp" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_client" type="BIGINT"/>
+            <column name="adresse_ip_client" type="VARCHAR(45)"/>
+            <column name="adresse_ip_serveur" type="VARCHAR(45)"/>
+            <column name="date_heure_demande" type="DATETIME"/>
+            <column name="date_heure_reception" type="DATETIME"/>
+            <column name="challenge" type="VARCHAR(255)"/>
+            <column name="digest_recu" type="VARCHAR(255)"/>
+            <column name="digest_recalcule" type="VARCHAR(255)"/>
+            <column name="compteur_essai" type="INT"/>
+            <column name="code_pin" type="VARCHAR(10)"/>
+            <column name="decision" type="VARCHAR(20)"/>
+            <column name="date_heure_envoi_decision" type="DATETIME"/>
+            <column name="nouvel_essai_necessaire" type="BOOLEAN"/>
+            <column name="nombre_essais_depasse" type="BOOLEAN"/>
+            <column name="validation_prealable" type="BOOLEAN"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Foreign key for authentification_otp -->
+    <changeSet id="8" author="grapes">
+        <addForeignKeyConstraint baseTableName="authentification_otp" baseColumnNames="id_client"
+                                 referencedTableName="client" referencedColumnNames="id_client"
+                                 constraintName="fk_authotp_client"/>
+    </changeSet>
+
+    <!-- Table log_otp_auth -->
+    <changeSet id="9" author="grapes">
+        <createTable tableName="log_otp_auth">
             <column name="id_log" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="id_paiement" type="BIGINT"/>
+            <column name="id_auth_otp" type="BIGINT"/>
             <column name="date_heure_log" type="DATETIME"/>
             <column name="type_evenement" type="VARCHAR(100)"/>
             <column name="description" type="TEXT"/>
@@ -31,8 +144,15 @@
         </createTable>
     </changeSet>
 
+    <!-- Foreign key for log_otp_auth -->
+    <changeSet id="10" author="grapes">
+        <addForeignKeyConstraint baseTableName="log_otp_auth" baseColumnNames="id_auth_otp"
+                                 referencedTableName="authentification_otp" referencedColumnNames="id_auth_otp"
+                                 constraintName="fk_logotp_authotp"/>
+    </changeSet>
+
     <!-- Table marchand -->
-    <changeSet id="3" author="grapes">
+    <changeSet id="11" author="grapes">
         <createTable tableName="marchand">
             <column name="nom_marchand" type="VARCHAR(100)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -45,34 +165,46 @@
         </createTable>
     </changeSet>
 
-    <!-- Foreign Key: paiement.id_transaction -> transaction.id -->
-<!--    <changeSet id="4" author="grapes">-->
-<!--        <addForeignKeyConstraint-->
-<!--                baseTableName="paiement"-->
-<!--                baseColumnNames="id_transaction"-->
-<!--                referencedTableName="transaction"-->
-<!--                referencedColumnNames="id"-->
-<!--                constraintName="fk_paiement_transaction"/>-->
-<!--    </changeSet>-->
-
-    <!-- Foreign Key: paiement.nom_marchand -> marchand.nom_marchand -->
-    <changeSet id="5" author="grapes">
-        <addForeignKeyConstraint
-                baseTableName="paiement"
-                baseColumnNames="nom_marchand"
-                referencedTableName="marchand"
-                referencedColumnNames="nom_marchand"
-                constraintName="fk_paiement_marchand"/>
+    <!-- Table paiement -->
+    <changeSet id="12" author="grapes">
+        <createTable tableName="paiement">
+            <column name="id_paiement" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_transaction" type="BIGINT"/>
+            <column name="nom_marchand" type="VARCHAR(100)"/>
+            <column name="date_heure" type="DATETIME"/>
+            <column name="montant" type="DECIMAL(10,2)"/>
+            <column name="statut" type="VARCHAR(20)"/>
+        </createTable>
     </changeSet>
 
-    <!-- Foreign Key: log_paiement.id_paiement -> paiement.id_paiement -->
-    <changeSet id="6" author="grapes">
-        <addForeignKeyConstraint
-                baseTableName="log_paiement"
-                baseColumnNames="id_paiement"
-                referencedTableName="paiement"
-                referencedColumnNames="id_paiement"
-                constraintName="fk_logpaiement_paiement"/>
+    <!-- Foreign keys for paiement -->
+    <changeSet id="13" author="grapes">
+        <addForeignKeyConstraint baseTableName="paiement" baseColumnNames="nom_marchand"
+                                 referencedTableName="marchand" referencedColumnNames="nom_marchand"
+                                 constraintName="fk_paiement_marchand"/>
+    </changeSet>
+
+    <!-- Table log_paiement -->
+    <changeSet id="14" author="grapes">
+        <createTable tableName="log_paiement">
+            <column name="id_log" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_paiement" type="BIGINT"/>
+            <column name="date_heure_log" type="DATETIME"/>
+            <column name="type_evenement" type="VARCHAR(100)"/>
+            <column name="description" type="TEXT"/>
+            <column name="localisation_ip" type="VARCHAR(45)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Foreign key for log_paiement -->
+    <changeSet id="15" author="grapes">
+        <addForeignKeyConstraint baseTableName="log_paiement" baseColumnNames="id_paiement"
+                                 referencedTableName="paiement" referencedColumnNames="id_paiement"
+                                 constraintName="fk_logpaiement_paiement"/>
     </changeSet>
 
 </databaseChangeLog>

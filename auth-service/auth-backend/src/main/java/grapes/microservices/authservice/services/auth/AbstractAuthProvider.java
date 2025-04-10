@@ -28,8 +28,9 @@ public abstract class AbstractAuthProvider {
     /**
      * Sends a challenge to the user to verify their identity
      * @param user the user to send the challenge to
+     * @return true if the challenge was sent successfully, false otherwise
      */
-    public abstract void sendChallenge(User user) throws IOException;
+    public abstract boolean sendChallenge(User user) throws IOException;
 
     /**
      * Verifies the challenge submitted by the user

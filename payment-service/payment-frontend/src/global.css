@@ -1,0 +1,341 @@
+/* ===================================================== */
+/*                   Styles Globaux                    */
+/* ===================================================== */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ----------------------------------------------------- */
+/*                  Styles pour LoginPage              */
+/* ----------------------------------------------------- */
+.login-container {
+  background: white;
+  border: 1px solid #e0e0e0;
+  width: 350px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 20px;
+  text-align: center;
+  /* Pour centrer verticalement si besoin */
+  margin: auto;
+}
+
+.login-container .logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.login-container .logo-container img {
+  max-height: 140px;
+  max-width: 140px;
+  object-fit: contain;
+}
+
+/* Formulaires et inputs */
+.login-container input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.login-container button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.login-container button:hover {
+  background-color: #0056b3;
+}
+
+.login-container label {
+  display: block;
+  text-align: left;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+/* Password validation */
+.password-validation {
+  text-align: left;
+  margin-top: 10px;
+}
+
+.password-validation p {
+  margin-bottom: 8px;
+}
+
+.password-validation ul {
+  list-style: none;
+  padding: 0;
+}
+
+.password-validation li {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.password-validation li span {
+  display: inline-flex;
+  margin-right: 5px;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  text-align: left;
+  margin-top: 5px;
+}
+
+/* Pour les inputs de card number (si utilisés dans Login) */
+.card-number-group {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.card-part {
+  width: 23%;
+  padding: 10px;
+  border: none;
+  border-bottom: 2px solid #ced4da;
+  border-radius: 0;
+  text-align: center;
+}
+
+.card-part:focus {
+  border-bottom: 2px solid #007bff;
+  outline: none;
+}
+
+/* ===================================================== */
+/*                    PaymentPage Styles                */
+/* ===================================================== */
+.payment-container {
+  background: white;
+  border: 1px solid #e0e0e0;
+  width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 25px;
+  margin: auto;
+  text-align: center;
+}
+
+.payment-container .left-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.payment-container .left-logo img {
+  max-height: 100px;
+  max-width: 100px;
+  object-fit: contain;
+}
+
+.payment-container .amount {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #000;
+}
+
+.payment-container .merchant {
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.payment-container .input-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.payment-container input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.payment-container .card-number-group {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+.payment-container .card-part {
+  width: 23%;
+  padding: 10px;
+  border: none;
+  border-bottom: 2px solid #ced4da;
+  border-radius: 0;
+  text-align: center;
+  font-family: monospace;
+  letter-spacing: 2px;
+}
+
+.payment-container .card-part:focus {
+  border-bottom: 2px solid #007bff;
+  outline: none;
+}
+
+.payment-container .required {
+  color: red;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.payment-container .error {
+  color: red;
+  font-size: 12px;
+  text-align: left;
+  margin-top: 5px;
+}
+
+.payment-container button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.payment-container button:hover {
+  background-color: #0056b3;
+}
+
+.payment-container .card-icons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.payment-container .card-icons img {
+  height: 24px;
+}
+
+.payment-container .security-note {
+  color: #6c757d;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+
+/* ----------------------------------------------------- */
+/*            Styles pour PaymentVerificationPage      */
+/* ----------------------------------------------------- */
+.verification-container {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.verification-box {
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.verification-box .logo-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.verification-box .left-logo {
+  text-align: left;
+}
+
+.verification-box .right-logos {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.verification-box img {
+  max-width: 120px;
+  max-height: 120px;
+  object-fit: contain;
+}
+
+.verification-box .form-group {
+  margin-bottom: 10px;
+}
+
+.verification-box input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.verification-box button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px;
+  width: 100%;
+  border: none;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.verification-box button:hover {
+  background-color: #0056b3;
+}
+
+.verification-box label {
+  display: block;
+  text-align: left;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.verification-box .error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+.verification-box .success-message {
+  color: green;
+  font-size: 18px;
+  margin-top: 15px;
+}
