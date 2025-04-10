@@ -5,10 +5,6 @@
 /.pnp
 .pnp.js
 
-# directory hidden
-/src/assets/images/*
-!/src/assets/images/.gitkeep
-
 # testing
 /coverage
 
