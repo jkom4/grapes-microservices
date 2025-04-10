@@ -1,5 +1,6 @@
 package grapes.microservices.salesservice.services;
 
+import grapes.microservices.salesservice.exceptions.ResourceNotFoundException;
 import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.repositories.ArticleRepository;
 import org.springframework.data.domain.Page;
@@ -98,6 +99,12 @@ public class ArticleService {
             throw new IllegalArgumentException("The 'origin' field is too short.");
         }
     }
+
+    public Article getArticleById(Integer id) {
+        return articleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Article not found with id: " + id));
+    }
+
 
     private boolean isZero(BigDecimal value) {
         return value != null && value.compareTo(BigDecimal.ZERO) == 0;

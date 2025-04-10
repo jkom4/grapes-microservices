@@ -134,18 +134,4 @@ public class CartController {
         }
     }
 
-    /**
-     * Retrieves order details by ID.
-     */
-    @GetMapping("/orders/{id}")
-    public ResponseEntity<?> getOrder(@PathVariable Integer id) {
-        try {
-            Order order = orderService.getOrderById(id);
-            return ResponseEntity.ok(order);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Failed to fetch order: " + e.getMessage());
-        }
-    }
 }

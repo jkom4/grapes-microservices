@@ -76,9 +76,9 @@ Here are the links to the APIs exposed by the various services in your applicati
 - **API Gateway** : [http://localhost:8090/api-gateway](http://localhost:8090/api-gateway)
 - **Auth Service** : [http://localhost:8091/auth-service](http://localhost:8091/auth-service)
 - **Sales Service** : [http://localhost:8092/sales-service](http://localhost:8092/transactions-service)
-- **Payment Service** : [http://localhost:8094/payment-service](http://localhost:8094/payment-service)
-- **Chat Service** : [http://localhost:8095/chat-service](http://localhost:8095/chat-service)
-- **Data Mining Service** : [http://localhost:8096/data-mining-service](http://localhost:8096/data-mining-service)
+- **Payment Service** : [http://localhost:8093/payment-service](http://localhost:8094/payment-service)
+- **Chat Service** : [http://localhost:8094/chat-service](http://localhost:8095/chat-service)
+- **Data Mining Service** : [http://localhost:8095/data-mining-service](http://localhost:8096/data-mining-service)
 
 ## Access Swagger
 

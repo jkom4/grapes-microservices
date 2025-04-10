@@ -4,6 +4,8 @@ import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.EmailService;
 import grapes.microservices.authservice.services.TokenService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,20 +18,21 @@ import java.io.IOException;
  */
 @Service
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class EmailAuthProvider extends AbstractAuthProvider{
 
     @Autowired
-    private final EmailService emailService;
+    private EmailService emailService;
 
     @Autowired
     private TokenService tokenService;
 
     @Override
-    public void sendChallenge(User user) throws IOException {
+    public boolean sendChallenge(User user) throws IOException {
         String challenge = generateChallenge();
         challengeService.saveChallengeForUser(user.getEmail(), challenge);
         String message = "Please use the following code to authenticate: " + challenge;
-        emailService.sendMail(user.getEmail(), "Authentication challenge", message);
+        return emailService.sendMail(user.getEmail(), "Authentication challenge", message);
     }
 
     @Override
@@ -53,7 +56,7 @@ public class EmailAuthProvider extends AbstractAuthProvider{
         boolean isValid = verifyChallenge(user, submittedChallenge);
         if (isValid) {
             challengeService.evictChallengeCache(user.getEmail());
-            String token = tokenService.generateToken(user.getEmail());
+            String token = tokenService.generateToken(user.getId().toHexString());
             sessionService.saveSession(user.getId().toHexString(), token);
             return token;
         }

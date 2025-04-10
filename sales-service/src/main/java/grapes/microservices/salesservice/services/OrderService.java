@@ -7,6 +7,8 @@ import grapes.microservices.salesservice.repositories.ArticleRepository;
 import grapes.microservices.salesservice.repositories.OrderItemRepository;
 import grapes.microservices.salesservice.repositories.OrderRepository;
 import grapes.microservices.salesservice.utils.InvoiceGenerator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
@@ -17,16 +19,18 @@ import java.util.List;
 import java.util.Random;
 
 @Service
+@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ArticleRepository articleRepository;
+    private final RabbitTemplate rabbitTemplate;
 
-    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, ArticleRepository articleRepository) {
-        this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
-        this.articleRepository = articleRepository;
+    // Method to send a message to RabbitMQ
+    public void sendOrderToDeliveryQueue(Integer orderId) {
+        rabbitTemplate.convertAndSend("order-paid-queue", orderId);
+        System.out.println(" Message sent to RabbitMQ : Order ID = " + orderId);
     }
 
     public Order createTemporaryOrder(Integer userId) {
@@ -55,7 +59,12 @@ public class OrderService {
         order.setPaid(true);
 
         orderRepository.save(order);
-        orderItemRepository.deleteAll(items);
+        // Send message to RabbitMQ
+        sendOrderToDeliveryQueue(order.getId());
+       // orderItemRepository.deleteAll(items);
+
+
+
     }
 
     private List<OrderItem> getValidOrderItems(Integer orderId) {
@@ -109,4 +118,5 @@ public class OrderService {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + id));
     }
+
 }
