@@ -70,6 +70,7 @@ public class DeliveryConsumerService {
 
 
 
+
     // (Optional) Generate a tracking URL
     private String generateTrackingUrl(Integer orderId) {
         return "https://grapes.delivery/track/" + orderId;

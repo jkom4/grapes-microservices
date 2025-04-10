@@ -31,7 +31,7 @@ public class EncryptionService {
     static {
         try {
             byte[] key = AESConfig.getKey();
-            if (key == null) {
+            if (key == null || key.length == 0) {
                 key = AESConfig.generateAESKey();
                 logger.warn("AES key is generated as it was not provided.");
             } else {

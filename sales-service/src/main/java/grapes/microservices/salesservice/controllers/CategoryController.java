@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/clm/categories")
 public class CategoryController {
@@ -24,10 +25,10 @@ public class CategoryController {
             return ResponseEntity.internalServerError().body("Failed to create category: " + e.getMessage());
         }
     }
-
     @GetMapping
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
         return ResponseEntity.ok(categories);
     }
+
 }

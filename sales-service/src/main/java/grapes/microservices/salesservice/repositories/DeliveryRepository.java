@@ -13,7 +13,4 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Integer> {
     List<Delivery> findByUserId(Integer userId);
 
 
-
-
-
 }

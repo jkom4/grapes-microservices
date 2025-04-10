@@ -24,7 +24,6 @@ public class FamilyController {
             return ResponseEntity.internalServerError().body("Failed to create family: " + e.getMessage());
         }
     }
-
     @GetMapping
     public ResponseEntity<List<Family>> getAllFamilies() {
         List<Family> families = familyRepository.findAll();
