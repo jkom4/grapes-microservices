@@ -33,6 +33,7 @@ public class CartController {
      * Adds an article to the user's cart (temporary order).
      */
     @PostMapping("/add")
+    @CrossOrigin(origins = "http://localhost:3002")
     @Transactional
     public ResponseEntity<?> addToCart(@RequestBody CartRequestDTO request) {
         try {

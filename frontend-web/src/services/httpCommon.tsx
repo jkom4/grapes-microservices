@@ -14,4 +14,11 @@ const searchArticlesAPI = {
     },
 };
 
+const getCart = {
+    baseURL: 'http://localhost:8092',
+    endpoints: {
+        articles: (orderId: string) => `http://localhost:8092/clm/cart/${orderId}`,
+    }
+}
+
 export { getArticlesAPI, searchArticlesAPI };

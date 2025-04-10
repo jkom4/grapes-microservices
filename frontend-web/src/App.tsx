@@ -6,6 +6,7 @@ import { LanguageProvider } from './features/LanguageContext';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import AllArticles from "./pages/AllArticles";
 import ArticleDetails from "./pages/ArticleDetails";
+import ShoppingCart from "./pages/ShoppingCart";
 
 const App: React.FC = () => {
     return (
@@ -16,6 +17,7 @@ const App: React.FC = () => {
                     <Route path="/" element={<MainPage />} />
                     <Route path="/all-articles" element={<AllArticles />} />
                     <Route path="/clm/articles/clm/articles/:id" element={<ArticleDetails />} />
+                    <Route path="/shopping-cart" element={<ShoppingCart />} />
                 </Routes>
             </Router>
         </LanguageProvider>

@@ -45,10 +45,10 @@ fun MyArticleCardList(title: String, articles : List<Article>, orientation: Orie
         }
     } else {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2), // C'est ici que vous spécifiez 2 colonnes
-            modifier = Modifier.fillMaxWidth(), // La grille prend toute la largeur disponible
-            contentPadding = PaddingValues(vertical = 16.dp), // Espace autour de l'ensemble des items
-            verticalArrangement = Arrangement.spacedBy(16.dp), // Espace vertical entre les lignes de la grille
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
 
         ) {
             items(articles) { item ->

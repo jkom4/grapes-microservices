@@ -1,4 +1,9 @@
 package grapes.microservices.models.api
 
-class GrapesApi {
+import grapes.microservices.models.data.Article
+import retrofit2.http.GET
+
+interface GrapesApi {
+    @GET("clm/articles")
+    suspend fun getArticles(): List<Article>
 }
