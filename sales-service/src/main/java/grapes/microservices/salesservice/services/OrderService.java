@@ -59,10 +59,12 @@ public class OrderService {
         order.setPaid(true);
 
         orderRepository.save(order);
-        orderItemRepository.deleteAll(items);
-
         // Send message to RabbitMQ
         sendOrderToDeliveryQueue(order.getId());
+       // orderItemRepository.deleteAll(items);
+
+
+
     }
 
     private List<OrderItem> getValidOrderItems(Integer orderId) {
@@ -116,4 +118,5 @@ public class OrderService {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + id));
     }
+
 }

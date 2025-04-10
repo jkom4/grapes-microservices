@@ -124,8 +124,13 @@ public class CartService {
             throw new IllegalArgumentException("Cart is already empty or does not exist.");
         }
 
-        orderItemRepository.deleteAll(items);
+        //  Correction : we should not delete the items.
+        for (OrderItem item : items) {
+            item.setCartId(null);
+        }
+        orderItemRepository.saveAll(items);
     }
+
 
 
 

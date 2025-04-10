@@ -50,4 +50,5 @@ public class Delivery {
     @Lob
     @Column(name = "signature")
     private byte[] signature;
+
 }

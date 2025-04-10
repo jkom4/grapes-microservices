@@ -10,6 +10,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -24,38 +26,50 @@ public class DeliveryConsumerService {
         System.out.println("Message received from RabbitMQ: Order ID = " + orderId);
 
         try {
-            // 1. Check if the order exists
-            orderRepository.findById(orderId).orElseThrow(() ->
-                    new IllegalArgumentException("Order not found with ID: " + orderId)
-            );
+            var order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + orderId));
 
-            // 2. (Future feature) In a future sprint, automatically assign an available delivery driver
+            // 🛠️ 1. recuperate the random delivery man
+            Integer deliveryManId = findRandomDeliveryManId();
 
-            // 3. Retrieve the "Pending" delivery status
+            if (deliveryManId == null) {
+                throw new IllegalStateException("No available deliveryman found!");
+            }
+
             DeliveryStatus pendingStatus = deliveryStatusRepository.findByLabel("Pending")
                     .orElseThrow(() -> new IllegalArgumentException("'Pending' delivery status not found"));
 
-            // 4. Create new delivery
+            // create delivery
             Delivery delivery = Delivery.builder()
                     .orderId(orderId)
+                    .userId(deliveryManId)
                     .deliveryStatusId(pendingStatus.getId())
                     .deliveryDate(LocalDateTime.now())
-                    // .userId(deliveryManId)  // Later: assign delivery driver
                     .build();
 
-            // 5. Save delivery
             deliveryRepository.save(delivery);
 
-            System.out.println("Delivery automatically created for order ID: " + orderId);
+            System.out.println("Delivery automatically created for order ID: " + orderId + ", assigned to deliveryman ID: " + deliveryManId);
 
-        } catch (IllegalArgumentException ex) {
-            System.err.println("Error while processing delivery for order ID: " + orderId);
-            System.err.println("Details: " + ex.getMessage());
         } catch (Exception ex) {
-            System.err.println("Unexpected error while creating delivery for order ID: " + orderId);
-            ex.printStackTrace();
+            System.err.println("Error while creating delivery: " + ex.getMessage());
         }
     }
+
+    private Integer findRandomDeliveryManId() {
+        List<Integer> deliveryMenIds = List.of(2, 3, 4);
+
+        if (deliveryMenIds.isEmpty()) {
+            return null;
+        }
+
+        Random random = new Random();
+        int randomIndex = random.nextInt(deliveryMenIds.size());
+        return deliveryMenIds.get(randomIndex);
+    }
+
+
+
 
     // (Optional) Generate a tracking URL
     private String generateTrackingUrl(Integer orderId) {

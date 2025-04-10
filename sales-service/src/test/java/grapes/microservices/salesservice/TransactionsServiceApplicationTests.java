@@ -3,8 +3,10 @@ package grapes.microservices.salesservice;
 import com.jayway.jsonpath.JsonPath;
 import grapes.microservices.salesservice.models.Delivery;
 import grapes.microservices.salesservice.models.DeliveryStatus;
+import grapes.microservices.salesservice.repositories.CategoryRepository;
 import grapes.microservices.salesservice.repositories.DeliveryRepository;
 import grapes.microservices.salesservice.repositories.DeliveryStatusRepository;
+import grapes.microservices.salesservice.repositories.FamilyRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.junit.jupiter.api.Disabled;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +32,10 @@ class TransactionsServiceApplicationTests {
     private DeliveryRepository deliveryRepository;
     @Autowired
     private DeliveryStatusRepository deliveryStatusRepository;
+    @Autowired
+    private FamilyRepository familyRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Test
     void testGetAllArticles() throws Exception {
@@ -266,7 +273,134 @@ class TransactionsServiceApplicationTests {
                 .andExpect(content().string("Delivery status updated successfully to: In Progress"));
     }
 
+    @Test
+    @Disabled("Ce test est ignoré")
+    void testEndToEndOrderPaymentAndDeliveryCreation() throws Exception {
 
+        // Create Family
+        mockMvc.perform(post("/clm/families")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                { "name": "Fruits Test" }
+            """))
+                .andExpect(status().isOk());
 
+        // Create Category
+        mockMvc.perform(post("/clm/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                { "name": "Category Test" }
+            """))
+                .andExpect(status().isOk());
 
+        // Create Article
+        MvcResult articleResult = mockMvc.perform(post("/clm/articles")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                {
+                  "categoryId": 1,
+                  "familyId": 1,
+                  "name": "Ananas",
+                  "description": "Fruit tropical délicieux",
+                  "priceKg": 3.99,
+                  "priceUnit": 1.50,
+                  "stockKg": 15.0,
+                  "stockUnit": 10.0,
+                  "origin": "Costa Rica",
+                  "picturePath": "ananas.jpg"
+                }
+            """))
+                .andExpect(status().isCreated())
+                .andReturn();
+        Integer articleId = JsonPath.read(articleResult.getResponse().getContentAsString(), "$.id");
+
+        // Init Cart
+        MvcResult cartResult = mockMvc.perform(post("/clm/cart/init")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                { "userId": 2 }
+            """))
+                .andExpect(status().isOk())
+                .andReturn();
+        Integer orderId = JsonPath.read(cartResult.getResponse().getContentAsString(), "$.id");
+
+        // Add to Cart
+        mockMvc.perform(post("/clm/cart/add")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(String.format("""
+                {
+                  "orderId": %d,
+                  "articleId": %d,
+                  "quantity": 2
+                }
+            """, orderId, articleId)))
+                .andExpect(status().isOk());
+
+        // Pay Cart
+        mockMvc.perform(post("/clm/cart/pay/" + orderId))
+                .andExpect(status().isOk());
+
+        // MANUALLY simulate delivery creation (simulate RabbitMQ behavior)
+        Delivery delivery = Delivery.builder()
+                .orderId(orderId)
+                .userId(2) // 🛠️ Choose an existing deliveryMan ID
+                .deliveryStatusId(1) // pending
+                .deliveryDate(LocalDateTime.now())
+                .build();
+        deliveryRepository.save(delivery);
+
+        // Now the delivery exists, verify trips
+        mockMvc.perform(get("/cll/trips/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").exists());
+
+        // Then verify products inside trip
+        mockMvc.perform(get("/cll/trips/{tripId}/orders", delivery.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].productDescription").exists());
+    }
+
+    @Test
+    void testCreateAndGetCategories() throws Exception {
+        // Clean up
+        categoryRepository.deleteAll();
+
+        // Create a new category
+        mockMvc.perform(post("/clm/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                                "name": "Fruits Exotiques"
+                            }
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Fruits Exotiques"));
+
+        // Get all categories
+        mockMvc.perform(get("/clm/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Fruits Exotiques"));
+    }
+
+    @Test
+    void testCreateAndGetFamilies() throws Exception {
+        // Clean up
+        familyRepository.deleteAll();
+
+        // Create a new family
+        mockMvc.perform(post("/clm/families")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                                "name": "Fruits"
+                            }
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Fruits"));
+
+        // Get all families
+        mockMvc.perform(get("/clm/families"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Fruits"));
+    }
 }
