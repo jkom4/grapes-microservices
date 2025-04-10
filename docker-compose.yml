@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   ### DATABASES
-  mariadb:
+  mariadb-master:
     build: ./docker/mariadb
     env_file:
       - .env

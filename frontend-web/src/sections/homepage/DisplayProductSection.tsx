@@ -2,13 +2,15 @@
 import React, { useEffect, useState } from "react";
 import Article from "../../utils/models/Articles";
 import { useLanguage } from "../../features/LanguageContext";
-import fetchFruits from "../../services/fruitServices";
+import {fetchFruits} from "../../services/fruitServices";
+import {useNavigate} from "react-router-dom";
 
 function DisplayProductSection({ limit = 6 }: { limit?: number })  {
     const [articles, setArticles] = useState<Article[]>([]); // Typing with the Article class
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const { language } = useLanguage();
+    const navigate = useNavigate();
 
     const text = {
         en: {
@@ -55,8 +57,9 @@ function DisplayProductSection({ limit = 6 }: { limit?: number })  {
             <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 px-4 max-w-screen-lg mx-auto pb-20">
                 {articles.map((article: Article) => (
                     <div
-                        key={article.id} // Using id as the unique key
-                        className="card bg-white p-5 w-full max-w-[300px] rounded-lg shadow-lg text-center transition-transform duration-300 ease-in-out hover:translate-y-[-5px] mx-auto"
+                        key={article.id}
+                        className="card bg-white p-5 w-full max-w-[300px] rounded-lg shadow-lg text-center transition-transform duration-300 ease-in-out hover:translate-y-[-5px] mx-auto cursor-pointer"
+                        onClick={() => navigate(`/clm/articles/clm/articles/${article.id}`)}
                     >
                         <div className="relative">
                             <div className="absolute top-2 left-2">

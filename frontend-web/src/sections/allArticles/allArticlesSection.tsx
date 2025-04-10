@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import Article from "../../utils/models/Articles";
 import placeholder from "../../assets/images/fruit.png";
 import { useLanguage } from "../../features/LanguageContext";
-import fetchFruits from "../../services/fruitServices";
+import {fetchFruits} from "../../services/fruitServices";
 import searchArticles from "../../services/searchFruitsServices";
+import {useNavigate} from "react-router-dom";
 
 // Component to display a paginated list of articles with search functionality
 function AllArticlesSection() {
-    // State to manage articles, loading status, errors, pagination, and search
     const [articles, setArticles] = useState<Article[]>([]); // List of articles to display
     const [loading, setLoading] = useState<boolean>(true); // Loading state for data fetching
     const [error, setError] = useState<string | null>(null); // Error message if fetching fails
@@ -17,6 +17,7 @@ function AllArticlesSection() {
     const { language } = useLanguage(); // Language context for multilingual support
 
     const articlesPerPage = 27; // Number of articles per page
+    const navigate = useNavigate();  // Initialize navigate function from react-router-dom
 
     // Text content for different languages (English and French)
     const text = {
@@ -139,6 +140,7 @@ function AllArticlesSection() {
                             <div
                                 key={article.id}
                                 className="card bg-white p-5 w-full max-w-[300px] rounded-lg shadow-lg text-center transition-transform duration-300 ease-in-out hover:translate-y-[-5px] mx-auto"
+                                onClick={() => navigate(`/clm/articles/clm/articles/${article.id}`)}
                             >
                                 <div className="relative">
                                     <div className="absolute top-2 left-2">

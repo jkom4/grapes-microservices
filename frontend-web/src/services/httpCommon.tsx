@@ -3,6 +3,7 @@ const getArticlesAPI = {
     endpoints: {
         articles: '/clm/articles',
         availableArticles: '/clm/articles/available',
+        articleById: (id: number) => `/clm/articles/${id}`,
     },
 };
 

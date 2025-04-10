@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import Fruit from "../../utils/models/Articles"; // Make sure your Fruit model is imported
 import { useLanguage } from "../../features/LanguageContext";
-import fetchFruits from "../../services/fruitServices";
+import {fetchFruits} from "../../services/fruitServices";
+import {useNavigate} from "react-router-dom";
 
 // PopularSection Component: Fetches and displays a list of popular fruits
 function PopularSection({ limit = 3 }: { limit?: number }) {
@@ -9,6 +10,8 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
     const [articles, setFruits] = useState<Fruit[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    const navigate = useNavigate();  // Initialize navigate function from react-router-dom
 
 
     // Text content for the section in both languages
@@ -70,6 +73,7 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
                         <div
                             key={article.id}
                             className="card bg-white p-5 w-full max-w-[300px] rounded-lg shadow-lg text-center transition-transform duration-300 ease-in-out hover:translate-y-[-5px] mx-auto"
+                            onClick={() => navigate(`/clm/articles/clm/articles/${article.id}`)}
                         >
                             <div className="relative">
                                 {/* Rating badge */}
