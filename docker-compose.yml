@@ -44,7 +44,7 @@ services:
         "--bind-address=0.0.0.0"
       ]
     depends_on:
-      - mariadb-master
+      - mariadb
 
   mongodb:
     build: ./docker/mongodb
@@ -133,7 +133,7 @@ services:
       - "8090:8090"
     depends_on:
       - mongodb
-      - mariadb-master
+      - mariadb
       - data-mining-service
       - auth-service
       - sales-service
@@ -149,7 +149,7 @@ services:
       - "8091:8091"
     depends_on:
       - mongodb
-      - mariadb-master
+      - mariadb
 
   sales-service:
     build: ./sales-service
@@ -164,7 +164,7 @@ services:
       RABBITMQ_USER: grapes
       RABBITMQ_PASSWORD: grapes
     depends_on:
-      - mariadb-master
+      - mariadb
       - rabbitmq
 
 
@@ -176,7 +176,7 @@ services:
     ports:
       - "8094:8094"
     depends_on:
-      - mariadb-master
+      - mariadb
 
   chat-service:
     build: ./chat-service
@@ -186,7 +186,7 @@ services:
     ports:
       - "8095:8095"
     depends_on:
-      - mariadb-master
+      - mariadb
 
   data-mining-service:
     build: ./data-mining-service
@@ -197,7 +197,7 @@ services:
       - "8096:8096"
     depends_on:
       - mongodb
-      - mariadb-master
+      - mariadb
 
 ### FRONTEND
 
