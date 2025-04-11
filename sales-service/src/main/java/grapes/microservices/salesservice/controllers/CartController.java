@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
  * confirming payment, and retrieving orders.
  */
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/clm/cart")
 public class CartController {
 
@@ -33,7 +34,6 @@ public class CartController {
      * Adds an article to the user's cart (temporary order).
      */
     @PostMapping("/add")
-    @CrossOrigin(origins = "http://localhost:3002")
     @Transactional
     public ResponseEntity<?> addToCart(@RequestBody CartRequestDTO request) {
         try {
@@ -107,14 +107,16 @@ public class CartController {
     @Transactional
     public ResponseEntity<?> clearCart(@PathVariable Integer orderId) {
         try {
-            cartService.clearCart(orderId);
-            return ResponseEntity.noContent().build();
+            String message = cartService.clearCart(orderId);
+            return ResponseEntity.ok(message);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed to clear cart: " + e.getMessage());
         }
     }
+
+
 
     /**
      * Finalizes the payment: verifies stock, updates quantities,

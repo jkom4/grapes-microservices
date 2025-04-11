@@ -117,21 +117,15 @@ public class CartService {
         orderItemRepository.deleteById(itemId);
     }
 
-    public void clearCart(Integer orderId) {
+    public String clearCart(Integer orderId) {
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
 
         if (items.isEmpty()) {
             throw new IllegalArgumentException("Cart is already empty or does not exist.");
         }
 
-        //  Correction : we should not delete the items.
-        for (OrderItem item : items) {
-            item.setCartId(null);
-        }
-        orderItemRepository.saveAll(items);
+        orderItemRepository.deleteAll(items);
+
+        return "Cart cleared successfully for order ID: " + orderId;
     }
-
-
-
-
 }
