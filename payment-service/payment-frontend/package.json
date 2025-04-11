@@ -11,8 +11,10 @@
     "crypto-js": "^4.2.0",
     "https-browserify": "^1.0.0",
     "react": "^19.0.0",
+    "react-checkmark": "^2.1.1",
     "react-dom": "^19.0.0",
-    "react-scripts": "5.0.1",
+    "react-router-dom": "^7.5.0",
+    "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

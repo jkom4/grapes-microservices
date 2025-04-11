@@ -41,10 +41,15 @@ public class OrderItem {
     private LocalDateTime scannedAt;
 
     @Column(name = "is_scanned", nullable = false)
-    private boolean isScanned;
+    private Boolean scanned;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", insertable = false, updatable = false)
     private Order order;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "article_id", insertable = false, updatable = false)
+    private Article article;
 }
+

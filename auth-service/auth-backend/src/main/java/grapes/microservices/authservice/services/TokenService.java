@@ -1,9 +1,12 @@
 package grapes.microservices.authservice.services;
 
+import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.utils.AuthLogger;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,9 @@ public class TokenService {
 
     @Value("${auth.service.jwt.secret.key}")
     private String secretKey;
+
+    @Value("${auth.service.jwt.expiration.time}")
+    private long expirationTime;
 
     @Autowired
     private SessionService sessionService;
@@ -78,14 +84,14 @@ public class TokenService {
     /**
      * Generates a token for the given email
      * The token is valid for 24 hours
-     * @param email the email to generate the token for
+     * @param idStr the identifier to be used in the token
      * @return the generated token
      */
-    public String generateToken(String email) {
+    public String generateToken(String idStr) {
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(idStr)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime * 1000))
                 .signWith(SECRET_KEY)
                 .compact();
     }
@@ -119,6 +125,40 @@ public class TokenService {
             return claims.getSubject();
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    /**
+     * Validates the given token
+     * @param token the token to validate
+     * @return true if the token is valid, false otherwise
+     */
+    private boolean isTokenExpired(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration()
+                .before(new Date());
+    }
+
+    /**
+     * Checks if the token is valid
+     * The token is valid if it is not expired and the signature is valid
+     * @param token the token to check
+     * @return true if the token is valid, false otherwise
+     */
+    public boolean isValidToken(String token) {
+        try {
+            JwtParser parser = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build();
+
+            Claims claims = parser.parseClaimsJws(token).getBody();
+            return claims.getExpiration().after(new java.util.Date());
+        } catch (SignatureException e) {
+            return false;
         }
     }
 }

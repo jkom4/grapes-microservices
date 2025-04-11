@@ -55,6 +55,7 @@ jobs:
         run: |
           cd frontend-web
           npm install
+          npm run-script build
   
 
   test :
@@ -83,16 +84,19 @@ jobs:
       - name: "🔍 Run Tests for Payment Service"
         run: mvn -B test --file payment-service/payment-backend/pom.xml
 
-#      - name: "🔍 Run Tests for Sales Service"
-#        run: mvn -B test --file sales-service/pom.xml
+      - name: "🔍 Run Tests for Sales Service"
+        run: mvn -B test --file sales-service/pom.xml
 
       - name: 🐍 Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
 
-#      - name: 🧪 Run Tests for Python Microservices
-#        run: pytest data-mining-service/tests
+      - name: 🧪 Run Tests for Python Microservices
+        working-directory: ./data-mining-service
+        run: |
+          pip install -r requirements.txt
+          pytest
 
 #      ## FRONTEND
 #      - name: 🌐 Install Node.js
@@ -101,6 +105,7 @@ jobs:
 #          node-version: 18
 #
 #      - name: 🧪 Run Frontend Tests
+#        working-directory: ./frontend-web
 #        run: |
 #          npm run test
 
@@ -115,39 +120,173 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: 🔑 Log in to Docker Hub
-        run: echo "${{ secrets.AZURE_ACR_PASSWORD }}" | docker login ${{ secrets.AZURE_ACR_LOGIN_SERVER }} -u ${{ secrets.AZURE_ACR_USERNAME }} --password-stdin
-
-      - name: 🐳 Build & Push Images (via Docker Compose)
+      - name: Create .env file from GitHub secrets
         run: |
-          docker-compose build mariadb 
+          cat <<EOF > .env
+          # 🌍 General config
+          ENVIRONMENT=development
+          LOG_LEVEL=debug
 
+          # 🚀 API Gateway
+          GATEWAY_PORT=8090
 
-#          docker-compose build mariadb mongodb rabbitmq api-gateway auth-service sales-service payment-service chat-service data-mining-service frontend-web frontend-auth frontend-payment
-#          docker-compose push mariadb mongodb rabbitmq api-gateway auth-service sales-service payment-service chat-service data-mining-service frontend-web frontend-auth frontend-payment
+          # 🔐 Authentication Service
+          AUTH_SERVICE_PORT=8091
+          TOKEN_EXPIRATION=3600
+          AUTH_MONGO_URI=${{ secrets.MONGO_URI }}
+          AUTH_MONGO_DB=db_auth
+          GRAPES_AES_KEY=${{ secrets.GRAPES_AES_KEY }}
+          GRAPES_TWILIO_API_SECRET=${{ secrets.GRAPES_TWILIO_API_SECRET }}
+          COMPANY_MAIL=${{ secrets.COMPANY_MAIL }}
+          GRAPES_JWT_SECRET_KEY=${{ secrets.GRAPES_JWT_SECRET_KEY }}
 
-#  deploy:
-#    name: Deploy on Azure VM (Manual)
-#    runs-on: ubuntu-latest
-#    needs:
-#      - build
-#      - tests
-#    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
-#
-#    steps:
-#      - name: 📥 Checkout repository
-#        uses: actions/checkout@v3
-#
-#      - name: 🔑 SSH into Azure VM and Deploy
-#        uses: appleboy/ssh-action@master
-#        with:
-#          host: ${{ secrets.AZURE_VM_IP }}
-#          username: ${{ secrets.AZURE_VM_USER }}
-#          key: ${{ secrets.AZURE_VM_SSH_KEY }}
-#          script: |
-#            cd grapes-microservices  # Path to project
-#            git pull origin main  # Update project
-#            docker-compose pull  # get new images from registry(grapes hub)
-#            docker-compose down
-#            docker-compose up -d
+          # 📦 Sales Service
+          SALES_SERVICE_PORT=8092
+          SALES_DB_URL=${{ secrets.SALES_DB_URL }}
+          SALES_DB_USER=${{ secrets.SALES_DB_USER }}
+          SALES_DB_PASSWORD=${{ secrets.SALES_DB_PASSWORD }}
+
+          # 💳 Payment Service
+          PAYMENT_SERVICE_PORT=8093
+          PAYMENT_DB_URL=${{ secrets.PAYMENT_DB_URL }}
+          PAYMENT_DB_USER=${{ secrets.PAYMENT_DB_USER }}
+          PAYMENT_DB_PASSWORD=${{ secrets.PAYMENT_DB_PASSWORD }}
+
+          # 💬 Chat Service
+          CHAT_SERVICE_PORT=8094
+          CHAT_MONGO_URI=${{ secrets.CHAT_MONGO_URI }}
+          CHAT_MONGO_DB=db_chat
+
+          # 📊 Database
+          # MariaDB
+          DB_PORT=3306
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+
+          # MongoDB
+          MONGO_PORT=27017
+          MONGO_USER=${{ secrets.MONGO_USER }}
+          MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+
+          # 🐰 Message Broker (RabbitMQ)
+          RABBITMQ_HOST=rabbitmq
+          RABBITMQ_PORT=5672
+          RABBITMQ_USER=${{ secrets.RABBITMQ_USER }}
+          RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+
+          # 📈 Monitoring
+          PROMETHEUS_PORT=${{ secrets.PROMETHEUS_PORT || '9090' }}
+          GRAFANA_PORT=${{ secrets.GRAFANA_PORT || '3000' }}
+
+          # 🛠️ SonarQube
+          SONARQUBE_HOST=http://localhost:9000
+          SONARQUBE_TOKEN=${{ secrets.SONARQUBE_TOKEN }}
+
+          # ☁️ Oracle Cloud (OCIR)
+          ORACLE_REGION_ID=${{ secrets.ORACLE_REGION_ID }}
+          ORACLE_TENANCY_NAMESPACE=${{ secrets.ORACLE_TENANCY_NAMESPACE }}
+          EOF
+          
+
+      - name: 🔑 Log in to OCIR
+        run:  |
+          echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
+
+      # 🐳 Multi-arch build & push for required images
+      - name: 🏗️ Build & Push Multi-Arch (MariaDB, MongoDB, RabbitMQ)
+        run: |
+          docker buildx build --platform linux/amd64,linux/arm64 \
+          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mariadb-grapes:latest \
+          --push ./docker/mariadb
+          
+          docker buildx build --platform linux/amd64,linux/arm64 \
+          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mongodb-grapes:latest \
+          --push ./docker/mongodb
+          
+          docker buildx build --platform linux/amd64,linux/arm64 \
+          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/rabbitmq-grapes:latest \
+          --push ./docker/rabbitmq
+
+      # 🐳 Simple build & push for the rest (amd64 only)
+      - name: 🏗️ Build & Push Remaining Services
+        run: |
+            docker compose build api-gateway auth-service sales-service payment-service chat-service frontend-web frontend-auth frontend-payment
+            docker compose push api-gateway auth-service sales-service payment-service chat-service frontend-web frontend-auth frontend-payment
+
+  deploy-backend:
+    name: Deploy to VM 1 - BACKEND (Manual)
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - tests
+    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🔑 SSH into ORACLE VM and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM1_IP }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM1_KEY }}
+          script: |
+            cd grapes-microservices
+            git pull origin main
+            sudo docker compose pull 
+            sudo docker compose down 
+            sudo docker compose -f docker-compose.vm1.yml up -d
+
+  deploy-frontend:
+    name: Deploy to VM 1 - FRONTEND + GATEWAY (Manual)
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - tests
+    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🔑 SSH into ORACLE VM and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM2_IP }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM2_KEY }}
+          script: |
+            cd grapes-microservices
+            git pull origin main
+            sudo docker compose pull 
+            sudo docker compose down 
+            sudo docker compose -f docker-compose.vm2.yml up -d
+
+  deploy-bd:
+      name: Deploy to VM 3 - DB + MONITORING (Manual)
+      runs-on: ubuntu-latest
+      needs:
+        - build
+        - tests
+      if: github.event_name == 'workflow_dispatch'  # Launches only if manual
+
+      steps:
+        - name: 📥 Checkout repository
+          uses: actions/checkout@v3
+
+        - name: 🔑 SSH into ORACLE VM and Deploy
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.VM3_IP }}
+            username: ${{ secrets.VM_USER }}
+            key: ${{ secrets.VM3_KEY }}
+            script: |
+              cd grapes-microservices
+              git pull origin main
+              sudo docker compose pull 
+              sudo docker compose down 
+              sudo docker compose -f docker-compose.vm3.yml up -d

@@ -100,7 +100,9 @@ public class InvoiceGenerator {
             Article article = articleRepository.findById(item.getArticleId()).orElse(null);
             String name = article != null ? article.getName() : "Unknown";
 
-            BigDecimal qty = item.getQuantityKg() != null ? item.getQuantityKg() : item.getQuantity();
+            BigDecimal qty = (item.getQuantityKg() != null && item.getQuantityKg().compareTo(BigDecimal.ZERO) > 0)
+                    ? item.getQuantityKg()
+                    : item.getQuantity();
             BigDecimal total = item.getPrice().multiply(qty).setScale(2, RoundingMode.HALF_UP);
             grandTotal = grandTotal.add(total);
 

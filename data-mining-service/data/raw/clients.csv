@@ -1,0 +1,2001 @@
+"client_id","age","region","prefere_produit_local"
+1,46,"Rural",FALSE
+2,66,"Urban - Medium Density",TRUE
+3,29,"Urban - High Density",FALSE
+4,57,"Urban - Medium Density",TRUE
+5,65,"Rural",TRUE
+6,58,"Urban - High Density",TRUE
+7,29,"Urban - Medium Density",TRUE
+8,40,"",FALSE
+9,72,"Urban - High Density",FALSE
+10,24,"Urban - High Density",TRUE
+11,41,"Urban - High Density",TRUE
+12,22,"Urban - High Density",TRUE
+13,57,"Urban - Medium Density",FALSE
+14,24,"Urban - High Density",TRUE
+15,51,"Urban - Medium Density",TRUE
+16,58,"",TRUE
+17,30,"Urban - Medium Density",TRUE
+18,47,"Urban - High Density",FALSE
+19,22,"Urban - Medium Density",FALSE
+20,24,"Urban - Medium Density",FALSE
+21,56,"Urban - High Density",FALSE
+22,38,"Urban - High Density",FALSE
+23,42,"Urban - High Density",TRUE
+24,75,"Rural",TRUE
+25,68,"Urban - Medium Density",TRUE
+26,22,"Rural",TRUE
+27,68,"Urban - High Density",TRUE
+28,42,"Urban - High Density",FALSE
+29,53,"Rural",TRUE
+30,49,"Urban - High Density",FALSE
+31,78,"Urban - Medium Density",NA
+32,28,"Unknown",TRUE
+33,40,"Urban - High Density",TRUE
+34,53,"",FALSE
+35,36,"Urban - High Density",FALSE
+36,56,"Urban - High Density",FALSE
+37,62,"Urban - High Density",TRUE
+38,75,"Rural",FALSE
+39,31,"Unknown",FALSE
+40,21,"Urban - Medium Density",TRUE
+41,54,"Urban - High Density",TRUE
+42,46,"Urban - High Density",NA
+43,65,"Urban - High Density",FALSE
+44,49,"Urban - Medium Density",TRUE
+45,19,"Urban - Medium Density",TRUE
+46,28,"Urban - High Density",TRUE
+47,40,"Urban - Medium Density",TRUE
+48,67,"Urban - Medium Density",NA
+49,37,"Urban - Medium Density",FALSE
+50,47,"Urban - Medium Density",FALSE
+51,40,"Urban - High Density",TRUE
+52,50,"Urban - Medium Density",TRUE
+53,55,"Rural",FALSE
+54,45,"Urban - High Density",TRUE
+55,27,"Urban - High Density",TRUE
+56,46,"Urban - Medium Density",TRUE
+57,45,"Urban - High Density",FALSE
+58,79,"Rural",TRUE
+59,29,"Urban - High Density",FALSE
+60,38,"Urban - Medium Density",TRUE
+61,52,"Urban - Medium Density",TRUE
+62,23,"Urban - Medium Density",FALSE
+63,66,"Urban - Medium Density",FALSE
+64,65,"Urban - Medium Density",FALSE
+65,61,"Rural",TRUE
+66,32,"Urban - High Density",TRUE
+67,77,"",NA
+68,61,"Urban - High Density",TRUE
+69,69,"Urban - Medium Density",FALSE
+70,50,"Urban - High Density",TRUE
+71,39,"Urban - High Density",TRUE
+72,22,"Rural",TRUE
+73,38,"Urban - High Density",TRUE
+74,41,"Urban - Medium Density",FALSE
+75,47,"Urban - High Density",TRUE
+76,22,"Urban - High Density",TRUE
+77,42,"Urban - High Density",TRUE
+78,57,"Urban - Medium Density",TRUE
+79,20,"Unknown",TRUE
+80,31,"Urban - High Density",TRUE
+81,39,"Urban - High Density",FALSE
+82,47,"Urban - Medium Density",NA
+83,36,"Urban - High Density",TRUE
+84,70,"Urban - High Density",NA
+85,51,"Urban - High Density",TRUE
+86,54,"Urban - High Density",FALSE
+87,69,"Urban - Medium Density",TRUE
+88,24,"Urban - Medium Density",TRUE
+89,63,"Urban - Medium Density",TRUE
+90,71,"Urban - High Density",TRUE
+91,54,"Urban - High Density",FALSE
+92,5,"Urban - High Density",TRUE
+93,55,"Urban - Medium Density",FALSE
+94,45,"Urban - Medium Density",TRUE
+95,31,"Urban - High Density",TRUE
+96,69,"Urban - High Density",FALSE
+97,63,"Rural",TRUE
+98,35,"",TRUE
+99,51,"Rural",FALSE
+100,67,"Rural",TRUE
+101,37,"Urban - High Density",TRUE
+102,64,"Urban - Medium Density",TRUE
+103,57,"Urban - Medium Density",TRUE
+104,74,"Urban - High Density",NA
+105,26,"Urban - Medium Density",FALSE
+106,70,"Rural",FALSE
+107,23,"Urban - High Density",FALSE
+108,61,"Rural",TRUE
+109,61,"Urban - High Density",FALSE
+110,59,"Urban - Medium Density",TRUE
+111,47,"Urban - Medium Density",FALSE
+112,51,"Urban - Medium Density",TRUE
+113,60,"Urban - High Density",TRUE
+114,29,"Urban - High Density",TRUE
+115,31,"Urban - High Density",TRUE
+116,48,"Urban - High Density",TRUE
+117,55,"Urban - High Density",FALSE
+118,55,"Urban - Medium Density",TRUE
+119,25,"Urban - High Density",TRUE
+120,24,"Unknown",TRUE
+121,22,"Urban - High Density",TRUE
+122,22,"Urban - Medium Density",TRUE
+123,73,"Urban - High Density",TRUE
+124,76,"Urban - High Density",TRUE
+125,39,"Urban - High Density",FALSE
+126,78,"",TRUE
+127,69,"Urban - Medium Density",FALSE
+128,38,"Urban - High Density",FALSE
+129,41,"Rural",TRUE
+130,48,"Urban - Medium Density",FALSE
+131,72,"Urban - High Density",FALSE
+132,44,"Rural",FALSE
+133,25,"Urban - Medium Density",TRUE
+134,68,"Urban - High Density",FALSE
+135,69,"Urban - High Density",FALSE
+136,26,"Urban - Medium Density",FALSE
+137,40,"Urban - Medium Density",NA
+138,67,"Urban - High Density",TRUE
+139,41,"Urban - Medium Density",TRUE
+140,22,"Urban - Medium Density",TRUE
+141,40,"Urban - Medium Density",TRUE
+142,47,"Rural",TRUE
+143,39,"Rural",TRUE
+144,72,"Rural",FALSE
+145,38,"Urban - High Density",TRUE
+146,29,"Urban - High Density",TRUE
+147,21,"Rural",TRUE
+148,5,"Rural",FALSE
+149,73,"Urban - Medium Density",TRUE
+150,44,"Urban - Medium Density",TRUE
+151,41,"Urban - Medium Density",NA
+152,42,"Urban - High Density",TRUE
+153,22,"Urban - High Density",TRUE
+154,75,"Urban - High Density",TRUE
+155,41,"Urban - High Density",FALSE
+156,56,"Rural",TRUE
+157,21,"Urban - Medium Density",FALSE
+158,46,"Urban - High Density",FALSE
+159,32,"Urban - High Density",FALSE
+160,79,"Urban - High Density",FALSE
+161,52,"Urban - High Density",FALSE
+162,72,"Rural",TRUE
+163,35,"Urban - Medium Density",TRUE
+164,50,"Urban - Medium Density",FALSE
+165,48,"Urban - High Density",FALSE
+166,19,"Urban - High Density",FALSE
+167,20,"Urban - High Density",TRUE
+168,40,"Urban - Medium Density",TRUE
+169,23,"Urban - High Density",FALSE
+170,70,"Urban - High Density",TRUE
+171,60,"Urban - Medium Density",FALSE
+172,33,"Urban - High Density",FALSE
+173,57,"Urban - High Density",FALSE
+174,46,"Urban - High Density",TRUE
+175,21,"Rural",TRUE
+176,76,"Rural",FALSE
+177,63,"Urban - High Density",TRUE
+178,32,"Urban - Medium Density",FALSE
+179,60,"Urban - High Density",FALSE
+180,78,"Urban - Medium Density",TRUE
+181,68,"Urban - High Density",FALSE
+182,68,"Rural",TRUE
+183,78,"Urban - High Density",FALSE
+184,32,"Urban - High Density",FALSE
+185,120,"Urban - High Density",FALSE
+186,64,"Urban - High Density",NA
+187,120,"Urban - Medium Density",FALSE
+188,28,"Urban - High Density",FALSE
+189,39,"Urban - High Density",FALSE
+190,64,"Urban - High Density",TRUE
+191,120,"Urban - High Density",TRUE
+192,52,"",TRUE
+193,78,"Urban - High Density",FALSE
+194,28,"Rural",FALSE
+195,57,"Urban - High Density",TRUE
+196,76,"Urban - High Density",FALSE
+197,53,"Urban - High Density",FALSE
+198,79,"Urban - Medium Density",FALSE
+199,51,"Urban - High Density",TRUE
+200,50,"Urban - High Density",TRUE
+201,63,"Urban - High Density",FALSE
+202,38,"Urban - High Density",NA
+203,24,"Rural",TRUE
+204,76,"Urban - Medium Density",TRUE
+205,54,"Urban - Medium Density",TRUE
+206,46,"Rural",TRUE
+207,51,"Urban - High Density",TRUE
+208,37,"Urban - High Density",FALSE
+209,59,"Urban - High Density",TRUE
+210,56,"Urban - High Density",TRUE
+211,58,"Urban - High Density",TRUE
+212,54,"Urban - Medium Density",FALSE
+213,52,"Urban - High Density",FALSE
+214,48,"Urban - Medium Density",TRUE
+215,27,"Urban - High Density",TRUE
+216,36,"Urban - Medium Density",FALSE
+217,50,"Urban - High Density",TRUE
+218,45,"Urban - High Density",TRUE
+219,65,"Urban - Medium Density",FALSE
+220,62,"Rural",TRUE
+221,57,"Urban - Medium Density",NA
+222,55,"Urban - Medium Density",FALSE
+223,57,"Urban - High Density",FALSE
+224,41,"Urban - High Density",FALSE
+225,28,"Urban - Medium Density",TRUE
+226,35,"Urban - Medium Density",TRUE
+227,35,"Urban - Medium Density",FALSE
+228,56,"Urban - Medium Density",TRUE
+229,23,"Urban - High Density",TRUE
+230,54,"Rural",FALSE
+231,78,"Urban - Medium Density",TRUE
+232,26,"Urban - High Density",NA
+233,120,"Urban - High Density",FALSE
+234,34,"Rural",FALSE
+235,28,"Urban - High Density",TRUE
+236,46,"Urban - Medium Density",NA
+237,45,"Urban - High Density",TRUE
+238,37,"Urban - Medium Density",NA
+239,31,"Urban - Medium Density",TRUE
+240,51,"Urban - High Density",FALSE
+241,65,"Urban - Medium Density",FALSE
+242,48,"Urban - High Density",FALSE
+243,43,"Urban - High Density",FALSE
+244,64,"Urban - High Density",TRUE
+245,27,"Urban - High Density",TRUE
+246,68,"Urban - High Density",FALSE
+247,43,"Urban - High Density",TRUE
+248,65,"Urban - High Density",FALSE
+249,62,"Urban - Medium Density",FALSE
+250,66,"Urban - High Density",NA
+251,21,"Rural",FALSE
+252,30,"Urban - High Density",TRUE
+253,34,"Urban - High Density",TRUE
+254,74,"Urban - Medium Density",FALSE
+255,18,"Urban - High Density",TRUE
+256,48,"Rural",FALSE
+257,63,"Urban - Medium Density",TRUE
+258,60,"Urban - High Density",FALSE
+259,25,"Urban - High Density",TRUE
+260,57,"Urban - High Density",TRUE
+261,39,"Urban - Medium Density",TRUE
+262,33,"Urban - High Density",TRUE
+263,74,"Urban - High Density",TRUE
+264,24,"Rural",TRUE
+265,68,"Urban - High Density",FALSE
+266,26,"Urban - High Density",TRUE
+267,23,"Urban - Medium Density",FALSE
+268,20,"Urban - High Density",FALSE
+269,44,"Rural",TRUE
+270,65,"Urban - High Density",TRUE
+271,41,"Rural",FALSE
+272,26,"Rural",TRUE
+273,21,"Rural",FALSE
+274,71,"Urban - High Density",FALSE
+275,42,"Urban - High Density",TRUE
+276,43,"Rural",TRUE
+277,55,"Urban - High Density",TRUE
+278,21,"Rural",TRUE
+279,51,"Urban - Medium Density",TRUE
+280,70,"Urban - Medium Density",TRUE
+281,63,"Urban - Medium Density",TRUE
+282,25,"Urban - High Density",TRUE
+283,40,"Urban - High Density",TRUE
+284,53,"Urban - High Density",TRUE
+285,40,"Urban - High Density",FALSE
+286,19,"Urban - Medium Density",TRUE
+287,67,"Urban - High Density",TRUE
+288,37,"Rural",TRUE
+289,39,"Rural",TRUE
+290,54,"Urban - High Density",TRUE
+291,62,"Urban - High Density",TRUE
+292,75,"Rural",TRUE
+293,78,"Urban - High Density",TRUE
+294,52,"Rural",TRUE
+295,61,"Urban - Medium Density",TRUE
+296,69,"Urban - High Density",FALSE
+297,62,"Urban - High Density",TRUE
+298,31,"Urban - High Density",TRUE
+299,34,"Urban - Medium Density",TRUE
+300,46,"Urban - High Density",TRUE
+301,52,"Urban - High Density",TRUE
+302,63,"Urban - High Density",FALSE
+303,75,"Rural",TRUE
+304,77,"Urban - Medium Density",FALSE
+305,24,"Urban - High Density",TRUE
+306,26,"Urban - Medium Density",TRUE
+307,58,"Urban - High Density",FALSE
+308,45,"Urban - Medium Density",TRUE
+309,76,"Urban - High Density",TRUE
+310,70,"Urban - Medium Density",TRUE
+311,76,"Urban - Medium Density",TRUE
+312,49,"Urban - Medium Density",TRUE
+313,72,"Urban - High Density",NA
+314,53,"Urban - High Density",TRUE
+315,78,"Urban - High Density",FALSE
+316,61,"Urban - High Density",FALSE
+317,33,"Urban - Medium Density",TRUE
+318,120,"Urban - High Density",TRUE
+319,36,"Urban - High Density",TRUE
+320,72,"Urban - Medium Density",TRUE
+321,74,"Urban - High Density",FALSE
+322,52,"Urban - Medium Density",NA
+323,70,"Urban - Medium Density",TRUE
+324,21,"",TRUE
+325,55,"Rural",TRUE
+326,21,"Unknown",TRUE
+327,43,"Urban - Medium Density",TRUE
+328,47,"Urban - Medium Density",TRUE
+329,64,"Unknown",TRUE
+330,80,"Urban - High Density",TRUE
+331,62,"Urban - Medium Density",TRUE
+332,35,"Urban - High Density",TRUE
+333,120,"Urban - High Density",TRUE
+334,77,"Urban - Medium Density",TRUE
+335,78,"Urban - High Density",FALSE
+336,77,"Urban - High Density",FALSE
+337,25,"Urban - High Density",TRUE
+338,74,"Rural",FALSE
+339,64,"Urban - High Density",TRUE
+340,22,"Urban - Medium Density",TRUE
+341,76,"Urban - Medium Density",FALSE
+342,53,"Urban - High Density",TRUE
+343,51,"Urban - High Density",FALSE
+344,38,"Urban - High Density",FALSE
+345,49,"Urban - Medium Density",TRUE
+346,19,"Urban - Medium Density",FALSE
+347,69,"Urban - High Density",FALSE
+348,44,"Urban - High Density",FALSE
+349,73,"Urban - High Density",TRUE
+350,71,"Urban - Medium Density",FALSE
+351,66,"Urban - Medium Density",TRUE
+352,65,"Urban - High Density",TRUE
+353,63,"Urban - High Density",TRUE
+354,18,"Rural",FALSE
+355,48,"Urban - Medium Density",TRUE
+356,49,"Urban - Medium Density",TRUE
+357,79,"Urban - High Density",TRUE
+358,55,"Urban - High Density",TRUE
+359,73,"Urban - Medium Density",FALSE
+360,35,"Urban - High Density",NA
+361,40,"Urban - High Density",TRUE
+362,55,"Urban - High Density",TRUE
+363,76,"Urban - High Density",TRUE
+364,37,"Rural",FALSE
+365,71,"Urban - High Density",TRUE
+366,48,"Urban - High Density",TRUE
+367,79,"Urban - High Density",TRUE
+368,68,"Urban - Medium Density",TRUE
+369,46,"Urban - High Density",FALSE
+370,61,"Urban - Medium Density",FALSE
+371,39,"Urban - High Density",TRUE
+372,75,"Urban - High Density",TRUE
+373,45,"Urban - High Density",TRUE
+374,38,"Urban - High Density",FALSE
+375,32,"Urban - High Density",TRUE
+376,74,"",NA
+377,72,"Urban - Medium Density",FALSE
+378,58,"Urban - High Density",TRUE
+379,38,"Rural",FALSE
+380,60,"Urban - High Density",FALSE
+381,23,"Urban - Medium Density",NA
+382,51,"Rural",TRUE
+383,54,"Rural",FALSE
+384,48,"Urban - High Density",NA
+385,53,"Urban - High Density",FALSE
+386,43,"Urban - Medium Density",FALSE
+387,68,"Urban - High Density",NA
+388,25,"Rural",TRUE
+389,56,"Rural",TRUE
+390,23,"Urban - Medium Density",TRUE
+391,5,"Urban - Medium Density",TRUE
+392,27,"Rural",TRUE
+393,56,"Urban - High Density",FALSE
+394,23,"Urban - High Density",TRUE
+395,72,"Urban - High Density",TRUE
+396,67,"Rural",FALSE
+397,55,"Rural",TRUE
+398,120,"Rural",TRUE
+399,80,"Urban - High Density",NA
+400,22,"Urban - High Density",TRUE
+401,44,"Urban - Medium Density",TRUE
+402,35,"Urban - Medium Density",TRUE
+403,22,"Urban - Medium Density",TRUE
+404,60,"Urban - High Density",FALSE
+405,40,"Urban - High Density",TRUE
+406,28,"Urban - High Density",TRUE
+407,25,"Urban - High Density",FALSE
+408,56,"Urban - Medium Density",TRUE
+409,27,"Urban - Medium Density",FALSE
+410,23,"Urban - High Density",FALSE
+411,30,"Urban - Medium Density",TRUE
+412,64,"Urban - Medium Density",TRUE
+413,54,"Rural",TRUE
+414,50,"Rural",TRUE
+415,21,"Urban - High Density",FALSE
+416,19,"Urban - Medium Density",TRUE
+417,63,"Urban - High Density",TRUE
+418,23,"Urban - High Density",TRUE
+419,68,"Urban - Medium Density",TRUE
+420,68,"Rural",FALSE
+421,29,"Urban - Medium Density",TRUE
+422,43,"Urban - Medium Density",TRUE
+423,21,"",TRUE
+424,24,"",TRUE
+425,48,"Urban - High Density",TRUE
+426,61,"Urban - High Density",FALSE
+427,79,"Urban - High Density",TRUE
+428,34,"Urban - Medium Density",TRUE
+429,5,"Rural",FALSE
+430,67,"Urban - Medium Density",TRUE
+431,20,"Rural",TRUE
+432,34,"Urban - Medium Density",TRUE
+433,50,"Urban - High Density",FALSE
+434,48,"Urban - High Density",TRUE
+435,76,"Urban - Medium Density",TRUE
+436,38,"Urban - High Density",TRUE
+437,56,"Urban - High Density",NA
+438,78,"Rural",FALSE
+439,64,"Urban - High Density",TRUE
+440,79,"Urban - High Density",TRUE
+441,120,"Urban - Medium Density",FALSE
+442,33,"Urban - Medium Density",FALSE
+443,19,"Urban - Medium Density",FALSE
+444,80,"Urban - Medium Density",FALSE
+445,26,"Urban - Medium Density",FALSE
+446,72,"Urban - Medium Density",TRUE
+447,71,"Urban - High Density",FALSE
+448,30,"",TRUE
+449,67,"Unknown",NA
+450,76,"Urban - High Density",NA
+451,51,"Urban - Medium Density",FALSE
+452,18,"Urban - High Density",TRUE
+453,22,"Urban - High Density",FALSE
+454,68,"Urban - High Density",TRUE
+455,39,"Urban - Medium Density",NA
+456,26,"Urban - High Density",FALSE
+457,20,"Urban - High Density",FALSE
+458,47,"Urban - Medium Density",FALSE
+459,26,"Urban - High Density",FALSE
+460,75,"Urban - High Density",TRUE
+461,46,"Rural",FALSE
+462,60,"Urban - Medium Density",TRUE
+463,74,"Urban - High Density",FALSE
+464,39,"Urban - High Density",TRUE
+465,50,"Rural",FALSE
+466,25,"Urban - Medium Density",FALSE
+467,79,"Urban - High Density",TRUE
+468,59,"Urban - High Density",FALSE
+469,57,"Urban - High Density",TRUE
+470,47,"Urban - High Density",FALSE
+471,54,"Urban - High Density",TRUE
+472,22,"Urban - Medium Density",FALSE
+473,53,"Urban - Medium Density",TRUE
+474,32,"Urban - High Density",TRUE
+475,48,"Rural",NA
+476,120,"Urban - Medium Density",NA
+477,74,"Urban - High Density",TRUE
+478,62,"Urban - Medium Density",FALSE
+479,24,"Urban - Medium Density",TRUE
+480,38,"Urban - High Density",NA
+481,40,"Urban - High Density",FALSE
+482,30,"Urban - High Density",TRUE
+483,36,"Urban - High Density",TRUE
+484,63,"Urban - Medium Density",TRUE
+485,58,"Urban - High Density",FALSE
+486,71,"Urban - High Density",FALSE
+487,19,"Rural",TRUE
+488,71,"Rural",FALSE
+489,65,"Rural",TRUE
+490,26,"Urban - Medium Density",FALSE
+491,75,"Urban - Medium Density",TRUE
+492,73,"Urban - Medium Density",TRUE
+493,55,"Rural",TRUE
+494,28,"Urban - Medium Density",TRUE
+495,23,"Urban - High Density",TRUE
+496,120,"Urban - High Density",FALSE
+497,21,"Urban - Medium Density",TRUE
+498,32,"Urban - High Density",TRUE
+499,47,"Urban - Medium Density",FALSE
+500,32,"Urban - High Density",FALSE
+501,70,"Urban - High Density",TRUE
+502,34,"Urban - High Density",FALSE
+503,30,"Urban - High Density",TRUE
+504,61,"Urban - High Density",TRUE
+505,29,"Urban - Medium Density",TRUE
+506,42,"Rural",TRUE
+507,48,"Urban - Medium Density",FALSE
+508,65,"Urban - High Density",NA
+509,33,"Urban - High Density",TRUE
+510,35,"Urban - Medium Density",FALSE
+511,57,"Urban - High Density",TRUE
+512,68,"Urban - Medium Density",NA
+513,78,"Urban - High Density",NA
+514,46,"Urban - High Density",FALSE
+515,70,"Urban - Medium Density",FALSE
+516,33,"Urban - High Density",TRUE
+517,59,"Urban - High Density",FALSE
+518,36,"Urban - High Density",FALSE
+519,44,"Urban - Medium Density",TRUE
+520,51,"Urban - Medium Density",TRUE
+521,38,"Urban - High Density",FALSE
+522,57,"Urban - High Density",TRUE
+523,77,"Urban - High Density",FALSE
+524,79,"Urban - High Density",FALSE
+525,66,"Urban - High Density",TRUE
+526,33,"Urban - Medium Density",TRUE
+527,25,"Urban - High Density",FALSE
+528,120,"Urban - High Density",TRUE
+529,58,"Urban - High Density",FALSE
+530,20,"Urban - High Density",FALSE
+531,42,"Urban - Medium Density",TRUE
+532,38,"Urban - Medium Density",TRUE
+533,18,"Rural",NA
+534,30,"Urban - High Density",FALSE
+535,73,"Urban - High Density",FALSE
+536,22,"Urban - Medium Density",TRUE
+537,49,"Urban - High Density",FALSE
+538,46,"Urban - High Density",TRUE
+539,33,"Urban - High Density",TRUE
+540,61,"Urban - High Density",FALSE
+541,24,"Urban - Medium Density",TRUE
+542,32,"Urban - Medium Density",TRUE
+543,22,"Urban - High Density",TRUE
+544,23,"Rural",FALSE
+545,80,"Urban - High Density",FALSE
+546,24,"Urban - Medium Density",TRUE
+547,40,"Urban - High Density",FALSE
+548,120,"Urban - High Density",TRUE
+549,26,"Urban - High Density",TRUE
+550,55,"Rural",FALSE
+551,35,"Urban - Medium Density",TRUE
+552,26,"Urban - High Density",FALSE
+553,33,"Urban - Medium Density",TRUE
+554,69,"Urban - Medium Density",TRUE
+555,29,"Urban - Medium Density",NA
+556,54,"Rural",FALSE
+557,38,"Urban - High Density",TRUE
+558,55,"Urban - High Density",FALSE
+559,48,"Urban - High Density",TRUE
+560,52,"Urban - High Density",FALSE
+561,75,"Urban - Medium Density",TRUE
+562,44,"Urban - Medium Density",TRUE
+563,40,"Urban - High Density",TRUE
+564,57,"Urban - High Density",FALSE
+565,41,"Urban - High Density",TRUE
+566,59,"Urban - High Density",FALSE
+567,23,"Rural",TRUE
+568,31,"Urban - Medium Density",TRUE
+569,54,"Urban - High Density",TRUE
+570,80,"Urban - Medium Density",TRUE
+571,73,"Rural",TRUE
+572,71,"Urban - High Density",FALSE
+573,58,"Urban - High Density",TRUE
+574,71,"Urban - Medium Density",FALSE
+575,37,"Urban - High Density",FALSE
+576,32,"Urban - High Density",FALSE
+577,29,"Urban - High Density",TRUE
+578,79,"Urban - High Density",FALSE
+579,39,"Urban - Medium Density",TRUE
+580,23,"Urban - Medium Density",TRUE
+581,35,"Urban - High Density",TRUE
+582,65,"Urban - High Density",TRUE
+583,32,"Urban - High Density",TRUE
+584,24,"Urban - High Density",TRUE
+585,50,"Urban - High Density",TRUE
+586,78,"Urban - High Density",TRUE
+587,72,"Urban - High Density",TRUE
+588,31,"Rural",TRUE
+589,67,"Urban - High Density",TRUE
+590,50,"Unknown",FALSE
+591,69,"Urban - Medium Density",TRUE
+592,41,"Rural",FALSE
+593,28,"Urban - High Density",NA
+594,51,"Rural",FALSE
+595,62,"Urban - Medium Density",NA
+596,40,"Urban - High Density",FALSE
+597,43,"Urban - Medium Density",NA
+598,44,"Rural",TRUE
+599,59,"Urban - Medium Density",FALSE
+600,69,"Urban - Medium Density",FALSE
+601,40,"Urban - Medium Density",TRUE
+602,44,"Urban - High Density",FALSE
+603,35,"Urban - High Density",TRUE
+604,28,"Urban - High Density",TRUE
+605,50,"Urban - Medium Density",TRUE
+606,70,"Unknown",FALSE
+607,20,"Rural",TRUE
+608,71,"Urban - Medium Density",TRUE
+609,59,"Urban - High Density",FALSE
+610,53,"Urban - Medium Density",TRUE
+611,39,"Urban - Medium Density",FALSE
+612,63,"Rural",FALSE
+613,30,"Urban - Medium Density",FALSE
+614,80,"Urban - High Density",TRUE
+615,69,"Urban - Medium Density",TRUE
+616,25,"Rural",TRUE
+617,57,"Urban - High Density",TRUE
+618,56,"Urban - High Density",FALSE
+619,40,"Urban - High Density",FALSE
+620,67,"Urban - High Density",TRUE
+621,52,"Urban - Medium Density",TRUE
+622,42,"Urban - Medium Density",TRUE
+623,50,"Urban - Medium Density",TRUE
+624,49,"Rural",FALSE
+625,78,"Urban - High Density",NA
+626,64,"Urban - High Density",TRUE
+627,50,"Urban - Medium Density",FALSE
+628,44,"Urban - High Density",NA
+629,60,"Urban - Medium Density",TRUE
+630,49,"Urban - Medium Density",FALSE
+631,62,"Urban - High Density",TRUE
+632,5,"Urban - High Density",FALSE
+633,25,"Rural",TRUE
+634,56,"Urban - High Density",TRUE
+635,56,"",FALSE
+636,54,"Urban - Medium Density",FALSE
+637,21,"Rural",FALSE
+638,47,"Urban - Medium Density",TRUE
+639,76,"Urban - High Density",FALSE
+640,31,"Urban - High Density",FALSE
+641,120,"Urban - High Density",FALSE
+642,49,"Rural",NA
+643,45,"Urban - Medium Density",TRUE
+644,43,"Urban - High Density",FALSE
+645,73,"Rural",TRUE
+646,45,"Urban - Medium Density",TRUE
+647,54,"Urban - Medium Density",TRUE
+648,61,"Urban - Medium Density",TRUE
+649,74,"Urban - High Density",FALSE
+650,63,"Rural",TRUE
+651,25,"Urban - High Density",TRUE
+652,43,"Rural",TRUE
+653,5,"Urban - Medium Density",FALSE
+654,59,"Urban - Medium Density",TRUE
+655,64,"Urban - Medium Density",TRUE
+656,48,"Urban - High Density",TRUE
+657,51,"Rural",TRUE
+658,28,"Rural",FALSE
+659,61,"Urban - Medium Density",FALSE
+660,33,"Urban - High Density",FALSE
+661,65,"Urban - High Density",FALSE
+662,41,"Urban - Medium Density",FALSE
+663,51,"Urban - High Density",TRUE
+664,51,"Urban - High Density",FALSE
+665,71,"Urban - High Density",TRUE
+666,72,"Urban - Medium Density",TRUE
+667,18,"Urban - Medium Density",TRUE
+668,26,"Urban - High Density",TRUE
+669,66,"Urban - Medium Density",FALSE
+670,45,"Urban - Medium Density",FALSE
+671,31,"Urban - Medium Density",TRUE
+672,26,"Unknown",NA
+673,37,"Urban - High Density",FALSE
+674,32,"Urban - High Density",FALSE
+675,20,"Rural",FALSE
+676,77,"Rural",FALSE
+677,50,"Urban - High Density",TRUE
+678,37,"Urban - High Density",FALSE
+679,78,"Unknown",FALSE
+680,30,"Urban - High Density",FALSE
+681,50,"Urban - Medium Density",TRUE
+682,45,"Urban - Medium Density",FALSE
+683,49,"Rural",FALSE
+684,120,"Urban - Medium Density",TRUE
+685,38,"Urban - Medium Density",TRUE
+686,36,"Urban - High Density",TRUE
+687,34,"Urban - High Density",FALSE
+688,24,"Urban - High Density",TRUE
+689,77,"Urban - High Density",FALSE
+690,60,"Rural",TRUE
+691,47,"Urban - High Density",NA
+692,63,"Urban - Medium Density",TRUE
+693,30,"Urban - High Density",TRUE
+694,41,"Urban - Medium Density",TRUE
+695,35,"Urban - Medium Density",FALSE
+696,50,"Urban - High Density",TRUE
+697,70,"Urban - High Density",TRUE
+698,46,"Urban - High Density",FALSE
+699,39,"Urban - High Density",FALSE
+700,32,"Urban - Medium Density",FALSE
+701,72,"Urban - Medium Density",TRUE
+702,50,"Urban - High Density",TRUE
+703,73,"Urban - High Density",TRUE
+704,69,"Urban - High Density",TRUE
+705,28,"Urban - High Density",FALSE
+706,40,"Urban - Medium Density",FALSE
+707,44,"Urban - High Density",FALSE
+708,68,"Unknown",TRUE
+709,31,"Rural",FALSE
+710,56,"Rural",FALSE
+711,24,"Urban - Medium Density",FALSE
+712,52,"Urban - High Density",TRUE
+713,69,"Urban - High Density",FALSE
+714,39,"Urban - High Density",TRUE
+715,29,"Urban - High Density",FALSE
+716,45,"Urban - High Density",FALSE
+717,77,"Urban - High Density",TRUE
+718,55,"Urban - Medium Density",FALSE
+719,54,"Urban - High Density",FALSE
+720,29,"Urban - High Density",TRUE
+721,63,"Urban - High Density",FALSE
+722,80,"Urban - Medium Density",FALSE
+723,38,"Urban - High Density",FALSE
+724,41,"Rural",NA
+725,61,"Rural",FALSE
+726,38,"Urban - High Density",TRUE
+727,78,"Urban - Medium Density",FALSE
+728,36,"Urban - Medium Density",FALSE
+729,54,"Urban - High Density",TRUE
+730,60,"Urban - Medium Density",FALSE
+731,62,"Rural",TRUE
+732,61,"Unknown",TRUE
+733,75,"Urban - Medium Density",TRUE
+734,32,"Urban - High Density",FALSE
+735,24,"Urban - Medium Density",TRUE
+736,38,"Urban - High Density",NA
+737,46,"Urban - High Density",TRUE
+738,53,"Urban - High Density",FALSE
+739,48,"Urban - High Density",TRUE
+740,75,"Urban - High Density",TRUE
+741,20,"Urban - High Density",TRUE
+742,78,"Rural",FALSE
+743,56,"Urban - Medium Density",TRUE
+744,52,"Urban - High Density",TRUE
+745,61,"Urban - Medium Density",TRUE
+746,31,"Urban - High Density",FALSE
+747,21,"Rural",FALSE
+748,67,"Urban - Medium Density",FALSE
+749,61,"Urban - High Density",FALSE
+750,23,"Urban - High Density",NA
+751,58,"Urban - High Density",TRUE
+752,39,"Rural",TRUE
+753,20,"Urban - Medium Density",FALSE
+754,29,"Rural",TRUE
+755,80,"",TRUE
+756,19,"Urban - Medium Density",TRUE
+757,50,"Urban - High Density",FALSE
+758,25,"Urban - Medium Density",FALSE
+759,27,"Rural",FALSE
+760,63,"Unknown",TRUE
+761,18,"Urban - High Density",TRUE
+762,41,"Urban - Medium Density",TRUE
+763,75,"Urban - High Density",FALSE
+764,60,"Urban - High Density",TRUE
+765,23,"Urban - High Density",TRUE
+766,32,"Urban - Medium Density",TRUE
+767,20,"Urban - High Density",TRUE
+768,47,"Urban - Medium Density",TRUE
+769,120,"Rural",FALSE
+770,32,"Urban - High Density",TRUE
+771,64,"Urban - Medium Density",TRUE
+772,66,"Urban - Medium Density",TRUE
+773,33,"Urban - Medium Density",TRUE
+774,41,"Rural",TRUE
+775,45,"Urban - Medium Density",FALSE
+776,61,"Rural",TRUE
+777,27,"",FALSE
+778,71,"Urban - Medium Density",TRUE
+779,5,"Urban - Medium Density",FALSE
+780,63,"Urban - Medium Density",TRUE
+781,67,"Urban - High Density",FALSE
+782,22,"Urban - High Density",TRUE
+783,25,"Urban - High Density",FALSE
+784,51,"Urban - Medium Density",TRUE
+785,23,"Urban - High Density",TRUE
+786,64,"Urban - Medium Density",TRUE
+787,54,"Urban - High Density",FALSE
+788,37,"Urban - High Density",FALSE
+789,25,"Rural",TRUE
+790,77,"Unknown",TRUE
+791,80,"Urban - High Density",TRUE
+792,62,"Urban - Medium Density",TRUE
+793,29,"Urban - Medium Density",FALSE
+794,78,"Urban - Medium Density",FALSE
+795,49,"Rural",FALSE
+796,34,"Urban - Medium Density",TRUE
+797,37,"Urban - High Density",FALSE
+798,33,"Urban - High Density",FALSE
+799,66,"Urban - High Density",TRUE
+800,67,"Urban - High Density",FALSE
+801,78,"Urban - Medium Density",FALSE
+802,52,"Urban - Medium Density",FALSE
+803,33,"Urban - Medium Density",TRUE
+804,56,"Urban - High Density",FALSE
+805,80,"Urban - High Density",TRUE
+806,54,"Urban - High Density",FALSE
+807,30,"Urban - Medium Density",FALSE
+808,64,"Urban - High Density",TRUE
+809,55,"Urban - Medium Density",FALSE
+810,75,"Urban - Medium Density",FALSE
+811,49,"Urban - High Density",TRUE
+812,33,"Urban - High Density",TRUE
+813,75,"Urban - High Density",TRUE
+814,50,"Urban - High Density",TRUE
+815,69,"Urban - Medium Density",TRUE
+816,58,"Urban - Medium Density",FALSE
+817,37,"Rural",FALSE
+818,35,"Urban - High Density",FALSE
+819,62,"Rural",FALSE
+820,56,"Urban - Medium Density",TRUE
+821,29,"Rural",TRUE
+822,44,"Urban - High Density",NA
+823,26,"Urban - High Density",TRUE
+824,75,"Urban - High Density",TRUE
+825,35,"Urban - High Density",FALSE
+826,66,"Urban - High Density",FALSE
+827,28,"Urban - High Density",TRUE
+828,21,"Urban - High Density",FALSE
+829,59,"Urban - High Density",TRUE
+830,26,"Urban - High Density",TRUE
+831,34,"Urban - Medium Density",FALSE
+832,26,"Urban - High Density",FALSE
+833,78,"Urban - Medium Density",TRUE
+834,37,"Urban - High Density",TRUE
+835,26,"Urban - High Density",TRUE
+836,42,"Urban - High Density",TRUE
+837,120,"Urban - High Density",TRUE
+838,21,"Rural",TRUE
+839,70,"Urban - High Density",TRUE
+840,63,"Rural",FALSE
+841,43,"Urban - Medium Density",FALSE
+842,44,"Urban - High Density",TRUE
+843,56,"Urban - High Density",FALSE
+844,20,"Urban - High Density",TRUE
+845,24,"Urban - High Density",FALSE
+846,43,"Rural",FALSE
+847,30,"Urban - Medium Density",FALSE
+848,75,"Urban - Medium Density",TRUE
+849,32,"Rural",TRUE
+850,76,"Urban - High Density",FALSE
+851,56,"Urban - High Density",TRUE
+852,40,"Urban - Medium Density",FALSE
+853,34,"Urban - High Density",TRUE
+854,67,"Urban - High Density",FALSE
+855,26,"Urban - High Density",TRUE
+856,30,"Urban - High Density",TRUE
+857,26,"Urban - Medium Density",TRUE
+858,48,"Urban - High Density",FALSE
+859,38,"Urban - Medium Density",FALSE
+860,32,"Urban - Medium Density",TRUE
+861,25,"Urban - High Density",FALSE
+862,33,"Urban - Medium Density",TRUE
+863,39,"Urban - High Density",FALSE
+864,65,"Urban - Medium Density",TRUE
+865,27,"Urban - High Density",TRUE
+866,18,"Urban - High Density",TRUE
+867,46,"Urban - High Density",FALSE
+868,36,"Urban - Medium Density",TRUE
+869,77,"Urban - High Density",FALSE
+870,49,"Urban - Medium Density",TRUE
+871,43,"Rural",TRUE
+872,51,"Urban - Medium Density",FALSE
+873,41,"Urban - High Density",FALSE
+874,5,"Urban - Medium Density",TRUE
+875,36,"Urban - Medium Density",TRUE
+876,57,"Urban - High Density",TRUE
+877,50,"Urban - High Density",FALSE
+878,27,"Urban - High Density",TRUE
+879,28,"Urban - High Density",TRUE
+880,65,"Urban - Medium Density",TRUE
+881,79,"Urban - Medium Density",FALSE
+882,48,"Urban - High Density",FALSE
+883,39,"Urban - High Density",FALSE
+884,24,"Rural",TRUE
+885,46,"",FALSE
+886,46,"Urban - High Density",TRUE
+887,75,"Urban - Medium Density",TRUE
+888,38,"Urban - Medium Density",TRUE
+889,52,"Urban - Medium Density",FALSE
+890,58,"Urban - High Density",NA
+891,34,"Urban - High Density",TRUE
+892,31,"Urban - High Density",TRUE
+893,54,"Unknown",TRUE
+894,65,"Urban - Medium Density",FALSE
+895,34,"Urban - Medium Density",TRUE
+896,19,"Urban - High Density",TRUE
+897,66,"Urban - High Density",FALSE
+898,50,"Urban - High Density",TRUE
+899,49,"Urban - High Density",TRUE
+900,44,"Urban - High Density",FALSE
+901,69,"Urban - High Density",FALSE
+902,68,"Urban - High Density",TRUE
+903,55,"Urban - High Density",TRUE
+904,20,"Urban - Medium Density",TRUE
+905,20,"Rural",TRUE
+906,32,"Urban - Medium Density",TRUE
+907,32,"Urban - High Density",FALSE
+908,76,"Urban - High Density",TRUE
+909,26,"Urban - High Density",FALSE
+910,29,"Urban - High Density",FALSE
+911,48,"Urban - Medium Density",TRUE
+912,49,"Unknown",TRUE
+913,79,"Rural",FALSE
+914,25,"Urban - High Density",TRUE
+915,53,"Urban - High Density",TRUE
+916,27,"Urban - High Density",TRUE
+917,50,"Urban - High Density",FALSE
+918,74,"Urban - Medium Density",NA
+919,48,"Urban - Medium Density",TRUE
+920,58,"Urban - High Density",TRUE
+921,26,"Urban - High Density",TRUE
+922,19,"Urban - High Density",TRUE
+923,62,"Urban - Medium Density",FALSE
+924,71,"Unknown",TRUE
+925,29,"Unknown",FALSE
+926,66,"Rural",FALSE
+927,42,"Urban - High Density",FALSE
+928,64,"Urban - High Density",TRUE
+929,44,"Urban - High Density",FALSE
+930,53,"Rural",TRUE
+931,34,"Urban - Medium Density",FALSE
+932,36,"Urban - High Density",TRUE
+933,64,"Urban - High Density",TRUE
+934,21,"Urban - Medium Density",FALSE
+935,31,"Urban - Medium Density",FALSE
+936,77,"Urban - High Density",TRUE
+937,45,"Urban - High Density",NA
+938,77,"Urban - High Density",FALSE
+939,60,"Urban - Medium Density",TRUE
+940,67,"Urban - Medium Density",FALSE
+941,57,"Urban - High Density",FALSE
+942,35,"Urban - High Density",NA
+943,55,"Urban - Medium Density",FALSE
+944,36,"Urban - High Density",TRUE
+945,73,"Urban - High Density",FALSE
+946,58,"Urban - High Density",TRUE
+947,5,"Urban - High Density",TRUE
+948,49,"Rural",TRUE
+949,29,"Urban - High Density",FALSE
+950,63,"Urban - High Density",FALSE
+951,35,"Urban - Medium Density",TRUE
+952,19,"Urban - Medium Density",FALSE
+953,19,"Urban - Medium Density",NA
+954,80,"Urban - Medium Density",FALSE
+955,51,"Urban - Medium Density",TRUE
+956,32,"Rural",TRUE
+957,54,"Rural",TRUE
+958,74,"Urban - Medium Density",TRUE
+959,24,"Urban - Medium Density",FALSE
+960,46,"Urban - High Density",TRUE
+961,56,"Urban - High Density",TRUE
+962,46,"Urban - High Density",TRUE
+963,50,"Urban - High Density",TRUE
+964,64,"Urban - High Density",TRUE
+965,53,"Urban - High Density",TRUE
+966,32,"Urban - High Density",TRUE
+967,62,"Rural",TRUE
+968,68,"Urban - Medium Density",TRUE
+969,31,"Urban - High Density",NA
+970,30,"Urban - Medium Density",TRUE
+971,37,"Urban - High Density",TRUE
+972,23,"Urban - Medium Density",TRUE
+973,80,"Urban - Medium Density",TRUE
+974,20,"Urban - High Density",TRUE
+975,24,"Urban - Medium Density",FALSE
+976,46,"Urban - Medium Density",TRUE
+977,56,"Urban - High Density",TRUE
+978,47,"Urban - Medium Density",TRUE
+979,68,"Urban - Medium Density",TRUE
+980,38,"Urban - High Density",TRUE
+981,73,"Rural",NA
+982,38,"Urban - High Density",TRUE
+983,40,"Rural",TRUE
+984,53,"Rural",TRUE
+985,45,"Urban - High Density",TRUE
+986,53,"Urban - High Density",TRUE
+987,19,"Urban - Medium Density",TRUE
+988,41,"Urban - Medium Density",TRUE
+989,54,"Urban - High Density",FALSE
+990,42,"Urban - High Density",TRUE
+991,77,"Urban - High Density",TRUE
+992,36,"Urban - High Density",TRUE
+993,32,"Unknown",FALSE
+994,39,"Urban - High Density",TRUE
+995,22,"Rural",TRUE
+996,48,"Rural",TRUE
+997,39,"Urban - High Density",TRUE
+998,61,"Urban - Medium Density",FALSE
+999,42,"Urban - High Density",FALSE
+1000,27,"Urban - Medium Density",FALSE
+1001,64,"Urban - High Density",FALSE
+1002,23,"Urban - High Density",FALSE
+1003,20,"",TRUE
+1004,41,"Urban - High Density",FALSE
+1005,35,"Urban - Medium Density",TRUE
+1006,44,"Urban - Medium Density",TRUE
+1007,71,"Urban - High Density",FALSE
+1008,24,"Urban - High Density",TRUE
+1009,64,"Rural",NA
+1010,65,"Urban - High Density",FALSE
+1011,57,"Urban - High Density",TRUE
+1012,26,"Urban - High Density",TRUE
+1013,80,"Urban - Medium Density",TRUE
+1014,77,"Urban - High Density",TRUE
+1015,29,"Rural",TRUE
+1016,52,"Urban - Medium Density",FALSE
+1017,25,"Urban - High Density",TRUE
+1018,64,"Urban - High Density",TRUE
+1019,67,"Rural",TRUE
+1020,37,"Urban - High Density",TRUE
+1021,59,"Urban - Medium Density",NA
+1022,26,"Urban - High Density",FALSE
+1023,33,"Urban - High Density",FALSE
+1024,27,"",FALSE
+1025,18,"Urban - Medium Density",TRUE
+1026,74,"Urban - Medium Density",FALSE
+1027,61,"Urban - High Density",TRUE
+1028,78,"Urban - High Density",FALSE
+1029,64,"Urban - High Density",TRUE
+1030,45,"Urban - Medium Density",TRUE
+1031,51,"Urban - Medium Density",FALSE
+1032,68,"Urban - High Density",FALSE
+1033,44,"Urban - High Density",TRUE
+1034,52,"Rural",FALSE
+1035,76,"Urban - High Density",FALSE
+1036,57,"Unknown",NA
+1037,69,"Rural",TRUE
+1038,57,"Unknown",TRUE
+1039,70,"Urban - High Density",TRUE
+1040,77,"Urban - High Density",NA
+1041,61,"Rural",FALSE
+1042,44,"Urban - Medium Density",FALSE
+1043,66,"Unknown",TRUE
+1044,47,"Unknown",FALSE
+1045,5,"Urban - Medium Density",TRUE
+1046,49,"Urban - High Density",TRUE
+1047,25,"Urban - Medium Density",TRUE
+1048,20,"Urban - High Density",NA
+1049,70,"Urban - High Density",TRUE
+1050,120,"Rural",FALSE
+1051,42,"Urban - Medium Density",TRUE
+1052,77,"Urban - Medium Density",TRUE
+1053,26,"Urban - High Density",FALSE
+1054,79,"Urban - Medium Density",TRUE
+1055,78,"Urban - Medium Density",FALSE
+1056,57,"Urban - High Density",FALSE
+1057,28,"Urban - High Density",FALSE
+1058,79,"Rural",FALSE
+1059,72,"Urban - Medium Density",TRUE
+1060,46,"Urban - High Density",FALSE
+1061,66,"Urban - Medium Density",TRUE
+1062,32,"Rural",FALSE
+1063,65,"Rural",TRUE
+1064,77,"Urban - High Density",TRUE
+1065,74,"Unknown",FALSE
+1066,73,"Rural",TRUE
+1067,62,"Urban - High Density",TRUE
+1068,47,"Rural",FALSE
+1069,5,"Rural",FALSE
+1070,33,"Urban - High Density",TRUE
+1071,51,"Urban - High Density",TRUE
+1072,42,"Rural",FALSE
+1073,57,"Urban - High Density",TRUE
+1074,43,"Urban - High Density",FALSE
+1075,48,"Rural",FALSE
+1076,47,"",TRUE
+1077,59,"Urban - High Density",TRUE
+1078,77,"Urban - High Density",TRUE
+1079,52,"Urban - Medium Density",TRUE
+1080,55,"Rural",TRUE
+1081,29,"Urban - High Density",FALSE
+1082,71,"Urban - Medium Density",TRUE
+1083,63,"Urban - High Density",NA
+1084,18,"Rural",TRUE
+1085,38,"Urban - High Density",TRUE
+1086,76,"Urban - High Density",TRUE
+1087,77,"Urban - High Density",FALSE
+1088,23,"Rural",TRUE
+1089,75,"Urban - High Density",TRUE
+1090,64,"Urban - High Density",FALSE
+1091,43,"Urban - Medium Density",NA
+1092,43,"Urban - Medium Density",TRUE
+1093,59,"Urban - Medium Density",TRUE
+1094,66,"Urban - Medium Density",TRUE
+1095,66,"Urban - Medium Density",TRUE
+1096,46,"Rural",FALSE
+1097,56,"Urban - High Density",FALSE
+1098,72,"Urban - High Density",TRUE
+1099,61,"Rural",TRUE
+1100,66,"Urban - Medium Density",FALSE
+1101,75,"Rural",TRUE
+1102,77,"Urban - High Density",TRUE
+1103,70,"Urban - High Density",TRUE
+1104,37,"Urban - Medium Density",TRUE
+1105,39,"Rural",FALSE
+1106,27,"Urban - High Density",FALSE
+1107,59,"Urban - High Density",TRUE
+1108,35,"Urban - High Density",TRUE
+1109,76,"Urban - High Density",TRUE
+1110,64,"Urban - High Density",TRUE
+1111,59,"Urban - High Density",TRUE
+1112,52,"Urban - High Density",TRUE
+1113,34,"Urban - High Density",FALSE
+1114,71,"Urban - High Density",TRUE
+1115,20,"Rural",NA
+1116,31,"Urban - Medium Density",FALSE
+1117,71,"Urban - Medium Density",FALSE
+1118,41,"Urban - High Density",TRUE
+1119,60,"Urban - Medium Density",FALSE
+1120,53,"Urban - Medium Density",NA
+1121,25,"Urban - High Density",TRUE
+1122,55,"Urban - High Density",TRUE
+1123,25,"Urban - Medium Density",FALSE
+1124,53,"Urban - Medium Density",FALSE
+1125,66,"Urban - Medium Density",FALSE
+1126,44,"Urban - High Density",FALSE
+1127,69,"Rural",TRUE
+1128,79,"Urban - High Density",TRUE
+1129,34,"Urban - High Density",TRUE
+1130,34,"Urban - Medium Density",TRUE
+1131,48,"Rural",TRUE
+1132,53,"Urban - Medium Density",FALSE
+1133,79,"Urban - High Density",TRUE
+1134,52,"Urban - High Density",TRUE
+1135,41,"Unknown",TRUE
+1136,62,"Urban - High Density",TRUE
+1137,52,"Urban - High Density",TRUE
+1138,47,"Urban - High Density",TRUE
+1139,60,"Urban - Medium Density",TRUE
+1140,55,"Rural",TRUE
+1141,51,"Urban - Medium Density",FALSE
+1142,71,"Urban - High Density",TRUE
+1143,65,"Urban - High Density",TRUE
+1144,55,"Rural",TRUE
+1145,43,"Rural",TRUE
+1146,71,"Urban - High Density",TRUE
+1147,69,"Urban - Medium Density",FALSE
+1148,70,"Urban - High Density",TRUE
+1149,51,"Urban - Medium Density",TRUE
+1150,61,"Rural",FALSE
+1151,43,"Urban - Medium Density",FALSE
+1152,27,"Rural",TRUE
+1153,26,"Rural",FALSE
+1154,45,"Urban - High Density",TRUE
+1155,26,"Urban - Medium Density",TRUE
+1156,32,"Urban - High Density",FALSE
+1157,38,"Rural",FALSE
+1158,69,"Urban - Medium Density",FALSE
+1159,19,"Urban - High Density",FALSE
+1160,56,"",TRUE
+1161,63,"Urban - Medium Density",FALSE
+1162,22,"Urban - High Density",TRUE
+1163,66,"Urban - Medium Density",TRUE
+1164,39,"Urban - High Density",FALSE
+1165,79,"Rural",TRUE
+1166,75,"Urban - High Density",TRUE
+1167,31,"Urban - High Density",FALSE
+1168,62,"Urban - High Density",FALSE
+1169,44,"Urban - Medium Density",FALSE
+1170,76,"Urban - High Density",NA
+1171,77,"Urban - High Density",NA
+1172,40,"Urban - High Density",TRUE
+1173,38,"Rural",NA
+1174,34,"Urban - High Density",FALSE
+1175,26,"Urban - High Density",TRUE
+1176,27,"Urban - High Density",TRUE
+1177,77,"Unknown",TRUE
+1178,22,"Urban - High Density",TRUE
+1179,28,"Urban - Medium Density",FALSE
+1180,27,"Urban - High Density",TRUE
+1181,51,"Urban - High Density",NA
+1182,49,"Urban - Medium Density",TRUE
+1183,76,"Rural",TRUE
+1184,71,"Urban - High Density",TRUE
+1185,29,"Urban - High Density",TRUE
+1186,31,"Urban - High Density",FALSE
+1187,36,"Urban - Medium Density",NA
+1188,23,"Urban - High Density",TRUE
+1189,48,"Urban - Medium Density",NA
+1190,33,"Urban - Medium Density",TRUE
+1191,31,"Urban - Medium Density",FALSE
+1192,19,"Urban - High Density",TRUE
+1193,54,"Urban - High Density",TRUE
+1194,77,"Urban - High Density",TRUE
+1195,51,"Urban - High Density",TRUE
+1196,38,"Urban - High Density",TRUE
+1197,34,"Urban - High Density",FALSE
+1198,33,"Urban - High Density",FALSE
+1199,72,"Urban - High Density",NA
+1200,63,"Urban - High Density",TRUE
+1201,38,"Urban - Medium Density",TRUE
+1202,26,"Urban - High Density",TRUE
+1203,120,"Urban - High Density",TRUE
+1204,61,"Urban - Medium Density",TRUE
+1205,32,"Urban - High Density",FALSE
+1206,37,"Urban - High Density",FALSE
+1207,40,"",FALSE
+1208,70,"Unknown",TRUE
+1209,75,"Urban - Medium Density",TRUE
+1210,50,"Urban - High Density",TRUE
+1211,57,"Unknown",FALSE
+1212,30,"Urban - Medium Density",NA
+1213,30,"Rural",FALSE
+1214,51,"Urban - High Density",TRUE
+1215,40,"Urban - High Density",TRUE
+1216,56,"Urban - Medium Density",FALSE
+1217,20,"Urban - High Density",FALSE
+1218,120,"Urban - Medium Density",TRUE
+1219,66,"Urban - High Density",FALSE
+1220,48,"Rural",NA
+1221,22,"Urban - Medium Density",FALSE
+1222,30,"Rural",TRUE
+1223,26,"Rural",TRUE
+1224,63,"Urban - High Density",TRUE
+1225,40,"Urban - High Density",FALSE
+1226,25,"Urban - High Density",NA
+1227,43,"Urban - High Density",FALSE
+1228,21,"Urban - High Density",FALSE
+1229,27,"Rural",TRUE
+1230,34,"Rural",FALSE
+1231,50,"Urban - High Density",FALSE
+1232,23,"Urban - Medium Density",TRUE
+1233,70,"Unknown",FALSE
+1234,63,"Urban - High Density",FALSE
+1235,120,"Urban - Medium Density",TRUE
+1236,68,"Urban - Medium Density",TRUE
+1237,46,"Urban - High Density",TRUE
+1238,44,"Urban - High Density",FALSE
+1239,48,"Urban - Medium Density",FALSE
+1240,42,"Rural",TRUE
+1241,40,"Urban - Medium Density",TRUE
+1242,71,"Rural",FALSE
+1243,55,"Urban - High Density",TRUE
+1244,78,"Urban - High Density",TRUE
+1245,25,"Urban - High Density",FALSE
+1246,30,"Urban - Medium Density",FALSE
+1247,57,"Urban - High Density",TRUE
+1248,39,"Urban - Medium Density",FALSE
+1249,55,"Urban - High Density",TRUE
+1250,120,"Rural",TRUE
+1251,33,"Urban - Medium Density",TRUE
+1252,120,"Urban - High Density",TRUE
+1253,75,"Rural",TRUE
+1254,34,"Urban - Medium Density",FALSE
+1255,56,"Unknown",FALSE
+1256,20,"Urban - High Density",TRUE
+1257,21,"Urban - High Density",FALSE
+1258,42,"Urban - High Density",FALSE
+1259,27,"Urban - Medium Density",FALSE
+1260,29,"Urban - Medium Density",FALSE
+1261,120,"Urban - High Density",TRUE
+1262,30,"Urban - High Density",TRUE
+1263,76,"Rural",TRUE
+1264,39,"Urban - High Density",TRUE
+1265,18,"Urban - Medium Density",TRUE
+1266,49,"Urban - High Density",TRUE
+1267,58,"Rural",TRUE
+1268,55,"Urban - Medium Density",TRUE
+1269,74,"Urban - High Density",FALSE
+1270,45,"Urban - Medium Density",TRUE
+1271,31,"Urban - Medium Density",FALSE
+1272,24,"Urban - High Density",TRUE
+1273,72,"Urban - Medium Density",TRUE
+1274,79,"Urban - High Density",FALSE
+1275,62,"Rural",FALSE
+1276,70,"Urban - High Density",FALSE
+1277,59,"Urban - High Density",TRUE
+1278,73,"Urban - Medium Density",FALSE
+1279,63,"Rural",TRUE
+1280,55,"Urban - Medium Density",TRUE
+1281,77,"Urban - High Density",TRUE
+1282,21,"Urban - Medium Density",FALSE
+1283,37,"Urban - High Density",FALSE
+1284,53,"Urban - High Density",FALSE
+1285,51,"Urban - Medium Density",FALSE
+1286,30,"Urban - High Density",TRUE
+1287,64,"Urban - High Density",TRUE
+1288,42,"Urban - High Density",TRUE
+1289,72,"Urban - High Density",FALSE
+1290,29,"Urban - High Density",TRUE
+1291,18,"Rural",TRUE
+1292,79,"Urban - High Density",TRUE
+1293,57,"Unknown",TRUE
+1294,34,"Urban - High Density",FALSE
+1295,46,"Rural",FALSE
+1296,59,"Urban - High Density",TRUE
+1297,41,"Urban - High Density",FALSE
+1298,44,"Urban - High Density",FALSE
+1299,54,"Urban - Medium Density",TRUE
+1300,36,"Urban - High Density",TRUE
+1301,72,"Urban - Medium Density",FALSE
+1302,19,"Urban - High Density",TRUE
+1303,25,"Urban - High Density",TRUE
+1304,70,"Urban - High Density",TRUE
+1305,50,"Urban - Medium Density",FALSE
+1306,54,"Urban - Medium Density",FALSE
+1307,45,"Urban - High Density",TRUE
+1308,36,"Urban - High Density",FALSE
+1309,53,"Urban - High Density",FALSE
+1310,120,"Urban - High Density",TRUE
+1311,61,"Urban - Medium Density",FALSE
+1312,51,"Urban - High Density",TRUE
+1313,69,"Urban - High Density",TRUE
+1314,25,"Urban - Medium Density",FALSE
+1315,52,"Urban - High Density",FALSE
+1316,59,"Urban - High Density",TRUE
+1317,22,"Urban - High Density",TRUE
+1318,26,"Unknown",TRUE
+1319,120,"Urban - Medium Density",TRUE
+1320,28,"Urban - Medium Density",TRUE
+1321,47,"Urban - Medium Density",TRUE
+1322,26,"Urban - Medium Density",TRUE
+1323,55,"Urban - Medium Density",FALSE
+1324,55,"Rural",TRUE
+1325,21,"Urban - High Density",FALSE
+1326,20,"Urban - High Density",FALSE
+1327,44,"Rural",FALSE
+1328,63,"Urban - High Density",TRUE
+1329,75,"Rural",TRUE
+1330,80,"Urban - High Density",TRUE
+1331,25,"Urban - Medium Density",TRUE
+1332,120,"Urban - Medium Density",TRUE
+1333,78,"Urban - Medium Density",TRUE
+1334,30,"Urban - High Density",FALSE
+1335,76,"Urban - Medium Density",TRUE
+1336,30,"Urban - High Density",FALSE
+1337,64,"Urban - Medium Density",FALSE
+1338,50,"Urban - High Density",FALSE
+1339,72,"Urban - Medium Density",TRUE
+1340,65,"Urban - Medium Density",FALSE
+1341,23,"Urban - Medium Density",FALSE
+1342,23,"Urban - High Density",TRUE
+1343,19,"Urban - Medium Density",TRUE
+1344,30,"Rural",TRUE
+1345,49,"Urban - High Density",TRUE
+1346,42,"Urban - High Density",TRUE
+1347,28,"Rural",FALSE
+1348,23,"Urban - High Density",TRUE
+1349,40,"Urban - High Density",FALSE
+1350,79,"Urban - Medium Density",TRUE
+1351,68,"Urban - High Density",FALSE
+1352,68,"Urban - High Density",TRUE
+1353,41,"Urban - High Density",FALSE
+1354,27,"Urban - Medium Density",FALSE
+1355,60,"Urban - Medium Density",FALSE
+1356,31,"Urban - Medium Density",NA
+1357,25,"Rural",FALSE
+1358,20,"Urban - Medium Density",NA
+1359,62,"Urban - Medium Density",TRUE
+1360,21,"Urban - High Density",FALSE
+1361,36,"Urban - High Density",TRUE
+1362,41,"Urban - High Density",TRUE
+1363,58,"Urban - Medium Density",TRUE
+1364,39,"Urban - Medium Density",FALSE
+1365,80,"Urban - High Density",TRUE
+1366,50,"Urban - High Density",FALSE
+1367,77,"Urban - High Density",FALSE
+1368,43,"Urban - High Density",FALSE
+1369,67,"Urban - High Density",FALSE
+1370,38,"Urban - High Density",FALSE
+1371,30,"Urban - High Density",FALSE
+1372,54,"Urban - High Density",TRUE
+1373,70,"Rural",FALSE
+1374,31,"Urban - High Density",TRUE
+1375,35,"Urban - High Density",TRUE
+1376,43,"Urban - High Density",FALSE
+1377,18,"Urban - High Density",TRUE
+1378,60,"Urban - Medium Density",FALSE
+1379,76,"Urban - Medium Density",FALSE
+1380,72,"Urban - High Density",TRUE
+1381,75,"Rural",TRUE
+1382,20,"Rural",FALSE
+1383,27,"Urban - High Density",TRUE
+1384,20,"Urban - Medium Density",TRUE
+1385,77,"Urban - High Density",TRUE
+1386,80,"Rural",TRUE
+1387,26,"Urban - High Density",TRUE
+1388,54,"Urban - Medium Density",TRUE
+1389,44,"Urban - High Density",TRUE
+1390,20,"Rural",NA
+1391,56,"Rural",FALSE
+1392,41,"Rural",TRUE
+1393,43,"Urban - High Density",FALSE
+1394,62,"Urban - High Density",TRUE
+1395,19,"Urban - High Density",TRUE
+1396,79,"Urban - High Density",FALSE
+1397,37,"Urban - High Density",TRUE
+1398,21,"Urban - Medium Density",TRUE
+1399,72,"Urban - High Density",FALSE
+1400,80,"Rural",TRUE
+1401,50,"Urban - Medium Density",TRUE
+1402,55,"Urban - Medium Density",TRUE
+1403,120,"Rural",TRUE
+1404,61,"Urban - Medium Density",FALSE
+1405,34,"Rural",TRUE
+1406,48,"Urban - High Density",FALSE
+1407,18,"Urban - High Density",FALSE
+1408,52,"Unknown",TRUE
+1409,79,"Urban - High Density",TRUE
+1410,76,"Urban - Medium Density",FALSE
+1411,74,"Urban - High Density",TRUE
+1412,79,"Urban - Medium Density",FALSE
+1413,28,"Urban - Medium Density",NA
+1414,32,"Urban - High Density",FALSE
+1415,68,"Urban - High Density",FALSE
+1416,23,"Urban - High Density",FALSE
+1417,52,"Urban - Medium Density",FALSE
+1418,27,"Urban - High Density",FALSE
+1419,20,"Urban - High Density",TRUE
+1420,72,"Urban - Medium Density",TRUE
+1421,65,"Urban - High Density",FALSE
+1422,66,"Urban - High Density",TRUE
+1423,50,"Urban - High Density",TRUE
+1424,20,"Urban - Medium Density",TRUE
+1425,52,"Urban - High Density",TRUE
+1426,70,"Unknown",TRUE
+1427,41,"Urban - High Density",FALSE
+1428,75,"Urban - Medium Density",TRUE
+1429,71,"Urban - High Density",TRUE
+1430,46,"Urban - High Density",TRUE
+1431,67,"Urban - High Density",TRUE
+1432,24,"Urban - Medium Density",FALSE
+1433,24,"Urban - Medium Density",FALSE
+1434,68,"Rural",TRUE
+1435,32,"Urban - Medium Density",FALSE
+1436,39,"Urban - Medium Density",TRUE
+1437,78,"Urban - High Density",TRUE
+1438,76,"Urban - High Density",FALSE
+1439,42,"Urban - High Density",TRUE
+1440,43,"Urban - High Density",TRUE
+1441,29,"Urban - High Density",FALSE
+1442,28,"Rural",TRUE
+1443,62,"Urban - High Density",FALSE
+1444,29,"Urban - Medium Density",TRUE
+1445,24,"Urban - High Density",FALSE
+1446,63,"Urban - High Density",FALSE
+1447,74,"Urban - High Density",TRUE
+1448,79,"Rural",FALSE
+1449,60,"Urban - High Density",FALSE
+1450,72,"Urban - High Density",TRUE
+1451,61,"Urban - High Density",TRUE
+1452,72,"Urban - High Density",FALSE
+1453,60,"Urban - Medium Density",TRUE
+1454,35,"Urban - Medium Density",TRUE
+1455,58,"Rural",TRUE
+1456,23,"Urban - Medium Density",FALSE
+1457,30,"Urban - Medium Density",FALSE
+1458,36,"Urban - Medium Density",TRUE
+1459,65,"Rural",FALSE
+1460,73,"",FALSE
+1461,76,"Urban - High Density",TRUE
+1462,48,"Urban - High Density",TRUE
+1463,76,"Rural",TRUE
+1464,38,"Urban - High Density",FALSE
+1465,43,"Urban - Medium Density",TRUE
+1466,19,"Rural",FALSE
+1467,25,"Urban - High Density",FALSE
+1468,44,"Rural",TRUE
+1469,62,"Urban - Medium Density",TRUE
+1470,120,"Urban - High Density",FALSE
+1471,22,"Urban - High Density",FALSE
+1472,56,"Urban - High Density",NA
+1473,5,"Rural",TRUE
+1474,26,"Urban - High Density",NA
+1475,29,"Urban - High Density",TRUE
+1476,23,"Rural",NA
+1477,23,"Urban - High Density",TRUE
+1478,78,"Urban - Medium Density",TRUE
+1479,78,"Urban - High Density",TRUE
+1480,65,"Urban - High Density",FALSE
+1481,23,"Urban - High Density",TRUE
+1482,53,"Urban - Medium Density",NA
+1483,76,"Unknown",TRUE
+1484,63,"Urban - High Density",FALSE
+1485,74,"Rural",TRUE
+1486,52,"Urban - High Density",TRUE
+1487,71,"Urban - Medium Density",TRUE
+1488,67,"Urban - High Density",FALSE
+1489,18,"Urban - Medium Density",TRUE
+1490,49,"Urban - High Density",FALSE
+1491,5,"Urban - Medium Density",FALSE
+1492,55,"Rural",TRUE
+1493,73,"Urban - Medium Density",FALSE
+1494,18,"Urban - High Density",FALSE
+1495,21,"Rural",FALSE
+1496,35,"Urban - High Density",TRUE
+1497,34,"Rural",TRUE
+1498,33,"Urban - Medium Density",FALSE
+1499,31,"Urban - High Density",TRUE
+1500,26,"Urban - Medium Density",FALSE
+1501,53,"Urban - High Density",TRUE
+1502,51,"Urban - Medium Density",FALSE
+1503,43,"Urban - High Density",FALSE
+1504,70,"Urban - Medium Density",FALSE
+1505,76,"Urban - High Density",TRUE
+1506,36,"Rural",TRUE
+1507,25,"Urban - High Density",TRUE
+1508,35,"Urban - High Density",FALSE
+1509,56,"Rural",TRUE
+1510,62,"Urban - Medium Density",NA
+1511,45,"Urban - High Density",FALSE
+1512,65,"Urban - Medium Density",TRUE
+1513,43,"Urban - High Density",TRUE
+1514,36,"Unknown",TRUE
+1515,73,"Urban - High Density",FALSE
+1516,70,"Urban - Medium Density",TRUE
+1517,34,"Urban - High Density",TRUE
+1518,30,"Urban - High Density",TRUE
+1519,57,"Rural",FALSE
+1520,68,"Urban - Medium Density",TRUE
+1521,33,"Urban - High Density",FALSE
+1522,56,"Urban - Medium Density",FALSE
+1523,80,"Urban - High Density",TRUE
+1524,22,"Urban - High Density",FALSE
+1525,61,"Urban - High Density",FALSE
+1526,50,"Urban - High Density",FALSE
+1527,28,"Rural",FALSE
+1528,43,"Urban - Medium Density",FALSE
+1529,23,"Unknown",TRUE
+1530,66,"Urban - High Density",TRUE
+1531,58,"Urban - High Density",TRUE
+1532,71,"Urban - High Density",TRUE
+1533,26,"Urban - Medium Density",FALSE
+1534,25,"Urban - High Density",NA
+1535,79,"Urban - High Density",FALSE
+1536,61,"Urban - Medium Density",TRUE
+1537,120,"Rural",TRUE
+1538,74,"Urban - High Density",TRUE
+1539,40,"Urban - Medium Density",FALSE
+1540,38,"Rural",FALSE
+1541,35,"Urban - High Density",TRUE
+1542,50,"Urban - Medium Density",TRUE
+1543,67,"Urban - High Density",TRUE
+1544,5,"Urban - High Density",NA
+1545,54,"Urban - High Density",FALSE
+1546,54,"Rural",TRUE
+1547,78,"Urban - High Density",TRUE
+1548,52,"Rural",TRUE
+1549,57,"Urban - High Density",TRUE
+1550,74,"Urban - Medium Density",FALSE
+1551,63,"Urban - High Density",TRUE
+1552,46,"Rural",FALSE
+1553,74,"Urban - Medium Density",TRUE
+1554,68,"Urban - Medium Density",FALSE
+1555,62,"Urban - Medium Density",TRUE
+1556,29,"Unknown",FALSE
+1557,48,"Urban - Medium Density",FALSE
+1558,52,"Rural",FALSE
+1559,27,"Urban - Medium Density",FALSE
+1560,37,"Urban - High Density",FALSE
+1561,38,"Rural",TRUE
+1562,35,"Urban - Medium Density",TRUE
+1563,25,"Urban - High Density",TRUE
+1564,24,"Urban - High Density",FALSE
+1565,42,"Urban - High Density",TRUE
+1566,32,"Urban - High Density",FALSE
+1567,78,"Urban - Medium Density",TRUE
+1568,48,"Urban - High Density",TRUE
+1569,58,"Urban - Medium Density",TRUE
+1570,38,"Urban - High Density",TRUE
+1571,55,"Urban - High Density",FALSE
+1572,32,"Urban - High Density",FALSE
+1573,66,"Rural",TRUE
+1574,38,"Urban - Medium Density",TRUE
+1575,31,"Rural",FALSE
+1576,27,"Urban - High Density",FALSE
+1577,69,"Urban - Medium Density",TRUE
+1578,18,"Urban - High Density",TRUE
+1579,22,"Urban - Medium Density",TRUE
+1580,18,"Rural",FALSE
+1581,68,"Urban - High Density",FALSE
+1582,35,"Urban - High Density",TRUE
+1583,34,"Urban - High Density",TRUE
+1584,76,"Rural",TRUE
+1585,19,"Urban - Medium Density",TRUE
+1586,41,"Urban - High Density",NA
+1587,23,"Rural",TRUE
+1588,64,"Urban - High Density",TRUE
+1589,73,"Urban - High Density",FALSE
+1590,30,"Urban - High Density",TRUE
+1591,28,"Urban - High Density",TRUE
+1592,76,"Urban - Medium Density",FALSE
+1593,46,"",TRUE
+1594,58,"Rural",TRUE
+1595,20,"Urban - Medium Density",FALSE
+1596,39,"Urban - Medium Density",TRUE
+1597,51,"Urban - High Density",TRUE
+1598,74,"",FALSE
+1599,53,"Rural",TRUE
+1600,76,"Unknown",TRUE
+1601,34,"Urban - Medium Density",FALSE
+1602,27,"Urban - Medium Density",TRUE
+1603,48,"Urban - Medium Density",TRUE
+1604,46,"Urban - Medium Density",FALSE
+1605,51,"Urban - Medium Density",TRUE
+1606,30,"Urban - Medium Density",TRUE
+1607,43,"Urban - High Density",NA
+1608,23,"Urban - High Density",TRUE
+1609,61,"Urban - Medium Density",TRUE
+1610,75,"Urban - Medium Density",FALSE
+1611,57,"Urban - Medium Density",TRUE
+1612,58,"Unknown",FALSE
+1613,78,"Urban - High Density",TRUE
+1614,55,"Urban - High Density",TRUE
+1615,61,"Urban - High Density",TRUE
+1616,35,"Urban - High Density",FALSE
+1617,22,"Urban - High Density",FALSE
+1618,68,"Urban - High Density",TRUE
+1619,26,"Urban - Medium Density",TRUE
+1620,64,"Urban - High Density",FALSE
+1621,120,"Urban - High Density",FALSE
+1622,44,"Urban - High Density",TRUE
+1623,52,"Urban - Medium Density",FALSE
+1624,45,"Urban - High Density",TRUE
+1625,67,"Urban - High Density",FALSE
+1626,21,"Urban - High Density",FALSE
+1627,78,"Urban - High Density",FALSE
+1628,70,"Urban - Medium Density",TRUE
+1629,50,"Unknown",TRUE
+1630,42,"Urban - Medium Density",FALSE
+1631,56,"Urban - Medium Density",TRUE
+1632,75,"Urban - Medium Density",FALSE
+1633,47,"Urban - High Density",FALSE
+1634,75,"Urban - Medium Density",TRUE
+1635,19,"Urban - High Density",TRUE
+1636,66,"Urban - High Density",TRUE
+1637,55,"Urban - Medium Density",FALSE
+1638,53,"Rural",TRUE
+1639,49,"Urban - High Density",TRUE
+1640,33,"Urban - Medium Density",FALSE
+1641,50,"Urban - Medium Density",FALSE
+1642,45,"Rural",FALSE
+1643,18,"Urban - High Density",TRUE
+1644,47,"Urban - High Density",NA
+1645,45,"Urban - High Density",TRUE
+1646,40,"Urban - High Density",TRUE
+1647,59,"Urban - Medium Density",FALSE
+1648,34,"Rural",FALSE
+1649,59,"Urban - Medium Density",TRUE
+1650,33,"Urban - High Density",FALSE
+1651,66,"Rural",FALSE
+1652,62,"Urban - High Density",FALSE
+1653,62,"Urban - High Density",TRUE
+1654,18,"Rural",TRUE
+1655,63,"Urban - High Density",FALSE
+1656,70,"Urban - High Density",FALSE
+1657,59,"Urban - High Density",TRUE
+1658,46,"Urban - High Density",FALSE
+1659,62,"Urban - High Density",TRUE
+1660,67,"Urban - Medium Density",FALSE
+1661,76,"Rural",TRUE
+1662,35,"Urban - High Density",TRUE
+1663,66,"Urban - High Density",FALSE
+1664,71,"Urban - High Density",TRUE
+1665,59,"Urban - High Density",TRUE
+1666,59,"Urban - Medium Density",FALSE
+1667,73,"Urban - High Density",FALSE
+1668,49,"Urban - Medium Density",FALSE
+1669,22,"Urban - High Density",FALSE
+1670,32,"Urban - High Density",TRUE
+1671,55,"Rural",TRUE
+1672,68,"Urban - High Density",FALSE
+1673,52,"",FALSE
+1674,30,"Urban - Medium Density",FALSE
+1675,60,"Urban - High Density",FALSE
+1676,64,"Urban - Medium Density",FALSE
+1677,36,"Urban - High Density",FALSE
+1678,45,"Urban - High Density",TRUE
+1679,51,"Urban - Medium Density",FALSE
+1680,69,"Urban - High Density",FALSE
+1681,27,"",TRUE
+1682,42,"Urban - High Density",TRUE
+1683,34,"Urban - High Density",FALSE
+1684,49,"Urban - High Density",TRUE
+1685,39,"Urban - High Density",FALSE
+1686,51,"Urban - High Density",TRUE
+1687,42,"Urban - High Density",TRUE
+1688,55,"Urban - High Density",FALSE
+1689,64,"Urban - High Density",TRUE
+1690,77,"Urban - High Density",TRUE
+1691,37,"Urban - High Density",NA
+1692,39,"Urban - Medium Density",TRUE
+1693,52,"Urban - High Density",TRUE
+1694,51,"Urban - High Density",TRUE
+1695,60,"Unknown",FALSE
+1696,74,"Urban - High Density",TRUE
+1697,63,"Urban - Medium Density",TRUE
+1698,19,"Rural",TRUE
+1699,78,"",FALSE
+1700,31,"Urban - Medium Density",TRUE
+1701,77,"Urban - Medium Density",TRUE
+1702,38,"Urban - High Density",TRUE
+1703,47,"Urban - High Density",FALSE
+1704,38,"Urban - High Density",TRUE
+1705,69,"Urban - High Density",TRUE
+1706,73,"Urban - High Density",TRUE
+1707,31,"Urban - Medium Density",TRUE
+1708,59,"Urban - High Density",TRUE
+1709,25,"Urban - High Density",FALSE
+1710,74,"Urban - High Density",TRUE
+1711,23,"Urban - Medium Density",TRUE
+1712,78,"Rural",TRUE
+1713,35,"Urban - Medium Density",TRUE
+1714,33,"Urban - Medium Density",TRUE
+1715,53,"Urban - Medium Density",FALSE
+1716,46,"Urban - Medium Density",FALSE
+1717,49,"Urban - High Density",NA
+1718,64,"Urban - High Density",FALSE
+1719,74,"Urban - High Density",NA
+1720,43,"Urban - High Density",TRUE
+1721,65,"Urban - High Density",TRUE
+1722,43,"Urban - High Density",FALSE
+1723,59,"Urban - Medium Density",TRUE
+1724,22,"Urban - Medium Density",TRUE
+1725,61,"Rural",FALSE
+1726,47,"Urban - Medium Density",TRUE
+1727,73,"Urban - High Density",FALSE
+1728,34,"Rural",TRUE
+1729,23,"Urban - Medium Density",FALSE
+1730,56,"Urban - High Density",TRUE
+1731,57,"",FALSE
+1732,54,"Urban - High Density",TRUE
+1733,38,"Unknown",FALSE
+1734,42,"Urban - High Density",FALSE
+1735,19,"Urban - High Density",FALSE
+1736,49,"Rural",FALSE
+1737,41,"Urban - Medium Density",FALSE
+1738,62,"Urban - Medium Density",TRUE
+1739,79,"Urban - High Density",FALSE
+1740,80,"Urban - Medium Density",TRUE
+1741,32,"Urban - Medium Density",FALSE
+1742,58,"Urban - High Density",TRUE
+1743,51,"Urban - High Density",TRUE
+1744,53,"Urban - Medium Density",TRUE
+1745,75,"Urban - Medium Density",TRUE
+1746,32,"Urban - High Density",TRUE
+1747,79,"Urban - High Density",TRUE
+1748,74,"Urban - Medium Density",TRUE
+1749,41,"Rural",TRUE
+1750,47,"Urban - High Density",TRUE
+1751,44,"Urban - High Density",FALSE
+1752,36,"Rural",TRUE
+1753,63,"Urban - High Density",TRUE
+1754,52,"Urban - Medium Density",TRUE
+1755,26,"Urban - High Density",TRUE
+1756,73,"Urban - Medium Density",TRUE
+1757,26,"Urban - Medium Density",TRUE
+1758,37,"Unknown",FALSE
+1759,32,"Rural",FALSE
+1760,49,"Urban - Medium Density",TRUE
+1761,50,"Urban - High Density",TRUE
+1762,19,"Urban - High Density",TRUE
+1763,56,"",FALSE
+1764,56,"Urban - High Density",TRUE
+1765,57,"Urban - High Density",TRUE
+1766,31,"Urban - High Density",FALSE
+1767,28,"Urban - Medium Density",NA
+1768,39,"Urban - High Density",TRUE
+1769,62,"Urban - High Density",FALSE
+1770,19,"Urban - High Density",TRUE
+1771,25,"Urban - High Density",FALSE
+1772,52,"Urban - High Density",FALSE
+1773,33,"Urban - Medium Density",FALSE
+1774,37,"Urban - Medium Density",TRUE
+1775,34,"Urban - Medium Density",TRUE
+1776,65,"Urban - High Density",FALSE
+1777,53,"Urban - Medium Density",TRUE
+1778,55,"Urban - Medium Density",FALSE
+1779,22,"Urban - High Density",FALSE
+1780,51,"Urban - High Density",FALSE
+1781,27,"Urban - High Density",TRUE
+1782,25,"Urban - High Density",TRUE
+1783,75,"Urban - High Density",TRUE
+1784,25,"Urban - Medium Density",FALSE
+1785,59,"Urban - High Density",TRUE
+1786,76,"Rural",TRUE
+1787,69,"Urban - Medium Density",FALSE
+1788,48,"Urban - High Density",TRUE
+1789,36,"Urban - Medium Density",TRUE
+1790,34,"Urban - High Density",FALSE
+1791,60,"Urban - High Density",FALSE
+1792,21,"Urban - Medium Density",FALSE
+1793,51,"Urban - High Density",TRUE
+1794,19,"Urban - Medium Density",FALSE
+1795,53,"Urban - High Density",FALSE
+1796,54,"Urban - Medium Density",TRUE
+1797,28,"Urban - Medium Density",TRUE
+1798,78,"Rural",TRUE
+1799,39,"Rural",TRUE
+1800,45,"Unknown",NA
+1801,27,"Urban - High Density",TRUE
+1802,56,"Urban - High Density",TRUE
+1803,74,"Urban - High Density",FALSE
+1804,59,"Urban - High Density",FALSE
+1805,120,"Urban - Medium Density",TRUE
+1806,75,"Rural",TRUE
+1807,58,"Urban - High Density",TRUE
+1808,56,"Urban - Medium Density",TRUE
+1809,71,"Urban - High Density",FALSE
+1810,80,"Urban - High Density",TRUE
+1811,42,"Urban - Medium Density",FALSE
+1812,49,"Urban - High Density",TRUE
+1813,65,"Urban - Medium Density",FALSE
+1814,54,"Urban - Medium Density",TRUE
+1815,43,"Rural",FALSE
+1816,62,"Urban - High Density",TRUE
+1817,44,"Urban - High Density",TRUE
+1818,69,"Urban - High Density",FALSE
+1819,36,"Rural",FALSE
+1820,27,"Urban - High Density",FALSE
+1821,51,"Urban - High Density",FALSE
+1822,40,"Urban - Medium Density",TRUE
+1823,5,"Urban - High Density",TRUE
+1824,41,"",TRUE
+1825,67,"Urban - High Density",TRUE
+1826,79,"Urban - Medium Density",FALSE
+1827,29,"Rural",FALSE
+1828,63,"Urban - High Density",TRUE
+1829,29,"Urban - Medium Density",FALSE
+1830,76,"Urban - Medium Density",TRUE
+1831,23,"Urban - High Density",TRUE
+1832,33,"Rural",TRUE
+1833,30,"Urban - High Density",FALSE
+1834,70,"Urban - High Density",NA
+1835,49,"Rural",TRUE
+1836,40,"Urban - High Density",FALSE
+1837,73,"Rural",FALSE
+1838,5,"Urban - High Density",TRUE
+1839,69,"Urban - High Density",FALSE
+1840,55,"Urban - High Density",FALSE
+1841,33,"Urban - High Density",FALSE
+1842,54,"Urban - High Density",TRUE
+1843,60,"Rural",TRUE
+1844,39,"Urban - High Density",TRUE
+1845,59,"Urban - Medium Density",FALSE
+1846,58,"Rural",FALSE
+1847,19,"Urban - High Density",FALSE
+1848,41,"Urban - Medium Density",TRUE
+1849,72,"Urban - Medium Density",TRUE
+1850,45,"Urban - High Density",FALSE
+1851,58,"Urban - High Density",TRUE
+1852,71,"Urban - High Density",TRUE
+1853,67,"Urban - High Density",FALSE
+1854,20,"Urban - Medium Density",TRUE
+1855,5,"Urban - Medium Density",TRUE
+1856,33,"Urban - High Density",TRUE
+1857,21,"Urban - High Density",TRUE
+1858,79,"Urban - High Density",TRUE
+1859,65,"Urban - High Density",TRUE
+1860,57,"Urban - High Density",TRUE
+1861,48,"Rural",FALSE
+1862,44,"Urban - High Density",NA
+1863,77,"Rural",TRUE
+1864,21,"Rural",FALSE
+1865,74,"Urban - High Density",TRUE
+1866,36,"Urban - Medium Density",TRUE
+1867,40,"Urban - High Density",FALSE
+1868,30,"Urban - Medium Density",FALSE
+1869,37,"Urban - Medium Density",TRUE
+1870,52,"Rural",TRUE
+1871,75,"Rural",FALSE
+1872,65,"Rural",FALSE
+1873,23,"Urban - High Density",FALSE
+1874,51,"Urban - High Density",FALSE
+1875,56,"Urban - High Density",FALSE
+1876,71,"Urban - Medium Density",TRUE
+1877,46,"Urban - Medium Density",FALSE
+1878,25,"Urban - Medium Density",FALSE
+1879,48,"Urban - High Density",FALSE
+1880,26,"Urban - High Density",TRUE
+1881,23,"Urban - High Density",TRUE
+1882,38,"",FALSE
+1883,57,"Urban - Medium Density",FALSE
+1884,44,"Urban - Medium Density",FALSE
+1885,67,"Urban - High Density",FALSE
+1886,66,"Urban - High Density",FALSE
+1887,19,"Urban - High Density",FALSE
+1888,60,"Urban - Medium Density",TRUE
+1889,30,"Urban - High Density",TRUE
+1890,50,"Rural",TRUE
+1891,65,"Urban - High Density",TRUE
+1892,47,"Urban - High Density",TRUE
+1893,32,"Urban - High Density",FALSE
+1894,78,"Urban - High Density",FALSE
+1895,31,"Urban - Medium Density",FALSE
+1896,46,"Rural",FALSE
+1897,49,"Urban - High Density",TRUE
+1898,37,"Urban - Medium Density",FALSE
+1899,26,"Urban - High Density",TRUE
+1900,120,"Urban - Medium Density",FALSE
+1901,44,"Urban - High Density",NA
+1902,18,"Urban - High Density",FALSE
+1903,19,"Urban - Medium Density",TRUE
+1904,77,"Urban - High Density",TRUE
+1905,34,"Urban - High Density",FALSE
+1906,33,"Urban - High Density",TRUE
+1907,29,"Urban - High Density",FALSE
+1908,71,"Rural",TRUE
+1909,26,"Unknown",NA
+1910,76,"Urban - Medium Density",NA
+1911,50,"Urban - Medium Density",TRUE
+1912,58,"Rural",FALSE
+1913,67,"Urban - Medium Density",TRUE
+1914,53,"Unknown",TRUE
+1915,80,"Urban - Medium Density",NA
+1916,41,"Urban - High Density",FALSE
+1917,19,"Urban - Medium Density",NA
+1918,58,"Urban - High Density",TRUE
+1919,61,"Rural",FALSE
+1920,45,"Rural",FALSE
+1921,27,"Urban - High Density",FALSE
+1922,68,"Urban - High Density",FALSE
+1923,44,"Urban - Medium Density",FALSE
+1924,57,"Urban - Medium Density",TRUE
+1925,67,"Unknown",TRUE
+1926,22,"Urban - High Density",TRUE
+1927,50,"Urban - High Density",FALSE
+1928,21,"Rural",TRUE
+1929,56,"Rural",TRUE
+1930,46,"Urban - Medium Density",TRUE
+1931,120,"Urban - High Density",TRUE
+1932,60,"Urban - High Density",TRUE
+1933,45,"Unknown",FALSE
+1934,5,"Urban - Medium Density",FALSE
+1935,23,"Urban - High Density",TRUE
+1936,77,"Urban - High Density",TRUE
+1937,58,"Urban - High Density",FALSE
+1938,60,"Urban - Medium Density",TRUE
+1939,60,"Rural",FALSE
+1940,80,"Urban - High Density",TRUE
+1941,24,"Rural",FALSE
+1942,46,"Urban - High Density",TRUE
+1943,21,"Urban - Medium Density",NA
+1944,74,"Urban - Medium Density",FALSE
+1945,19,"Urban - Medium Density",TRUE
+1946,26,"Urban - Medium Density",TRUE
+1947,27,"Urban - Medium Density",FALSE
+1948,31,"Urban - Medium Density",TRUE
+1949,36,"",FALSE
+1950,46,"Rural",TRUE
+1951,33,"Urban - High Density",FALSE
+1952,49,"Urban - Medium Density",FALSE
+1953,33,"Urban - High Density",TRUE
+1954,44,"Urban - High Density",FALSE
+1955,52,"Urban - High Density",TRUE
+1956,78,"Urban - High Density",FALSE
+1957,56,"Rural",FALSE
+1958,49,"Unknown",FALSE
+1959,78,"Urban - High Density",NA
+1960,19,"Urban - High Density",FALSE
+1961,5,"Urban - High Density",TRUE
+1962,47,"Urban - High Density",FALSE
+1963,27,"Unknown",TRUE
+1964,27,"Urban - Medium Density",NA
+1965,26,"Urban - High Density",TRUE
+1966,30,"Urban - High Density",TRUE
+1967,43,"Unknown",TRUE
+1968,77,"Urban - Medium Density",FALSE
+1969,74,"Urban - High Density",TRUE
+1970,38,"Urban - High Density",TRUE
+1971,42,"Rural",TRUE
+1972,70,"Rural",FALSE
+1973,35,"Urban - Medium Density",NA
+1974,50,"Urban - High Density",NA
+1975,42,"Urban - High Density",TRUE
+1976,20,"Urban - High Density",TRUE
+1977,33,"Urban - High Density",FALSE
+1978,71,"Urban - Medium Density",TRUE
+1979,45,"Rural",NA
+1980,52,"Rural",TRUE
+1981,55,"Unknown",TRUE
+1982,51,"Urban - High Density",TRUE
+1983,74,"Urban - High Density",TRUE
+1984,32,"Urban - High Density",TRUE
+1985,29,"",TRUE
+1986,26,"Urban - High Density",TRUE
+1987,69,"",FALSE
+1988,20,"Urban - Medium Density",TRUE
+1989,58,"Urban - High Density",TRUE
+1990,27,"Rural",NA
+1991,50,"Urban - High Density",TRUE
+1992,30,"Rural",TRUE
+1993,32,"Urban - High Density",TRUE
+1994,80,"Unknown",TRUE
+1995,33,"Urban - High Density",TRUE
+1996,24,"Urban - High Density",TRUE
+1997,26,"Urban - Medium Density",TRUE
+1998,35,"Urban - High Density",FALSE
+1999,64,"Urban - Medium Density",FALSE
+2000,38,"Urban - Medium Density",TRUE
