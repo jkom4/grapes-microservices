@@ -6,7 +6,7 @@ services:
     build: ./docker/mariadb
     env_file:
       - .env
- #   image:  ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
+    image:  ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
     container_name: grapes-mariadb
 
     environment:
@@ -46,11 +46,12 @@ services:
     depends_on:
       - mariadb
 
+
   mongodb:
     build: ./docker/mongodb
     env_file:
       - ./.env
- #   image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mongodb-grapes:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mongodb-grapes:latest
     container_name: grapes-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
@@ -67,7 +68,7 @@ services:
   rabbitmq:
     build: ./docker/rabbitmq
     env_file: .env
- #   image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/rabbitmq-grapes:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/rabbitmq-grapes:latest
     container_name: grapes-rabbitmq
     volumes:
       - ./docker/rabbitmq/volumes/data/:/var/lib/rabbitmq/mnesia
@@ -126,7 +127,7 @@ services:
   api-gateway:
     build: ./api-gateway
     env_file: .env
- #   image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/api-gateway:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/api-gateway:latest
 
     container_name: api-gateway
     ports:
@@ -143,7 +144,7 @@ services:
   auth-service:
     build: ./auth-service/auth-backend
     env_file: .env
- #   image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-backend:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-backend:latest
     container_name: auth-backend
     ports:
       - "8091:8091"
@@ -154,7 +155,7 @@ services:
   sales-service:
     build: ./sales-service
     env_file: .env
- #   image:  ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/sales-service:latest
+    image:  ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/sales-service:latest
     container_name: sales-backend
     ports:
       - "8092:8092"
@@ -171,7 +172,7 @@ services:
   payment-service:
     build: ./payment-service/payment-backend
     env_file: .env
-#    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-backend:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-backend:latest
     container_name: payment-backend
     ports:
       - "8094:8094"
@@ -181,7 +182,7 @@ services:
   chat-service:
     build: ./chat-service
     env_file: .env
- #   image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/chat-service:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/chat-service:latest
     container_name: chat-backend
     ports:
       - "8095:8095"
@@ -191,7 +192,7 @@ services:
   data-mining-service:
     build: ./data-mining-service
     env_file: .env
- #   image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-mining-service:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-mining-service:latest
     container_name: data-mining-backend
     ports:
       - "8096:8096"
@@ -203,7 +204,7 @@ services:
 
   frontend-web:
     build: ./frontend-web
- #   image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/grapes-frontend:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/grapes-frontend:latest
     container_name: grapes-frontend
     ports:
       - "3001:80"
@@ -212,7 +213,7 @@ services:
 
   frontend-auth:
     build: ./auth-service/auth-frontend
- #   image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-frontend:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-frontend:latest
     container_name: auth-frontend
     ports:
       - "3002:81"
@@ -221,7 +222,7 @@ services:
 
   frontend-payment:
     build: ./payment-service/payment-frontend
- #   image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-frontend:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-frontend:latest
     ports:
       - "3003:82"
     depends_on:

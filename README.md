@@ -21,9 +21,9 @@ Before getting started, make sure you have the following installed on your machi
 grapes-microservices/
 │── .github/                         # CI/CD Config
 │── api-gateway/                     # API Gateway (Spring Cloud Gateway)
-│── auth-service/                    # Authentication Service
+│── auth-service/                    # Authentication Service(Frontend + backend)
 │── sales-service/                   # Sales Service
-│── payment-service/                 # Payment Service
+│── payment-service/                 # Payment Service (frontend + backend)
 │── chat-service/                    # Real-time Chat Service
 │── data-mining-service/             # Big Data & Analytics Service
 │── frontend-web/                    # Main Web Frontend (React)
