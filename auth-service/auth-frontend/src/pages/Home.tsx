@@ -13,9 +13,9 @@ const Home = () => {
             <Header />
             <IntroSection />
             <div className="container">
-                <LoginBox imgSrc={eid} altText="eID Card" loginMethod="eID card reader" />
-                <LoginBox imgSrc={email} altText="Email" loginMethod="Security code by email" />
-                <LoginBox imgSrc={phone} altText="Phone" loginMethod="Security code by phone" />
+                <LoginBox imgSrc={eid} altText="eID Card" loginMethod="eID card reader" description="Please connect your card reader before"/>
+                <LoginBox imgSrc={email} altText="Email" loginMethod="Security code by email" description="You will receive a one-time password by mail"/>
+                <LoginBox imgSrc={phone} altText="Phone" loginMethod="Security code by phone" description="You will receive a one-time password by phone"/>
             </div>
             <Footer />
         </div>

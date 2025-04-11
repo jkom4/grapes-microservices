@@ -12,7 +12,7 @@ const Footer = () => {
                 <a href="#">Cookies</a>
             </div>
             <div className="footer-right">
-                <span>Powered by MASI - Projet intégré</span>
+                <span>Powered by MASI - Projet intégré (groupe 4)</span>
             </div>
         </footer>
     );
