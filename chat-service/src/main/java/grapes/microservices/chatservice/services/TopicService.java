@@ -2,7 +2,6 @@ package grapes.microservices.chatservice.services;
 
 import grapes.microservices.chatservice.dto.MessageDto;
 import grapes.microservices.chatservice.dto.TopicDto;
-import grapes.microservices.chatservice.models.Chat;
 import grapes.microservices.chatservice.models.Message;
 import grapes.microservices.chatservice.repositories.ChatRepository;
 import grapes.microservices.chatservice.repositories.MessageRepository;
@@ -19,7 +18,6 @@ public class TopicService {
 
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
-    private final AuthService authService;
 
     public List<TopicDto> getAllTopics() {
         return chatRepository.findAll()
@@ -43,16 +41,10 @@ public class TopicService {
                 .collect(Collectors.toList());
     }
 
-    public MessageDto postMessage(String topicId, String token, String content) {
-        var userDto = authService.validateToken(token);
-
-        if (userDto == null) {
-            throw new RuntimeException("Invalid Tokens");
-        }
-
+    public MessageDto postMessage(String topicId, String userId, String content) {
         Message message = Message.builder()
                 .chatId(topicId)
-                .senderId(userDto.getId())
+                .senderId(userId) // userId comes directly from the token
                 .content(content)
                 .createdAt(LocalDateTime.now())
                 .build();

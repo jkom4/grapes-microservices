@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MessageDto {
 
-    private String id;         // id message
-    private String userId;     // id user
-    private String username;   // username
-    private String content;    // message
-    private String createdAt;  // date
-    private String topicId;    // id topic
+    private String id;
+    private String userId;
+    private String username;
+    private String content;
+    private String createdAt;
+    private String topicId;
 }
