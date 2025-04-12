@@ -37,12 +37,12 @@ class UserTest {
     @Test
     void verifyPassword_CorrectPassword_ReturnsTrue() {
         when(passwordEncoder.matches("correctPassword", "hashedPassword")).thenReturn(true);
-        assertTrue(user.verifyPassword("correctPassword"));
+        assertTrue(user.verifyUserPassword("correctPassword"));
     }
 
     @Test
     void verifyPassword_IncorrectPassword_ThrowsException() {
         when(passwordEncoder.matches("wrongPassword", "hashedPassword")).thenReturn(false);
-        assertFalse(user.verifyPassword("wrongPassword"));
+        assertFalse(user.verifyUserPassword("wrongPassword"));
     }
 }

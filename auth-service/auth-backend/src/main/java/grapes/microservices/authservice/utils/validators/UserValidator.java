@@ -1,4 +1,4 @@
-package grapes.microservices.authservice.validators;
+package grapes.microservices.authservice.utils.validators;
 
 import grapes.microservices.authservice.models.User;
 import jakarta.validation.ConstraintViolation;

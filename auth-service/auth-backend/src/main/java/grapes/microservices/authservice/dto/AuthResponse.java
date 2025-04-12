@@ -1,4 +1,4 @@
-package grapes.microservices.authservice.models;
+package grapes.microservices.authservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
