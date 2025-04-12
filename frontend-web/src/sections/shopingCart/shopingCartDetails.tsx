@@ -1,87 +1,10 @@
+// src/components/CartPage.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../features/LanguageContext";
-import CartItem from "../../utils/models/CartItem";
-
-interface CartResponse {
-    items: CartItem[];
-    totalPrice: number;
-}
-
-const translations = {
-    en: {
-        checkout: "Checkout",
-        fullName: "Full name",
-        email: "Email address",
-        phone: "Phone number",
-        address: "Street address",
-        country: "Country",
-        city: "City",
-        state: "State",
-        zip: "ZIP Code",
-        cardNumber: "Card Number",
-        cardExpiry: "MM/YY",
-        cardCVC: "CVC",
-        terms: "I have read and agree to the Terms and Conditions.",
-        paymentError: "Payment failed. Please try again.",
-        completeForm: "Please complete all required fields before paying.",
-        secureCheckout: "Secure Checkout – SSL Encrypted",
-        payNow: "Pay Now",
-        processing: "Processing...",
-        subtotal: "Subtotal",
-        shipping: "Shipping",
-        total: "Total",
-        titleCart: "Review your cart",
-        emptyCart: "Your cart is empty. Add items to proceed with checkout.",
-        promoCode: "Promo Code",
-        applyPromo: "Apply",
-        promoSuccess: "Promo code applied successfully!",
-        promoError: "Invalid promo code. Please try again.",
-        kg: "kg",
-        unit: "unit",
-        paymentSuccess: "Payment Successful!",
-        transactionSummary: "Transaction Summary",
-        shippingAddress: "Shipping Address",
-        itemsOrdered: "Items Ordered",
-        redirecting: "Redirecting to homepage...",
-    },
-    fr: {
-        checkout: "Commande",
-        fullName: "Nom complet",
-        email: "Adresse email",
-        phone: "Numéro de téléphone",
-        address: "Adresse postale",
-        country: "Pays",
-        city: "Ville",
-        state: "État",
-        zip: "Code postal",
-        cardNumber: "Numéro de carte",
-        cardExpiry: "MM/AA",
-        cardCVC: "CVC",
-        terms: "J'ai lu et j'accepte les conditions générales.",
-        paymentError: "Échec du paiement. Veuillez réessayer.",
-        completeForm: "Veuillez remplir tous les champs requis avant de payer.",
-        secureCheckout: "Paiement sécurisé – Chiffrement SSL",
-        payNow: "Payer maintenant",
-        processing: "En cours...",
-        subtotal: "Sous-total",
-        shipping: "Expédition",
-        total: "Total",
-        titleCart: "Vérifiez votre panier",
-        emptyCart: "Votre panier est vide. Ajoutez des articles pour continuer.",
-        promoCode: "Code promo",
-        applyPromo: "Appliquer",
-        promoSuccess: "Code promo appliqué avec succès !",
-        promoError: "Code promo invalide. Veuillez réessayer.",
-        kg: "kg",
-        unit: "unité",
-        paymentSuccess: "Paiement réussi !",
-        transactionSummary: "Résumé de la transaction",
-        shippingAddress: "Adresse de livraison",
-        itemsOrdered: "Articles commandés",
-        redirecting: "Redirection vers la page d'accueil...",
-    },
-};
+import { cartService, CartResponse } from "../../services/cartService";
+import CartItemModel from "../../utils/models/CartItem";
+import { translations } from "../../utils/translations";
 
 const CartPage = () => {
     const { language } = useLanguage();
@@ -111,31 +34,29 @@ const CartPage = () => {
     const [promoSuccess, setPromoSuccess] = useState<string | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
 
+    // Hardcoded orderId for all operations
     const orderId = "1";
+    // Hardcoded userId for initializeCart
+    const userId = 1;
 
     useEffect(() => {
-        const fetchCart = async () => {
+        const initializeAndFetchCart = async () => {
             try {
-                const response = await fetch(`http://localhost:8092/clm/cart/${orderId}`);
-                if (!response.ok) {
-                    const errorDetails = await response.text();
-                    throw new Error(`Failed to fetch cart items. Details: ${errorDetails}`);
-                }
-                const data: CartResponse = await response.json();
+                setLoading(true);
+                // Initialize cart with userId
+                await cartService.initializeCart(userId);
+                // Fetch cart with hardcoded orderId
+                const data = await cartService.fetchCart(orderId);
                 setCart(data);
-            } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("An unknown error occurred");
-                }
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "An unknown error occurred while initializing or fetching the cart");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchCart();
-    }, [orderId]);
+        initializeAndFetchCart();
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
@@ -146,8 +67,22 @@ const CartPage = () => {
     };
 
     const isFormComplete = () => {
-        const { fullName, email, phone, address, country, city, state, zip, cardNumber, cardExpiry, cardCVC, termsAccepted } = formData;
-        return fullName && email && phone && address && country && city && state && zip && cardNumber && cardExpiry && cardCVC && termsAccepted;
+        const { fullName, email, phone, address, country, city, state, zip, cardNumber, cardExpiry, cardCVC, termsAccepted } =
+            formData;
+        return (
+            fullName &&
+            email &&
+            phone &&
+            address &&
+            country &&
+            city &&
+            state &&
+            zip &&
+            cardNumber &&
+            cardExpiry &&
+            cardCVC &&
+            termsAccepted
+        );
     };
 
     const handlePayment = async () => {
@@ -161,48 +96,20 @@ const CartPage = () => {
 
         setIsPaying(true);
         try {
-            const response = await fetch(`http://localhost:8092/clm/cart/pay/${orderId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (!response.ok) {
-                const errorDetails = await response.text();
-                throw new Error(`Payment failed. Details: ${errorDetails}`);
-            }
-
+            await cartService.processPayment(orderId);
             setShowSuccess(true);
 
             setTimeout(async () => {
                 try {
-                    const clearResponse = await fetch(`http://localhost:8092/clm/cart/clear/${orderId}`, {
-                        method: "DELETE",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    });
-
-                    if (!clearResponse.ok) {
-                        const errorDetails = await clearResponse.text();
-                        console.error(`Failed to clear cart. Details: ${errorDetails}`);
-                        // Continue with redirect even if clearing fails to avoid blocking user flow
-                    }
-                } catch (err: unknown) {
+                    await cartService.clearCart(orderId);
+                } catch (err) {
                     console.error("Error clearing cart:", err instanceof Error ? err.message : "Unknown error");
-                    // Continue with redirect regardless of error
                 }
-
                 setShowSuccess(false);
-                navigate("/"); // Redirect to homepage
-            }, 5000); // 5 seconds delay
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setPaymentError(err.message);
-            } else {
-                setPaymentError(translations[language].paymentError);
-            }
+                navigate("/");
+            }, 5000);
+        } catch (err) {
+            setPaymentError(err instanceof Error ? err.message : translations[language].paymentError);
         } finally {
             setIsPaying(false);
         }
@@ -210,18 +117,7 @@ const CartPage = () => {
 
     const handleRemoveItem = async (itemId: number) => {
         try {
-            const response = await fetch(`http://localhost:8092/clm/cart/remove/${itemId}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (!response.ok) {
-                const errorDetails = await response.text();
-                throw new Error(`Failed to remove item. Details: ${errorDetails}`);
-            }
-
+            await cartService.removeItem(itemId);
             setCart((prevCart) => {
                 if (!prevCart) return null;
                 const updatedItems = prevCart.items.filter((item) => item.id !== itemId);
@@ -238,63 +134,50 @@ const CartPage = () => {
             setPromoCode("");
             setPromoSuccess(null);
             setPromoError(null);
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError("An unknown error occurred while removing the item");
-            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "An unknown error occurred while removing the item");
         }
     };
 
     const handleApplyPromo = async () => {
-        if (!promoCode.trim()) return;
+        if (!promoCode.trim()) {
+            setPromoError(translations[language].promoError);
+            return;
+        }
+
         setPromoError(null);
         setPromoSuccess(null);
 
         try {
-            const response = await fetch(`http://localhost:8092/clm/cart/apply-promo`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ orderId, promoCode }),
-            });
-
-            if (!response.ok) {
-                const errorDetails = await response.text();
-                throw new Error(`Failed to apply promo code. Details: ${errorDetails}`);
-            }
-
-            const data: CartResponse = await response.json();
+            const data = await cartService.applyPromoCode(orderId, promoCode);
             setCart(data);
             setPromoSuccess(translations[language].promoSuccess);
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setPromoError(err.message);
-            } else {
-                setPromoError(translations[language].promoError);
-            }
+            setPromoCode("");
+        } catch (err) {
+            setPromoError(err instanceof Error ? err.message : translations[language].promoError);
         }
     };
 
-    const calculateItemPrice = (item: CartItem) => {
-        if (item.quantityKg > 0) {
-            return (item.price * item.quantityKg).toFixed(2);
-        } else {
-            return (item.price * item.quantity).toFixed(2);
+    const handleAddItem = async (articleId: number, quantityKg: number, quantity: number) => {
+        try {
+            const updatedCart = await cartService.addItemToCart(parseInt(orderId), articleId, quantityKg, quantity);
+            setCart(updatedCart);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to add item to cart");
         }
     };
 
-    const getItemQuantityDisplay = (item: CartItem) => {
-        if (item.quantityKg > 0) {
-            return `${item.quantityKg} ${translations[language].kg}`;
-        } else {
-            return `${item.quantity} ${translations[language].unit}`;
-        }
+    const calculateItemPrice = (item: CartItemModel) => {
+        return (item.quantityKg > 0 ? item.price * item.quantityKg : item.price * item.quantity).toFixed(2);
     };
 
-    const getUnitPriceDisplay = (item: CartItem) => {
+    const getItemQuantityDisplay = (item: CartItemModel) => {
+        return item.quantityKg > 0
+            ? `${item.quantityKg} ${translations[language].kg}`
+            : `${item.quantity} ${translations[language].unit}`;
+    };
+
+    const getUnitPriceDisplay = (item: CartItemModel) => {
         return `${item.price.toFixed(2)} €/${item.quantityKg > 0 ? translations[language].kg : translations[language].unit}`;
     };
 
@@ -317,11 +200,9 @@ const CartPage = () => {
 
     return (
         <div className="bg-gray-100 min-h-screen p-6 lg:p-12">
-            {/* Transaction Summary Modal */}
             {showSuccess && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-8 shadow-2xl w-full max-w-2xl animate-fade-in">
-                        {/* Success Animation */}
                         <div className="relative w-20 h-20 mx-auto mb-6">
                             <div className="absolute inset-0 bg-green-500 rounded-full animate-circle"></div>
                             <svg
@@ -336,9 +217,9 @@ const CartPage = () => {
                                 <path d="M20 6L9 17l-5-5" />
                             </svg>
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">{translations[language].transactionSummary}</h2>
-
-                        {/* Shipping Address */}
+                        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+                            {translations[language].transactionSummary}
+                        </h2>
                         <div className="mb-6">
                             <h3 className="text-lg font-semibold text-gray-800">{translations[language].shippingAddress}</h3>
                             <div className="mt-2 text-gray-600 space-y-1">
@@ -352,8 +233,6 @@ const CartPage = () => {
                                 <p>{formData.country}</p>
                             </div>
                         </div>
-
-                        {/* Items Ordered */}
                         <div className="mb-6">
                             <h3 className="text-lg font-semibold text-gray-800">{translations[language].itemsOrdered}</h3>
                             <div className="mt-2 space-y-2 max-h-64 overflow-y-auto">
@@ -368,8 +247,6 @@ const CartPage = () => {
                                 ))}
                             </div>
                         </div>
-
-                        {/* Pricing Summary */}
                         <div className="border-t pt-4">
                             <div className="flex justify-between text-gray-600">
                                 <span>{translations[language].subtotal}</span>
@@ -384,18 +261,13 @@ const CartPage = () => {
                                 <span>{total.toFixed(2)} €</span>
                             </div>
                         </div>
-
-                        {/* Redirect Notice */}
                         <p className="text-gray-600 text-center mt-6">{translations[language].redirecting}</p>
                     </div>
                 </div>
             )}
-
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Delivery form and payment */}
                 <div className="bg-white rounded-xl p-8 shadow-lg">
                     <h1 className="text-3xl font-bold text-secondary mb-6">{translations[language].checkout}</h1>
-
                     <form className="space-y-4">
                         <input
                             type="text"
@@ -468,8 +340,6 @@ const CartPage = () => {
                                 onChange={handleInputChange}
                             />
                         </div>
-
-                        {/* Payment Info */}
                         <h2 className="text-lg font-semibold mt-6 text-gray-800">{translations[language].payNow}</h2>
                         <input
                             type="text"
@@ -497,7 +367,6 @@ const CartPage = () => {
                                 onChange={handleInputChange}
                             />
                         </div>
-
                         <label className="flex items-center space-x-2 text-sm mt-2 text-gray-600">
                             <input
                                 type="checkbox"
@@ -509,14 +378,10 @@ const CartPage = () => {
                             <span>{translations[language].terms}</span>
                         </label>
                     </form>
-
                     {formError && <div className="mt-4 text-red-600 text-sm">{formError}</div>}
                 </div>
-
-                {/* Summary Cart */}
                 <div className="bg-primary rounded-xl p-8 shadow-xl">
                     <h2 className="text-xl font-bold text-gray-800 mb-6">{translations[language].titleCart}</h2>
-
                     {isCartEmpty ? (
                         <div className="text-red-600 text-center p-4">{translations[language].emptyCart}</div>
                     ) : (
@@ -546,24 +411,24 @@ const CartPage = () => {
                             ))}
                         </div>
                     )}
-
-                    <div className="mt-6 space-y-2 text-sm text-gray-700 border-t pt-4">
-                        <div className="flex justify-between">
-                            <span>{translations[language].subtotal}</span>
-                            <span>{subtotal.toFixed(2)} €</span>
-                        </div>
-                        {!isCartEmpty && (
+                    <div className="mt-6 space-y-4">
+                        <div className="space-y-2 text-sm text-gray-700 border-t pt-4">
                             <div className="flex justify-between">
-                                <span>{translations[language].shipping}</span>
-                                <span>{shipping.toFixed(2)} €</span>
+                                <span>{translations[language].subtotal}</span>
+                                <span>{subtotal.toFixed(2)} €</span>
                             </div>
-                        )}
-                        <div className="flex justify-between font-bold text-lg text-gray-800">
-                            <span>{translations[language].total}</span>
-                            <span>{total.toFixed(2)} €</span>
+                            {!isCartEmpty && (
+                                <div className="flex justify-between">
+                                    <span>{translations[language].shipping}</span>
+                                    <span>{shipping.toFixed(2)} €</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between font-bold text-lg text-gray-800">
+                                <span>{translations[language].total}</span>
+                                <span>{total.toFixed(2)} €</span>
+                            </div>
                         </div>
                     </div>
-
                     <button
                         onClick={handlePayment}
                         disabled={isPaying || isCartEmpty}
@@ -573,9 +438,7 @@ const CartPage = () => {
                     >
                         {isPaying ? translations[language].processing : translations[language].payNow}
                     </button>
-
                     {paymentError && <div className="mt-4 text-red-600 text-sm">{paymentError}</div>}
-
                     <div className="mt-4 text-xs text-gray-600 flex items-start space-x-2">
                         <span className="text-lg">🔒</span>
                         <p>
