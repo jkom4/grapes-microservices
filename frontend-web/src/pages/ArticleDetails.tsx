@@ -8,7 +8,6 @@ import WhoAreWeSection from "../sections/homepage/WhoAreWeSection";
 import Newsletter from "../sections/homepage/Newsletter";
 import ArticleDetailsSection from "../sections/articleDetails/ArticleDetailsSection";
 
-
 export default function ArticleDetails() {
     return (
         <>
