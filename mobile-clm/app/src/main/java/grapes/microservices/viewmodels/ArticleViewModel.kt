@@ -28,6 +28,12 @@ sealed class CartState {
     data class Error(val message: String) : CartState()
 }
 
+sealed class ArticlePaginationState {
+    object Loading : ArticlePaginationState()
+    data class Success(val articles: List<Article>, val currentPage: Int) : ArticlePaginationState()
+    data class Error(val message: String) : ArticlePaginationState()
+}
+
 // États pour l'écran du panier
 sealed class CartScreenState {
     object Loading : CartScreenState()
@@ -59,6 +65,16 @@ class ArticleViewModel(
     private val _paymentState = MutableStateFlow<PaymentState>(PaymentState.Idle)
     val paymentState: StateFlow<PaymentState> = _paymentState
 
+    private val _articlePaginationState = MutableStateFlow<ArticlePaginationState>(ArticlePaginationState.Loading)
+    val articlePaginationState: StateFlow<ArticlePaginationState> = _articlePaginationState
+
+    private var currentPage = 0
+    private val pageSize = 20
+
+    init {
+        loadArticles()
+    }
+
     fun fetchArticleById(id: Int) {
         viewModelScope.launch {
             _articleState.value = ArticleState.Loading
@@ -70,6 +86,34 @@ class ArticleViewModel(
                 )
                 else -> ArticleState.Error("Unexpected result state")
             }
+        }
+    }
+
+    fun loadArticles() {
+        viewModelScope.launch {
+            _articlePaginationState.value = ArticlePaginationState.Loading
+            try {
+                val articles = repository.getArticles()
+                if (articles.isNotEmpty()) {
+                    _articlePaginationState.value = ArticlePaginationState.Success(articles, currentPage)
+                } else {
+                    _articlePaginationState.value = ArticlePaginationState.Error("No more articles available.")
+                }
+            } catch (e: Exception) {
+                _articlePaginationState.value = ArticlePaginationState.Error("Error loading articles: ${e.message}")
+            }
+        }
+    }
+
+    fun nextPage() {
+        currentPage++
+        loadArticles()
+    }
+
+    fun previousPage() {
+        if (currentPage > 0) {
+            currentPage--
+            loadArticles()
         }
     }
 
@@ -133,14 +177,12 @@ class ArticleViewModel(
         viewModelScope.launch {
             _paymentState.value = PaymentState.Loading
             try {
-                // Étape 1 : Payer le panier
                 val payResponse = apiService.payCart(orderId)
                 if (!payResponse.isSuccessful) {
                     _paymentState.value = PaymentState.Error("Erreur lors du paiement")
                     return@launch
                 }
 
-                // Étape 2 : Vider le panier
                 val clearResponse = apiService.clearCart(orderId)
                 if (clearResponse.isSuccessful) {
                     _paymentState.value = PaymentState.Success

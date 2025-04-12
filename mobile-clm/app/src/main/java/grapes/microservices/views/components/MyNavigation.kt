@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import grapes.microservices.Screen
 import grapes.microservices.views.ArticleDetails.ArticleDetailScreen
 import grapes.microservices.views.CartScreen.CartScreen
+import grapes.microservices.views.Home.AllArticlesScreen
 import grapes.microservices.views.Home.HomeScreen
 
 @Composable
@@ -50,7 +51,7 @@ fun MyNavigation() {
                 CartScreen(navController = navController)
             }
             composable("catalog") {
-                Text("Écran de catalogue", modifier = Modifier.fillMaxSize())
+                AllArticlesScreen(navController = navController)
             }
             composable("profile") {
                 Text("Écran de profil", modifier = Modifier.fillMaxSize())

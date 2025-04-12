@@ -68,6 +68,19 @@ class ArticleRepository(
         }
     }
 
+    suspend fun getArticlesPaginated(page: Int, size: Int): List<Article> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val articles = api.getArticlesPaginated(page, size)
+                Log.d("ArticleRepository", "Successfully fetched ${articles.size} articles for page $page")
+                articles
+            } catch (e: Exception) {
+                Log.e("ArticleRepository", "Failed to fetch articles: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+
     suspend fun getArticleById(id: Int): Result<Article> {
         return withContext(Dispatchers.IO) {
             try {

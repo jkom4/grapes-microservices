@@ -145,7 +145,7 @@ navController: NavController
 
                         // --- ORIGIN ---
                         Text(
-                            text = "Origine : ${article.origin}",
+                            text = "Origin : ${article.origin}",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color(0xFF4A4A4A),
@@ -162,14 +162,14 @@ navController: NavController
 
                         // --- PRICES ---
                         Text(
-                            text = "Prix (à l'unité) : %.3f €".format(article.priceUnit),
+                            text = "Price (unit) : %.3f €".format(article.priceUnit),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF000000),
                             modifier = Modifier.padding(top = 16.dp)
                         )
                         Text(
-                            text = "Prix (au Kg) : %.3f €".format(article.priceKg),
+                            text = "Price (Kg) : %.3f €".format(article.priceKg),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF000000),
@@ -195,7 +195,7 @@ navController: NavController
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(selected = isUnitSelected, onClick = { isUnitSelected = true })
-                            Text("Unités")
+                            Text("Units")
                             RadioButton(selected = !isUnitSelected, onClick = { isUnitSelected = false })
                             Text("Kilogrammes")
                         }
@@ -203,7 +203,7 @@ navController: NavController
                         OutlinedTextField(
                             value = quantity,
                             onValueChange = { quantity = it },
-                            label = { Text("Quantité") },
+                            label = { Text("Quantity") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -212,7 +212,7 @@ navController: NavController
 
                         // --- CART STATE ---
                         when (val cart = cartState.value) {
-                            is CartState.Loading -> Text("Ajout en cours...", modifier = Modifier.padding(top = 8.dp))
+                            is CartState.Loading -> Text("Adding in progress...", modifier = Modifier.padding(top = 8.dp))
 
                             is CartState.Success -> {
                                 LaunchedEffect(cart) {
@@ -229,7 +229,7 @@ navController: NavController
                                     modifier = Modifier.padding(top = 12.dp)
                                 ) {
                                     Text(
-                                        text = "Ajouté au panier 🎉",
+                                        text = "Added to cart 🎉",
                                         color = Color(0xFF4CAF50),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp
@@ -274,7 +274,7 @@ navController: NavController
                 }
             }
 
-            is ArticleState.Error -> Text("Erreur : ${state.message}", color = Color.Red)
+            is ArticleState.Error -> Text("Error : ${state.message}", color = Color.Red)
         }
     }
 }

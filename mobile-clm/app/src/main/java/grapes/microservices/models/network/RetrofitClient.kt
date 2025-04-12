@@ -10,6 +10,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 object RetrofitClient {
     private const val BASE_URL = "http://192.168.129.10:8092/"
@@ -49,6 +50,11 @@ interface ArticleApiService {
 
     @POST("clm/cart/add")
     suspend fun addToCart(@Body request: AddToCartRequest): retrofit2.Response<Unit>
+
+    suspend fun getArticlesPaginated(
+        @Query("page") page: Int,
+        @Query("size") size: Int
+    ): List<Article>
 }
 
 data class InitCartRequest(val userId: Int)
