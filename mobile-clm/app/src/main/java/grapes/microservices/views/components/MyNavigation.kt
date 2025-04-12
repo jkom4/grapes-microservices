@@ -29,11 +29,12 @@ fun MyNavigation() {
                 currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
             )
         }
-    ) { innerPadding ->
+    ) { paddingValues -> // Utilisation de paddingValues
         NavHost(
             navController = navController,
             startDestination = Screen.HomeScreen.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(paddingValues)  // Assurer que le padding ne génère pas un espace supplémentaire
         ) {
             composable(route = Screen.HomeScreen.route) {
                 HomeScreen(navController)

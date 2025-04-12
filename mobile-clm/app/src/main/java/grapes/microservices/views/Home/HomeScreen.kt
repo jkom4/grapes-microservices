@@ -27,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.LayoutDirection
 import grapes.microservices.views.components.PromoBox
 
 @Composable
@@ -45,11 +46,15 @@ fun HomeScreen(navController: NavHostController) {
             .background(color = MaterialTheme.colorScheme.background)
             .padding(space)
     ) { paddingValues ->
-        // Remplacer la Column par LazyColumn pour un défilement performant
         LazyColumn(
             modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize() // Garantir que la taille de la LazyColumn occupe tout l'espace disponible
+                .padding(
+                    start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                    top = paddingValues.calculateTopPadding(),
+                    end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                )
+                .fillMaxSize()
+                .background(Color.Transparent)
         ) {
             item {
                 MyTopBar(

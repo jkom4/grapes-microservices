@@ -50,7 +50,7 @@ fun BottomBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(2.dp)
+                    .height(0.dp)
             ) {
                 items.forEach { item ->
                     val isSelected = currentRoute == item.route
