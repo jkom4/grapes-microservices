@@ -32,8 +32,8 @@ import grapes.microservices.views.components.MySearchBar
 
 @Composable
 fun AllArticlesScreen(navController: NavHostController) {
-    val repository = ArticleRepository(RetrofitClient.articleApiService) // À remplacer par ton repository
-    val apiService = RetrofitClient.articleApiService // Ton API service
+    val repository = ArticleRepository(RetrofitClient.articleApiService) // Replace with your repository
+    val apiService = RetrofitClient.articleApiService // Your API service
 
     val viewModelFactory = ArticleViewModelFactory(repository, apiService)
     val viewModel: ArticleViewModel = viewModel(factory = viewModelFactory)
@@ -41,7 +41,7 @@ fun AllArticlesScreen(navController: NavHostController) {
     val space = 16.dp
     val state = viewModel.articlePaginationState.collectAsState()
 
-    // Déclare un état pour gérer la valeur de la recherche
+    // Declare a state to handle search query value
     var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
@@ -58,29 +58,32 @@ fun AllArticlesScreen(navController: NavHostController) {
                 )
                 .fillMaxSize()
         ) {
-            // Ajouter le titre "All products"
+            // Add the title "All products"
             Text(
                 text = "All products",
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold // Met le texte en gras
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold // Make the text bold
                 ),
-                modifier = Modifier.padding(bottom = space) // Ajoute une marge en bas du titre
+                modifier = Modifier.padding(bottom = space) // Add margin at the bottom of the title
             )
 
+            // Search bar for entering query
             MySearchBar(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp), // Ajoute une marge en bas de la barre de recherche
-                query = searchQuery, // La valeur de la recherche
+                    .padding(bottom = 16.dp), // Add margin below the search bar
+                query = searchQuery, // The search query value
                 onValueChange = { newQuery ->
-                    searchQuery = newQuery // Met à jour la valeur de la recherche
+                    searchQuery = newQuery // Update the search query
                 }
             )
 
             when (val result = state.value) {
+                // Show loading state
                 is ArticlePaginationState.Loading -> {
                     Text("Loading articles...", style = MaterialTheme.typography.titleMedium)
                 }
+                // Show articles if the loading is successful
                 is ArticlePaginationState.Success -> {
                     LazyColumn(
                         modifier = Modifier
@@ -89,34 +92,35 @@ fun AllArticlesScreen(navController: NavHostController) {
                         contentPadding = PaddingValues(bottom = space)
                     ) {
                         items(result.articles.chunked(2)) { articlePair ->
-                            // Créer une row avec deux articles
+                            // Create a row with two articles
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(bottom = space),
                                 horizontalArrangement = Arrangement.spacedBy(space)
                             ) {
-                                // Afficher le premier article de la paire
+                                // Display the first article in the pair
                                 MyArticleCard(
                                     article = articlePair[0],
                                     navController = navController,
                                     modifier = Modifier
-                                        .weight(1f) // Occuper la moitié de la ligne
+                                        .weight(1f) // Take half of the row's space
                                 )
 
-                                // Si la paire contient un second article, l'afficher aussi
+                                // If the pair contains a second article, display it as well
                                 articlePair.getOrNull(1)?.let { secondArticle ->
                                     MyArticleCard(
                                         article = secondArticle,
                                         navController = navController,
                                         modifier = Modifier
-                                            .weight(1f) // Occuper l'autre moitié de la ligne
+                                            .weight(1f) // Take the other half of the row's space
                                     )
                                 }
                             }
                         }
                     }
                 }
+                // Show error state if an error occurs
                 is ArticlePaginationState.Error -> {
                     Text(result.message, style = MaterialTheme.typography.bodyMedium)
                 }

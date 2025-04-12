@@ -29,49 +29,53 @@ import grapes.microservices.models.data.Article
 
 @Composable
 fun MyArticleCardList(
-    title: String,
-    articles: List<Article>,
-    orientation: Orientation = Vertical,
-    navController: NavController,
-    modifier: Modifier = Modifier
+    title: String, // The title to display above the article list
+    articles: List<Article>, // List of articles to display
+    orientation: Orientation = Vertical, // Orientation for the scroll (Vertical or Horizontal)
+    navController: NavController, // NavController to handle navigation when an item is clicked
+    modifier: Modifier = Modifier // Modifier to apply any extra customization to the layout
 ) {
+    // A state for the scroll, used to remember the scroll position
     val scrollState = rememberScrollState()
 
+    // A column to hold the title and list of articles
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth() // Ensure the column takes up the full width
     ) {
-        // Affichage du titre
+        // Display the title for the list
         Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
+            text = title, // Title of the section (e.g., "All Articles")
+            style = MaterialTheme.typography.bodyLarge, // Style of the title
+            fontWeight = FontWeight.Bold, // Make the title bold
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .fillMaxWidth() // Make sure the title spans the entire width
+                .padding(horizontal = 16.dp, vertical = 8.dp) // Add padding around the title
         )
 
-        // Vérification de l'existence d'articles
+        // Check if there are articles available to display
         if (articles.isEmpty()) {
+            // Display a message if no articles are available
             Text(
-                text = "Aucun article disponible",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(16.dp)
+                text = "No articles available", // Message indicating no data
+                style = MaterialTheme.typography.bodyMedium, // Medium style for the message
+                modifier = Modifier.padding(16.dp) // Padding around the message
             )
         } else {
-            // Liste horizontale pour toutes les orientations
+            // Horizontal scroll layout for articles
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(scrollState)
-                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth() // Take up full width
+                    .horizontalScroll(scrollState) // Allow horizontal scrolling
+                    .padding(horizontal = 16.dp) // Padding on the left and right for the articles
             ) {
+                // Loop through the list of articles and display each one
                 articles.forEach { item ->
                     MyArticleCard(
-                        article = item,
-                        navController = navController,
+                        article = item, // Passing the current article to the card
+                        navController = navController, // Navigation controller for handling clicks
                         modifier = Modifier
-                            .padding(end = 12.dp) // Réduit légèrement pour équilibrer avec la largeur accrue
-                            .width(180.dp) // Augmenté de 160.dp à 180.dp pour un look pro
+                            .padding(end = 12.dp) // Add some spacing between cards
+                            .width(180.dp) // Set the width for each article card for consistent sizing
                     )
                 }
             }

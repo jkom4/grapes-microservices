@@ -28,93 +28,97 @@ import coil3.compose.AsyncImage
 
 @Composable
 fun MyArticleCard(
-    article: Article,
-    navController: NavController,
-    modifier: Modifier = Modifier
+    article: Article, // Article data to be displayed
+    navController: NavController, // Navigation controller to handle navigation
+    modifier: Modifier = Modifier // Modifier to apply to the card
 ) {
+    // Card component to display article details
     Card(
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(12.dp), // Rounded corners for the card
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Card shadow
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = MaterialTheme.colorScheme.surface, // Background color of the card
+            contentColor = MaterialTheme.colorScheme.onSurface // Text color on the card
         ),
         modifier = modifier
-            .padding(8.dp)
-            .clickable { navController.navigate("article_detail/${article.id}") }
+            .padding(8.dp) // Padding around the card
+            .clickable { navController.navigate("article_detail/${article.id}") } // Navigate to article detail screen when clicked
     ) {
+        // Column to arrange content vertically within the card
         Column(
             modifier = Modifier
                 .padding(12.dp)
                 .fillMaxWidth()
-                .heightIn(min = 220.dp)
+                .heightIn(min = 220.dp) // Minimum height for the card
         ) {
+            // Box to hold the image and price label
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp)
+                    .height(160.dp) // Set the height of the image box
             ) {
-                // Image avec border radius
+                // Asynchronously load and display the article's image
                 AsyncImage(
-                    model = article.picture, // Suppose que picture est picturePath
-                    contentDescription = "Image de ${article.name}",
+                    model = article.picture, // Load the article's picture from its URL/path
+                    contentDescription = "Image of ${article.name}", // Image description for accessibility
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxSize() // Image takes up the full space of the box
                 )
 
-                // Prix de l'article dans un encadré rose en haut à gauche
+                // Display the price label for the article in a pink background
                 Text(
-                    text = "%.2f €/kg".format(article.priceKg),
+                    text = "%.2f €/kg".format(article.priceKg), // Price formatted with 2 decimal points
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        fontWeight = FontWeight.Bold, // Make the price text bold
+                        color = MaterialTheme.colorScheme.onPrimary // Set text color to be readable on primary color
                     ),
                     modifier = Modifier
-                        .padding(start = 8.dp, top = 16.dp)
+                        .padding(start = 8.dp, top = 16.dp) // Padding for position
                         .background(
-                            color = MaterialTheme.colorScheme.secondary,
-                            shape = RoundedCornerShape(8.dp)
+                            color = MaterialTheme.colorScheme.secondary, // Background color of the price label
+                            shape = RoundedCornerShape(8.dp) // Rounded corners for the price label
                         )
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .align(Alignment.TopStart)
+                        .padding(horizontal = 8.dp, vertical = 4.dp) // Padding inside the price label
+                        .align(Alignment.TopStart) // Position at the top left corner
                 )
             }
 
-            // Ligne contenant le titre de l'article et l'icône panier
+            // Row to display the article's title and the shopping cart icon
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(top = 8.dp, bottom = 4.dp), // Padding around the row
+                verticalAlignment = Alignment.CenterVertically, // Vertically align items in the center
             ) {
-                // Titre de l'article à gauche
+                // Display the title of the article
                 Text(
-                    text = article.name,
+                    text = article.name, // Article name
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        fontWeight = FontWeight.Bold, // Make the title bold
+                        color = MaterialTheme.colorScheme.onSurface // Text color based on surface theme
                     ),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f) // Title takes up remaining space in the row
                 )
 
-                // Icône "Ajouter au panier" sur fond rond rose à droite
+                // Shopping cart icon as a button, with a pink circular background
                 Box(
                     modifier = Modifier
                         .background(
-                            color = MaterialTheme.colorScheme.secondary,
-                            shape = CircleShape
+                            color = MaterialTheme.colorScheme.secondary, // Background color of the button
+                            shape = CircleShape // Round shape for the button
                         )
-                        .clickable { /* Action d'ajout au panier */ }
-                        .size(40.dp) // Légèrement plus grand pour une meilleure visibilité
-                        .align(Alignment.CenterVertically)
+                        .clickable { /* Add to cart action goes here */ } // Handle cart addition
+                        .size(40.dp) // Size of the button
+                        .align(Alignment.CenterVertically) // Align the button vertically in the center
                 ) {
+                    // Shopping cart icon
                     Icon(
-                        imageVector = Icons.Filled.ShoppingCart,
-                        contentDescription = "Ajouter au panier",
-                        tint = Color.White, // Icône en blanc
+                        imageVector = Icons.Filled.ShoppingCart, // Use shopping cart icon
+                        contentDescription = "Add to cart", // Description for accessibility
+                        tint = Color.White, // Set the icon color to white
                         modifier = Modifier
-                            .size(24.dp) // Taille de l'icône à l'intérieur
-                            .align(Alignment.Center)
+                            .size(24.dp) // Set the size of the icon
+                            .align(Alignment.Center) // Align the icon in the center of the box
                     )
                 }
             }

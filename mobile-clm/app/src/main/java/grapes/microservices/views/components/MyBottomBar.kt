@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
+// Data class to represent each item in the Bottom Navigation
 data class BottomNavItem(
     val route: String,
     val icon: ImageVector,
@@ -29,8 +30,9 @@ data class BottomNavItem(
 @Composable
 fun BottomBar(
     navController: NavController,
-    currentRoute: String?
+    currentRoute: String? // The current route to determine which item is selected
 ) {
+    // List of items to display in the bottom navigation bar
     val items = listOf(
         BottomNavItem("home", Icons.Default.Home, "Home"),
         BottomNavItem("cart", Icons.Default.ShoppingCart, "Cart"),
@@ -38,22 +40,25 @@ fun BottomBar(
         BottomNavItem("profile", Icons.Default.Person, "Profile")
     )
 
+    // Card container for the bottom navigation bar
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(110.dp),
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+            .height(110.dp), // Setting the height of the bottom bar
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp), // Rounded corners
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp), // Shadow elevation
+        colors = CardDefaults.cardColors(containerColor = Color.White) // Background color of the card
     ) {
         Column {
+            // This row sets up the background for each item in the bottom bar (indicating selection)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(0.dp)
+                    .height(0.dp) // Invisible row, used to apply background
             ) {
                 items.forEach { item ->
                     val isSelected = currentRoute == item.route
+                    // Background color change based on selection
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -63,12 +68,13 @@ fun BottomBar(
                 }
             }
 
+            // This row contains the actual icons and labels for the navigation items
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 8.dp), // Ajout d'un padding vertical pour espacer
+                    .padding(horizontal = 16.dp, vertical = 8.dp), // Adding padding for spacing
                 horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.Top // Alignement en haut
+                verticalAlignment = Alignment.Top // Align items to the top
             ) {
                 items.forEach { item ->
                     val isSelected = currentRoute == item.route
@@ -76,6 +82,7 @@ fun BottomBar(
                         modifier = Modifier
                             .weight(1f)
                             .clickable {
+                                // Navigate to the selected route if it's not already selected
                                 if (!isSelected) {
                                     navController.navigate(item.route) {
                                         popUpTo(navController.graph.startDestinationId) {
@@ -88,11 +95,12 @@ fun BottomBar(
                             },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        // Icon for each bottom navigation item
                         Icon(
                             imageVector = item.icon,
                             contentDescription = item.label,
-                            tint = if (isSelected) Color(0xFF9B00D8) else Color.Black,
-                            modifier = Modifier.size(28.dp)
+                            tint = if (isSelected) Color(0xFF9B00D8) else Color.Black, // Change icon color based on selection
+                            modifier = Modifier.size(28.dp) // Set the size of the icon
                         )
                     }
                 }

@@ -22,10 +22,6 @@ import grapes.microservices.viewmodels.HomeViewModel
 import grapes.microservices.viewmodels.HomeViewModelFactory
 import grapes.microservices.views.components.MyArticleCardList
 import grapes.microservices.views.components.MyTopBar
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.LayoutDirection
 import grapes.microservices.views.components.PromoBox
@@ -34,13 +30,15 @@ import grapes.microservices.views.components.PromoBox
 fun HomeScreen(navController: NavHostController) {
     val space = 16.dp
 
+    // Initialize the repository and ViewModel
     val repository = ArticleRepository(RetrofitClient.articleApiService)
     val vm: HomeViewModel = viewModel(factory = HomeViewModelFactory(repository))
 
-    // Récupère les articles et le query
+    // Get the query from the filter settings and articles list from the ViewModel
     val query = vm.filterSettings.collectAsState().value.query
     val articles = vm.articles.collectAsState().value
 
+    // Scaffold to structure the UI
     Scaffold(
         modifier = Modifier
             .background(color = MaterialTheme.colorScheme.background)
@@ -56,6 +54,7 @@ fun HomeScreen(navController: NavHostController) {
                 .fillMaxSize()
                 .background(Color.Transparent)
         ) {
+            // Top bar with navigation
             item {
                 MyTopBar(
                     modifier = Modifier.padding(bottom = space),
@@ -63,15 +62,19 @@ fun HomeScreen(navController: NavHostController) {
                 )
             }
 
+            // Filter/search layer
             item {
                 MyFilterSearchLayer(modifier = Modifier.padding(bottom = space))
             }
 
+            // Promo box
             item {
                 PromoBox()
             }
 
+            // Display articles based on query or default lists
             if (query.isEmpty()) {
+                // If query is empty, show popular and "for you" articles
                 item {
                     MyArticleCardList(
                         title = "Popular",
@@ -94,6 +97,7 @@ fun HomeScreen(navController: NavHostController) {
                     )
                 }
             } else {
+                // If there is a query, show filtered results
                 item {
                     MyArticleCardList(
                         title = "Results",
@@ -113,6 +117,7 @@ fun HomeScreen(navController: NavHostController) {
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
+    // Preview function to display HomeScreen in the UI
     MobileCLMTheme(false) {
         HomeScreen(rememberNavController())
     }

@@ -41,11 +41,12 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun ArticleDetailScreen(
-articleId: Int,
-navController: NavController
+    articleId: Int,
+    navController: NavController
 ) {
     var showConfirmation by remember { mutableStateOf(false) }
 
+    // Initialize the repository and ViewModel
     val repository = ArticleRepository(RetrofitClient.articleApiService)
     val viewModel: ArticleViewModel = viewModel(
         factory = ArticleViewModelFactory(repository, RetrofitClient.articleApiService)
@@ -53,10 +54,12 @@ navController: NavController
     val articleState = viewModel.articleState.collectAsState()
     val cartState = viewModel.cartState.collectAsState()
 
+    // Manage quantity and selection state
     var quantity by remember { mutableStateOf("") }
     var isUnitSelected by remember { mutableStateOf(true) }
     var isFavorite by remember { mutableStateOf(false) }
 
+    // Fetch article details by ID
     LaunchedEffect(articleId) {
         viewModel.fetchArticleById(articleId)
     }
@@ -70,6 +73,7 @@ navController: NavController
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Header with Back button
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -93,6 +97,7 @@ navController: NavController
             is ArticleState.Success -> {
                 val article = state.article
 
+                // Display article name
                 Text(
                     text = article.name,
                     fontWeight = FontWeight.Bold,
@@ -100,6 +105,7 @@ navController: NavController
                     color = Color(0xFF9B00D8)
                 )
 
+                // Display article image
                 AsyncImage(
                     model = article.picture,
                     contentDescription = null,
@@ -108,7 +114,7 @@ navController: NavController
                         .padding(vertical = 16.dp)
                 )
 
-                // --- FAVORITE ICON ---
+                // Favorite button
                 IconButton(
                     onClick = { isFavorite = !isFavorite },
                     modifier = Modifier
@@ -122,7 +128,7 @@ navController: NavController
                     )
                 }
 
-                // --- CARD SECTION ---
+                // Card for article details
                 Card(
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                     modifier = Modifier
@@ -130,6 +136,7 @@ navController: NavController
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
+                        // Description section
                         Text(
                             text = "Description",
                             fontWeight = FontWeight.Bold,
@@ -143,7 +150,7 @@ navController: NavController
                             modifier = Modifier.padding(top = 4.dp)
                         )
 
-                        // --- ORIGIN ---
+                        // Origin
                         Text(
                             text = "Origin : ${article.origin}",
                             fontSize = 14.sp,
@@ -152,7 +159,7 @@ navController: NavController
                             modifier = Modifier.padding(top = 12.dp)
                         )
 
-                        // --- STOCK ---
+                        // Stock information
                         Text(
                             text = "Stock : ${article.stockKg} Kg / ${article.stockUnit} unités",
                             fontSize = 14.sp,
@@ -160,7 +167,7 @@ navController: NavController
                             modifier = Modifier.padding(top = 4.dp)
                         )
 
-                        // --- PRICES ---
+                        // Price per unit and per kilogram
                         Text(
                             text = "Price (unit) : %.3f €".format(article.priceUnit),
                             fontSize = 14.sp,
@@ -176,7 +183,7 @@ navController: NavController
                             modifier = Modifier.padding(top = 2.dp)
                         )
 
-                        // --- RATING FIXE ---
+                        // Rating section
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(top = 12.dp)
@@ -188,8 +195,7 @@ navController: NavController
                             Text("(4.4)", color = Color.Gray, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp))
                         }
 
-
-                        // --- UNIT SELECTION ---
+                        // Unit selection (unit or kilogram)
                         Row(
                             modifier = Modifier.padding(top = 16.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -200,6 +206,7 @@ navController: NavController
                             Text("Kilogrammes")
                         }
 
+                        // Quantity input field
                         OutlinedTextField(
                             value = quantity,
                             onValueChange = { quantity = it },
@@ -210,7 +217,7 @@ navController: NavController
                                 .padding(top = 8.dp)
                         )
 
-                        // --- CART STATE ---
+                        // Cart state handling
                         when (val cart = cartState.value) {
                             is CartState.Loading -> Text("Adding in progress...", modifier = Modifier.padding(top = 8.dp))
 
@@ -242,7 +249,7 @@ navController: NavController
                             else -> {}
                         }
 
-                        // --- ADD TO CART BUTTON ---
+                        // Add to cart button
                         Button(
                             onClick = {
                                 val qty = quantity.toFloatOrNull() ?: 0f

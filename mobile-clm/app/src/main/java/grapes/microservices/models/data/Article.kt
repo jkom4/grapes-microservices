@@ -13,7 +13,7 @@ data class Article(
     @SerializedName("stockKg") val stockKg: Int,
     @SerializedName("stockUnit") val stockUnit: Int,
     @SerializedName("origin") val origin: String,
-    @SerializedName("picturePath") val picture: String = "https://pngimg.com/uploads/pear/pear_PNG3463.png" // Changé de "picture" à "picturePath" pour correspondre au JSON
+    @SerializedName("picturePath") val picture: String = "https://pngimg.com/uploads/pear/pear_PNG3463.png"
 )
 
 data class ArticleMetric(
