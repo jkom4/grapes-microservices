@@ -7,9 +7,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import grapes.microservices.Screen
+import grapes.microservices.views.ArticleDetails.ArticleDetailScreen
 import grapes.microservices.views.CartScreen.CartScreen
 import grapes.microservices.views.Home.HomeScreen
-import grapes.microservices.views.ArticleDetails.ArticleDetailScreen
 
 @Composable
 fun MyNavigation() {

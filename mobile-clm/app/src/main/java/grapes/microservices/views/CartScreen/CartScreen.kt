@@ -1,18 +1,27 @@
 package grapes.microservices.views.CartScreen
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -25,7 +34,9 @@ import grapes.microservices.viewmodel.ArticleViewModel
 import grapes.microservices.viewmodel.ArticleViewModelFactory
 import grapes.microservices.viewmodel.CartScreenState
 import grapes.microservices.viewmodel.PaymentState
+import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     navController: NavController
@@ -36,8 +47,9 @@ fun CartScreen(
     )
     val cartState = viewModel.cartScreenState.collectAsState()
     val paymentState = viewModel.paymentState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
-    // États pour les champs du formulaire (conservés pour l'UX)
+    // Form fields (front-end only)
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
@@ -51,314 +63,505 @@ fun CartScreen(
     var cvc by remember { mutableStateOf("") }
     var termsAccepted by remember { mutableStateOf(false) }
 
-    // Frais d'expédition
+    // Animation state
+    var showPaymentConfirmation by remember { mutableStateOf(false) }
+    val animatedScale by animateFloatAsState(
+        targetValue = if (showPaymentConfirmation) 1f else 0f,
+        animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
+    )
+    val animatedAlpha by animateFloatAsState(
+        targetValue = if (showPaymentConfirmation) 1f else 0f,
+        animationSpec = tween(durationMillis = 600)
+    )
+
+    // Shipping Fee
     val shippingFee = 5f
 
     LaunchedEffect(Unit) {
         viewModel.fetchCart(orderId = 1)
     }
 
-    // Navigation après paiement réussi
     LaunchedEffect(paymentState.value) {
         if (paymentState.value is PaymentState.Success) {
+            showPaymentConfirmation = true
+            // Delay redirection to show animation
+            delay(2000) // 2 seconds
             navController.navigate("home") {
                 popUpTo(navController.graph.startDestinationId) {
                     inclusive = true
                 }
             }
             viewModel.resetPaymentState()
+            showPaymentConfirmation = false
         }
     }
 
-    // État de défilement
-    val scrollState = rememberScrollState()
-
-    Column(
+    Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(scrollState)
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Votre Panier",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        when (val state = cartState.value) {
-            is CartScreenState.Loading -> {
-                Text(text = "Chargement du panier...", style = MaterialTheme.typography.bodyLarge)
-            }
-            is CartScreenState.Success -> {
-                val cart = state.cart
-                if (cart.items.isEmpty()) {
+            .background(MaterialTheme.colorScheme.background),
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Title
+                item {
                     Text(
-                        text = "Votre panier est vide.",
-                        style = MaterialTheme.typography.bodyLarge
+                        text = "Votre Panier",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        ),
+                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                     )
-                } else {
-                    // Liste des articles
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 300.dp)
-                    ) {
-                        items(cart.items) { item ->
-                            Row(
+                }
+
+                when (val state = cartState.value) {
+                    is CartScreenState.Loading -> {
+                        item {
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                AsyncImage(
-                                    model = item.picturePath ?: "https://via.placeholder.com/100",
-                                    contentDescription = "Image de ${item.articleName}",
-                                    modifier = Modifier
-                                        .size(100.dp)
-                                        .padding(end = 16.dp)
+                                CircularProgressIndicator(
+                                    color = MaterialTheme.colorScheme.primary
                                 )
-                                Column(
-                                    modifier = Modifier.weight(1f)
+                            }
+                        }
+                    }
+                    is CartScreenState.Success -> {
+                        val cart = state.cart
+                        if (cart.items.isEmpty()) {
+                            item {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surface
+                                    )
                                 ) {
                                     Text(
-                                        text = item.articleName,
+                                        text = "Votre panier est vide.",
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "Quantité: ${if (item.quantityKg > 0) "${item.quantityKg} kg" else "${item.quantity} unités"}",
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                    Text(
-                                        text = "Prix unitaire: %.2f €".format(item.price),
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                    Text(
-                                        text = "Total: %.2f €".format(
-                                            if (item.quantityKg > 0) item.quantityKg * item.price else item.quantity * item.price
-                                        ),
-                                        style = MaterialTheme.typography.bodyMedium
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(16.dp)
                                     )
                                 }
-                                IconButton(
-                                    onClick = {
-                                        viewModel.removeFromCart(item.id, orderId = 1)
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Supprimer ${item.articleName}",
-                                        tint = MaterialTheme.colorScheme.error
+                            }
+                        } else {
+                            // Cart Items with Scrollable Container
+                            item {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surface
                                     )
+                                ) {
+                                    LazyColumn(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(max = 300.dp) // Hauteur max pour ~3 articles
+                                            .padding(12.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        items(cart.items, key = { item -> item.id }) { item ->
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(vertical = 4.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                AsyncImage(
+                                                    model = item.picturePath ?: "https://via.placeholder.com/100",
+                                                    contentDescription = "Image de ${item.articleName}",
+                                                    modifier = Modifier
+                                                        .size(80.dp)
+                                                        .clip(RoundedCornerShape(8.dp))
+                                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                                )
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Column(
+                                                    modifier = Modifier.weight(1f),
+                                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    Text(
+                                                        text = item.articleName,
+                                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                                            fontWeight = FontWeight.Bold
+                                                        ),
+                                                        color = MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                    Text(
+                                                        text = "Quantité: ${if (item.quantityKg > 0) "${item.quantityKg} kg" else "${item.quantity} unités"}",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    Text(
+                                                        text = "Prix unitaire: %.2f €".format(item.price),
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    Text(
+                                                        text = "Total: %.2f €".format(
+                                                            if (item.quantityKg > 0) item.quantityKg * item.price else item.quantity * item.price
+                                                        ),
+                                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                                            fontWeight = FontWeight.SemiBold
+                                                        ),
+                                                        color = MaterialTheme.colorScheme.primary
+                                                    )
+                                                }
+                                                IconButton(
+                                                    onClick = {
+                                                        viewModel.removeFromCart(item.id, orderId = 1)
+                                                    },
+                                                    modifier = Modifier
+                                                        .size(40.dp)
+                                                        .background(
+                                                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
+                                                            shape = CircleShape
+                                                        )
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Delete,
+                                                        contentDescription = "Supprimer ${item.articleName}",
+                                                        tint = MaterialTheme.colorScheme.error
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Cost Summary
+                            item {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surface
+                                    )
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "Résumé du panier",
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Divider(
+                                            modifier = Modifier.padding(vertical = 8.dp),
+                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                        )
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Sous-total",
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            Text(
+                                                text = "%.2f €".format(cart.totalPrice),
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Frais d'expédition",
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            Text(
+                                                text = "%.2f €".format(shippingFee),
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 8.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Total",
+                                                style = MaterialTheme.typography.titleLarge.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = "%.2f €".format(cart.totalPrice + shippingFee),
+                                                style = MaterialTheme.typography.titleLarge.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Payment Form
+                            item {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.background
+                                    )
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Text(
+                                            text = "Informations de paiement",
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Divider(
+                                            modifier = Modifier.padding(vertical = 8.dp),
+                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                        )
+
+                                        val fields = listOf(
+                                            Triple("Nom complet", fullName, { newValue: String -> fullName = newValue }),
+                                            Triple("Adresse e-mail", email, { newValue: String -> email = newValue }),
+                                            Triple("Numéro de téléphone", phoneNumber, { newValue: String -> phoneNumber = newValue }),
+                                            Triple("Adresse", address, { newValue: String -> address = newValue }),
+                                            Triple("Pays", country, { newValue: String -> country = newValue }),
+                                            Triple("Ville", city, { newValue: String -> city = newValue }),
+                                            Triple("Département", department, { newValue: String -> department = newValue }),
+                                            Triple("Code postal", zipCode, { newValue: String -> zipCode = newValue }),
+                                            Triple("Numéro de carte bancaire", cardNumber, { newValue: String -> cardNumber = newValue }),
+                                            Triple("Date d'expiration (MM/AA)", expiryDate, { newValue: String -> expiryDate = newValue }),
+                                            Triple("CVC", cvc, { newValue: String -> cvc = newValue })
+                                        )
+
+                                        fields.forEach { (label, value, onChange) ->
+                                            OutlinedTextField(
+                                                value = value,
+                                                onValueChange = onChange,
+                                                label = { Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                                shape = RoundedCornerShape(8.dp),
+                                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                                    cursorColor = MaterialTheme.colorScheme.primary,
+                                                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                                ),
+                                                keyboardOptions = when (label) {
+                                                    "Numéro de téléphone", "Code postal", "Numéro de carte bancaire", "CVC" -> KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                    "Adresse e-mail" -> KeyboardOptions(keyboardType = KeyboardType.Email)
+                                                    else -> KeyboardOptions.Default
+                                                },
+                                                singleLine = true
+                                            )
+                                        }
+
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 8.dp)
+                                        ) {
+                                            Checkbox(
+                                                checked = termsAccepted,
+                                                onCheckedChange = { checked -> termsAccepted = checked },
+                                                colors = CheckboxDefaults.colors(
+                                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary,
+                                                    checkedColor = MaterialTheme.colorScheme.primary,
+                                                    uncheckedColor = MaterialTheme.colorScheme.outline
+                                                )
+                                            )
+                                            Text(
+                                                text = "J'accepte les conditions générales",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                modifier = Modifier.padding(start = 8.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Pay Button and Payment Status
+                            item {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            viewModel.payAndClearCart(orderId = 1)
+                                        },
+                                        enabled = termsAccepted && cart.items.isNotEmpty(),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(56.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                                            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                                        ),
+                                        elevation = ButtonDefaults.buttonElevation(
+                                            defaultElevation = 2.dp,
+                                            pressedElevation = 4.dp
+                                        )
+                                    ) {
+                                        Text(
+                                            text = "Payer maintenant",
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                        )
+                                    }
+
+                                    when (val payment = paymentState.value) {
+                                        is PaymentState.Loading -> {
+                                            LinearProgressIndicator(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(top = 8.dp),
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                        is PaymentState.Error -> {
+                                            Text(
+                                                text = payment.message,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.error,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(top = 8.dp)
+                                            )
+                                        }
+                                        else -> {
+                                            // Idle: no message
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-
-                    // Résumé des coûts
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp)
-                    ) {
-                        Text(
-                            text = "Sous-total: %.2f €".format(cart.totalPrice),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            text = "Frais d'expédition: %.2f €".format(shippingFee),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            text = "Total à payer: %.2f €".format(cart.totalPrice + shippingFee),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-
-                    // Formulaire de paiement (conservé pour l'UX)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Informations de paiement",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    OutlinedTextField(
-                        value = fullName,
-                        onValueChange = { fullName = it },
-                        label = { Text("Nom complet") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Adresse e-mail") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = phoneNumber,
-                        onValueChange = { phoneNumber = it },
-                        label = { Text("Numéro de téléphone") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = address,
-                        onValueChange = { address = it },
-                        label = { Text("Adresse") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = country,
-                        onValueChange = { country = it },
-                        label = { Text("Pays") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = city,
-                        onValueChange = { city = it },
-                        label = { Text("Ville") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = department,
-                        onValueChange = { department = it },
-                        label = { Text("Département") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = zipCode,
-                        onValueChange = { zipCode = it },
-                        label = { Text("Code postal") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = cardNumber,
-                        onValueChange = { cardNumber = it },
-                        label = { Text("Numéro de carte bancaire") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = expiryDate,
-                        onValueChange = { expiryDate = it },
-                        label = { Text("Date d'expiration (MM/AA)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = cvc,
-                        onValueChange = { cvc = it },
-                        label = { Text("CVC") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                    )
-
-                    // Case à cocher pour les conditions générales
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    ) {
-                        Checkbox(
-                            checked = termsAccepted,
-                            onCheckedChange = { termsAccepted = it }
-                        )
-                        Text(
-                            text = "J'ai lu et j'accepte les conditions générales",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    }
-
-                    // Bouton Payer maintenant
-                    Button(
-                        onClick = {
-                            viewModel.payAndClearCart(orderId = 1)
-                        },
-                        enabled = termsAccepted &&
-                                fullName.isNotBlank() &&
-                                email.isNotBlank() &&
-                                phoneNumber.isNotBlank() &&
-                                address.isNotBlank() &&
-                                country.isNotBlank() &&
-                                city.isNotBlank() &&
-                                department.isNotBlank() &&
-                                zipCode.isNotBlank() &&
-                                cardNumber.isNotBlank() &&
-                                expiryDate.isNotBlank() &&
-                                cvc.isNotBlank() &&
-                                cartState.value is CartScreenState.Success &&
-                                (cartState.value as CartScreenState.Success).cart.items.isNotEmpty(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)
-                    ) {
-                        Text("Payer maintenant")
-                    }
-
-                    // Affichage de l'état du paiement
-                    when (val payment = paymentState.value) {
-                        is PaymentState.Loading -> {
-                            Text(
-                                text = "Traitement du paiement...",
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
-                        }
-                        is PaymentState.Error -> {
-                            Text(
-                                text = payment.message,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
-                        }
-                        else -> {
-                            // Ne rien afficher pour Idle ou Success
+                    is CartScreenState.Error -> {
+                        item {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
+                                )
+                            ) {
+                                Text(
+                                    text = "Erreur : ${state.message}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
                         }
                     }
                 }
             }
-            is CartScreenState.Error -> {
-                Text(
-                    text = "Erreur : ${state.message}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.error
-                )
+
+            // Payment Confirmation Animation
+            if (showPaymentConfirmation) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .size(250.dp)
+                            .scale(animatedScale)
+                            .alpha(animatedAlpha),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Paiement réussi",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .size(80.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Paiement réussi !",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Merci pour votre achat.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }

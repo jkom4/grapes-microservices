@@ -2,8 +2,9 @@ package grapes.microservices.views.Home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -21,58 +22,84 @@ import grapes.microservices.viewmodels.HomeViewModel
 import grapes.microservices.viewmodels.HomeViewModelFactory
 import grapes.microservices.views.components.MyArticleCardList
 import grapes.microservices.views.components.MyTopBar
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import grapes.microservices.views.components.PromoBox
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
     val space = 16.dp
-    // Crée manuellement les dépendances
+
     val repository = ArticleRepository(RetrofitClient.articleApiService)
-    val vm: HomeViewModel = viewModel(
-        factory = HomeViewModelFactory(repository)
-    )
+    val vm: HomeViewModel = viewModel(factory = HomeViewModelFactory(repository))
+
+    // Récupère les articles et le query
+    val query = vm.filterSettings.collectAsState().value.query
+    val articles = vm.articles.collectAsState().value
 
     Scaffold(
         modifier = Modifier
             .background(color = MaterialTheme.colorScheme.background)
             .padding(space)
     ) { paddingValues ->
-        Column(
-            modifier = Modifier.padding(paddingValues)
+        // Remplacer la Column par LazyColumn pour un défilement performant
+        LazyColumn(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize() // Garantir que la taille de la LazyColumn occupe tout l'espace disponible
         ) {
-            MyTopBar(
-                modifier = Modifier.padding(bottom = space),
-                navController = navController
-            )
-            MyFilterSearchLayer(modifier = Modifier.padding(bottom = space))
+            item {
+                MyTopBar(
+                    modifier = Modifier.padding(bottom = space),
+                    navController = navController
+                )
+            }
 
-            val query = vm.filterSettings.collectAsState().value.query
-            val articles = vm.articles.collectAsState().value
+            item {
+                MyFilterSearchLayer(modifier = Modifier.padding(bottom = space))
+            }
+
+            item {
+                PromoBox()
+            }
 
             if (query.isEmpty()) {
-                MyArticleCardList(
-                    title = "Popular",
-                    articles = articles.take(3),
-                    orientation = Orientation.Horizontal,
-                    navController = navController, // Pass navController
-                    modifier = Modifier.padding(bottom = space)
-                )
+                item {
+                    MyArticleCardList(
+                        title = "Popular",
+                        articles = articles.take(3),
+                        orientation = Orientation.Horizontal,
+                        navController = navController,
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                            .padding(bottom = 0.dp)
+                    )
+                }
 
-                MyArticleCardList(
-                    title = "For You",
-                    articles = articles.take(6),
-                    orientation = Orientation.Horizontal,
-                    navController = navController, // Pass navController
-                    modifier = Modifier.padding(bottom = space)
-                )
+                item {
+                    MyArticleCardList(
+                        title = "For You",
+                        articles = articles.take(6),
+                        orientation = Orientation.Vertical,
+                        navController = navController,
+                        modifier = Modifier.padding(bottom = space)
+                    )
+                }
             } else {
-                MyArticleCardList(
-                    title = "Results",
-                    articles = articles.filter {
-                        it.name.contains(query, ignoreCase = true)
-                    },
-                    navController = navController, // Pass navController
-                    modifier = Modifier.padding(bottom = space)
-                )
+                item {
+                    MyArticleCardList(
+                        title = "Results",
+                        articles = articles.filter {
+                            it.name.contains(query, ignoreCase = true)
+                        },
+                        orientation = Orientation.Vertical,
+                        navController = navController,
+                        modifier = Modifier.padding(bottom = space)
+                    )
+                }
             }
         }
     }

@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
@@ -34,51 +37,43 @@ fun MyArticleCardList(
 ) {
     val scrollState = rememberScrollState()
 
-    Text(
-        text = title,
-        style = MaterialTheme.typography.bodyLarge,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
-
-    if (articles.isEmpty()) {
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        // Affichage du titre
         Text(
-            text = "Aucun article disponible",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(16.dp)
-        )
-    } else if (orientation == Horizontal) {
-        Column(
-            modifier = modifier
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp)
-                .horizontalScroll(scrollState)
-                .height(210.dp)
-        ) {
-            Row {
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        // Vérification de l'existence d'articles
+        if (articles.isEmpty()) {
+            Text(
+                text = "Aucun article disponible",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(16.dp)
+            )
+        } else {
+            // Liste horizontale pour toutes les orientations
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(scrollState)
+                    .padding(horizontal = 16.dp)
+            ) {
                 articles.forEach { item ->
                     MyArticleCard(
                         article = item,
                         navController = navController,
-                        modifier = Modifier.padding(end = 16.dp)
+                        modifier = Modifier
+                            .padding(end = 12.dp) // Réduit légèrement pour équilibrer avec la largeur accrue
+                            .width(180.dp) // Augmenté de 160.dp à 180.dp pour un look pro
                     )
                 }
-            }
-        }
-    } else {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(articles) { item ->
-                MyArticleCard(
-                    article = item,
-                    navController = navController,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
             }
         }
     }
