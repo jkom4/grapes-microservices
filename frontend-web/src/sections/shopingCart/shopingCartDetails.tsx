@@ -29,9 +29,6 @@ const CartPage = () => {
     const [formError, setFormError] = useState<string | null>(null);
     const [isPaying, setIsPaying] = useState(false);
     const [paymentError, setPaymentError] = useState<string | null>(null);
-    const [promoCode, setPromoCode] = useState("");
-    const [promoError, setPromoError] = useState<string | null>(null);
-    const [promoSuccess, setPromoSuccess] = useState<string | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
 
     // Hardcoded orderId for all operations
@@ -131,32 +128,11 @@ const CartPage = () => {
                     totalPrice: updatedTotalPrice,
                 };
             });
-            setPromoCode("");
-            setPromoSuccess(null);
-            setPromoError(null);
         } catch (err) {
             setError(err instanceof Error ? err.message : "An unknown error occurred while removing the item");
         }
     };
 
-    const handleApplyPromo = async () => {
-        if (!promoCode.trim()) {
-            setPromoError(translations[language].promoError);
-            return;
-        }
-
-        setPromoError(null);
-        setPromoSuccess(null);
-
-        try {
-            const data = await cartService.applyPromoCode(orderId, promoCode);
-            setCart(data);
-            setPromoSuccess(translations[language].promoSuccess);
-            setPromoCode("");
-        } catch (err) {
-            setPromoError(err instanceof Error ? err.message : translations[language].promoError);
-        }
-    };
 
     const handleAddItem = async (articleId: number, quantityKg: number, quantity: number) => {
         try {
