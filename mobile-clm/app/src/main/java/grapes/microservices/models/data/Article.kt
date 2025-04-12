@@ -3,14 +3,17 @@ package grapes.microservices.models.data
 import com.google.gson.annotations.SerializedName
 
 data class Article(
-    @SerializedName("id") val id: String,
+    @SerializedName("id") val id: Int,
+    @SerializedName("categoryId") val categoryId: Int,
+    @SerializedName("familyId") val familyId: Int,
     @SerializedName("name") val name: String,
-    @SerializedName("category") val category: String,
-    @SerializedName("family") val family: String,
     @SerializedName("description") val description: String,
-    @SerializedName("metric") val metric: ArticleMetric,
-    @SerializedName("rating") val rating: Float? = null,
-    @SerializedName("picture") val picture: String = "https://pngimg.com/uploads/pear/pear_PNG3463.png"
+    @SerializedName("priceKg") val priceKg: Double,
+    @SerializedName("priceUnit") val priceUnit: Double,
+    @SerializedName("stockKg") val stockKg: Int,
+    @SerializedName("stockUnit") val stockUnit: Int,
+    @SerializedName("origin") val origin: String,
+    @SerializedName("picturePath") val picture: String = "https://pngimg.com/uploads/pear/pear_PNG3463.png" // Changé de "picture" à "picturePath" pour correspondre au JSON
 )
 
 data class ArticleMetric(

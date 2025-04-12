@@ -1,7 +1,7 @@
-package grapes.microservices.views.screens.home
+package grapes.microservices.views.Home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation.Horizontal
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -39,8 +39,10 @@ fun HomeScreen(navController: NavHostController) {
         Column(
             modifier = Modifier.padding(paddingValues)
         ) {
-            MyTopBar(modifier = Modifier.padding(bottom = space))
-
+            MyTopBar(
+                modifier = Modifier.padding(bottom = space),
+                navController = navController
+            )
             MyFilterSearchLayer(modifier = Modifier.padding(bottom = space))
 
             val query = vm.filterSettings.collectAsState().value.query
@@ -50,20 +52,26 @@ fun HomeScreen(navController: NavHostController) {
                 MyArticleCardList(
                     title = "Popular",
                     articles = articles.take(3),
-                    orientation = Horizontal
+                    orientation = Orientation.Horizontal,
+                    navController = navController, // Pass navController
+                    modifier = Modifier.padding(bottom = space)
                 )
 
                 MyArticleCardList(
                     title = "For You",
                     articles = articles.take(6),
-                    orientation = Horizontal
+                    orientation = Orientation.Horizontal,
+                    navController = navController, // Pass navController
+                    modifier = Modifier.padding(bottom = space)
                 )
             } else {
                 MyArticleCardList(
                     title = "Results",
                     articles = articles.filter {
                         it.name.contains(query, ignoreCase = true)
-                    }
+                    },
+                    navController = navController, // Pass navController
+                    modifier = Modifier.padding(bottom = space)
                 )
             }
         }

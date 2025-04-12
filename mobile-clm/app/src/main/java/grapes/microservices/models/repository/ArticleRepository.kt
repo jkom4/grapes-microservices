@@ -67,4 +67,17 @@ class ArticleRepository(
             }
         }
     }
+
+    suspend fun getArticleById(id: Int): Result<Article> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val article = api.getArticleById(id)
+                Log.d("ArticleRepository", "Successfully fetched article with id $id: $article")
+                Result.success(article)
+            } catch (e: Exception) {
+                Log.e("ArticleRepository", "Failed to fetch article with id $id: ${e.message}", e)
+                Result.failure(e)
+            }
+        }
+    }
 }

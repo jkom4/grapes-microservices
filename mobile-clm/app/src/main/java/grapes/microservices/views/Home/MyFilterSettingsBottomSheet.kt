@@ -1,4 +1,4 @@
-package grapes.microservices.views.screens.home
+package grapes.microservices.views.Home
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
