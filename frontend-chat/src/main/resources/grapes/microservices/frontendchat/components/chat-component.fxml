@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import grapes.microservices.frontendchat.views.components.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<fx:root prefWidth="300.0" styleClass="chatComponentContainer" stylesheets="@chat-component.css" type="javafx.scene.layout.VBox" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+    <!--HEADER-->
+    <HBox alignment="CENTER" maxHeight="50.0" minHeight="50.0" prefHeight="50.0" VBox.vgrow="ALWAYS">
+        <styleClass>
+            <String fx:value="header" />
+        </styleClass>
+        <VBox.margin>
+            <Insets />
+        </VBox.margin>
+        <padding>
+            <Insets left="20.0" right="20.0" />
+        </padding>
+        <Label fx:id="topicText" text="Topic">
+           <font>
+               <Font name="System Bold" size="16.0" />
+           </font>
+         <HBox.margin>
+            <Insets />
+         </HBox.margin>
+        </Label>
+      <Pane HBox.hgrow="ALWAYS" />
+      <ImageView fx:id="closeTopicButton" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" styleClass="button-icon">
+         <image>
+            <Image url="@../cross.png" />
+         </image>
+      </ImageView>
+    </HBox>
+
+    <!--MESSAGE CONTAINER-->
+    <ScrollPane fx:id="messagesScroller" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" prefHeight="400.0" vvalue="1.0" VBox.vgrow="ALWAYS">
+        <VBox fx:id="messagesContainer" VBox.vgrow="ALWAYS">
+    <!--        <TextArea fx:id="messagesTextArea" editable="false" VBox.vgrow="ALWAYS" />-->
+            <BubbleMessageFx text="Yo" />
+            <BubbleMessageFx text="you there? you there? you there? you there? you there? you there? " />
+            <BubbleMessageFx alignment="TOP_RIGHT" isMyText="true" text="Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? " />
+        </VBox>
+    </ScrollPane>
+
+    <LoadingFx fx:id="loadingFx" managed="false" prefHeight="400.0" visible="false" VBox.vgrow="ALWAYS" />
+
+    <!--MESSAGES SEND TEXT-->
+    <HBox alignment="CENTER" prefHeight="50.0" spacing="5.0" styleClass="footer" VBox.vgrow="NEVER">
+        <TextField fx:id="messageTextfield" promptText="Type your message..." HBox.hgrow="ALWAYS">
+            <HBox.margin>
+                <Insets />
+            </HBox.margin>
+        </TextField>
+        <ImageView fx:id="sendMessageButton" fitHeight="36.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true" styleClass="button-icon">
+            <Image url="@../send.png" />
+        </ImageView>
+        <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+        </padding>
+    </HBox>
+</fx:root>

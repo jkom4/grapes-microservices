@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import grapes.microservices.frontendchat.views.components.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root stylesheets="@topics-component.css" type="javafx.scene.layout.VBox" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+    <!--HEADER-->
+    <HBox alignment="CENTER" maxHeight="50.0" minHeight="50.0" prefHeight="50.0">
+        <styleClass>
+            <String fx:value="header" />
+        </styleClass>
+        <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+        </padding>
+        <TextField fx:id="topicTextfield" promptText="Type your message..." HBox.hgrow="ALWAYS" />
+        <opaqueInsets>
+            <Insets />
+        </opaqueInsets>
+    </HBox>
+
+    <!--TOPICS CONTAINER-->
+    <ScrollPane fx:id="topicScroller" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+        <VBox fx:id="topicsContainer" alignment="TOP_CENTER">
+            <CardFx descriptionFx="test" titleFx="topic"/>
+            <CardFx descriptionFx="test2" titleFx="topic2" />
+            <CardFx descriptionFx="test3" titleFx="topic3"/>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <padding>
+            <Insets bottom="10.0" />
+         </padding>
+        </VBox>
+        <VBox.margin>
+            <Insets />
+        </VBox.margin>
+    </ScrollPane>
+</fx:root>

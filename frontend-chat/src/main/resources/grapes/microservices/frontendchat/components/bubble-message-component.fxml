@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root fx:id="bubbleMessageContainer" stylesheets="@bubble-message-component.css" type="javafx.scene.layout.VBox" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+    <HBox fx:id="messageOrienter" alignment="CENTER_LEFT" nodeOrientation="LEFT_TO_RIGHT" styleClass="message-orienter">
+        <ImageView fx:id="sendMessageButton" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@../profile.png" />
+         <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </HBox.margin>
+        </ImageView>
+        <VBox fx:id="messageBubble" alignment="CENTER_LEFT" styleClass="message-bubble">
+            <Label fx:id="bubbleLabel" text="TEST MY MESSAGE" wrapText="true" VBox.vgrow="SOMETIMES">
+                <VBox.margin>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                </VBox.margin>
+            </Label>
+        </VBox>
+    </HBox>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</fx:root>

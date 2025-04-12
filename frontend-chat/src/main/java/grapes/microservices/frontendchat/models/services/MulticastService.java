@@ -29,10 +29,11 @@ public class MulticastService implements IMulticastService {
         mockMessageExecutor.scheduleAtFixedRate(() -> {
             if (messageConsumer != null && currentTopic != null) {
                 Message fakeMsg = new Message(
-                        new User("OtherUser"),
+                        currentTopic.id(),
+                        new User(1, "OtherUser"),
                         "Received multicast sim message " + System.currentTimeMillis(),
-                        LocalDateTime.now(),
-                        String.valueOf(currentTopic.id()));
+                        LocalDateTime.now()
+                );
                 // !! IMPORTANT: The consumer call should happen on the JavaFX thread.
                 // This responsibility is delegated to the ViewModel which uses Platform.runLater.
                 if(messageConsumer != null) {

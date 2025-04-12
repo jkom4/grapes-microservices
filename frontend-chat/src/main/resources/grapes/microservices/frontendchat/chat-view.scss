@@ -1,11 +1,7 @@
-$primary-light: #ae17e6;
-$primary: #9b14cc;
-$primary-dark: #610d80;
-$secondary: #ffffff;
-$dark: rgba(0, 0, 0, 0.2);
+@import "global";
 
 .split-pane > .split-pane-divider {
-  -fx-padding: 0 px 0 px;
+  -fx-padding: 0px 0px;
 }
 
 .split-chat-view, .topic-zone {
@@ -13,51 +9,19 @@ $dark: rgba(0, 0, 0, 0.2);
 }
 
 .message-zone {
-  -fx-background-color: $secondary;
+  -fx-background-color: $background-light;
 }
 
 .side-container {
   -fx-background-color: $primary-dark;
 }
 
-.header {
-  -fx-border-color: transparent transparent $dark transparent;
-  -fx-border-width: 0 0 1px 0;
-}
-
-.footer {
-  -fx-border-color: $dark transparent transparent transparent;
-  -fx-border-width: 1px 0 0 0;
-}
-
-.topic-search {
-  -fx-pref-width: 300px; /* Set the width */
-  //-fx-padding: 10px; /* Add padding inside */
-  -fx-background-color: $primary-dark; /* Light background color */
-  //-fx-border-width: 2px; /* Border thickness */
-  -fx-border-radius: 25px; /* Rounded corners */
-  -fx-background-radius: 25px; /* Match the border radius */
-  -fx-font-size: 12px; /* Text size */
-  -fx-text-fill: white; /* Text color */
-  //-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0.5, 0, 2); /* Subtle shadow for depth */
-  -fx-focus-color: transparent; /* Remove focus border color */
-  -fx-faint-focus-color: transparent; /* Remove faint focus color */
+#messageTextfield {
+  -fx-pref-width: 300px;
+  -fx-background-color: transparent;
+  -fx-border-width: 0;
+  -fx-font-size: 12px;
+  -fx-focus-color: transparent;
+  -fx-faint-focus-color: transparent;
   -fx-transition: all 0.3s ease; /* Smooth transitions */
-  -fx-prompt-text-fill: $primary
-}
-
-.topic-search:hover {
-  //-fx-border-color: $primary;
-}
-
-.topic-search:focused {
-  //-fx-border-color: $primary-light;
-}
-
-.leave-icon {
-  -fx-opacity: 0.2;
-}
-
-.card {
-  -fx-background-color: $primary-dark;
 }

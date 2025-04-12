@@ -1,0 +1,21 @@
+@import "../global";
+
+@mixin bubble-shape {
+  -fx-border-radius: 10px;
+  -fx-background-radius: 25px;
+  -fx-min-width: 0;
+}
+
+.message-bubble {
+  @include bubble-shape;
+  -fx-background-color: $background;
+}
+
+.bubble-container {
+
+}
+
+.my-message .message-bubble {
+  @include bubble-shape;
+  -fx-background-color: $primary-light;
+}

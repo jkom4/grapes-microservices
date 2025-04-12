@@ -40,8 +40,8 @@ public class FrontendChat extends Application {
         // 3. Load the FXML view
         URL fxmlUrl = getClass().getResource("chat-view.fxml");
         FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
+        fxmlLoader.setClassLoader(getClass().getClassLoader());
         Parent root = fxmlLoader.load();
-
         // 4. Get the Controller instance created by the FXMLLoader
         ChatViewController controller = fxmlLoader.getController();
 
@@ -52,6 +52,8 @@ public class FrontendChat extends Application {
         Scene scene = new Scene(root, 800, 600); // Initial size
         stage.setTitle("JavaFX Multicast Chat (MVVM)");
         stage.setScene(scene);
+        stage.setMinWidth(800);
+        stage.setMinHeight(500);
         System.out.println("Scene and Stage configured.");
 
         // 7. Handle application close request gracefully

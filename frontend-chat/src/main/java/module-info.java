@@ -8,6 +8,8 @@ module grapes.microservices.frontendchat {
     requires net.synedra.validatorfx;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
+    requires static lombok;
+    requires java.compiler;
 
     // Opens the BASE package containing FrontendChat.java to necessary modules
     opens grapes.microservices.frontendchat to javafx.fxml, javafx.graphics;
@@ -17,4 +19,7 @@ module grapes.microservices.frontendchat {
     opens grapes.microservices.frontendchat.views to javafx.fxml;
 
     exports grapes.microservices.frontendchat;
+    exports grapes.microservices.frontendchat.models;
+    exports grapes.microservices.frontendchat.views.components;
+    opens grapes.microservices.frontendchat.views.components to javafx.fxml, javafx.graphics;
 }
