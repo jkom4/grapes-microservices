@@ -36,6 +36,7 @@ import grapes.microservices.viewmodel.ArticleState
 import grapes.microservices.viewmodel.ArticleViewModel
 import grapes.microservices.viewmodel.ArticleViewModelFactory
 import grapes.microservices.viewmodel.CartState
+import grapes.microservices.views.components.MyTopBar
 import kotlinx.coroutines.delay
 
 @Composable
@@ -69,7 +70,6 @@ navController: NavController
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()

@@ -34,6 +34,7 @@ import grapes.microservices.viewmodel.ArticleViewModel
 import grapes.microservices.viewmodel.ArticleViewModelFactory
 import grapes.microservices.viewmodel.CartScreenState
 import grapes.microservices.viewmodel.PaymentState
+import grapes.microservices.views.components.MyTopBar
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +42,7 @@ import kotlinx.coroutines.delay
 fun CartScreen(
     navController: NavController
 ) {
+
     val repository = ArticleRepository(RetrofitClient.articleApiService)
     val viewModel: ArticleViewModel = viewModel(
         factory = ArticleViewModelFactory(repository, RetrofitClient.articleApiService)
