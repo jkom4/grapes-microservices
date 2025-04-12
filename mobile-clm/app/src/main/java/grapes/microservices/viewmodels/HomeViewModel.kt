@@ -1,7 +1,7 @@
 package grapes.microservices.viewmodels
 
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import grapes.microservices.models.data.Article
 import grapes.microservices.models.data.ArticleFilterSettings
 import grapes.microservices.models.data.ArticleMinMaxPrice
@@ -10,26 +10,39 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val articleRepo: ArticleRepository
 ) : ViewModel() {
-    // lazy: initialize only when called for the first tome
     private val _filterSettings by lazy {
-        // i don't know the min and max cost among all the articles, so i ask to the API
-        MutableStateFlow(ArticleFilterSettings(articleMinMaxPrice = ArticleMinMaxPrice(
-            articleRepo.getMinMaxCost(),
-            articleRepo.getMinMaxCost()
-        )))
+        MutableStateFlow(
+            ArticleFilterSettings(
+                articleMinMaxPrice = ArticleMinMaxPrice(
+                    articleRepo.getMinMaxCost(),
+                    articleRepo.getMinMaxCost()
+                )
+            )
+        )
     }
     val filterSettings: StateFlow<ArticleFilterSettings> = _filterSettings.asStateFlow()
 
-    fun getFilterSettings(): ArticleFilterSettings {
-        return _filterSettings.asStateFlow().value
+    private val _articles = MutableStateFlow<List<Article>>(emptyList())
+    val articles: StateFlow<List<Article>> = _articles.asStateFlow()
+
+    init {
+        fetchArticles()
     }
 
-    fun getArticles(): List<Article> {
-        return articleRepo.getArticles()
+    private fun fetchArticles() {
+        viewModelScope.launch {
+            val fetchedArticles = articleRepo.getArticles()
+            _articles.value = fetchedArticles
+        }
+    }
+
+    fun getFilterSettings(): ArticleFilterSettings {
+        return _filterSettings.asStateFlow().value
     }
 
     fun getCategories(): List<String> {
@@ -42,17 +55,15 @@ class HomeViewModel(
 
     fun updateCategory(newCategory: String) {
         _filterSettings.update { currentState ->
-            // if select already selected item, deselect it
             val categoryToSet = if (currentState.category == newCategory) "" else newCategory
-            currentState.copy(category = categoryToSet) // Crée une nouvelle instance avec la catégorie mise à jour
+            currentState.copy(category = categoryToSet)
         }
     }
 
     fun updateFamily(newFamily: String) {
         _filterSettings.update { currentState ->
-            // if select already selected item, deselect it
             val familyToSet = if (currentState.family == newFamily) "" else newFamily
-            currentState.copy(family = familyToSet) // Crée une nouvelle instance avec la famille mise à jour
+            currentState.copy(family = familyToSet)
         }
     }
 
