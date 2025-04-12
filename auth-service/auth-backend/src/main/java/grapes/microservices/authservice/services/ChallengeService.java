@@ -18,32 +18,32 @@ public class ChallengeService {
 
     /**
      * Save the challenge for the user in the cache
-     * Cache key: email, value: challenge
-     * @param email the user to save the challenge for
+     * Cache key: key, value: challenge
+     * @param key the user to save the challenge for
      * @param challenge the challenge to save
      * @return the saved challenge
      */
-    @CachePut(value = "challenges", key = "#email")
-    public ChallengeWithTimestamp saveChallengeForUser(String email, String challenge) {
+    @CachePut(value = "challenges", key = "#key")
+    public ChallengeWithTimestamp saveChallengeForUser(String key, String challenge) {
         return new ChallengeWithTimestamp(challenge);
     }
 
 
     /**
      * Retrieve the challenge for the user from the cache
-     * @param email the email of the user to retrieve the challenge for
+     * @param key the key of the user to retrieve the challenge for
      * @return the challenge for the user, or null if not found
      */
-    @Cacheable(value = "challenges", key = "#email")
-    public ChallengeWithTimestamp getChallengeForUser(String email) {
+    @Cacheable(value = "challenges", key = "#key")
+    public ChallengeWithTimestamp getChallengeForUser(String key) {
         return null;
     }
 
     /**
      * Evict the challenge cache for a specific user.
      * This method will be invoked when the challenge is validated.
-     * @param email the email of the user whose challenge cache should be evicted
+     * @param key the key of the user whose challenge cache should be evicted
      */
-    @CacheEvict(value = "challenges", key = "#email")
-    public void evictChallengeCache(String email) {}
+    @CacheEvict(value = "challenges", key = "#key")
+    public void evictChallengeCache(String key) {}
 }

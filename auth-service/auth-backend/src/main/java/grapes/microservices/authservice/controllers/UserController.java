@@ -46,6 +46,7 @@ public class UserController {
 
 
     @Transactional
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
         logger.info("Received request to register a user: {}", userDTO);
@@ -65,6 +66,7 @@ public class UserController {
     }
 
     @Transactional
+    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping(value = "/disable/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> disable(@PathVariable String id, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -83,6 +85,7 @@ public class UserController {
     }
 
     @Transactional
+    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping(value = "/enable/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> enable(@PathVariable String id, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -101,6 +104,7 @@ public class UserController {
     }
 
     @Transactional
+    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping(value = "/update/password", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updatePassword(@RequestBody PasswordRequest password, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -126,6 +130,7 @@ public class UserController {
     }
 
     @Transactional
+    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping(value = "/update/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO, @PathVariable String id, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -161,6 +166,7 @@ public class UserController {
         }
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping(value = "/email", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getUserByEmail(@RequestBody EmailDTO emailDTO, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -178,6 +184,7 @@ public class UserController {
         }
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getUserById(@PathVariable String id, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -196,6 +203,7 @@ public class UserController {
     }
 
     @Transactional
+    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping(value = "/{id}/points/add/", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> addPoints(@PathVariable String id, @RequestBody AmountRequest amount, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -213,6 +221,7 @@ public class UserController {
     }
 
     @Transactional
+    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping(value = "/{id}/points/remove/", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> removePoints(@PathVariable String id, @RequestBody AmountRequest amount, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -230,6 +239,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/points")
+    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<?> getPoints(@PathVariable String id, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         if(!authController.isValidSession(token)) {

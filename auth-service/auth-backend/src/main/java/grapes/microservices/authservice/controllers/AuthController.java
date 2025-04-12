@@ -32,6 +32,7 @@ public class AuthController {
     @Autowired
     private TokenService tokenService;
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password, @RequestParam AuthMethod authMethod) throws IOException {
         try {
@@ -39,6 +40,8 @@ public class AuthController {
             if (user == null || !user.verifyPassword(password)) {
                 return ResponseEntity.status(401).body("Credentials are incorrect.");
             }
+            // set raw password to user
+            user.setPassword(password);
             if (!user.isValidPassword()) {
                 return ResponseEntity.status(401).body("Password must be changed because it does not meet the security policy.");
             }
@@ -53,6 +56,7 @@ public class AuthController {
         }
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> logout(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -70,6 +74,7 @@ public class AuthController {
         }
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping(value  = "/verify-challenge", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> verifyChallenge(@RequestParam String email, @RequestParam String submittedChallenge, @RequestParam AuthMethod authMethod) {
         try {
@@ -97,6 +102,7 @@ public class AuthController {
     }
 
     // TODO : finish refresh token
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
         String refreshToken = request.getHeader("Authorization");
@@ -115,6 +121,7 @@ public class AuthController {
         return ResponseEntity.ok(newAccessToken);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping(value = "/session", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getSession(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
