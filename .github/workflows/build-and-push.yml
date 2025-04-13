@@ -54,7 +54,7 @@ jobs:
       - name: "📦 Install Frontend Dependencies"
         run: |
           cd frontend-web
-          npm install
+          npm ci --legacy-peer-deps
           npm run-script build
   
 
