@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import grapes.microservices.R
+import grapes.microservices.models.data.Article
 import grapes.microservices.ui.theme.White
 import grapes.microservices.viewmodels.HomeViewModel
 import grapes.microservices.views.components.MySearchBar
@@ -33,7 +34,11 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyFilterSearchLayer(
-    modifier: Modifier
+    modifier: Modifier,
+    query: String,
+    onSearchStarted: () -> Unit,
+    onSearchResults: (List<Article>) -> Unit,
+    onQueryChanged: (String) -> Unit
 ) {
     val isBottomSheetOpen = rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -41,23 +46,30 @@ fun MyFilterSearchLayer(
         skipPartiallyExpanded = true,
     )
 
+    // Bottom sheet to manage filter options
     MyFilterSettingsBottomSheet(
         sheetState = filterSettingsSheetState,
         isSheetOpen = isBottomSheetOpen
     )
 
-    Row(
-        modifier = modifier
-    ) {
+    Row(modifier = modifier) {
         val viewmodel = koinViewModel<HomeViewModel>()
         val currentSettings by viewmodel.filterSettings.collectAsState()
-        MySearchBar(modifier = Modifier.weight(1f), query = currentSettings.query,
-            onValueChange = {newQuery ->
-                viewmodel.updateQuery(newQuery)
-            })
+
+        // Search bar with callbacks
+        MySearchBar(
+            modifier = Modifier.weight(1f),
+            query = query,
+            onQueryChanged = { onQueryChanged(it) },
+            onSearchStarted = { onSearchStarted() },
+            onResults = { response ->
+                onSearchResults(response)
+            }
+        )
 
         Spacer(modifier = Modifier.width(20.dp))
 
+        // Settings icon to open filter sheet
         Box(
             modifier = Modifier
                 .size(50.dp)
@@ -71,10 +83,9 @@ fun MyFilterSearchLayer(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.settings), // Ton image de profil
-                contentDescription = "User Avatar",
-                modifier = Modifier
-                    .size(26.dp),
+                painter = painterResource(id = R.drawable.settings),
+                contentDescription = "Filter Settings Icon",
+                modifier = Modifier.size(26.dp),
                 colorFilter = ColorFilter.tint(White)
             )
         }

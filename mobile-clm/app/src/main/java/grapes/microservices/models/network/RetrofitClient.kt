@@ -37,7 +37,7 @@ interface ArticleApiService {
     suspend fun getArticles(): List<Article>
 
     // Fetch an article by its ID
-    @GET("clm/articles/{id}")
+    @GET("/clm/articles/{id}")
     suspend fun getArticleById(@Path("id") id: Int): Article
 
     // Fetch the cart data using the order ID
@@ -69,6 +69,9 @@ interface ArticleApiService {
         @Query("page") page: Int, // Page number
         @Query("size") size: Int // Number of articles per page
     ): List<Article>
+
+    @GET("clm/articles/search")
+    suspend fun searchArticles(@Query("name") name: String): List<Article>
 }
 
 // Data classes to handle request bodies for cart-related operations
