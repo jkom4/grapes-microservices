@@ -6,9 +6,13 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<fx:root stylesheets="@topics-component.css" type="javafx.scene.layout.VBox" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<fx:root stylesheets="@topics-component.css" type="javafx.scene.layout.VBox"
+         xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+         prefWidth="300.0" >
     <!--HEADER-->
-    <HBox alignment="CENTER" maxHeight="50.0" minHeight="50.0" prefHeight="50.0">
+    <HBox alignment="CENTER" maxHeight="50.0" minHeight="50.0" prefHeight="50.0" VBox.vgrow="ALWAYS">
         <styleClass>
             <String fx:value="header" />
         </styleClass>
@@ -22,11 +26,11 @@
     </HBox>
 
     <!--TOPICS CONTAINER-->
-    <ScrollPane fx:id="topicScroller" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+    <ScrollPane fx:id="topicScroller" fitToHeight="true" fitToWidth="true" prefHeight="400.0" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
         <VBox fx:id="topicsContainer" alignment="TOP_CENTER">
-            <CardFx descriptionFx="test" titleFx="topic"/>
+            <CardFx descriptionFx="test" titleFx="topic" />
             <CardFx descriptionFx="test2" titleFx="topic2" />
-            <CardFx descriptionFx="test3" titleFx="topic3"/>
+            <CardFx descriptionFx="test3" titleFx="topic3" />
          <opaqueInsets>
             <Insets />
          </opaqueInsets>
@@ -38,4 +42,22 @@
             <Insets />
         </VBox.margin>
     </ScrollPane>
+    <LoadingFx fx:id="loadingFx" managed="false" prefHeight="400.0" visible="false" VBox.vgrow="ALWAYS" />
+
+    <!--USER PROFILE-->
+    <HBox alignment="CENTER_LEFT" prefHeight="50.0" VBox.vgrow="NEVER" styleClass="footer">
+        <ImageView fx:id="sendMessageButton" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@../profile.png" />
+            <HBox.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+            </HBox.margin>
+        </ImageView>
+        <VBox alignment="CENTER_LEFT">
+            <Label fx:id="profileLabel" minHeight="-Infinity" text="Nasser Kotiyev">
+                <VBox.margin>
+                    <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+                </VBox.margin>
+            </Label>
+        </VBox>
+    </HBox>
 </fx:root>

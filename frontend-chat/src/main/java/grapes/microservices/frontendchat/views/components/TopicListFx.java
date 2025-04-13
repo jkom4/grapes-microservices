@@ -1,12 +1,13 @@
 package grapes.microservices.frontendchat.views.components;
 
 import grapes.microservices.frontendchat.models.Topic;
+import grapes.microservices.frontendchat.models.User;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -23,6 +24,8 @@ public class TopicListFx extends VBox {
     @FXML private ScrollPane topicScroller;
     @FXML private ListView<Topic> topicListView;
     @FXML private TextField topicTextfield;
+    @FXML private LoadingFx loadingFx;
+    @FXML private Label profileLabel;
 
     // Observers
     private ObjectProperty<Topic> selectedTopic;
@@ -44,10 +47,9 @@ public class TopicListFx extends VBox {
     }
 
     private void bindObservers() {
+        profileLabel.setText("");
         // update the list when filter is modified and user press "Enter"
-        topicTextfield.setOnAction(event -> {
-            updateTopicsContainer(this.topics);
-        });
+        topicTextfield.setOnAction(event -> updateTopicsContainer(this.topics));
     }
 
     public void updateTopicsContainer(List<Topic> currentTopics) {
@@ -55,10 +57,13 @@ public class TopicListFx extends VBox {
         // Clear existing children from the VBox
         topicsContainer.getChildren().clear();
 
-        if (currentTopics.isEmpty()) {
-            topicsContainer.getChildren().add(new LoadingFx());
-            return;
-        }
+        // hide or show loading view
+        loadingFx.setVisible(currentTopics.isEmpty());
+        loadingFx.setManaged(currentTopics.isEmpty());
+        topicScroller.setVisible(!currentTopics.isEmpty());
+        topicScroller.setManaged(!currentTopics.isEmpty());
+
+        if (currentTopics.isEmpty()) return;
 
         // Create and add new cards for each topic in the current list
         int index = 0;
@@ -75,9 +80,7 @@ public class TopicListFx extends VBox {
             card.getStyleClass().add("topic-card"); // Add a style class for CSS
             card.setTitleFx(topic.name());
             card.setDescriptionFx(topic.lastMessage());
-            card.setOnMouseClicked(mouseEvent -> {
-                selectedTopic.set(topic);
-            });
+            card.setOnMouseClicked(mouseEvent -> selectedTopic.set(topic));
             // Add the custom component to the VBox
             topicsContainer.getChildren().add(card);
             // Add fade in effect
@@ -91,5 +94,13 @@ public class TopicListFx extends VBox {
 
     public void setSelectedTopicObserver(ObjectProperty<Topic> selectedTopic) {
         this.selectedTopic = selectedTopic;
+    }
+
+    public void setCurrentUserObserver(ObjectProperty<User> authUserObserver) {
+
+        authUserObserver.addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) return;
+            profileLabel.setText(newValue.username());
+        });
     }
 }

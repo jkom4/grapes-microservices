@@ -20,6 +20,8 @@ public class LoadingFx extends HBox {
         this.getChildren().add(circle);
         this.setAlignment(Pos.CENTER);
         this.setPadding(new Insets(10));
+        this.setFillHeight(true);
+        this.setPrefHeight(400);
 
         RotateTransition rotate = new RotateTransition(Duration.seconds(1), circle);
         rotate.setByAngle(360);

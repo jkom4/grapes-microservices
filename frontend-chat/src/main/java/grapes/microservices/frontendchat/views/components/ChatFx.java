@@ -3,6 +3,7 @@ package grapes.microservices.frontendchat.views.components;
 import grapes.microservices.frontendchat.models.Message;
 import grapes.microservices.frontendchat.models.Topic;
 import grapes.microservices.frontendchat.models.User;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -31,8 +32,7 @@ public class ChatFx extends VBox {
     @FXML private Label topicText;
     @FXML private ImageView sendMessageButton;
     @FXML private ImageView closeTopicButton;
-    private static final TextArea messageArea = new TextArea();
-    private static final TextField inputBox = new TextField();
+    @FXML private ImageView refreshMessagesButton;
 
     // Observers
     @Getter
@@ -75,6 +75,12 @@ public class ChatFx extends VBox {
         closeTopicButton.setOnMouseClicked(event -> {
             selectedTopic.set(null);
         });
+        // refresh all messages
+        refreshMessagesButton.setOnMouseClicked(event -> {
+            var currentTopic = selectedTopic.get();
+            selectedTopic.set(null);
+            Platform.runLater(() -> selectedTopic.set(currentTopic));
+        });
     }
 
     public void setMessageListObserver(ObservableList<Message> observer) {
@@ -90,7 +96,6 @@ public class ChatFx extends VBox {
                 if (change.wasAdded()) {
                     AtomicInteger index = new AtomicInteger(change.getAddedSubList().size()); // for fade in effect
                     change.getAddedSubList().forEach(message -> {
-                        System.out.println(index);
                         var bubbleMessage = addMessageToTheList(message);
                         // Add fade in effect (index-- => reversed)
                         EffectUtils.fadeIn(bubbleMessage, index.getAndDecrement() * 20);
@@ -103,22 +108,8 @@ public class ChatFx extends VBox {
         });
 
         // Scroll to the bottom observer
-        messagesContainer.heightProperty().addListener((observable, oldValue, newValue) -> {
-            EffectUtils.scrollToTheBottom(messagesScroller);
-        });
-    }
-
-    private void updateWholeMessageListView() {
-        // when the user joins a new topic, we clear all the previous messages, and display the new ones
-        messagesContainer.getChildren().clear();
-
-        // display each message in a bubble
-        int index = loadedMessages.size();
-        for (Message message : loadedMessages) {
-            var bubbleMessage = addMessageToTheList(message);
-            // Add fade in effect (index-- => reversed)
-            EffectUtils.fadeIn(bubbleMessage, index-- * 20);
-        }
+        messagesContainer.heightProperty().addListener((observable, oldValue, newValue) ->
+                EffectUtils.scrollToTheBottom(messagesScroller));
     }
 
     public void setCurrentUserObserver(ObjectProperty<User> authUserObserver) {
@@ -151,11 +142,13 @@ public class ChatFx extends VBox {
      */
     public BubbleMessageFx addMessageToTheList(Message message) {
         var bubbleMessage = new BubbleMessageFx();
-        messagesContainer.getChildren().add(bubbleMessage);
         bubbleMessage.setText(message.content());
+        bubbleMessage.setAuthor(message.sender().username());
+        bubbleMessage.setDate(message.getDateToString());
         // if the message belongs to the user, then the message bubble is aligned to the left with another color
         var isMyMessage = message.sender().id() == userObserver.get().id();
         bubbleMessage.setIsMyText(isMyMessage);
+        messagesContainer.getChildren().add(bubbleMessage);
 
         return bubbleMessage;
     }
@@ -170,19 +163,15 @@ public class ChatFx extends VBox {
         sendMessageButton.setOnMouseClicked(event -> {
             handleSendMessage();
         });
-        messageTextfield.setOnAction(event -> {
-            handleSendMessage();
-        });
+        messageTextfield.setOnAction(event -> handleSendMessage());
     }
 
     // this function is called by 2 events : "On textfield Enter pressed" and "On send button clicked"
     private void handleSendMessage() {
-        // if message is empty, it's ignored
-        if (messageTextfield.getText().isEmpty()) {
-            return;
-        }
-
         String message = messageTextfield.getText();
+        // The reason why there are 2 "set" it's because the observer notify only when the old and new value are
+        // different, so I firstly set it to "" (empty messages are not posted), then I erase it with "message" value
+        currentPostedMessage.set("");
         currentPostedMessage.set(message); // the observer notify its listeners
         messageTextfield.clear();
     }

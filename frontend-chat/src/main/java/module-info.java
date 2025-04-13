@@ -10,6 +10,8 @@ module grapes.microservices.frontendchat {
     requires org.kordamp.bootstrapfx.core;
     requires static lombok;
     requires java.compiler;
+    requires com.google.gson;
+    opens grapes.microservices.frontendchat.models.dto to com.google.gson;
 
     // Opens the BASE package containing FrontendChat.java to necessary modules
     opens grapes.microservices.frontendchat to javafx.fxml, javafx.graphics;

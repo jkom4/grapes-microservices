@@ -8,7 +8,7 @@ public record Topic(int id, String name, String lastMessage) {
     }
 
     /**
-     * Generates a multicast address based on the ID using modulo.
+     * Generates a multicast address based on the ID using modulo => 253 +1 -> 4
      * @return The generated multicast address.
      */
     public String getMulticastGroup() {

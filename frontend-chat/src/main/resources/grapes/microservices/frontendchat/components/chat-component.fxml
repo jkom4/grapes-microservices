@@ -8,7 +8,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<fx:root prefWidth="300.0" styleClass="chatComponentContainer" stylesheets="@chat-component.css" type="javafx.scene.layout.VBox" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root styleClass="chatComponentContainer" stylesheets="@chat-component.css" type="javafx.scene.layout.VBox"
+         xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+         prefWidth="300.0" >
     <!--HEADER-->
     <HBox alignment="CENTER" maxHeight="50.0" minHeight="50.0" prefHeight="50.0" VBox.vgrow="ALWAYS">
         <styleClass>
@@ -29,11 +31,17 @@
          </HBox.margin>
         </Label>
       <Pane HBox.hgrow="ALWAYS" />
-      <ImageView fx:id="closeTopicButton" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" styleClass="button-icon">
-         <image>
-            <Image url="@../cross.png" />
-         </image>
-      </ImageView>
+        <ImageView fx:id="refreshMessagesButton" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true"
+                   preserveRatio="true" styleClass="button-icon">
+            <HBox.margin>
+                <Insets left="10.0" right="10.0"/>
+            </HBox.margin>
+            <Image url="@../refresh.png"/>
+        </ImageView>
+        <ImageView fx:id="closeTopicButton" fitHeight="20.0" fitWidth="20.0" layoutX="270.0" layoutY="25.0"
+                   pickOnBounds="true" preserveRatio="true" styleClass="button-icon">
+            <Image url="@../cross.png"/>
+        </ImageView>
     </HBox>
 
     <!--MESSAGE CONTAINER-->
@@ -41,8 +49,8 @@
         <VBox fx:id="messagesContainer" VBox.vgrow="ALWAYS">
     <!--        <TextArea fx:id="messagesTextArea" editable="false" VBox.vgrow="ALWAYS" />-->
             <BubbleMessageFx text="Yo" />
-            <BubbleMessageFx text="you there? you there? you there? you there? you there? you there? " />
-            <BubbleMessageFx alignment="TOP_RIGHT" isMyText="true" text="Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? " />
+            <BubbleMessageFx text="you there? you there? you there? you there? you there? you there? you there?you there?you there?" />
+            <BubbleMessageFx alignment="TOP_RIGHT" author="test" date="test" isMyText="true" text="dsgfdgfd" />
         </VBox>
     </ScrollPane>
 

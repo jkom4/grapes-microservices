@@ -1,85 +1,135 @@
 package grapes.microservices.frontendchat.models.services;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import grapes.microservices.frontendchat.models.Message;
 import grapes.microservices.frontendchat.models.Topic;
-import grapes.microservices.frontendchat.models.User;
+import grapes.microservices.frontendchat.models.dto.MessageDTO;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * Mock implementation of MulticastService for testing without actual network.
  */
 public class MulticastService implements IMulticastService {
-    private Consumer<Message> messageConsumer;
     private Topic currentTopic;
-    private ScheduledExecutorService mockMessageExecutor;
+    MulticastSocket multicastSocket;
+    InetAddress adresseGroupe;
+    private static Gson gson;
+    private ExecutorService listenerExecutor;
+    private volatile boolean running = false;
+    private final ObjectProperty<Message> messageReveiceObserver;
 
-    public MulticastService() {
-        // Simulate receiving random messages in the current topic
-        mockMessageExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r);
-            t.setDaemon(true); // Allows the application to exit even if this thread is running
-            return t;
+    @Override
+    public ObjectProperty<Message> getMessageReveiceObserver() {
+        return messageReveiceObserver;
+    }
+
+    private final byte[] buf = new byte[30000];
+
+    private final int port;
+
+    public MulticastService(int port) {
+        this.port = port;
+        this.messageReveiceObserver = new SimpleObjectProperty<>();
+        gson = new Gson();
+    }
+
+    @Override
+    public void init() throws IOException {
+        System.out.println("[MulticastService] Start Multicast service");
+        multicastSocket = new MulticastSocket(port);
+
+        // Use a single-threaded executor for the listener task
+        listenerExecutor = Executors.newSingleThreadExecutor(r -> {
+            Thread thread = new Thread(r, "MulticastListenerThread");
+            thread.setDaemon(true);
+            return thread;
         });
-
-        mockMessageExecutor.scheduleAtFixedRate(() -> {
-            if (messageConsumer != null && currentTopic != null) {
-                Message fakeMsg = new Message(
-                        currentTopic.id(),
-                        new User(1, "OtherUser"),
-                        "Received multicast sim message " + System.currentTimeMillis(),
-                        LocalDateTime.now()
-                );
-                // !! IMPORTANT: The consumer call should happen on the JavaFX thread.
-                // This responsibility is delegated to the ViewModel which uses Platform.runLater.
-                if(messageConsumer != null) {
-                    messageConsumer.accept(fakeMsg);
-                }
-            }
-        }, 5, 10, TimeUnit.SECONDS); // Send a simulated message every 10 seconds
     }
 
     @Override
-    public void joinTopic(Topic topic) {
-        System.out.println("[MockMulticast] Joining topic: " + topic);
+    public void close() {
+        System.out.println("[MulticastService] Stop Multicast service...");
+        running = false;
+        multicastSocket.close();
+    }
+
+    @Override
+    public void joinTopic(Topic topic) throws IOException {
+        System.out.println("[MulticastService] Joining topic: " + topic);
+
         this.currentTopic = topic;
-        // TODO: Implement actual multicast group joining logic here
+
+        adresseGroupe = InetAddress.getByName(topic.getMulticastGroup());
+        NetworkInterface networkInterface = NetworkInterface.getByName("Wi-Fi");
+        InetSocketAddress socketAddress = new InetSocketAddress(adresseGroupe, port);
+        multicastSocket.joinGroup(socketAddress, networkInterface);
+        running = true;
+        System.out.println("[MulticastService] Listening to group: " + adresseGroupe + ".");
+        listenerExecutor.submit(this::listenInLoop);
     }
 
     @Override
-    public void leaveTopic(Topic topic) {
-        System.out.println("[MockMulticast] Leaving topic: " + topic);
+    public void leaveTopic(Topic topic) throws IOException {
+        System.out.println("[MulticastService] Leaving topic: " + topic);
         if (this.currentTopic != null && this.currentTopic.equals(topic)) {
             this.currentTopic = null;
         }
-        // TODO: Implement actual multicast group leaving logic here
+        adresseGroupe = InetAddress.getByName(topic.getMulticastGroup());
+        multicastSocket.leaveGroup(adresseGroupe);
+        running = false; // stop the thread task
     }
 
     @Override
-    public void sendMessage(Topic topic, Message message) {
-        System.out.println("[MockMulticast] Sending to topic " + topic.id() + ": " + message.content());
-        // TODO: Implement actual multicast message sending logic here
+    public void sendMessage(Topic topic, Message message) throws IOException {
+        MessageDTO dto = MessageDTO.toDTO(message); // convert message into messageDTO
+        String data = gson.toJson(dto); // convert messageDTO into json
+        DatagramPacket dtg = new DatagramPacket(data.getBytes(), data.length(), adresseGroupe, port);
+        // send
+        multicastSocket.send(dtg);
+        System.out.println("[MulticastService] Message sent to topic " + topic.id() + ": " + data);
     }
 
-    @Override
-    public void setMessageReceiver(Consumer<Message> messageConsumer) {
-        this.messageConsumer = messageConsumer;
-    }
+    // task executed by the thread listener
+    private void listenInLoop() {
+        DatagramPacket packet = new DatagramPacket(buf, buf.length);
 
-    @Override
-    public void startListening() {
-        System.out.println("[MockMulticast] Start Listening Simulation...");
-        // TODO: Initialize actual multicast socket and listening thread here
-    }
+        while (running) {
+            try {
+                multicastSocket.receive(packet);
+            } catch (Exception e) {
+                // Catch any other unexpected errors
+                if (running) {
+                    System.err.println("Unexpected error in listener loop: " + e.getMessage());
+                    e.printStackTrace();
+                    running = false; // Stop on unexpected errors
+                }
+            }
 
-    @Override
-    public void stopListening() {
-        System.out.println("[MockMulticast] Stop Listening Simulation...");
-        mockMessageExecutor.shutdown();
-        // TODO: Properly close socket and stop listening thread here
+            if (!running) {
+                break;
+            }
+
+            // Process the received packet
+            String jsonPayload = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
+            MessageDTO dto;
+            try {
+                dto = gson.fromJson(jsonPayload, MessageDTO.class);
+            } catch (JsonSyntaxException e) {
+                System.err.println("Not valid Json: " + jsonPayload);
+                continue;
+            }
+            Message message = MessageDTO.toEntity(dto);
+
+            // notify listeners of new message
+            messageReveiceObserver.set(message);
+        }
     }
 }

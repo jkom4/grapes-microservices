@@ -17,5 +17,9 @@
 
 .my-message .message-bubble {
   @include bubble-shape;
-  -fx-background-color: $primary-light;
+  -fx-background-color: $secondary;
+}
+
+#messageAuthor, #messageDate {
+  -fx-text-fill: $background;
 }

@@ -22,8 +22,8 @@
   //-fx-border-color: $primary-light;
 }
 
-#topicsContainer {
-  -fx-background-color: $primary;
+#topicsContainer, #loadingFx {
+  -fx-background-color: $primary-light;
 }
 
 #topicScroller {
@@ -38,4 +38,9 @@
 
 .scroll-bar .thumb:hover {
   -fx-background-color: $secondary-light;
+}
+
+#profileLabel {
+  //-fx-text-fill: white;
+  -fx-font-weight: bold;
 }
