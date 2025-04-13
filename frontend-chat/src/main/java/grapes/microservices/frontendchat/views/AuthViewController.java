@@ -58,11 +58,6 @@ public class AuthViewController implements Initializable {
      * Sets up the bindings between the View's UI elements and the ViewModel's properties.
      */
     private void bindViewModel() {
-        // TODO add a textfield component
-        // TODO add textfied observer
-        // TODO add event after token entered
-        // TODO in the event, auth api call then save the user in user session
-
         // === OBSERVERS ===
         authErrorObserver = viewModel.getAuthErrorObserver();
         authenticatedUser = viewModel.getAuthenticatedUser();
