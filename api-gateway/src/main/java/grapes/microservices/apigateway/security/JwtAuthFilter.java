@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -21,7 +20,6 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Component
@@ -53,24 +51,24 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().toString();
 
-        // Bypass pour les endpoints publics
+        // Bypass public endpoints
         if (isWhitelisted(path)) {
             logger.warn("whitelisted path: {}", path);
             return chain.filter(exchange);
         }
 
-        // Extraction du token
+        // Extract token
         String token = extractToken(request);
         if (token == null) {
             return unauthorizedResponse(exchange, "Authorization header missing or invalid");
         }
 
-        // Validation synchrone si nécessaire (sinon version réactive ci-dessous)
+
         if (!jwtUtil.validateToken(token)) {
             return unauthorizedResponse(exchange, "Invalid JWT token");
         }
 
-        // Vérification dans Redis (version réactive)
+
         return redisTemplate.opsForValue().get("invalidated:" + token)
                 .flatMap(invalidated -> {
                     if (invalidated != null) {
@@ -91,7 +89,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
                     return chain.filter(exchange.mutate().request(modifiedRequest).build());
                 })
                 .switchIfEmpty(Mono.defer(() -> {
-                    // Cas où le token n'est pas dans Redis (non révoqué)
+                    // if token not in Redis
                     Claims claims = jwtUtil.extractAllClaims(token);
                     String userId = claims.getSubject();
                     String roles = claims.get("roles", String.class);
@@ -107,7 +105,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -100; // Hautement prioritaire
+        return -100; // High priority
     }
 
     private boolean isWhitelisted(String path) {
