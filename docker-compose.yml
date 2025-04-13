@@ -16,8 +16,8 @@ services:
     ports:
       - "3306:3306"
     volumes:
+      - ./docker/mariadb/config/init-db.sql:/docker-entrypoint-initdb.d/init.sql
       - ./docker/mariadb/volumes/mariadb_data:/var/lib/mysql
-      - ./docker/mariadb/config/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     command:
       [
         "--server-id=1",
@@ -31,7 +31,7 @@ services:
     image: mariadb:latest
     container_name: grapes-mariadb-slave
     environment:
-      MARIADB_ROOT_PASSWORD: SparringMASI!
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3307:3306"
     volumes:
@@ -81,6 +81,17 @@ services:
       - "15673:15672"
 
 ### MONITORING
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    entrypoint: [ "sh", "-c", "redis-server --requirepass REDIS_PASSWORD" ]
+
+
   sonarqube:
     image: sonarqube:lts-community
     container_name: grapes-sonarqube
@@ -128,7 +139,6 @@ services:
     build: ./api-gateway
     env_file: .env
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/api-gateway:latest
-
     container_name: api-gateway
     ports:
       - "8090:8090"
@@ -140,6 +150,10 @@ services:
       - sales-service
       - payment-service
       - chat-service
+      - redis
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
 
   auth-service:
     build: ./auth-service/auth-backend
@@ -188,6 +202,11 @@ services:
       - "8095:8095"
     depends_on:
       - mariadb
+    environment:
+      - SALES_SERVICE_PORT=${SALES_SERVICE_PORT}
+      - SALES_DB_URL=${SALES_DB_URL}
+      - SALES_DB_USER=${SALES_DB_USER}
+      - SALES_DB_PASSWORD=${SALES_DB_PASSWORD}
 
   data-mining-service:
     build: ./data-mining-service
@@ -204,12 +223,13 @@ services:
 
   frontend-web:
     build: ./frontend-web
+    env_file: .env
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/grapes-frontend:latest
     container_name: grapes-frontend
     ports:
       - "3001:80"
-    depends_on:
-      - api-gateway
+    environment:
+        - REACT_APP_API_URL=${REACT_APP_API_URL}
 
   frontend-auth:
     build: ./auth-service/auth-frontend
@@ -232,5 +252,6 @@ volumes:
   mariadb_data:
   mongodb_data:
   sonarqube-data:
+  redis_data:
 
 
