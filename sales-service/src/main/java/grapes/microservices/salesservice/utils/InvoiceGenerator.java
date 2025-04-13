@@ -31,7 +31,7 @@ import java.util.UUID;
 
 public class InvoiceGenerator {
 
-    public static String generateInvoice(Order order, List<OrderItem> items, ArticleRepository articleRepository) throws FileNotFoundException {
+    public static String generateInvoice(Order order, String customerName, String address, String postalCode, String country, String phoneNumber, List<OrderItem> items, ArticleRepository articleRepository) throws FileNotFoundException {
         String datePart = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
         String uuidPart = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
         String filename = String.format("Invoice%03d_%s_%s.pdf", order.getId(), datePart, uuidPart);
@@ -47,10 +47,9 @@ public class InvoiceGenerator {
         Document document = new Document(pdf);
 
         // 📎 Pagination
-        int numberOfPages = pdf.getNumberOfPages();
         pdf.addEventHandler(com.itextpdf.kernel.events.PdfDocumentEvent.END_PAGE, new FooterHandler());
 
-        // 🟪 Logo
+        //  Logo
         try {
             InputStream logoStream = InvoiceGenerator.class.getClassLoader().getResourceAsStream("static/logo/grapes.png");
             if (logoStream != null) {
@@ -60,17 +59,17 @@ public class InvoiceGenerator {
                 document.add(logo);
             }
         } catch (Exception e) {
-            e.printStackTrace(); // for debug
+            e.printStackTrace();
         }
 
-        // 🟪 Title
+        //  Title
         document.add(new Paragraph("GRAPES - INVOICE")
                 .setFontSize(22)
                 .setBold()
                 .setFontColor(ColorConstants.MAGENTA)
                 .setTextAlignment(TextAlignment.LEFT));
 
-        // ℹ️ Info
+        //  Order Information
         Table infoTable = new Table(UnitValue.createPercentArray(new float[]{1, 2}))
                 .useAllAvailableWidth();
         infoTable.addCell(createInfoCell("Order ID:"));
@@ -80,9 +79,27 @@ public class InvoiceGenerator {
         infoTable.addCell(createInfoCell("Date:"));
         infoTable.addCell(createValueCell(LocalDate.now().toString()));
         document.add(infoTable);
+
         document.add(new Paragraph("\n"));
 
-        // 🧾  Articles table
+        //  Client Information
+        Table customerTable = new Table(UnitValue.createPercentArray(new float[]{1, 2}))
+                .useAllAvailableWidth();
+        customerTable.addCell(createInfoCell("Customer Name:"));
+        customerTable.addCell(createValueCell(customerName));
+        customerTable.addCell(createInfoCell("Address:"));
+        customerTable.addCell(createValueCell(address));
+        customerTable.addCell(createInfoCell("Postal Code:"));
+        customerTable.addCell(createValueCell(postalCode));
+        customerTable.addCell(createInfoCell("Country:"));
+        customerTable.addCell(createValueCell(country));
+        customerTable.addCell(createInfoCell("Phone:"));
+        customerTable.addCell(createValueCell(phoneNumber));
+        document.add(customerTable);
+
+        document.add(new Paragraph("\n"));
+
+        //  Articles table
         Table articleTable = new Table(UnitValue.createPercentArray(new float[]{1, 3, 1, 1, 1, 1}))
                 .useAllAvailableWidth()
                 .setBorder(new SolidBorder(ColorConstants.LIGHT_GRAY, 1));
@@ -116,7 +133,7 @@ public class InvoiceGenerator {
 
         document.add(articleTable);
 
-        // 💸 TOTAL
+        //  TOTAL
         document.add(new Paragraph("\n"));
         Table totalTable = new Table(2).useAllAvailableWidth();
         totalTable.addCell(new Cell().add(new Paragraph("TOTAL"))
@@ -129,13 +146,12 @@ public class InvoiceGenerator {
                 .setBorder(Border.NO_BORDER));
         document.add(totalTable);
 
-        // 📬 Footer with contact info
+        //  Footer
         document.add(new Paragraph("\nThank you for shopping with GRAPES 🍇")
                 .setItalic()
                 .setFontSize(9)
                 .setTextAlignment(TextAlignment.CENTER)
                 .setFontColor(ColorConstants.GRAY));
-
         document.add(new Paragraph("Contact: contact@grapes-market.com | +32 2 123 45 67")
                 .setFontSize(8)
                 .setTextAlignment(TextAlignment.CENTER)
@@ -145,7 +161,7 @@ public class InvoiceGenerator {
         return fullPath;
     }
 
-    // ➕ Footer Pagination Handler
+    //  Footer Pagination
     private static class FooterHandler implements com.itextpdf.kernel.events.IEventHandler {
         @Override
         public void handleEvent(com.itextpdf.kernel.events.Event event) {
@@ -153,7 +169,6 @@ public class InvoiceGenerator {
             PdfDocument pdf = docEvent.getDocument();
             int pageNum = pdf.getPageNumber(docEvent.getPage());
             int totalPages = pdf.getNumberOfPages();
-
             Document doc = new Document(pdf);
             Paragraph footer = new Paragraph(String.format("Page %d of %d", pageNum, totalPages))
                     .setFontSize(8)
@@ -166,7 +181,7 @@ public class InvoiceGenerator {
         }
     }
 
-    // 📌 Utils
+    //  Utils
     private static Cell center(Object value) {
         return new Cell().add(new Paragraph(value != null ? value.toString() : "-"))
                 .setTextAlignment(TextAlignment.CENTER);

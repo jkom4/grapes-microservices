@@ -20,12 +20,12 @@ public class OrderDeliveryService {
     /**
      * Retrieves all order items associated with a specific trip (delivery).
      *
-     * @param tripId the delivery ID (trip ID)
+     * @param tripId the delivery ORDER ID (trip ID)
      * @return a list of order items to be delivered
      */
     public List<OrderDTO> getOrdersForTrip(Integer tripId) {
-        Integer orderId = deliveryRepository.findById(tripId)
-                .orElseThrow(() -> new IllegalArgumentException("Delivery not found"))
+        Integer orderId = deliveryRepository.findByOrderId(tripId)
+                .orElseThrow(() -> new IllegalArgumentException("Delivery not found with ORDER_ID: " + tripId))
                 .getOrderId();
 
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
@@ -33,10 +33,10 @@ public class OrderDeliveryService {
         return orderItems.stream()
                 .map(item -> new OrderDTO(
                         item.getId(),
-                        "Product description to fetch", // ( To be updated later by linking with the Article entity)
+                        "Product description to fetch",
                         item.getQuantity() != null ? item.getQuantity() : item.getQuantityKg(),
                         tripId,
-                        Boolean.TRUE.equals(item.getScanned()) //  use getScanned() (Boolean) safely
+                        Boolean.TRUE.equals(item.getScanned())
                 ))
                 .collect(Collectors.toList());
     }
@@ -49,10 +49,28 @@ public class OrderDeliveryService {
     public void markOrderItemAsScanned(Integer orderItemId) {
         OrderItem orderItem = orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new IllegalArgumentException("OrderItem not found"));
-
-        orderItem.setScanned(true); //  mark as scanned
-        orderItem.setScannedAt(java.time.LocalDateTime.now()); //  update scanned timestamp
-
+        orderItem.setScanned(true);
+        orderItem.setScannedAt(java.time.LocalDateTime.now());
         orderItemRepository.save(orderItem);
+    }
+
+    /**
+     * Marks all order items of a trip as scanned.
+     *
+     * @param tripId the trip (delivery) ID
+     */
+    public void markAllOrderItemsAsScannedForTrip(Integer tripId) {
+        Integer orderId = deliveryRepository.findByOrderId(tripId)
+                .orElseThrow(() -> new IllegalArgumentException("Delivery not found with ORDER_ID: " + tripId))
+                .getOrderId();
+
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+
+        for (OrderItem item : orderItems) {
+            item.setScanned(true);
+            item.setScannedAt(java.time.LocalDateTime.now());
+        }
+
+        orderItemRepository.saveAll(orderItems);
     }
 }

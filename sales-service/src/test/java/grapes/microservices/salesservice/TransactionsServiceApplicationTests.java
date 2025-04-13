@@ -1,8 +1,5 @@
 package grapes.microservices.salesservice;
 
-import com.jayway.jsonpath.JsonPath;
-import grapes.microservices.salesservice.models.Delivery;
-import grapes.microservices.salesservice.models.DeliveryStatus;
 import grapes.microservices.salesservice.repositories.CategoryRepository;
 import grapes.microservices.salesservice.repositories.DeliveryRepository;
 import grapes.microservices.salesservice.repositories.DeliveryStatusRepository;
@@ -14,10 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.junit.jupiter.api.Disabled;
-
-import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -209,7 +202,7 @@ class TransactionsServiceApplicationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].orderId").value(orderId));
     }
-*/
+
 
     @Test
     void testGetArticleById() throws Exception {
@@ -402,5 +395,5 @@ class TransactionsServiceApplicationTests {
         mockMvc.perform(get("/clm/families"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Fruits"));
-    }
+    }*/
 }

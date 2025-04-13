@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/cll/trips")
@@ -35,10 +36,11 @@ public class TripController {
     }
 
     @PatchMapping("/{tripId}/finish")
-    public ResponseEntity<Void> finishTrip(@PathVariable Integer tripId) {
+    public ResponseEntity<?> finishTrip(@PathVariable Integer tripId) {
         tripService.finishTrip(tripId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().body(Map.of("message", "Trip finished successfully."));
     }
+
 
 }
 

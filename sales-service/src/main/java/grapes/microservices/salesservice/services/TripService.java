@@ -20,25 +20,25 @@ public class TripService {
     private final DeliveryRepository deliveryRepository;
     private final OrderItemRepository orderItemRepository;
 
-    //  1. recuperate all the trips of 1 deliver
+    //  1. Gett all the trips from one deliver man
     public List<TripDTO> getTripsByDeliveryMan(Integer userId) {
         List<Delivery> deliveries = deliveryRepository.findByUserId(userId);
 
         return deliveries.stream()
                 .map(delivery -> new TripDTO(
-                        delivery.getId(),                            // tripId = deliveryId
-                        "Trip " + delivery.getId(),                  // name of  trip
-                        "Unknown distance",                         // Distance (placeholder)
-                        "Address placeholder",                      // Adresses (placeholder)
+                        delivery.getOrderId(),
+                        "Trip " + delivery.getOrderId(),
+                        "Unknown distance",
+                        delivery.getAddress(),
                         delivery.getDeliveryStatusId() != null && delivery.getDeliveryStatusId() == 3
                 ))
                 .collect(Collectors.toList());
     }
 
-    //  2. recuperate all the products for a trip
+    // 2. Get all products from a trip
     public List<OrderDTO> getOrdersForTrip(Integer tripId) {
-        Delivery delivery = deliveryRepository.findById(tripId)
-                .orElseThrow(() -> new IllegalArgumentException("Trip not found with ID: " + tripId));
+        Delivery delivery = deliveryRepository.findByOrderId(tripId)
+                .orElseThrow(() -> new IllegalArgumentException("Delivery not found with ORDER_ID: " + tripId));
 
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(delivery.getOrderId());
 
@@ -53,7 +53,8 @@ public class TripService {
         }).collect(Collectors.toList());
     }
 
-    //  3. mark a product is scanned
+
+    // 3. Mark a product as scanned
     public void updateScanStatus(Integer orderItemId) {
         OrderItem orderItem = orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new IllegalArgumentException("OrderItem not found with ID: " + orderItemId));
@@ -61,13 +62,23 @@ public class TripService {
         orderItemRepository.save(orderItem);
     }
 
-    //  4. mark a trip like done
     public void finishTrip(Integer tripId) {
-        Delivery delivery = deliveryRepository.findById(tripId)
+        Delivery delivery = deliveryRepository.findByOrderId(tripId)
                 .orElseThrow(() -> new IllegalArgumentException("Trip not found with ID: " + tripId));
 
-        delivery.setDeliveryStatusId(3);
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(delivery.getOrderId());
+
+        boolean allScanned = orderItems.stream()
+                .allMatch(item -> Boolean.TRUE.equals(item.getScanned()));
+
+        if (!allScanned) {
+            throw new IllegalStateException("Cannot finish trip: Some order items are not scanned.");
+        }
+
+        delivery.setDeliveryStatusId(3); // 3 = Finished
         delivery.setDeliveredAt(LocalDateTime.now());
         deliveryRepository.save(delivery);
     }
+
+
 }

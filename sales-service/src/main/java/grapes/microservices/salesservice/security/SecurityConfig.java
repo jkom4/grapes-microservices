@@ -4,16 +4,17 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity  // To active @preauthorize
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private static final String[] SWAGGER_PATHS = {
@@ -56,5 +57,17 @@ public class SecurityConfig {
         // ⚠️ To complete with JWT configuration if he works (filter, etc.)
 
         return http.build();
+    }
+
+    /**
+     * Registration of the Rate Limiting Filter
+     */
+    @Bean
+    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilterRegistration(RateLimitingFilter rateLimitingFilter) {
+        FilterRegistrationBean<RateLimitingFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(rateLimitingFilter);
+        registrationBean.addUrlPatterns("/*"); // Apply to all URLs
+        registrationBean.setOrder(1); // High priority
+        return registrationBean;
     }
 }
