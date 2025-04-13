@@ -1,7 +1,9 @@
 package grapes.microservices.authservice.mapper;
 
+import grapes.microservices.authservice.dto.EIDCardInfo;
 import grapes.microservices.authservice.dto.UserDTO;
 import grapes.microservices.authservice.models.User;
+import grapes.microservices.authservice.models.Role;
 import org.bson.types.ObjectId;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -21,6 +23,29 @@ public interface UserMapper {
     @Mapping(target = "age", expression = "java(computeAge(user.getBirthDate()))")
     @Mapping(source = "id", target = "id", qualifiedByName = "objectIdToString")
     UserDTO toDTO(User user);
+    // Mapping using eID card data
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "active", constant = "true")
+    @Mapping(target = "bankId", constant = "DEFAULT_BANK")
+    @Mapping(target = "name", source = "lastName")
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "nationalId", source = "nationalId")
+    @Mapping(target = "birthDate", source = "birthDate")
+    @Mapping(target = "age", expression = "java(computeAge(info.getBirthDate()))")
+    @Mapping(target = "gender", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "emailVerified", constant = "false")
+    @Mapping(target = "phoneNumber", ignore = true)
+    @Mapping(target = "phoneVerified", constant = "false")
+    @Mapping(target = "cardNumber", ignore = true)
+    @Mapping(target = "pinCode", ignore = true)
+    @Mapping(target = "role", constant = "USER")
+    @Mapping(target = "profession", ignore = true)
+    @Mapping(target = "authMethods", ignore = true)
+    @Mapping(target = "deliveryAddress", ignore = true)
+    @Mapping(target = "billingAddress", ignore = true)
+    UserDTO toDTOFromEID(EIDCardInfo info);
 
     @Named("stringToObjectId")
     static ObjectId stringToObjectId(String id) {

@@ -19,7 +19,7 @@ public class UserDTO {
 
     @NotNull
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private boolean isActive;
+    private boolean active;
 
     @NotNull(message = "bankId cannot be null")
     private String bankId;
