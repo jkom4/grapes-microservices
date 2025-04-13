@@ -31,8 +31,13 @@ public class AcsService {
     @Value("${keystore.client.alias}")
     private String clientKeystoreAlias;
 
-    @Value("${keystore.client.truststore}")
-    private String clientTruststorePath;
+
+    // --- Truststore used to verify the server (ACS) certificate ---
+    @Value("${app.truststore.client.path}") // <-- Path to truststore containing ACS cert
+    private String clientTruststorePath; // RENAMED for clarity (was acsTruststorePath implicitly)
+
+    @Value("${app.truststore.client.password}") // <-- Inject the client truststore password
+    private String clientTruststorePassword;
 
     public boolean processPayment(Transaction transaction) {
         try {
@@ -92,7 +97,10 @@ public class AcsService {
     }
 
     private String sendToACS(String message) {
-        try (SSLSocket acsSocket = SslUtils.createSslClientSocket(ACS_PORT, clientTruststorePath)) {
+        try (SSLSocket acsSocket = SslUtils.createSslClientSocket(
+                ACS_PORT,
+                clientTruststorePath,      // Truststore to verify ACS server
+                clientTruststorePassword)) {
             PrintWriter writer = new PrintWriter(acsSocket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(acsSocket.getInputStream()));
 

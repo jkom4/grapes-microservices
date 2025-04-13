@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+
+
+@Data
 @Entity
 @Table(name = "auth_tokens")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthToken {
@@ -16,12 +18,8 @@ public class AuthToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "token_value", nullable = false, unique = true)
-    private String tokenValue;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(nullable = false, unique = true)
+    private String token;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -29,10 +27,22 @@ public class AuthToken {
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    @Column(nullable = false)
-    private boolean used;
+    @Column(name = "is_used", nullable = false)
+    private boolean isUsed;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    public AuthToken(String token, User user) {
+        this.token = token;
+        this.user = user;
+        this.createdAt = LocalDateTime.now();
+        this.expiresAt = LocalDateTime.now().plusMinutes(3); // Token valid for 3 minutes
+        this.isUsed = false;
+    }
 
     public boolean isValid() {
-        return !used && LocalDateTime.now().isBefore(expiresAt);
+        return !isUsed && LocalDateTime.now().isBefore(expiresAt);
     }
 }

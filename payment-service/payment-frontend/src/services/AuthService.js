@@ -15,22 +15,24 @@ export class AuthService {
         try {
             console.log(`Envoi de la requête d'authentification à ${API_BASE_URL}/api/login`);
 
+            // --- LA CORRECTION EST ICI ---
             const response = await axios.post(`${API_BASE_URL}/api/login`, {
                 login: user.login,
                 password: user.password
+            }, {
+                // Ajoutez cet objet de configuration avec withCredentials
+                withCredentials: true
             });
+            // --- FIN DE LA CORRECTION ---
 
-            // Traiter la réponse
+            // Le reste de votre logique de traitement de la réponse...
             if (response.status === 200) {
                 console.log('Authentification réussie:', response.data);
-
-                // Stocker le token de session et l'ID de l'utilisateur
                 localStorage.setItem('sessionToken', response.data.token);
                 localStorage.setItem('userId', response.data.userId);
-
                 return {
                     success: true,
-                    redirectUrl: '/dashboard', // URL de redirection après connexion réussie
+                    redirectUrl: '/payment',
                     userId: response.data.userId
                 };
             } else {
@@ -41,28 +43,24 @@ export class AuthService {
             }
         } catch (error) {
             console.error('Login error:', error);
-
-            // Gérer les différents types d'erreurs
             if (error.response) {
-                // La requête a été faite et le serveur a répondu avec un code d'erreur
                 return {
                     success: false,
                     error: error.response.data.message || 'Authentication failed'
                 };
             } else if (error.request) {
-                // La requête a été faite mais pas de réponse reçue
                 return {
                     success: false,
                     error: 'No response from server. Please try again later.'
                 };
             } else {
-                // Une erreur s'est produite lors de la configuration de la requête
                 return {
                     success: false,
                     error: 'Connection error. Please check your network.'
                 };
             }
         }
+
     }
 
     /**

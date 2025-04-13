@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import '../global.css';
 import SPMB from '../images/SMPB.png';
 import { Card } from '../models/Card';
 import { Payment } from '../models/Payment';
@@ -14,38 +13,22 @@ const PaymentPage = () => {
         cardPart3: '',
         cardPart4: '',
         expiry: '',
-        cvc: ''
+        cvc: '',
+        cardholderName: 'Card Holder'
     });
     const [errors, setErrors] = useState({});
     const [status, setStatus] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [paymentState, setPaymentState] = useState('INPUT'); // States: INPUT, PROCESSING, OTP, COMPLETED, ERROR
-    const [otpCode, setOtpCode] = useState('');
-    const [countdown, setCountdown] = useState(0);
-    const [paymentId, setPaymentId] = useState('');
+    const [paymentState, setPaymentState] = useState('INPUT'); // States: INPUT, PROCESSING, ERROR
 
-    const PAYMENT_AMOUNT = 5.39;
+    const PAYMENT_AMOUNT = 45.99;
 
     // Check if user is authenticated
     useEffect(() => {
-        if (!AuthService.isAuthenticated()) {
+        if (!AuthService.isLoggedIn()) {
             window.location.href = '/login';
         }
     }, []);
-
-    // Start countdown timer for OTP
-    useEffect(() => {
-        let timer;
-        if (paymentState === 'OTP' && countdown > 0) {
-            timer = setTimeout(() => {
-                setCountdown(countdown - 1);
-            }, 1000);
-        } else if (countdown === 0 && paymentState === 'OTP') {
-            setPaymentState('ERROR');
-            setStatus('OTP verification timed out. Please try again.');
-        }
-        return () => clearTimeout(timer);
-    }, [countdown, paymentState]);
 
     // Handle input changes with validation
     const handleChange = (e) => {
@@ -84,9 +67,9 @@ const PaymentPage = () => {
         } else if (name === 'cvc' && value.length <= 4 && /^\d*$/.test(value)) {
             // Handle CVC input (digits only)
             setFormData(prev => ({ ...prev, [name]: value }));
-        } else if (name === 'otpCode' && value.length <= 6 && /^\d*$/.test(value)) {
-            // Handle OTP input
-            setOtpCode(value);
+        } else if (name === 'cardholderName') {
+            // Handle cardholder name
+            setFormData(prev => ({ ...prev, [name]: value }));
         }
     };
 
@@ -99,7 +82,8 @@ const PaymentPage = () => {
             formData.cardPart3,
             formData.cardPart4,
             formData.expiry,
-            formData.cvc
+            formData.cvc,
+            formData.cardholderName
         );
         const fullCardNumber = card.getFullCardNumber();
 
@@ -149,18 +133,17 @@ const PaymentPage = () => {
                 formData.cardPart3,
                 formData.cardPart4,
                 formData.expiry,
-                formData.cvc
+                formData.cvc,
+                formData.cardholderName
             );
 
-            const payment = new Payment(card, PAYMENT_AMOUNT);
+            const payment = new Payment(card, PAYMENT_AMOUNT, formData.cardholderName);
             const result = await PaymentService.processPayment(payment);
 
             // Handle payment response
             if (result.success) {
-                setPaymentId(result.paymentId);
-                setPaymentState('OTP');
-                setStatus('Card verified. An OTP code has been sent to your registered mobile number. Please enter it below.');
-                setCountdown(300); // 5 minutes countdown
+                // Redirect to the verification page with payment ID
+                window.location.href = `/verification?paymentId=${result.paymentId || 'pending'}`;
             } else {
                 setPaymentState('ERROR');
                 setStatus(result.message || 'Payment verification failed');
@@ -174,36 +157,6 @@ const PaymentPage = () => {
         }
     };
 
-    // Handle OTP verification
-    const handleOtpSubmit = async (e) => {
-        e.preventDefault();
-
-        if (otpCode.length !== 6) {
-            setErrors(prev => ({ ...prev, otp: 'OTP code must be 6 digits' }));
-            return;
-        }
-
-        setIsProcessing(true);
-        setStatus('Verifying OTP code...');
-
-        try {
-            // Complete payment with OTP
-            const result = await PaymentService.completePayment(paymentId, otpCode);
-
-            if (result.success) {
-                setPaymentState('COMPLETED');
-                setStatus('Payment completed successfully! Transaction ID: ' + result.transactionId);
-            } else {
-                setErrors(prev => ({ ...prev, otp: result.message || 'Invalid OTP code' }));
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            setErrors(prev => ({ ...prev, otp: 'An error occurred while verifying OTP' }));
-        } finally {
-            setIsProcessing(false);
-        }
-    };
-
     // Auto-focus next field when current is complete
     const handleCardInputKeyUp = (e, nextFieldName) => {
         if (e.target.value.length === 4 && nextFieldName) {
@@ -211,19 +164,12 @@ const PaymentPage = () => {
         }
     };
 
-    // Format time for countdown display
-    const formatTime = (seconds) => {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-    };
-
     return (
         <div className="payment-container">
             <div className="left-logo">
                 <img src={SPMB} alt="Bank Logo" />
             </div>
-            <div className="amount">{PAYMENT_AMOUNT} USD</div>
+            <div className="amount">{PAYMENT_AMOUNT} EURO</div>
             <div className="merchant">Grapes</div>
             {status && <div className="status-message">{status}</div>}
 
@@ -231,53 +177,55 @@ const PaymentPage = () => {
             {paymentState === 'INPUT' && (
                 <form onSubmit={handleSubmit}>
                     {/* Card number input fields (4 groups of 4 digits) */}
-                    <div className="input-container card-number-group">
-                        <input
-                            type="text"
-                            name="cardPart1"
-                            value={formData.cardPart1}
-                            onChange={handleChange}
-                            onKeyUp={(e) => handleCardInputKeyUp(e, 'cardPart2')}
-                            maxLength="4"
-                            placeholder="XXXX"
-                            className="card-part"
-                            disabled={isProcessing}
-                        />
-                        <input
-                            type="text"
-                            name="cardPart2"
-                            value={formData.cardPart2}
-                            onChange={handleChange}
-                            onKeyUp={(e) => handleCardInputKeyUp(e, 'cardPart3')}
-                            maxLength="4"
-                            placeholder="XXXX"
-                            className="card-part"
-                            disabled={isProcessing}
-                        />
-                        <input
-                            type="text"
-                            name="cardPart3"
-                            value={formData.cardPart3}
-                            onChange={handleChange}
-                            onKeyUp={(e) => handleCardInputKeyUp(e, 'cardPart4')}
-                            maxLength="4"
-                            placeholder="XXXX"
-                            className="card-part"
-                            disabled={isProcessing}
-                        />
-                        <input
-                            type="text"
-                            name="cardPart4"
-                            value={formData.cardPart4}
-                            onChange={handleChange}
-                            maxLength="4"
-                            placeholder="XXXX"
-                            className="card-part"
-                            disabled={isProcessing}
-                        />
+                    <div className="input-container">
+                        <div className="card-number-group">
+                            <input
+                                type="text"
+                                name="cardPart1"
+                                value={formData.cardPart1}
+                                onChange={handleChange}
+                                onKeyUp={(e) => handleCardInputKeyUp(e, 'cardPart2')}
+                                maxLength="4"
+                                placeholder="XXXX"
+                                className="card-part"
+                                disabled={isProcessing}
+                            />
+                            <input
+                                type="text"
+                                name="cardPart2"
+                                value={formData.cardPart2}
+                                onChange={handleChange}
+                                onKeyUp={(e) => handleCardInputKeyUp(e, 'cardPart3')}
+                                maxLength="4"
+                                placeholder="XXXX"
+                                className="card-part"
+                                disabled={isProcessing}
+                            />
+                            <input
+                                type="text"
+                                name="cardPart3"
+                                value={formData.cardPart3}
+                                onChange={handleChange}
+                                onKeyUp={(e) => handleCardInputKeyUp(e, 'cardPart4')}
+                                maxLength="4"
+                                placeholder="XXXX"
+                                className="card-part"
+                                disabled={isProcessing}
+                            />
+                            <input
+                                type="text"
+                                name="cardPart4"
+                                value={formData.cardPart4}
+                                onChange={handleChange}
+                                maxLength="4"
+                                placeholder="XXXX"
+                                className="card-part"
+                                disabled={isProcessing}
+                            />
+                        </div>
+                        <span className="required">*</span>
+                        {errors.cardNumber && <span className="error">{errors.cardNumber}</span>}
                     </div>
-                    <span className="required">*</span>
-                    {errors.cardNumber && <span className="error">{errors.cardNumber}</span>}
 
                     {/* Expiry date input (MM/YY) */}
                     <div className="input-container">
@@ -309,66 +257,36 @@ const PaymentPage = () => {
                         {errors.cvc && <span className="error">{errors.cvc}</span>}
                     </div>
 
+                    {/* Cardholder name input */}
+                    <div className="input-container">
+                        <input
+                            type="text"
+                            name="cardholderName"
+                            placeholder="Cardholder Name"
+                            value={formData.cardholderName}
+                            onChange={handleChange}
+                            disabled={isProcessing}
+                        />
+                    </div>
+
                     {/* Submit button with dynamic text */}
                     <button type="submit" disabled={isProcessing}>
-                        {isProcessing ? 'Processing...' : `Pay ${PAYMENT_AMOUNT} USD`}
+                        {isProcessing ? 'Processing...' : `Pay ${PAYMENT_AMOUNT} EURO`}
                     </button>
                 </form>
             )}
 
-            {/* OTP Input Form */}
-            {paymentState === 'OTP' && (
-                <div className="otp-container">
-                    <div className="otp-message">
-                        <p>Enter the 6-digit OTP code sent to your registered mobile</p>
-                        <p className="countdown">Time remaining: {formatTime(countdown)}</p>
-                    </div>
-                    <form onSubmit={handleOtpSubmit}>
-                        <input
-                            type="text"
-                            name="otpCode"
-                            placeholder="Enter OTP"
-                            value={otpCode}
-                            onChange={handleChange}
-                            maxLength="6"
-                            className="otp-input"
-                            disabled={isProcessing}
-                        />
-                        {errors.otp && <span className="error">{errors.otp}</span>}
-                        <button type="submit" disabled={isProcessing}>
-                            {isProcessing ? 'Verifying...' : 'Verify OTP'}
-                        </button>
-                    </form>
-                </div>
-            )}
-
-            {/* Payment Completed */}
-            {paymentState === 'COMPLETED' && (
-                <div className="payment-success">
-                    <svg className="checkmark-circle" width="64" height="64" viewBox="0 0 52 52">
-                        <circle className="checkmark-circle-bg" cx="26" cy="26" r="25" fill="none" />
-                        <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-                    </svg>
-                    <h3>Payment Successful!</h3>
-                    <p>Thank you for your payment.</p>
-                    <button onClick={() => window.location.href = '/'}>Return to Homepage</button>
-                </div>
-            )}
-
             {/* Payment Failed */}
             {paymentState === 'ERROR' && (
-                <div className="payment-error">
-                    <svg className="error-circle" width="64" height="64" viewBox="0 0 52 52">
-                        <circle className="error-circle-bg" cx="26" cy="26" r="25" fill="none" />
-                        <path className="error-x" fill="none" d="M16 16 36 36 M36 16 16 36" />
-                    </svg>
-                    <h3>Payment Failed</h3>
-                    <p>{status}</p>
+                <div>
+                    <p className="error-message">{status}</p>
                     <button onClick={() => {
                         setPaymentState('INPUT');
                         setStatus('');
                         setErrors({});
-                    }}>Try Again</button>
+                    }}>
+                        Try Again
+                    </button>
                 </div>
             )}
 
@@ -383,6 +301,8 @@ const PaymentPage = () => {
                     alt="Visa"
                 />
             </div>
+
+            <p className="security-note">Secured by 3D Secure protocol</p>
         </div>
     );
 };

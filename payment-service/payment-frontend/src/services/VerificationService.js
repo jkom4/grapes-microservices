@@ -1,23 +1,76 @@
-import { API_CONFIG } from './config';
-//import { PaymentVerification } from '../models/PaymentVerification';
+// src/services/VerificationService.js
+import axios from 'axios';
 
-export class VerificationService {
-    // Static method to verify payment with OTP
-    static async verifyPayment(verification) {
+// Base URL for API endpoints
+const API_URL = 'http://localhost:8043/api';
+
+// Axios instance with configuration
+const apiClient = axios.create({
+    baseURL: API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: true // Important for maintaining session
+});
+
+export const VerificationService = {
+    /**
+     * Verify payment with OTP code
+     * @param {PaymentVerification} verification - The verification details with OTP code
+     * @returns {Promise} - Promise with verification result
+     */
+    verifyPayment: async (verification) => {
         try {
-            // Send verification data to dedicated verification endpoint
-            const response = await fetch(`${API_CONFIG.VERIFICATION_BASE_URL}/payment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(verification.toJSON())  // Convert verification object to JSON
-            });
+            const response = await apiClient.post('/payment/complete', verification.toJSON());
 
-            // Return boolean indicating success/failure
-            return response.ok;
+            if (response.data.success) {
+                return {
+                    success: true,
+                    message: response.data.message,
+                    transactionId: response.data.transactionId || 'Transaction completed'
+                };
+            } else {
+                return {
+                    success: false,
+                    message: response.data.message || 'Verification failed'
+                };
+            }
         } catch (error) {
-            console.error('Error submitting payment:', error);
-            // Throw standardized error for consistent handling
-            throw new Error('Payment verification failed');
+            console.error('Verification service error:', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'An error occurred during verification'
+            };
+        }
+    },
+
+    /**
+     * Get payment details based on payment ID
+     * @param {string} paymentId - The payment ID
+     * @returns {Promise} - Promise with payment details
+     */
+    getPaymentDetails: async (paymentId) => {
+        try {
+            // In a real system, this would fetch actual details from the server
+            // For this example, we'll return mock data
+            // You could implement an actual API call like:
+            // const response = await apiClient.get(`/payment/details/${paymentId}`);
+            // return response.data;
+
+            // Mock data
+            return {
+                merchantName: 'Grapes',
+                amount: 'EURO 45.99 €',
+                cardNumber: 'XXXX XXXX XXXX 0237',
+                dateTime: new Date().toLocaleString()
+            };
+        } catch (error) {
+            console.error('Error fetching payment details:', error);
+            return {
+                merchantName: 'Grapes',
+                amount: 'EURO 45.99 €',
+                cardNumber: 'XXXX XXXX XXXX 0237'
+            };
         }
     }
-}
+};

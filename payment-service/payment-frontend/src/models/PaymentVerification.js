@@ -1,17 +1,16 @@
-// src/models/PaymentVerification.js
 
+// src/models/PaymentVerification.js
 export class PaymentVerification {
-    /**
-     * Constructeur de la classe PaymentVerification
-     * @param {string} paymentId - Identifiant du paiement
-     * @param {string} verificationCode - Code de vérification
-     * @param {number} amount - Montant du paiement (optionnel)
-     */
-    constructor(paymentId, verificationCode, amount = null) {
+    constructor(paymentToken, paymentId = null) {
+        this.paymentToken = paymentToken;
         this.paymentId = paymentId;
-        this.verificationCode = verificationCode;
-        this.amount = amount;
+    }
+
+    // Convert to JSON for API requests
+    toJSON() {
+        return {
+            paymentToken: this.paymentToken,
+            paymentId: this.paymentId
+        };
     }
 }
-
-export default PaymentVerification;
