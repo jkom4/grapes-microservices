@@ -10,6 +10,7 @@ import grapes.microservices.salesservice.repositories.OrderRepository;
 import grapes.microservices.salesservice.utils.InvoiceGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
@@ -47,6 +48,7 @@ public class OrderService {
 
 
     //  Finalize payment
+    @CacheEvict(value = "articles", allEntries = true)
     public void finalizePaymentAndClearCart(Integer orderId, String address, String phoneNumber, String customerName, String country, String postalCode) throws FileNotFoundException {
         Order order = getOrderById(orderId);
         List<OrderItem> items = getValidOrderItems(orderId);

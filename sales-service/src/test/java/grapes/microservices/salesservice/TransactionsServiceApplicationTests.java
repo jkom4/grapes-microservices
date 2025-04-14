@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles(value = "test")
-@Import(RabbitTestConfig.class) // 👈 ajoute ta config ici
+@Import(RabbitTestConfig.class)
 class TransactionsServiceApplicationTests {
     @Autowired
     private MockMvc mockMvc;

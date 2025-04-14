@@ -27,7 +27,7 @@ public class ArticleService {
         return articleRepository.save(article);
     }
 
-    @CacheEvict(value = "articles", key = "#id")  // Only clears the cache for the updated article
+    @CacheEvict(value = "articles", allEntries = true)
     public Article updateArticle(Integer id, Article updatedData) {
         if (!articleRepository.existsById(id)) {
             throw new ResourceNotFoundException("Article not found with id: " + id);
