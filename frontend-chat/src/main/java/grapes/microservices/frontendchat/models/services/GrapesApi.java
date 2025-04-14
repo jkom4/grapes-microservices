@@ -35,10 +35,10 @@ public class GrapesApi implements IGrapesApi {
             System.out.println("[GrapesApi] topics loaded");
             return List.of(
                     new Topic(1, "General", "Hi Can someone help me"),
-                    new Topic(2, "Delivery", "Ok thanks for the help"),
-                    new Topic(3, "Delivery", "Ok thanks for the help"),
-                    new Topic(254, "Delivery", "Ok thanks for the help "),
-                    new Topic(255, "Discount", "I have a problem with this article")
+                    new Topic(2, "Conseil fruits de saison", "Ok thanks for the help"),
+                    new Topic(3, "Problème livraison", "Ok thanks for the help"),
+                    new Topic(254, "Suggestion", "Ok thanks for the help "),
+                    new Topic(255, "Question sur les produits", "I have a problem with this article")
             );
         }, executor);
     }
@@ -82,9 +82,10 @@ public class GrapesApi implements IGrapesApi {
 //                    new Message(1, new User(10, "Nasser"), "Vous faites quoi", LocalDateTime.now()),
 //                    new Message(1, new User(10, "Nasser"), "Vous faites quoi", LocalDateTime.now()),
 //                    new Message(1, new User(10, "Nasser"), "Vous faites quoi", LocalDateTime.now()),
-                    new Message(1, new User(10, "Nasser"), "Vous faites quoi", LocalDateTime.now()),
-                    new Message(1, new User(10, "Nasser"), "Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? Vous faites quoi? ", LocalDateTime.now()),
-                    new Message(1, new User(1, "Loic"), "Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien Rien ", LocalDateTime.now())
+                    new Message(1, new User(1, "Jean"), "Salut, j'ai un problème avec la livraison, le produit n'est pas arrivé", LocalDateTime.now()),
+                    new Message(1, new User(2, "Vendeur"), "Un instant, je vais vérifier", LocalDateTime.now().plusMinutes(1)),
+                    new Message(1, new User(10, "Jack"), "Pareil, On me dit que la livraison est arrivée mais rien", LocalDateTime.now().plusMinutes(2)),
+                    new Message(1, new User(2, "Vendeur"), "Ok, je vais voir ", LocalDateTime.now().plusMinutes(3))
             );
         }, executor);
     }
