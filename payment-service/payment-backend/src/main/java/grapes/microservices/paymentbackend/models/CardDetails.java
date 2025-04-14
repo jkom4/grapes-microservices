@@ -1,71 +1,82 @@
+// --- START OF payment-backend/src/main/java/grapes/microservices/paymentbackend/models/CardDetails.java ---
 package grapes.microservices.paymentbackend.models;
 
-import lombok.AllArgsConstructor; // Vous pouvez la laisser si vous l'utilisez vraiment
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 
-@Data
+@Data // Gère getters, setters, toString, equals, hashCode
 @Entity
-@Table(name = "transaction") // Assurez-vous que c'est la bonne table
+@Table(name = "transaction") // Assurez-vous que 'transaction' est la bonne table pour les détails de carte
+@NoArgsConstructor // Nécessaire pour JPA
 public class CardDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_transaction")
+    @Column(name = "id_transaction") // Correspond à votre schéma Liquibase pour la clé primaire
     private Long id;
 
-    @Column(name = "message")
-    private String cardDetails; // Stocke la version masquée/JSON
+    @Column(name = "message") // Stocke la version masquée/JSON ou autre info
+    private String cardDetails;
 
     @Column(name = "id_client", nullable = false)
-    private Long userId; // Utilisé par findByCardNumberAndUserId
+    private Long userId;
 
-    // !! MODIFICATION CRUCIALE : Retirer @Transient et mapper à une colonne !!
-    @Column(name = "card_number_persistent") // Utilisez un nom de colonne approprié
-    private String cardNumber; // Ce champ doit être persistant pour la requête
+    // --- MODIFICATIONS ---
+    // Retrait de @Transient et ajout de @Column pour la persistance
+    @Column(name = "card_number_persistent", nullable = true) // Rendre nullable=false si requis par la logique métier
+    private String cardNumber;
 
-    // Vous devrez peut-être aussi rendre ces champs persistants si nécessaire
-    // Si vous les laissez @Transient, ils ne seront pas sauvés/lus de la DB
-    @Transient // ou @Column(name="...") si vous voulez le persister
+    // Garder les autres comme Transient s'ils ne sont pas en BDD,
+    // ou ajouter @Column si vous voulez les persister.
+    @Transient
     private String expirationDate;
 
-    @Transient // ou @Column(name="...") si vous voulez le persister
+    @Transient
     private String cvv;
 
-    @Transient // ou @Column(name="...") si vous voulez le persister
-    private String cardholderName;
+    // RETIRÉ : Le nom n'est plus géré ici directement
+    // @Transient
+    // private String cardholderName;
+    // --- FIN MODIFICATIONS ---
 
-    // Constructeur par défaut
-    public CardDetails() {}
 
-    // Constructeur avec paramètres
-    public CardDetails(String cardNumber, String expirationDate, String cvv, String cardholderName, User user) {
-        // Assigner la valeur au champ persistant cardNumber
+    // Constructeur modifié (sans cardholderName, utilise User pour le nom)
+    public CardDetails(String cardNumber, String expirationDate, String cvv, User user) {
+        // Assigner aux champs (y compris le persistant cardNumber)
         this.cardNumber = cardNumber;
-
-        // Initialiser les champs transients si vous les gardez
         this.expirationDate = expirationDate;
         this.cvv = cvv;
-        this.cardholderName = cardholderName;
 
         if (user != null) {
             this.userId = user.getId();
-        }
+            // Utilise le login de l'utilisateur comme nom récupéré pour l'affichage/log si besoin
+            String userNameFromUserObject = user.getLogin();
 
-        // Mise à jour de la chaîne JSON (peut-être redondante maintenant)
-        this.cardDetails = String.format(
-                "{\"cardNumber\":\"%s\",\"expirationDate\":\"%s\",\"cardholderName\":\"%s\"}",
-                maskCardNumber(cardNumber), expirationDate, cardholderName
-        );
+            // Mise à jour de la chaîne JSON (sans cardholderName explicite, utilise le nom de l'user)
+            this.cardDetails = String.format(
+                    "{\"cardNumber\":\"%s\",\"expirationDate\":\"%s\",\"retrievedUserName\":\"%s\"}",
+                    maskCardNumber(cardNumber), expirationDate, userNameFromUserObject
+            );
+        } else {
+            this.userId = null; // Ou gérer l'erreur
+            this.cardDetails = String.format( // Version sans nom utilisateur
+                    "{\"cardNumber\":\"%s\",\"expirationDate\":\"%s\"}",
+                    maskCardNumber(cardNumber), expirationDate
+            );
+            System.err.println("Warning: Creating CardDetails with a null User object.");
+        }
     }
 
     // Méthode pour masquer le numéro de carte
     private String maskCardNumber(String number) {
         if (number == null || number.length() < 16) {
-            return number;
+            return number != null ? number : "****"; // Gère null
         }
+        // Masque tout sauf les 4 derniers chiffres
         return "XXXXXXXXXXXX" + number.substring(number.length() - 4);
     }
 
-    // Getters et Setters gérés par @Data
+    // Les Getters et Setters sont générés par @Data
 }
+// --- END OF payment-backend/src/main/java/grapes/microservices/paymentbackend/models/CardDetails.java ---

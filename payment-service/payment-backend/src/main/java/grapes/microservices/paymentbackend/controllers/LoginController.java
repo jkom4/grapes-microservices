@@ -1,12 +1,14 @@
+// --- START OF payment-backend/src/main/java/grapes/microservices/paymentbackend/controllers/LoginController.java ---
 package grapes.microservices.paymentbackend.controllers;
 
 import grapes.microservices.paymentbackend.dto.LoginRequest;
 import grapes.microservices.paymentbackend.dto.LoginResponse;
-import grapes.microservices.paymentbackend.dto.PaymentInitiateRequest; // Gardé au cas où vous l'utiliseriez ailleurs
+import grapes.microservices.paymentbackend.dto.PaymentInitiateRequest; // Gardé
 import grapes.microservices.paymentbackend.models.User;
 import grapes.microservices.paymentbackend.services.UserService;
 import jakarta.servlet.http.HttpServletRequest; // Import nécessaire
 import jakarta.servlet.http.HttpSession; // Import nécessaire
+import lombok.extern.slf4j.Slf4j; // Ajout de Slf4j pour les logs
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal; // Import BigDecimal
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,141 +24,140 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Controller
-@CrossOrigin(origins = "http://localhost:3000") // Autorise les requêtes du frontend React
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true") // Important: allowCredentials
+@Slf4j // Annotation pour le logger
 public class LoginController {
 
     private final UserService userService;
-
-    // URL du frontend React
     private static final String FRONTEND_URL = "http://localhost:3000";
+
+    // Session attribute keys for initial payment data
+    private static final String SESSION_INIT_AMOUNT_KEY = "initialPaymentAmount";
+    private static final String SESSION_INIT_MERCHANT_KEY = "initialMerchantName";
+    private static final String SESSION_INIT_PAYMENT_ID_KEY = "initialPaymentId";
+
 
     @Autowired
     public LoginController(UserService userService) {
         this.userService = userService;
     }
 
-    // !! RETIREZ CES VARIABLES STATIQUES !! Elles sont remplacées par la gestion de session HTTP
-    // private static boolean IS_CONNECTED = false;
-    // private static Long CONNECTED_USER_ID = null;
-
-    // Endpoint pour initier un paiement avec un format simplifié (inchangé a priori)
+    // Endpoint pour initier un paiement depuis un site externe (ou autre)
     @PostMapping("/api/login/payment-initiate")
     @ResponseBody
-    public ResponseEntity<?> initiatePayment(@RequestBody PaymentInitiateRequest paymentRequest) {
+    // Ajout de HttpServletRequest pour accéder à la session
+    public ResponseEntity<?> initiatePayment(@RequestBody PaymentInitiateRequest paymentRequest, HttpServletRequest request) {
         try {
-            if (paymentRequest.getAmount() == null || paymentRequest.getClientId() == null) {
+            BigDecimal amount = paymentRequest.getAmount();
+            String clientId = paymentRequest.getClientId(); // Considéré comme l'ID/nom du marchand
+
+            if (amount == null || clientId == null || clientId.isEmpty()) {
+                log.warn("[LoginController] Missing amount or clientId in payment initiation request.");
                 return ResponseEntity.badRequest().body(Map.of(
                         "status", "error",
-                        "message", "Amount and clientId are required"
+                        "message", "Amount and clientId (merchant identifier) are required"
                 ));
             }
-            String paymentId = UUID.randomUUID().toString();
-            System.out.println("[INFO] Payment initiated - ID: " + paymentId
-                    + ", Amount: " + paymentRequest.getAmount()
-                    + ", Client: " + paymentRequest.getClientId());
 
-            String redirectUrl = FRONTEND_URL + "/login";
+            // Générer un ID pour cette *tentative* d'initiation
+            String initialPaymentId = UUID.randomUUID().toString();
+            log.info("[LoginController] Payment initiated via external request - Initial ID: {}, Amount: {}, Merchant: {}",
+                    initialPaymentId, amount, clientId);
+
+            // --- STOCKAGE EN SESSION ---
+            HttpSession session = request.getSession(true); // Obtient ou crée une session
+            session.setAttribute(SESSION_INIT_AMOUNT_KEY, amount);
+            session.setAttribute(SESSION_INIT_MERCHANT_KEY, clientId); // Stocke l'ID client comme nom de marchand
+            session.setAttribute(SESSION_INIT_PAYMENT_ID_KEY, initialPaymentId);
+            log.info("[LoginController] Stored initial payment details in session ID: {}", session.getId());
+            // ---------------------------
+
+            // Préparer la redirection vers la page de login du frontend
+            String redirectUrl = FRONTEND_URL + "/login"; // Pas besoin de passer l'ID ici, il est en session
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
-            response.put("message", "Payment initiated. Redirecting to login page.");
+            response.put("message", "Payment context created. Redirecting to login page.");
             response.put("redirectUrl", redirectUrl);
-            response.put("paymentId", paymentId);
+
             return ResponseEntity.ok(response);
+
         } catch (Exception e) {
+            log.error("[LoginController] Failed to initiate payment context: {}", e.getMessage(), e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("status", "error");
-            errorResponse.put("message", "Failed to initiate payment: " + e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
+            errorResponse.put("message", "Failed to initiate payment context: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
-    // Endpoint de redirection (inchangé a priori)
+    // Endpoint de redirection (moins utile, mais gardé pour compatibilité potentielle)
     @GetMapping("/api/payment/redirect")
-    public ResponseEntity<?> redirectToLogin(@RequestParam String paymentId) {
-        if (paymentId != null && !paymentId.isEmpty()) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Location", FRONTEND_URL + "/login?paymentId=" + paymentId);
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+    public ResponseEntity<?> redirectToLogin(@RequestParam(required = false) String paymentId) { // Rend le param optionnel
+        if (paymentId != null) {
+            log.warn("[LoginController] Received redirect request for paymentId {}, but session should handle context. Redirecting to login.", paymentId);
         } else {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "status", "error",
-                    "message", "Invalid payment ID"
-            ));
+            log.info("[LoginController] Received redirect request without paymentId. Redirecting to login.");
         }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location", FRONTEND_URL + "/login");
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
-    // Endpoint de connexion (corrigé)
+    // Endpoint de connexion
     @PostMapping("/api/login")
     @ResponseBody
-    // Ajoutez HttpServletRequest comme paramètre pour accéder à la session
     public ResponseEntity<LoginResponse> connect(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         try {
             String login = loginRequest.getLogin();
             String password = loginRequest.getPassword();
-
             boolean userVerified = userService.verifyUser(login, password);
 
             if (userVerified) {
                 Optional<User> userOpt = userService.findByLogin(login);
-                System.out.println("[INFO] User found: " + userOpt.isPresent());
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
-
-                    // ** GESTION DE LA SESSION HTTP **
                     HttpSession session = request.getSession(true); // Obtenir/Créer la session
-                    session.setAttribute("userId", user.getId());     // Stocker l'ID utilisateur
-                    session.setAttribute("userLogin", user.getLogin()); // Stocker le login utilisateur
+                    session.setAttribute("userId", user.getId());
+                    session.setAttribute("userLogin", user.getLogin());
+                    log.info("[LoginController] User ID {} and Login '{}' set in session {}", user.getId(), user.getLogin(), session.getId());
 
-                    System.out.println("[INFO] User ID " + user.getId() + " and Login '" + user.getLogin() + "' set in session " + session.getId());
-
-                    String sessionToken = UUID.randomUUID().toString(); // Peut être utilisé pour autre chose si besoin
+                    Object initialAmount = session.getAttribute(SESSION_INIT_AMOUNT_KEY);
+                    if (initialAmount != null) {
+                        log.info("[LoginController] Found initial payment details in session for user {}.", login);
+                    }
 
                     LoginResponse response = new LoginResponse(
-                            sessionToken,
+                            session.getId(), // Utilise l'ID de session comme "token" - à adapter si JWT etc.
                             "success",
                             "User authenticated successfully",
                             user.getId()
                     );
-
                     return ResponseEntity.ok().body(response);
+                } else {
+                    // Cas très improbable si verifyUser réussit mais findByLogin échoue ensuite
+                    log.error("[LoginController] User verified but could not be found for login: {}", login);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                            new LoginResponse(null, "error", "Internal server error retrieving user data", null)
+                    );
                 }
             }
 
-            // Échec de l'authentification ou utilisateur non trouvé
-            // Optionnel: invalider toute session existante associée à cette requête
+            // Échec authentification
+            log.warn("[LoginController] Invalid credentials for login attempt: {}", login);
             HttpSession existingSession = request.getSession(false);
             if (existingSession != null) {
                 existingSession.invalidate();
-                System.out.println("[INFO] Invalidated existing session on login failure: " + existingSession.getId());
+                log.info("[LoginController] Invalidated existing session on login failure: {}", existingSession.getId());
             }
-
-            return ResponseEntity.status(401).body(
-                    new LoginResponse(
-                            null,
-                            "error",
-                            "Invalid credentials",
-                            null
-                    )
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new LoginResponse(null, "error", "Invalid credentials", null)
             );
         } catch (NoSuchAlgorithmException e) {
-            // Loggez l'erreur serveur
-            System.err.println("[ERROR] Password hashing algorithm not found: " + e.getMessage());
-            return ResponseEntity.status(500).body(
-                    new LoginResponse(
-                            null,
-                            "error",
-                            "Internal server error during authentication",
-                            null
-                    )
+            log.error("[LoginController] Password hashing algorithm error: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new LoginResponse(null, "error", "Internal server error during authentication", null)
             );
         }
     }
-
-    // !! RETIREZ CES MÉTHODES STATIQUES !! Elles ne sont plus pertinentes
-    // public static boolean isConnected() {
-    //     return IS_CONNECTED;
-    // }
-    // public static Long getConnectedUserId() {
-    //     return CONNECTED_USER_ID;
-    // }
 }
+// --- END OF payment-backend/src/main/java/grapes/microservices/paymentbackend/controllers/LoginController.java ---

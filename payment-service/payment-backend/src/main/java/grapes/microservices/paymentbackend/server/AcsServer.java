@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional; // Import pour @Transactional
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLSocket;
@@ -22,13 +23,13 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.time.LocalDateTime;
+import java.time.LocalDateTime; // Import LocalDateTime
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService; // Import nécessaire
+import java.util.concurrent.ExecutorService;
 
 @Component
 @Slf4j
@@ -40,25 +41,25 @@ public class AcsServer implements CommandLineRunner {
     @Value("${app.ports.acs.money}")
     private int acsMoneyPort;
 
-    // Keystore pour le serveur ACS lui-même (utilisé pour créer SSLServerSocket)
-    @Value("${app.keystore.path}")
+    // Keystore pour le serveur ACS lui-même
+    @Value("${app.keystore.path}") // Probablement app.keystore.acs.path selon application.properties
     private String acsKeystorePath;
 
-    @Value("${app.keystore.password}")
+    @Value("${app.keystore.password}") // Probablement app.keystore.acs.password
     private String acsKeystorePassword;
 
-    // Clé privée du serveur ACS (utilisée pour signer les réponses)
-    @Value("${app.keystore.key.alias}")
-    private String acsKeyAlias; // Renommé pour clarté
+    // Clé privée du serveur ACS
+    @Value("${app.keystore.key.alias}") // Probablement app.keystore.acs.key.alias
+    private String acsKeyAlias;
 
-    @Value("${app.keystore.key.password}")
-    private String acsKeyPassword; // Renommé pour clarté
+    @Value("${app.keystore.key.password}") // Probablement app.keystore.acs.key.password
+    private String acsKeyPassword;
 
-    // Truststore pour faire confiance au client (le backend principal)
+    // Truststore pour faire confiance au client (payment-backend)
     @Value("${app.truststore.client.path}")
     private String clientTruststorePath;
 
-    @Value("${app.truststore.client.password}") // Assurez-vous que cette propriété existe dans application.properties
+    @Value("${app.truststore.client.password}")
     private String clientTruststorePassword;
 
     private final UserRepository userRepository;
@@ -67,8 +68,8 @@ public class AcsServer implements CommandLineRunner {
 
     private static final String SOURCE = "acs";
 
-    // Map to store temporary tokens during verification (inchangé)
-    private final Map<String, String> pendingTokens = new ConcurrentHashMap<>();
+    // Map pour stocker les tentatives échouées (optionnel, mais laissé pour le contexte)
+    private final Map<Long, Integer> failedAttempts = new ConcurrentHashMap<>();
 
     @Autowired
     public AcsServer(UserRepository userRepository, AuthTokenRepository tokenRepository, SmsService smsService) {
@@ -79,69 +80,51 @@ public class AcsServer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Use a cached thread pool for better management
         ExecutorService executorService = Executors.newCachedThreadPool();
-
-        // Start the main ACS server in a separate thread
-        executorService.submit(this::startMainServer);
-
-        // Start the ACS Money port server in a separate thread
-        executorService.submit(this::startMoneyServer);
-
-        // Consider shutting down the executor service gracefully on application exit
-        // Runtime.getRuntime().addShutdownHook(new Thread(executorService::shutdown));
+        executorService.submit(this::startMainServer); // Pour l'initiation (/initiate)
+        executorService.submit(this::startMoneyServer); // Pour la vérification (/complete)
     }
 
     /**
-     * Start the main ACS server that handles client requests
+     * Start the main ACS server that handles client requests (initiation)
      */
     private void startMainServer() {
-        log.info("Attempting to start ACS server on port {}", acsPort);
-        // **CORRECTED CALL:** Pass only 3 arguments (port, keystore path, keystore password)
+        log.info("Attempting to start ACS main server on port {}", acsPort);
         try (SSLServerSocket serverSocket = SslUtils.createSslServerSocket(
                 acsPort,
-                acsKeystorePath, // Keystore du serveur ACS
-                acsKeystorePassword)) { // Mot de passe du keystore ACS
+                acsKeystorePath,
+                acsKeystorePassword)) {
 
-            log.info("ACS server successfully listening on port {}", acsPort);
-            // Accept client connections in a loop
+            log.info("ACS main server successfully listening on port {}", acsPort);
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
-                    // Configure client authentication requirement if needed
-                    // clientSocket.setNeedClientAuth(true); // Example: Require client cert
                     log.info("ACS main server accepted connection from {}", clientSocket.getRemoteSocketAddress());
-                    // Handle each client request in a new thread or using an ExecutorService
                     Executors.newSingleThreadExecutor().submit(() -> handleClientRequest(clientSocket));
                 } catch (Exception e) {
                     log.error("Error accepting connection on ACS main port {}: {}", acsPort, e.getMessage(), e);
-                    // Optionally break the loop or wait before retrying
                 }
             }
         } catch (Exception e) {
             log.error("Fatal error starting ACS main server on port {}: {}", acsPort, e.getMessage(), e);
-            // Consider application shutdown or alternative actions
         }
     }
 
     /**
-     * Start the ACS Money server that handles verification requests
+     * Start the ACS Money server that handles verification requests from ACQ
      */
     private void startMoneyServer() {
         log.info("Attempting to start ACS Money server on port {}", acsMoneyPort);
-        // **CORRECTED CALL:** Pass only 3 arguments (port, keystore path, keystore password)
         try (SSLServerSocket serverSocket = SslUtils.createSslServerSocket(
                 acsMoneyPort,
-                acsKeystorePath,       // Assuming same keystore for simplicity
+                acsKeystorePath,   // Utilise le même keystore/certificat que le port principal
                 acsKeystorePassword)) {
 
             log.info("ACS Money server successfully listening on port {}", acsMoneyPort);
-            // Accept connections in a loop
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     SSLSocket acqSocket = (SSLSocket) serverSocket.accept();
                     log.info("ACS Money server accepted connection from {}", acqSocket.getRemoteSocketAddress());
-                    // Handle each verification request
                     Executors.newSingleThreadExecutor().submit(() -> handleVerificationRequest(acqSocket));
                 } catch (Exception e) {
                     log.error("Error accepting connection on ACS Money port {}: {}", acsMoneyPort, e.getMessage(), e);
@@ -154,67 +137,49 @@ public class AcsServer implements CommandLineRunner {
 
 
     /**
-     * Handle a client request (from payment-backend's CardService)
-     * @param clientSocket the client socket
+     * Handle a client request (from payment-backend's CardService during /initiate)
      */
     private void handleClientRequest(SSLSocket clientSocket) {
+        // Logique pour initier: vérifier signature client, générer OTP, sauvegarder, envoyer SMS, renvoyer réponse signée
+        // (Cette partie semble fonctionner correctement d'après les logs précédents, on ne la modifie pas pour l'instant)
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
              PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
             String data = reader.readLine();
-            log.debug("ACS Main: Received raw data: {}", data); // Debug level for potentially sensitive data
+            log.debug("ACS Main: Received raw data: {}", data);
 
             if (data == null || data.isEmpty()) {
                 log.warn("ACS Main: No data received from client.");
-                writer.println("ERROR:No data received."); // Provide clearer error
-                return;
+                writer.println("ERROR:No data received."); return;
             }
-
             Map<String, String> parsedData = DataUtils.parseData(data);
-
             String source = parsedData.get("source");
             String cardData = parsedData.get("data");
             String signature = parsedData.get("signature");
 
             if (source == null || cardData == null || signature == null) {
                 log.warn("ACS Main: Invalid data format. Missing required fields. Received: {}", data);
-                writer.println("ERROR:Invalid data format.");
-                return;
+                writer.println("ERROR:Invalid data format."); return;
             }
-
             log.info("ACS Main: Processing request from source: {}", source);
 
-            // Expecting requests from the "client" (payment-backend)
             if ("client".equalsIgnoreCase(source)) {
-                // Verify signature using client's public key from the truststore
                 PublicKey clientPublicKey = KeystoreUtils.getCertificate(
-                        clientTruststorePath, // Path to truststore containing the client's cert
-                        clientTruststorePassword, // Password for this truststore
-                        "client_trusted" // Alias of the client's certificate in the truststore
+                        clientTruststorePath, clientTruststorePassword, "client_trusted" // Assurez-vous que l'alias est correct
                 ).getPublicKey();
 
                 if (SignUtils.verifySignature(cardData, signature, clientPublicKey)) {
                     log.info("ACS Main: Client signature verified successfully for data: {}", cardData);
-
-                    // Parse card data (format: "card=XXXX#date=MM/YYYY")
-                    // Consider a more robust parsing method (e.g., regex or dedicated parser)
-                    Map<String, String> cardDetailsMap = DataUtils.parseData(cardData.replace("#", "&")); // Reuse parseData
+                    Map<String, String> cardDetailsMap = DataUtils.parseData(cardData.replace("#", "&"));
                     String cardNumber = cardDetailsMap.get("card");
-                    String expirationDate = cardDetailsMap.get("date"); // Not used here, but parsed
-                    // String amount = cardDetailsMap.get("amount"); // If amount/merchant were included
-                    // String merchant = cardDetailsMap.get("merchant");
-
                     if (cardNumber == null) {
                         log.warn("ACS Main: Card number missing in data: {}", cardData);
-                        writer.println("ERROR:Card number missing.");
-                        return;
+                        writer.println("ERROR:Card number missing."); return;
                     }
+                    log.info("ACS Main: Received card number (masked for log): {}", "****" + cardNumber.substring(Math.max(0, cardNumber.length()-4)));
 
-                    log.info("ACS Main: Received card number: {}", cardNumber); // Masking recommended for logs
-
-                    // Find user associated with the card - **CRITICAL**: This is highly insecure and needs replacement
-                    // In a real system, the user would be identified securely, perhaps via session or token from payment backend.
-                    // This placeholder finds ANY user with a phone number.
+                    // **LOGIQUE DEMO/PLACEHOLDER POUR TROUVER L'UTILISATEUR**
+                    // A Remplacer par une méthode sécurisée pour identifier l'utilisateur associé à la requête/session
                     Optional<User> userOpt = userRepository.findAll().stream()
                             .filter(user -> user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty())
                             .findFirst(); // **INSECURE DEMO LOGIC**
@@ -222,42 +187,34 @@ public class AcsServer implements CommandLineRunner {
                     if (userOpt.isPresent()) {
                         User user = userOpt.get();
                         log.info("ACS Main: Found user {} associated with the request (DEMO LOGIC)", user.getLogin());
-
-                        // Generate OTP code
                         String otpCode = generateOtpCode();
                         log.info("ACS Main: Generated OTP code: {} for user {}", otpCode, user.getLogin());
 
-                        // Store auth code linked to the user - consider expiration
                         AuthToken token = new AuthToken(otpCode, user);
-                        tokenRepository.save(token);
-                        log.info("ACS Main: Saved OTP token {} for user {}", token.getId(), user.getLogin());
-
-                        // Send OTP via SMS (using configured SmsService)
                         try {
-                            smsService.sendOtp(user.getPhoneNumber(), otpCode);
-                            log.info("ACS Main: OTP sent via SMS to user {}", user.getLogin());
-                        } catch (RuntimeException e) {
-                            log.error("ACS Main: Failed to send SMS OTP to user {}: {}", user.getLogin(), e.getMessage());
-                            writer.println("ERROR:Failed to send OTP.");
-                            // Decide if the process should fail here or continue without SMS confirmation
-                            // For 3DS, failing here is usually correct.
-                            return;
+                            tokenRepository.save(token);
+                            log.info("ACS Main: Successfully saved AuthToken with ID {} and token value '{}' for user {}", token.getId(), token.getToken(), user.getLogin());
+                        } catch (Exception e) {
+                            log.error("ACS Main: !!! FAILED to save AuthToken for user {}: {}", user.getLogin(), e.getMessage(), e);
+                            writer.println("ERROR:Failed to process token generation."); return;
                         }
 
-                        // Sign the OTP code with ACS's private key
+                        try {
+                            log.info("ACS Main: Attempting to send OTP '{}' via SMS to {}", otpCode, user.getPhoneNumber());
+                            smsService.sendOtp(user.getPhoneNumber(), otpCode);
+                            log.info("ACS Main: SMS service call completed for user {}", user.getLogin());
+                        } catch (RuntimeException e) {
+                            log.error("ACS Main: Failed to send SMS OTP to user {}: {}", user.getLogin(), e.getMessage());
+                            writer.println("ERROR:Failed to send OTP."); return;
+                        }
+
                         PrivateKey acsPrivateKey = KeystoreUtils.getPrivateKey(
-                                acsKeystorePath,
-                                acsKeystorePassword,
-                                acsKeyAlias, // Use ACS key alias
-                                acsKeyPassword // Use ACS key password
+                                acsKeystorePath, acsKeystorePassword, acsKeyAlias, acsKeyPassword
                         );
-
-                        String signedOtpCode = SignUtils.signData(otpCode, acsPrivateKey);
-
-                        // Return the signed OTP code
-                        String response = "source=" + SOURCE + "&data=" + otpCode + "&signature=" + signedOtpCode;
+                        String signedOtpCode = SignUtils.signData(otpCode, acsPrivateKey); // Signe l'OTP, pas la réponse entière
+                        String response = "source=" + SOURCE + "&data=" + otpCode + "&signature=" + signedOtpCode; // Renvoie l'OTP et sa signature
                         writer.println(response);
-                        log.info("ACS Main: Sent response to client with OTP code.");
+                        log.info("ACS Main: Sent response to client with OTP code and signature.");
 
                     } else {
                         log.warn("ACS Main: No user found for verification (using demo logic). Card: {}", cardNumber);
@@ -273,97 +230,123 @@ public class AcsServer implements CommandLineRunner {
             }
         } catch (Exception e) {
             log.error("ACS Main: Error handling client request: {}", e.getMessage(), e);
-            // Avoid sending detailed errors back to the client
+            // Envoyer une réponse d'erreur générique
             try (PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
                 writer.println("ERROR:Internal server error.");
             } catch (Exception ex) {
                 log.error("ACS Main: Error sending error response to client: {}", ex.getMessage());
             }
         } finally {
-            try {
-                if (clientSocket != null && !clientSocket.isClosed()) {
-                    clientSocket.close();
-                    log.debug("ACS Main: Closed client socket.");
-                }
-            } catch (Exception e) {
-                log.error("ACS Main: Error closing client socket: {}", e.getMessage());
-            }
+            // Fermer le socket
+            try { if (clientSocket != null && !clientSocket.isClosed()) clientSocket.close(); } catch (Exception e) { log.error("ACS Main: Error closing client socket: {}", e.getMessage()); }
         }
     }
 
 
     /**
-     * Handle a verification request from ACQ (on the money port)
-     * @param socket the client socket (ACQ)
+     * Handle a verification request from ACQ (on the money port).
+     * VERSION CORRIGÉE AVEC LOGIQUE SIMPLIFIÉE ET LOGS DÉTAILLÉS.
      */
-    private void handleVerificationRequest(SSLSocket socket) {
+    @Transactional // Ajouté pour s'assurer que le save après setUsed est bien commit
+    protected void handleVerificationRequest(SSLSocket socket) { // Changé en protected pour @Transactional
+        String receivedData = null; // Pour log même si le parsing échoue
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
 
-            String tokenValue = reader.readLine(); // Renamed for clarity
-            log.debug("ACS Money: Received raw verification request: {}", tokenValue);
+            receivedData = reader.readLine(); // Lit la ligne brute envoyée par ACQ
+            log.info("ACS Money: Received raw data from ACQ: '{}'", receivedData);
 
-            if (tokenValue == null || tokenValue.isEmpty()) {
-                writer.println("NACK"); // Negative Acknowledgement
-                log.warn("ACS Money: Empty token received for verification.");
+            // Supposition: ACQ envoie JUSTE le token OTP maintenant
+            String tokenValue = receivedData; // On considère que la ligne entière est le token
+
+            if (tokenValue == null || tokenValue.isEmpty() || tokenValue.length() != 6 || !tokenValue.matches("\\d{6}")) {
+                log.warn("ACS Money: Invalid or empty token received: '{}'. Sending NACK.", tokenValue);
+                writer.println("NACK"); // Réponse pour token invalide/vide
                 return;
             }
 
-            // Check if token exists in database and is valid
-            // Use findByToken as the ACQ doesn't know the user
+            log.info("ACS Money: Attempting to verify token '{}'.", tokenValue);
+            log.info("ACS Money: Searching for token '{}' in the database.", tokenValue);
             Optional<AuthToken> tokenOpt = tokenRepository.findByToken(tokenValue);
+
+            log.info("ACS Money: Token lookup result for '{}': Found={}", tokenValue, tokenOpt.isPresent());
 
             if (tokenOpt.isPresent()) {
                 AuthToken authToken = tokenOpt.get();
-                User tokenUser = authToken.getUser(); // Get associated user for logging
-                log.info("ACS Money: Found token {} associated with user {}", tokenValue, tokenUser != null ? tokenUser.getLogin() : "UNKNOWN");
+                log.info("ACS Money: Token ID {} found. Checking validity: isUsed={}, expiresAt={}, Now={}",
+                        authToken.getId(), authToken.isUsed(), authToken.getExpiresAt(), LocalDateTime.now());
 
-                // Check if token is valid (not expired and not used)
-                if (authToken.isValid()) { // Use the isValid method from AuthToken model
-                    // Mark token as used to prevent replay attacks
-                    authToken.setUsed(true);
-                    tokenRepository.save(authToken);
+                boolean isValid = authToken.isValid(); // Vérifie isUsed et expiresAt
+                log.info("ACS Money: Result of authToken.isValid() for token ID {}: {}", authToken.getId(), isValid);
 
-                    writer.println("ACK"); // Positive Acknowledgement
-                    log.info("ACS Money: Token verified successfully and marked as used: {}", tokenValue);
+                // --- Logique Simplifiée ---
+                if (isValid) {
+                    // Le token est trouvé et valide !
+                    authToken.setUsed(true); // Marquer comme utilisé
+                    tokenRepository.save(authToken); // Sauvegarder le changement
+                    log.info("ACS Money: Token ID {} marked as used. Sending ACK.", authToken.getId());
+                    writer.println("ACK"); // Envoyer ACK
+
+                    // Réinitialiser le compteur d'échecs si besoin (logique optionnelle)
+                    // if (authToken.getUser() != null) {
+                    //     failedAttempts.remove(authToken.getUser().getId());
+                    //     log.info("ACS Money: Cleared failed attempts count for user ID {}", authToken.getUser().getId());
+                    // }
+
                 } else {
-                    writer.println("NACK");
-                    log.warn("ACS Money: Token expired or already used: {}. Expired: {}, Used: {}",
-                            tokenValue,
-                            LocalDateTime.now().isAfter(authToken.getExpiresAt()),
-                            authToken.isUsed());
+                    // Le token est trouvé mais invalide (déjà utilisé ou expiré)
+                    log.warn("ACS Money: Token ID {} found but is invalid (Used={} or Expired={}). Sending NACK.",
+                            authToken.getId(), authToken.isUsed(), LocalDateTime.now().isAfter(authToken.getExpiresAt()));
+
+                    // Incrémenter le compteur d'échecs (logique optionnelle)
+                    // if (authToken.getUser() != null) {
+                    //     int attempts = failedAttempts.compute(authToken.getUser().getId(), (k, v) -> (v == null) ? 1 : v + 1);
+                    //     log.warn("ACS Money: User ID {} has {} failed verification attempts (including this one).", authToken.getUser().getId(), attempts);
+                    //     // Ajouter logique de blocage si attempts > X
+                    // }
+                    writer.println("NACK"); // Envoyer NACK
                 }
+                // --- Fin Logique Simplifiée ---
+
+                // COMMENTED OUT: Logique de mapping de transaction qui causait problème
+                 /*
+                 log.warn("ACS Money: No token mapping found for transaction '...'. This logic might be incorrect/unnecessary.");
+                 // Supprimer ou corriger cette logique si elle n'est pas pertinente pour la validation OTP elle-même.
+                 */
+
+                // COMMENTED OUT: Logique de requête utilisateur non nécessaire pour la validation OTP simple
+                 /*
+                 Hibernate: select u1_0.id ... from users u1_0 where u1_0.id=?
+                 log.warn("ACS Money: User query after token check might be unnecessary here.");
+                 */
+
+
             } else {
-                writer.println("NACK");
-                log.warn("ACS Money: Token not found in database: {}", tokenValue);
+                // Le token n'a pas été trouvé dans la base de données
+                log.warn("ACS Money: Token '{}' not found in database. Sending NACK.", tokenValue);
+                writer.println("NACK"); // Envoyer NACK
             }
+
         } catch (Exception e) {
-            log.error("ACS Money: Error handling verification request: {}", e.getMessage(), e);
-            // Send NACK if possible, otherwise the connection might just close
+            log.error("ACS Money: Error handling verification request for data '{}': {}", receivedData, e.getMessage(), e);
+            // Envoyer NACK en cas d'erreur interne
             try (PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
                 writer.println("NACK");
             } catch (Exception ex) {
-                log.error("ACS Money: Error sending NACK response: {}", ex.getMessage());
+                log.error("ACS Money: Error sending NACK response after exception: {}", ex.getMessage());
             }
         } finally {
-            try {
-                if (socket != null && !socket.isClosed()) {
-                    socket.close();
-                    log.debug("ACS Money: Closed ACQ socket.");
-                }
-            } catch (Exception e) {
-                log.error("ACS Money: Error closing ACQ socket: {}", e.getMessage());
-            }
+            // Fermer le socket
+            try { if (socket != null && !socket.isClosed()) socket.close(); } catch (Exception e) { log.error("ACS Money: Error closing ACQ socket: {}", e.getMessage()); }
         }
     }
 
 
     /**
      * Generate a random 6-digit auth code (OTP)
-     * @return the OTP code
      */
-    private String generateOtpCode() { // Renamed for clarity
+    private String generateOtpCode() {
         Random random = new Random();
-        return String.format("%06d", random.nextInt(1000000)); // Ensure 6 digits with leading zeros
+        return String.format("%06d", random.nextInt(1000000));
     }
 }

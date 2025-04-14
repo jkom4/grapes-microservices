@@ -1,13 +1,13 @@
+// --- START OF payment-backend/src/main/java/grapes/microservices/paymentbackend/dto/PaymentRequestDTO.java ---
 package grapes.microservices.paymentbackend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.NotBlank; // @NotBlank est pour les Strings
-import jakarta.validation.constraints.NotNull; // Utilisez @NotNull pour les objets/nombres
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 @Data
@@ -27,13 +27,13 @@ public class PaymentRequestDTO {
     @Pattern(regexp = "^[0-9]{3,4}$", message = "CVV must be 3 or 4 digits")
     private String cvv;
 
-    @NotBlank(message = "Cardholder name is required")
-    @Size(min = 2, max = 100, message = "Cardholder name must be between 2 and 100 characters")
-    private String cardholderName;
-
-    // MODIFICATION ICI: Remplacer @NotBlank par @NotNull
-    // @NotBlank(message = "Amount is required") // Incorrect pour BigDecimal
-    @NotNull(message = "Amount is required")   // Correct pour BigDecimal (vérifie la non-nullité)
-    // Vous pourriez ajouter d'autres contraintes si nécessaire, comme @DecimalMin("0.01")
+    @NotNull(message = "Amount is required") // Le montant peut être initialisé par le formulaire OU par la session
     private BigDecimal amount;
+
+    // --- AJOUT ---
+    private String merchantName; // Pour stocker le nom du marchand récupéré de la session ou un défaut
+    // -------------
+
+
 }
+// --- END OF payment-backend/src/main/java/grapes/microservices/paymentbackend/dto/PaymentRequestDTO.java ---

@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // Configuration de base
-const API_BASE_URL = 'http://localhost:8043'; // Ajustez selon l'URL de votre backend Spring Boot
+const API_BASE_URL = 'http://localhost:8093'; // Ajustez selon l'URL de votre backend Spring Boot
 
 export class AuthService {
     /**

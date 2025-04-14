@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.security.PrivateKey;
 import java.util.Map;
+import java.util.UUID;
 
 import grapes.microservices.paymentbackend.utils.DataUtils;
 
@@ -39,11 +40,10 @@ public class CardService {
     @Value("${app.keystore.client.key.password}")
     private String clientKeyPassword;
 
-
     @Value("${app.truststore.acs.path}")
     private String acsTruststorePath;
 
-    @Value("${app.truststore.acs.password}") // Inject the new property
+    @Value("${app.truststore.acs.password}")
     private String acsTruststorePassword;
 
     private static final String SOURCE = "client";
@@ -52,15 +52,23 @@ public class CardService {
      * Send card details to ACS to initiate 3D Secure verification
      * @param paymentRequest the payment request with card details
      * @param user the authenticated user
+     * @param transactionId unique identifier for this transaction
      * @return the OTP code sent to the user's phone if successful, null otherwise
      */
-    public String initiateCardVerification(PaymentRequestDTO paymentRequest, User user) {
-        log.info("Initiating 3D Secure verification for user: {}", user.getLogin());
+    public String initiateCardVerification(PaymentRequestDTO paymentRequest, User user, String transactionId) {
+        log.info("Initiating 3D Secure verification for user: {}, transaction: {}", user.getLogin(), transactionId);
 
         try {
-            // Format card data for ACS
-            String cardData = "card=" + paymentRequest.getCardNumber() + "#date=" + paymentRequest.getExpirationDate();
-            log.info("Card data prepared: {}", cardData);
+            // Format card data for ACS including transaction ID and merchant name
+            String cardData = String.format(
+                    "card=%s#date=%s#amount=%s#merchant=%s#transactionId=%s",
+                    paymentRequest.getCardNumber(),
+                    paymentRequest.getExpirationDate(),
+                    paymentRequest.getAmount(),
+                    paymentRequest.getMerchantName(),
+                    transactionId
+            );
+            log.info("Card data prepared for transaction {}", transactionId);
 
             // Sign the data with client's private key
             PrivateKey privateKey = KeystoreUtils.getPrivateKey(
@@ -71,34 +79,45 @@ public class CardService {
             );
 
             String signedData = SignUtils.signData(cardData, privateKey);
-            log.info("Card data signed successfully");
+            log.info("Card data signed successfully for transaction {}", transactionId);
 
             // Format data for ACS
             String formattedDataForAcs = "source=" + SOURCE + "&data=" + cardData + "&signature=" + signedData;
 
             // Send to ACS and get response
             String acsResponse = sendToACS(formattedDataForAcs);
-            log.info("Received response from ACS: {}", acsResponse);
+            log.info("Received response from ACS for transaction {}: {}", transactionId, acsResponse);
 
             if (acsResponse == null || acsResponse.isEmpty()) {
-                log.error("Empty response from ACS");
+                log.error("Empty response from ACS for transaction {}", transactionId);
                 return null;
             }
 
             // Parse ACS response
             Map<String, String> parsedResponse = DataUtils.parseData(acsResponse);
+            String responseSource = parsedResponse.get("source");
             String otpCode = parsedResponse.get("data");
+            String signature = parsedResponse.get("signature");
+            String responseTransactionId = parsedResponse.get("transactionId");
 
-            if (otpCode == null || otpCode.isEmpty()) {
-                log.error("No OTP code in ACS response");
+            // Validate response
+            if (!"acs".equals(responseSource) || otpCode == null || signature == null) {
+                log.error("Invalid response format from ACS for transaction {}", transactionId);
                 return null;
             }
 
-            log.info("Card verification initiated successfully, OTP sent to user's phone");
+            // Validate transaction ID if provided in response
+            if (responseTransactionId != null && !transactionId.equals(responseTransactionId)) {
+                log.error("Transaction ID mismatch: expected {}, got {}", transactionId, responseTransactionId);
+                return null;
+            }
+
+            // Return the OTP code
+            log.info("Card verification initiated successfully for transaction {}, OTP sent to user's phone", transactionId);
             return otpCode;
 
         } catch (Exception e) {
-            log.error("Error initiating card verification: {}", e.getMessage(), e);
+            log.error("Error initiating card verification for transaction {}: {}", transactionId, e.getMessage(), e);
             return null;
         }
     }

@@ -86,6 +86,7 @@
             <column name="communication" type="VARCHAR(255)"/>
             <column name="nouvel_etat_compte_debiteur" type="DECIMAL(10,2)"/>
             <column name="nouvel_etat_compte_crediteur" type="DECIMAL(10,2)"/>
+            <column name="statut" type="VARCHAR(20)"/>
         </createTable>
     </changeSet>
 
@@ -165,34 +166,13 @@
         </createTable>
     </changeSet>
 
-    <!-- Table paiement -->
+    <!-- Table log_transaction -->
     <changeSet id="12" author="grapes">
-        <createTable tableName="paiement">
-            <column name="id_paiement" type="BIGINT">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="id_transaction" type="BIGINT"/>
-            <column name="nom_marchand" type="VARCHAR(100)"/>
-            <column name="date_heure" type="DATETIME"/>
-            <column name="montant" type="DECIMAL(10,2)"/>
-            <column name="statut" type="VARCHAR(20)"/>
-        </createTable>
-    </changeSet>
-
-    <!-- Foreign keys for paiement -->
-    <changeSet id="13" author="grapes">
-        <addForeignKeyConstraint baseTableName="paiement" baseColumnNames="nom_marchand"
-                                 referencedTableName="marchand" referencedColumnNames="nom_marchand"
-                                 constraintName="fk_paiement_marchand"/>
-    </changeSet>
-
-    <!-- Table log_paiement -->
-    <changeSet id="14" author="grapes">
-        <createTable tableName="log_paiement">
+        <createTable tableName="log_transaction">
             <column name="id_log" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="id_paiement" type="BIGINT"/>
+            <column name="id_transaction" type="BIGINT"/>
             <column name="date_heure_log" type="DATETIME"/>
             <column name="type_evenement" type="VARCHAR(100)"/>
             <column name="description" type="TEXT"/>
@@ -200,11 +180,11 @@
         </createTable>
     </changeSet>
 
-    <!-- Foreign key for log_paiement -->
-    <changeSet id="15" author="grapes">
-        <addForeignKeyConstraint baseTableName="log_paiement" baseColumnNames="id_paiement"
-                                 referencedTableName="paiement" referencedColumnNames="id_paiement"
-                                 constraintName="fk_logpaiement_paiement"/>
+    <!-- Foreign key for log_transaction -->
+    <changeSet id="13" author="grapes">
+        <addForeignKeyConstraint baseTableName="log_transaction" baseColumnNames="id_transaction"
+                                 referencedTableName="transaction" referencedColumnNames="id_transaction"
+                                 constraintName="fk_logtransaction_transaction"/>
     </changeSet>
 
 </databaseChangeLog>

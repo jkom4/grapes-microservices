@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Base URL for API endpoints
-const API_URL = 'http://localhost:8043/api';
+const API_URL = 'http://localhost:8093/api';
 
 // Axios instance with configuration
 const apiClient = axios.create({
