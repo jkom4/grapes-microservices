@@ -15,7 +15,7 @@ import retrofit2.http.Query
 // Retrofit client to handle network operations
 object RetrofitClient {
     // Base URL for the API endpoint
-    private const val BASE_URL = "http://172.20.10.3:8092/"
+    private const val BASE_URL = "http://192.168.129.10:8092/"
 
     // Create the Retrofit instance with the specified configurations
     private val retrofit: Retrofit = Retrofit.Builder()
