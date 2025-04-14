@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Article from "../../utils/models/Articles";
 import { useLanguage } from "../../features/LanguageContext";
 import { fetchArticleById } from "../../services/fruitServices";
+import { cartService } from "../../services/cartService";
 
 function ArticleDetailsSection() {
     const { id } = useParams<{ id: string }>();
@@ -97,27 +98,15 @@ function ArticleDetailsSection() {
         });
 
         try {
-            const response = await fetch("http://localhost:8092/clm/cart/add", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    orderId,
-                    articleId,
-                    quantityKg,
-                    quantity: selectedQuantity,
-                }),
-            });
+            // Use cartService to add item to cart
+            const response = await cartService.addItemToCart(
+                orderId,
+                articleId,
+                quantityKg,
+                selectedQuantity
+            );
 
-            console.log("Request sent to add item to the cart");
-
-            if (!response.ok) {
-                throw new Error("Failed to add item to cart");
-            }
-
-            const responseData = await response.json();
-            console.log("Item added to cart successfully:", responseData);
+            console.log("Item added to cart successfully:", response);
             setToast({ message: text[language].addToCartSuccess, type: "success" });
 
             // Reset animation after a delay

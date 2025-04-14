@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping(value = "/clm/articles", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ArticleController {
 

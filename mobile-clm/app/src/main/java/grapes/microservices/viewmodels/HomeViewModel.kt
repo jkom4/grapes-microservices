@@ -1,95 +1,110 @@
-package grapes.microservices.viewmodels
+package grapes.microservices.viewmodels.home
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import grapes.microservices.models.data.Article
-import grapes.microservices.models.data.ArticleFilterSettings
+import grapes.microservices.models.data.ArticleFilter
 import grapes.microservices.models.data.ArticleMinMaxPrice
 import grapes.microservices.models.repository.ArticleRepository
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val articleRepo: ArticleRepository
 ) : ViewModel() {
+    // --- State ---
+    private val _state = mutableStateOf<HomeState<Unit>>(HomeState.Loading)
+    val state: State<HomeState<Unit>> = _state
 
-    // Flow pour les articles
+    // --- Attributes ---
+    private val _filterSettings = MutableStateFlow<ArticleFilter?>(null)
+    val filterSettings: StateFlow<ArticleFilter?> = _filterSettings.asStateFlow()
+
     private val _articles = MutableStateFlow<List<Article>>(emptyList())
-    val articles: StateFlow<List<Article>> = _articles
+    val articles: StateFlow<List<Article>> get() = _articles.asStateFlow()
 
-    // Flow pour les paramètres de filtre
-    private val _filterSettings = MutableStateFlow(
-        ArticleFilterSettings(articleMinMaxPrice = ArticleMinMaxPrice(
-            articleRepo.getMinMaxCost(),
-            articleRepo.getMinMaxCost()
-        ))
-    )
+    private val _categories = MutableStateFlow<List<String>>(emptyList())
+    val categories: StateFlow<List<String>> get() = _categories.asStateFlow()
 
-    fun getCategories(): List<String> {
-        return articleRepo.getCategories().values.map { it.name.orEmpty() }
-    }
+    private val _families = MutableStateFlow<List<String>>(emptyList())
+    val families: StateFlow<List<String>> get() = _families.asStateFlow()
 
-    fun getFamilies(): List<String> {
-        return articleRepo.getFamilies().values.map { it.name.orEmpty() }
-    }
-
-    val filterSettings: StateFlow<ArticleFilterSettings> = _filterSettings.asStateFlow()
-
-    // State pour afficher l'état de chargement
-    private val _loading = MutableStateFlow(false)
-    val loading: StateFlow<Boolean> = _loading
-
+    // code executed on initialization
     init {
-        // Charger les articles au lancement de la ViewModel
-        loadArticles()
+        fetchData()
     }
 
-    private fun loadArticles() {
+    fun fetchData() {
         viewModelScope.launch {
+            _state.value = HomeState.Loading
+            _articles.value = emptyList() // Optionnel: vider les articles pendant le chargement
+
             try {
-                // Appel à l'API pour récupérer les articles
-                _articles.value = articleRepo.getArticles()
+                delay(1000)
+                // Change MinMaxCost and init filters
+                val minMaxCost = articleRepo.getMinMaxCost()
+                // Update only when ready
+                _filterSettings.value = ArticleFilter(priceRange = ArticleMinMaxPrice(minMaxCost))
+
+                fetchArticles()
+                fetchCategories()
+                fetchFamilies()
+
+                // Set state to success
+                _state.value = HomeState.Success(Unit)
             } catch (e: Exception) {
-                // Gérer les erreurs
-                _articles.value = emptyList() // ou une liste d'articles par défaut
+                val errorMessage = e.message ?: "unknown_error"
+                _state.value = HomeState.Error(errorMessage)
+                _filterSettings.value = null
             }
         }
     }
 
-    // Méthode pour mettre à jour les paramètres de filtre
-    fun updateCategory(newCategory: String) {
-        _filterSettings.update { currentState ->
-            val categoryToSet = if (currentState.category == newCategory) "" else newCategory
-            currentState.copy(category = categoryToSet)
+    private suspend fun fetchArticles() {
+        val currentFilters = _filterSettings.value
+        if (currentFilters != null) {
+            _articles.value = articleRepo.getArticles(currentFilters)
+        } else {
+            _articles.value = emptyList()
         }
-        loadArticles() // Recharger les articles avec le filtre mis à jour
     }
 
-    fun updateFamily(newFamily: String) {
-        _filterSettings.update { currentState ->
-            val familyToSet = if (currentState.family == newFamily) "" else newFamily
-            currentState.copy(family = familyToSet)
-        }
-        loadArticles() // Recharger les articles avec le filtre mis à jour
+    private suspend fun fetchCategories() {
+        _categories.value = articleRepo.getCategories().map { it.name.orEmpty() }
     }
 
-    fun updateQuery(newQuery: String) {
-        _filterSettings.update { it.copy(query = newQuery) }
-        loadArticles() // Recharger les articles avec le filtre mis à jour
+    private suspend fun fetchFamilies() {
+        _families.value = articleRepo.getFamilies().map { it.name.orEmpty() }
     }
 
-    fun updatePriceRange(newRange: ClosedFloatingPointRange<Float>) {
-        _filterSettings.update {
-            it.copy(articleMinMaxPrice = it.articleMinMaxPrice.copy(currentInterval = newRange))
-        }
-        loadArticles() // Recharger les articles avec le filtre mis à jour
-    }
+    fun updateFilters(newFilterData: ArticleFilter) {
+        val currentFilterValue = _filterSettings.value ?: return // Ne rien faire si pas encore initialisé
 
-    fun updateRattingRange(newRange: ClosedFloatingPointRange<Float>) {
-        _filterSettings.update {
-            it.copy(articleMinMaxRatting = it.articleMinMaxRatting.copy(currentInterval = newRange))
+        // Crée une copie mise à jour basée sur l'état actuel
+        val updatedFilter = currentFilterValue.copy(
+            priceRange = newFilterData.priceRange,
+            rattingRange = newFilterData.rattingRange,
+            query = newFilterData.query,
+            category = newFilterData.category,
+            family = newFilterData.family
+        )
+
+        // Update only if something changed
+        if (currentFilterValue.sameAs(updatedFilter)) return
+        _filterSettings.value = updatedFilter
+
+        viewModelScope.launch {
+            _state.value = HomeState.Loading
+            delay(1000)
+            fetchArticles()
+            _state.value = HomeState.Success(Unit)
         }
-        loadArticles() // Recharger les articles avec le filtre mis à jour
     }
 }
