@@ -7,11 +7,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
@@ -35,22 +33,21 @@ import grapes.microservices.viewmodel.ArticleViewModel
 import grapes.microservices.viewmodel.ArticleViewModelFactory
 import grapes.microservices.viewmodel.CartScreenState
 import grapes.microservices.viewmodel.PaymentState
-import grapes.microservices.views.components.MyTopBar
 import kotlinx.coroutines.delay
+import androidx.compose.ui.res.stringResource
+import grapes.microservices.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     navController: NavController
 ) {
-
     val repository = ArticleRepository(RetrofitClient.articleApiService)
     val viewModel: ArticleViewModel = viewModel(
         factory = ArticleViewModelFactory(repository, RetrofitClient.articleApiService)
     )
     val cartState = viewModel.cartScreenState.collectAsState()
     val paymentState = viewModel.paymentState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
 
     // Form fields (front-end only)
     var fullName by remember { mutableStateOf("") }
@@ -121,7 +118,7 @@ fun CartScreen(
                 // Title
                 item {
                     Text(
-                        text = "Your basket",
+                        text = stringResource(R.string.cart_title),
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
@@ -159,7 +156,7 @@ fun CartScreen(
                                     )
                                 ) {
                                     Text(
-                                        text = "Your basket is empty",
+                                        text = stringResource(R.string.cart_empty),
                                         style = MaterialTheme.typography.bodyLarge,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(16.dp)
@@ -167,7 +164,7 @@ fun CartScreen(
                                 }
                             }
                         } else {
-                            // Cart Items with Scrollable Container
+                            // Cart Items
                             item {
                                 Card(
                                     modifier = Modifier
@@ -181,7 +178,7 @@ fun CartScreen(
                                     LazyColumn(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .heightIn(max = 300.dp) // Hauteur max pour ~3 articles
+                                            .heightIn(max = 300.dp)
                                             .padding(12.dp),
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
@@ -194,7 +191,7 @@ fun CartScreen(
                                             ) {
                                                 AsyncImage(
                                                     model = item.picturePath ?: "https://via.placeholder.com/100",
-                                                    contentDescription = "Image de ${item.articleName}",
+                                                    contentDescription = "${stringResource(R.string.cart_image_description)} ${item.articleName}",
                                                     modifier = Modifier
                                                         .size(80.dp)
                                                         .clip(RoundedCornerShape(8.dp))
@@ -213,17 +210,18 @@ fun CartScreen(
                                                         color = MaterialTheme.colorScheme.onSurface
                                                     )
                                                     Text(
-                                                        text = "Quantity: ${if (item.quantityKg > 0) "${item.quantityKg} kg" else "${item.quantity} unit"}",
+                                                        text = "${stringResource(R.string.cart_quantity)}: ${if (item.quantityKg > 0) "${item.quantityKg} kg" else "${item.quantity} unit"}",
                                                         style = MaterialTheme.typography.bodyMedium,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
                                                     Text(
-                                                        text = "Price: %.2f €".format(item.price),
+                                                        text = stringResource(R.string.cart_price, item.price),
                                                         style = MaterialTheme.typography.bodyMedium,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
                                                     Text(
-                                                        text = "Total: %.2f €".format(
+                                                        text = stringResource(
+                                                            R.string.cart_item_total,
                                                             if (item.quantityKg > 0) item.quantityKg * item.price else item.quantity * item.price
                                                         ),
                                                         style = MaterialTheme.typography.bodyMedium.copy(
@@ -245,7 +243,7 @@ fun CartScreen(
                                                 ) {
                                                     Icon(
                                                         imageVector = Icons.Default.Delete,
-                                                        contentDescription = "Delete ${item.articleName}",
+                                                        contentDescription = "${stringResource(R.string.delete_item)} ${item.articleName}",
                                                         tint = MaterialTheme.colorScheme.error
                                                     )
                                                 }
@@ -273,7 +271,7 @@ fun CartScreen(
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         Text(
-                                            text = "Cart Summary",
+                                            text = stringResource(R.string.cart_summary),
                                             style = MaterialTheme.typography.titleMedium.copy(
                                                 fontWeight = FontWeight.Bold
                                             ),
@@ -288,7 +286,7 @@ fun CartScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
                                             Text(
-                                                text = "Sub total",
+                                                text = stringResource(R.string.cart_subtotal),
                                                 style = MaterialTheme.typography.bodyLarge,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -303,7 +301,7 @@ fun CartScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
                                             Text(
-                                                text = "Shipping costs",
+                                                text = stringResource(R.string.cart_shipping),
                                                 style = MaterialTheme.typography.bodyLarge,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -320,7 +318,7 @@ fun CartScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
                                             Text(
-                                                text = "Total",
+                                                text = stringResource(R.string.cart_total),
                                                 style = MaterialTheme.typography.titleLarge.copy(
                                                     fontWeight = FontWeight.Bold
                                                 ),
@@ -356,7 +354,7 @@ fun CartScreen(
                                         verticalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
                                         Text(
-                                            text = "Payment information",
+                                            text = stringResource(R.string.payment_info),
                                             style = MaterialTheme.typography.titleMedium.copy(
                                                 fontWeight = FontWeight.Bold
                                             ),
@@ -368,24 +366,24 @@ fun CartScreen(
                                         )
 
                                         val fields = listOf(
-                                            Triple("Name", fullName, { newValue: String -> fullName = newValue }),
-                                            Triple("E-mail address", email, { newValue: String -> email = newValue }),
-                                            Triple("Phone number", phoneNumber, { newValue: String -> phoneNumber = newValue }),
-                                            Triple("Address", address, { newValue: String -> address = newValue }),
-                                            Triple("Country", country, { newValue: String -> country = newValue }),
-                                            Triple("City", city, { newValue: String -> city = newValue }),
-                                            Triple("State", department, { newValue: String -> department = newValue }),
-                                            Triple("ZIP code", zipCode, { newValue: String -> zipCode = newValue }),
-                                            Triple("Card number", cardNumber, { newValue: String -> cardNumber = newValue }),
-                                            Triple("Expiration date (MM/AA)", expiryDate, { newValue: String -> expiryDate = newValue }),
-                                            Triple("CVC", cvc, { newValue: String -> cvc = newValue })
+                                            Triple(R.string.field_name, fullName, { newValue: String -> fullName = newValue }),
+                                            Triple(R.string.field_email, email, { newValue: String -> email = newValue }),
+                                            Triple(R.string.field_phone, phoneNumber, { newValue: String -> phoneNumber = newValue }),
+                                            Triple(R.string.field_address, address, { newValue: String -> address = newValue }),
+                                            Triple(R.string.field_country, country, { newValue: String -> country = newValue }),
+                                            Triple(R.string.field_city, city, { newValue: String -> city = newValue }),
+                                            Triple(R.string.field_state, department, { newValue: String -> department = newValue }),
+                                            Triple(R.string.field_zip, zipCode, { newValue: String -> zipCode = newValue }),
+                                            Triple(R.string.field_card_number, cardNumber, { newValue: String -> cardNumber = newValue }),
+                                            Triple(R.string.field_expiry, expiryDate, { newValue: String -> expiryDate = newValue }),
+                                            Triple(R.string.field_cvc, cvc, { newValue: String -> cvc = newValue })
                                         )
 
-                                        fields.forEach { (label, value, onChange) ->
+                                        fields.forEach { (labelResId, value, onChange) ->
                                             OutlinedTextField(
                                                 value = value,
                                                 onValueChange = onChange,
-                                                label = { Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                                label = { Text(stringResource(labelResId), color = MaterialTheme.colorScheme.onSurfaceVariant) },
                                                 modifier = Modifier
                                                     .fillMaxWidth(),
                                                 shape = RoundedCornerShape(8.dp),
@@ -396,9 +394,9 @@ fun CartScreen(
                                                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                                                     unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                                                 ),
-                                                keyboardOptions = when (label) {
-                                                    "Numéro de téléphone", "Code postal", "Numéro de carte bancaire", "CVC" -> KeyboardOptions(keyboardType = KeyboardType.Number)
-                                                    "Adresse e-mail" -> KeyboardOptions(keyboardType = KeyboardType.Email)
+                                                keyboardOptions = when (labelResId) {
+                                                    R.string.field_phone, R.string.field_zip, R.string.field_card_number, R.string.field_cvc -> KeyboardOptions(keyboardType = KeyboardType.Number)
+                                                    R.string.field_email -> KeyboardOptions(keyboardType = KeyboardType.Email)
                                                     else -> KeyboardOptions.Default
                                                 },
                                                 singleLine = true
@@ -421,7 +419,7 @@ fun CartScreen(
                                                 )
                                             )
                                             Text(
-                                                text = "I accept the terms and conditions",
+                                                text = stringResource(R.string.terms_conditions),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 modifier = Modifier.padding(start = 8.dp)
@@ -460,7 +458,7 @@ fun CartScreen(
                                         )
                                     ) {
                                         Text(
-                                            text = "Pay now",
+                                            text = stringResource(R.string.pay_button),
                                             style = MaterialTheme.typography.titleMedium.copy(
                                                 fontWeight = FontWeight.SemiBold
                                             )
@@ -478,7 +476,7 @@ fun CartScreen(
                                         }
                                         is PaymentState.Error -> {
                                             Text(
-                                                text = payment.message,
+                                                text = "${stringResource(R.string.error_prefix)}: ${payment.message}",
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.error,
                                                 modifier = Modifier
@@ -506,7 +504,7 @@ fun CartScreen(
                                 )
                             ) {
                                 Text(
-                                    text = "Erreur : ${state.message}",
+                                    text = "${stringResource(R.string.error_prefix)}: ${state.message}",
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.error,
                                     modifier = Modifier.padding(16.dp)
@@ -545,14 +543,14 @@ fun CartScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
-                                contentDescription = "Payment successful",
+                                contentDescription = stringResource(R.string.payment_success),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
                                     .size(80.dp)
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "Payment successful !",
+                                text = stringResource(R.string.payment_success),
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold
                                 ),
@@ -560,7 +558,7 @@ fun CartScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Thank you for your purchase.",
+                                text = stringResource(R.string.payment_thanks),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

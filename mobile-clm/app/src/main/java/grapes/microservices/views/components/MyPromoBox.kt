@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart // Remplace avec l'icône que tu veux utiliser
+import androidx.compose.ui.res.stringResource
+import grapes.microservices.R
 
 @Composable
 fun PromoBox() {
@@ -24,11 +26,11 @@ fun PromoBox() {
             .padding(16.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth(0.7f)) {
-            Text("Enjoy your fruits before your activity", color = Color(0xFF6A1B9A), fontWeight = FontWeight.Bold)
-            Text("Boost your productivity and build your mood", fontSize = 12.sp)
+            Text(text = stringResource(R.string.promo_title), color = Color(0xFF6A1B9A), fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.promo_subtitle), fontSize = 12.sp)
             Spacer(modifier = Modifier.height(4.dp))
             Button(onClick = {}, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBA68C8))) {
-                Text("Shop Now")
+                Text(text = stringResource(R.string.promo_button))
             }
         }
         Icon(

@@ -36,7 +36,8 @@ import grapes.microservices.viewmodel.ArticleState
 import grapes.microservices.viewmodel.ArticleViewModel
 import grapes.microservices.viewmodel.ArticleViewModelFactory
 import grapes.microservices.viewmodel.CartState
-import grapes.microservices.views.components.MyTopBar
+import androidx.compose.ui.res.stringResource
+import grapes.microservices.R
 import kotlinx.coroutines.delay
 
 @Composable
@@ -81,18 +82,22 @@ fun ArticleDetailScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Retour", tint = Color(0xFF9B00D8))
+                Icon(
+                    Icons.Default.ArrowBack,
+                    contentDescription = stringResource(R.string.back_button_description),
+                    tint = Color(0xFF9B00D8)
+                )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Detail product",
+                text = stringResource(R.string.article_detail_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.Black
             )
         }
 
         when (val state = articleState.value) {
-            is ArticleState.Loading -> Text("Chargement...")
+            is ArticleState.Loading -> Text(stringResource(R.string.loading))
 
             is ArticleState.Success -> {
                 val article = state.article
@@ -108,7 +113,7 @@ fun ArticleDetailScreen(
                 // Display article image
                 AsyncImage(
                     model = article.picture,
-                    contentDescription = null,
+                    contentDescription = "${stringResource(R.string.cart_image_description)} ${article.name}",
                     modifier = Modifier
                         .size(180.dp)
                         .padding(vertical = 16.dp)
@@ -123,7 +128,7 @@ fun ArticleDetailScreen(
                 ) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Favori",
+                        contentDescription = stringResource(R.string.favorite_description),
                         tint = Color(0xFF9B00D8)
                     )
                 }
@@ -138,7 +143,7 @@ fun ArticleDetailScreen(
                     Column(modifier = Modifier.padding(20.dp)) {
                         // Description section
                         Text(
-                            text = "Description",
+                            text = stringResource(R.string.description),
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
                             color = Color(0xFF222222)
@@ -152,7 +157,7 @@ fun ArticleDetailScreen(
 
                         // Origin
                         Text(
-                            text = "Origin : ${article.origin}",
+                            text = "${stringResource(R.string.origin)} : ${article.origin}",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color(0xFF4A4A4A),
@@ -161,7 +166,7 @@ fun ArticleDetailScreen(
 
                         // Stock information
                         Text(
-                            text = "Stock : ${article.stockKg} Kg / ${article.stockUnit} unités",
+                            text = "${stringResource(R.string.stock)} : ${article.stockKg} ${stringResource(R.string.unit_kg)} / ${article.stockUnit} ${stringResource(R.string.unit_single)}",
                             fontSize = 14.sp,
                             color = Color(0xFF666666),
                             modifier = Modifier.padding(top = 4.dp)
@@ -169,14 +174,14 @@ fun ArticleDetailScreen(
 
                         // Price per unit and per kilogram
                         Text(
-                            text = "Price (unit) : %.3f €".format(article.priceUnit),
+                            text = stringResource(R.string.price_unit, article.priceUnit),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF000000),
                             modifier = Modifier.padding(top = 16.dp)
                         )
                         Text(
-                            text = "Price (Kg) : %.3f €".format(article.priceKg),
+                            text = stringResource(R.string.price_kg, article.priceKg),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF000000),
@@ -201,16 +206,16 @@ fun ArticleDetailScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(selected = isUnitSelected, onClick = { isUnitSelected = true })
-                            Text("Units")
+                            Text(stringResource(R.string.units))
                             RadioButton(selected = !isUnitSelected, onClick = { isUnitSelected = false })
-                            Text("Kilogrammes")
+                            Text(stringResource(R.string.kilograms))
                         }
 
                         // Quantity input field
                         OutlinedTextField(
                             value = quantity,
                             onValueChange = { quantity = it },
-                            label = { Text("Quantity") },
+                            label = { Text(stringResource(R.string.quantity)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -219,7 +224,10 @@ fun ArticleDetailScreen(
 
                         // Cart state handling
                         when (val cart = cartState.value) {
-                            is CartState.Loading -> Text("Adding in progress...", modifier = Modifier.padding(top = 8.dp))
+                            is CartState.Loading -> Text(
+                                stringResource(R.string.adding_in_progress),
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
 
                             is CartState.Success -> {
                                 LaunchedEffect(cart) {
@@ -227,7 +235,7 @@ fun ArticleDetailScreen(
                                     delay(1500)
                                     showConfirmation = false
                                     viewModel.resetCartState()
-                                    navController.popBackStack() // ← redirection
+                                    navController.popBackStack()
                                 }
 
                                 AnimatedVisibility(
@@ -236,7 +244,7 @@ fun ArticleDetailScreen(
                                     modifier = Modifier.padding(top = 12.dp)
                                 ) {
                                     Text(
-                                        text = "Added to cart 🎉",
+                                        text = stringResource(R.string.added_to_cart),
                                         color = Color(0xFF4CAF50),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp
@@ -273,15 +281,18 @@ fun ArticleDetailScreen(
                             ),
                             border = BorderStroke(2.dp, Color(0xFF9B00D8))
                         ) {
-                            Icon(Icons.Default.ShoppingBag, contentDescription = null)
+                            Icon(Icons.Default.ShoppingBag, contentDescription = stringResource(R.string.add_to_cart))
                             Spacer(Modifier.width(8.dp))
-                            Text("Add to cart", fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.add_to_cart), fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
 
-            is ArticleState.Error -> Text("Error : ${state.message}", color = Color.Red)
+            is ArticleState.Error -> Text(
+                "${stringResource(R.string.error_prefix)} : ${state.message}",
+                color = Color.Red
+            )
         }
     }
 }

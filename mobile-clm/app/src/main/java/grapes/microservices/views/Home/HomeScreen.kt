@@ -28,7 +28,9 @@ import grapes.microservices.viewmodels.HomeViewModelFactory
 import grapes.microservices.views.components.MyArticleCardList
 import grapes.microservices.views.components.MyTopBar
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
+import grapes.microservices.R
 import grapes.microservices.models.data.Article
 import grapes.microservices.views.components.PromoBox
 
@@ -122,7 +124,7 @@ fun HomeScreen(navController: NavHostController) {
                     // Default content: popular & recommended
                     item {
                         MyArticleCardList(
-                            title = "Popular",
+                            title = stringResource(R.string.home_popular),
                             articles = articles.take(3),
                             orientation = Orientation.Horizontal,
                             navController = navController,
@@ -132,7 +134,7 @@ fun HomeScreen(navController: NavHostController) {
 
                     item {
                         MyArticleCardList(
-                            title = "For You",
+                            title = stringResource(R.string.home_for_you),
                             articles = articles.take(6),
                             orientation = Orientation.Vertical,
                             navController = navController,

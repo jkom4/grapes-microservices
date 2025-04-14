@@ -19,8 +19,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import grapes.microservices.R
 import grapes.microservices.models.data.Article
 import grapes.microservices.models.network.RetrofitClient
 import kotlinx.coroutines.launch
@@ -59,7 +61,7 @@ fun MySearchBar(
         keyboardActions = KeyboardActions(onSearch = { search(text) }),
         placeholder = {
             Text(
-                text = "Search ...",
+                text = stringResource(R.string.search_text),
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.bodyLarge
             )

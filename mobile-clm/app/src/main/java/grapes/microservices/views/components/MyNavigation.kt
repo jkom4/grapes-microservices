@@ -6,6 +6,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,6 +18,7 @@ import grapes.microservices.views.ArticleDetails.ArticleDetailScreen
 import grapes.microservices.views.CartScreen.CartScreen
 import grapes.microservices.views.Home.AllArticlesScreen
 import grapes.microservices.views.Home.HomeScreen
+import grapes.microservices.views.Settings.SettingsScreen
 
 @Composable
 fun MyNavigation() {
@@ -30,12 +32,12 @@ fun MyNavigation() {
                 currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
             )
         }
-    ) { paddingValues -> // Utilisation de paddingValues
+    ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = Screen.HomeScreen.route,
             modifier = Modifier
-                .padding(paddingValues)  // Assurer que le padding ne génère pas un espace supplémentaire
+                .padding(paddingValues)
         ) {
             composable(route = Screen.HomeScreen.route) {
                 HomeScreen(navController)
@@ -54,7 +56,7 @@ fun MyNavigation() {
                 AllArticlesScreen(navController = navController)
             }
             composable("profile") {
-                Text("Écran de profil", modifier = Modifier.fillMaxSize())
+                SettingsScreen(context = LocalContext.current)
             }
         }
     }
