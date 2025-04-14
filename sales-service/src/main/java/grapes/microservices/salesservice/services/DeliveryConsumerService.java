@@ -25,7 +25,6 @@ public class DeliveryConsumerService {
 
     @RabbitListener(queues = "order-paid-queue")
     public void receiveOrder(DeliveryMessage message) {
-        System.out.println(" Received Order: " + message);
 
         try {
             var order = orderRepository.findById(message.getOrderId())
@@ -54,7 +53,6 @@ public class DeliveryConsumerService {
 
             deliveryRepository.save(delivery);
 
-            System.out.println(" Delivery created for Order ID: " + message.getOrderId() + ", assigned to deliveryman ID: " + deliveryManId);
 
         } catch (Exception ex) {
             System.err.println(" Error while creating delivery: " + ex.getMessage());

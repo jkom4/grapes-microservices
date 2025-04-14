@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -32,21 +31,20 @@ public class OrderService {
     public void sendOrderToDeliveryQueue(Integer orderId, String address, String phoneNumber, String customerName, String country, String postalCode) {
         DeliveryMessage message = new DeliveryMessage(orderId, address, phoneNumber, customerName, country, postalCode);
         rabbitTemplate.convertAndSend("order-paid-queue", message);
-        System.out.println("✅ Message sent to RabbitMQ: " + message);
+        System.out.println(" Message sent to RabbitMQ: " + message);
     }
 
-    //  Create a temporary order
     public Order createTemporaryOrder(Integer userId) {
         Order order = Order.builder()
                 .userId(userId)
                 .isFinished(false)
                 .isPaid(false)
                 .totalPrice(null)
-                .code(new Random().nextInt(999999))
                 .createdAt(LocalDateTime.now())
                 .build();
         return orderRepository.save(order);
     }
+
 
     //  Finalize payment
     public void finalizePaymentAndClearCart(Integer orderId, String address, String phoneNumber, String customerName, String country, String postalCode) throws FileNotFoundException {
@@ -57,7 +55,6 @@ public class OrderService {
         BigDecimal total = updateStockAndComputeTotal(items);
         order.setTotalPrice(total);
 
-        //  DIRECTLY generate the invoice with CLIENT info (delivery info not needed yet!)
         String pdfPath = InvoiceGenerator.generateInvoice(order, customerName, address, postalCode, country, phoneNumber, items, articleRepository);
         order.setFacturePath(pdfPath);
         order.setPaid(true);

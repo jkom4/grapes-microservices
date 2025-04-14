@@ -33,7 +33,7 @@ public class OrderDeliveryService {
         return orderItems.stream()
                 .map(item -> new OrderDTO(
                         item.getId(),
-                        "Product description to fetch",
+                        item.getArticle() != null ? item.getArticle().getName() : "Unknown product",
                         item.getQuantity() != null ? item.getQuantity() : item.getQuantityKg(),
                         tripId,
                         Boolean.TRUE.equals(item.getScanned())

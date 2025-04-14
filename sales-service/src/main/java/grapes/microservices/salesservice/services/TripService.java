@@ -80,5 +80,12 @@ public class TripService {
         deliveryRepository.save(delivery);
     }
 
+    public boolean existsTrip(Integer tripId) {
+        return deliveryRepository.findByOrderId(tripId).isPresent();
+    }
+
+
+
+
 
 }

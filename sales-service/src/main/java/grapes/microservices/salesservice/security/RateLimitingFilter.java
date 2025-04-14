@@ -12,6 +12,23 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Rate Limiting Filter
+ *
+ * This filter implements request rate limiting to protect the service against excessive traffic.
+ * It tracks request frequency from clients based on their IP address or other identifiers,
+ * and temporarily blocks requests that exceed configured thresholds.
+ *
+ * The filter helps mitigate:
+ * - Denial of Service (DoS) attacks
+ * - Distributed Denial of Service (DDoS) attacks
+ * - Unintentional service overloading from legitimate clients
+ *
+ * Configuration parameters:
+ * - maxRequestsPerMinute: Maximum number of requests allowed per client within a minute
+ * - blockDurationSeconds: Duration in seconds a client is blocked after exceeding the limit
+ */
+
 @Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
