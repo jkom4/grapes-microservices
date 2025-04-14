@@ -189,24 +189,25 @@ class ArticleViewModel(
     // Process payment and clear the cart
     fun payAndClearCart(orderId: Int) {
         viewModelScope.launch {
-            _paymentState.value = PaymentState.Loading // Set loading state while processing payment
+            _paymentState.value = PaymentState.Loading
             try {
-                // Process the payment
                 val payResponse = apiService.payCart(orderId)
                 if (!payResponse.isSuccessful) {
-                    _paymentState.value = PaymentState.Error("Error during payment") // Error: payment failed
+                    _paymentState.value = PaymentState.Error("Erreur lors du paiement")
                     return@launch
                 }
 
-                // Clear the cart after payment
                 val clearResponse = apiService.clearCart(orderId)
-                if (clearResponse.isSuccessful) {
-                    _paymentState.value = PaymentState.Success // Success: payment and cart cleared
-                } else {
-                    _paymentState.value = PaymentState.Error("Error clearing cart") // Error: failed to clear cart
+                if (!clearResponse.isSuccessful) {
+                    _paymentState.value = PaymentState.Error("Erreur lors du vidage du panier")
+                    return@launch
                 }
+
+                fetchCart(orderId)
+
+                _paymentState.value = PaymentState.Success
             } catch (e: Exception) {
-                _paymentState.value = PaymentState.Error(e.message ?: "Network error") // Error: network issue
+                _paymentState.value = PaymentState.Error(e.message ?: "Erreur réseau")
             }
         }
     }

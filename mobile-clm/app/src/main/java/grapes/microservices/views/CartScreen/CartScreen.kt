@@ -87,8 +87,7 @@ fun CartScreen(
     LaunchedEffect(paymentState.value) {
         if (paymentState.value is PaymentState.Success) {
             showPaymentConfirmation = true
-            // Delay redirection to show animation
-            delay(2000) // 2 seconds
+            delay(2000)
             navController.navigate("home") {
                 popUpTo(navController.graph.startDestinationId) {
                     inclusive = true
@@ -377,7 +376,7 @@ fun CartScreen(
                                             Triple("City", city, { newValue: String -> city = newValue }),
                                             Triple("State", department, { newValue: String -> department = newValue }),
                                             Triple("ZIP code", zipCode, { newValue: String -> zipCode = newValue }),
-                                            Triple("Card nulber", cardNumber, { newValue: String -> cardNumber = newValue }),
+                                            Triple("Card number", cardNumber, { newValue: String -> cardNumber = newValue }),
                                             Triple("Expiration date (MM/AA)", expiryDate, { newValue: String -> expiryDate = newValue }),
                                             Triple("CVC", cvc, { newValue: String -> cvc = newValue })
                                         )
