@@ -1,5 +1,6 @@
 package grapes.microservices.salesservice.services;
 
+import grapes.microservices.salesservice.dto.OrderDTO;
 import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.models.DeliveryMessage;
 import grapes.microservices.salesservice.models.Order;
@@ -122,4 +123,28 @@ public class OrderService {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + id));
     }
+
+    public List<Order> getOrdersByUserId(Integer userId) {
+        return orderRepository.findByUserId(userId);
+    }
+
+    public List<OrderItem> getOrderItemsByOrderId(Integer orderId) {
+        return orderItemRepository.findByOrderId(orderId);
+    }
+
+    public OrderDTO mapOrderItemToDTO(OrderItem item) {
+        OrderDTO dto = new OrderDTO();
+        dto.setOrderItemId(item.getId());
+        dto.setQuantity(item.getQuantityKg() != null ? item.getQuantityKg() : item.getQuantity());
+        dto.setTripId(item.getOrderId()); // ou autre selon ta logique
+        dto.setScanned(Boolean.TRUE.equals(item.getScanned()));
+        dto.setProductDescription(
+                articleRepository.findById(item.getArticleId())
+                        .map(Article::getName)
+                        .orElse("Unknown")
+        );
+        return dto;
+    }
+
+
 }

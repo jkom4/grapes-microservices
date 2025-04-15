@@ -1,9 +1,10 @@
 package grapes.microservices.salesservice;
 
+import com.jayway.jsonpath.JsonPath;
 import grapes.microservices.salesservice.config.RabbitTestConfig;
-import grapes.microservices.salesservice.models.Delivery;
-import grapes.microservices.salesservice.models.DeliveryStatus;
+import grapes.microservices.salesservice.models.*;
 import grapes.microservices.salesservice.repositories.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,7 +13,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,6 +38,12 @@ class TransactionsServiceApplicationTests {
     private CategoryRepository categoryRepository;
     @Autowired
     private ArticleRepository articleRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+
 
 
     @Test
@@ -109,7 +118,6 @@ class TransactionsServiceApplicationTests {
                 .andExpect(content().string("Delivery status updated successfully to: In Progress"));
     }
 
-
     @Test
     void testCreateArticle() throws Exception {
         String articleJson = """
@@ -158,7 +166,7 @@ class TransactionsServiceApplicationTests {
                 .andExpect(jsonPath("$.name").value("Kiwi Modifié"));
     }
 
- /*   @Test
+    @Test
     void testGetAllArticles() throws Exception {
         Article article = new Article();
         article.setName("Banane");
@@ -207,12 +215,12 @@ class TransactionsServiceApplicationTests {
     }
 
 
-  /*  @Test
+    @Test
     void testGetAvailableArticlesWithoutPagination() throws Exception {
         mockMvc.perform(get("/clm/articles/available"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray());
-    }*/
+    }
 
 
 
@@ -277,10 +285,10 @@ class TransactionsServiceApplicationTests {
         mockMvc.perform(get("/cll/deliveries/pending"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].orderId").value(orderId));
-    }*/
+    }
+*/
 
-
- /*   @Test
+   @Test
     void testGetArticleById() throws Exception {
         String articleJson = """
         {
@@ -311,12 +319,12 @@ class TransactionsServiceApplicationTests {
                 .andExpect(jsonPath("$.id").value(createdArticleId))
                 .andExpect(jsonPath("$.name").value("Banane"))
                 .andExpect(jsonPath("$.origin").value("Colombie"));
-    }*/
+    }
 
 
 
 
- /*   @Test
+   @Test
     @Disabled("Ce test est ignoré")
     void testEndToEndOrderPaymentAndDeliveryCreation() throws Exception {
 
@@ -401,7 +409,7 @@ class TransactionsServiceApplicationTests {
         mockMvc.perform(get("/cll/trips/{tripId}/orders", delivery.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].productDescription").exists());
-    }*/
+    }
 
 
 }
