@@ -3,6 +3,7 @@ package grapes.microservices.models.network
 import grapes.microservices.models.data.Article
 import grapes.microservices.models.data.Cart
 import okhttp3.OkHttpClient
+import grapes.microservices.BuildConfig
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -12,10 +13,11 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
+
 // Retrofit client to handle network operations
 object RetrofitClient {
     // Base URL for the API endpoint
-    private const val BASE_URL = "http://192.168.129.10:8092/"
+    private const val BASE_URL = BuildConfig.BASE_URL
 
     // Create the Retrofit instance with the specified configurations
     private val retrofit: Retrofit = Retrofit.Builder()

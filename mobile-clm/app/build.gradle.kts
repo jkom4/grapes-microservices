@@ -21,6 +21,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "BASE_URL", "\"${project.properties["BASE_URL"]}\"")
     }
 
     buildTypes {
@@ -41,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3"  // Example version; adjust as needed
@@ -85,4 +88,5 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation ("io.coil-kt:coil-compose:2.4.0")
     implementation ("androidx.compose.material:material-icons-extended:1.5.0")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 }

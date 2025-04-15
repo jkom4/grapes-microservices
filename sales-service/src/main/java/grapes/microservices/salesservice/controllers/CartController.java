@@ -106,8 +106,8 @@ public class CartController {
     @Transactional
     public ResponseEntity<?> clearCart(@PathVariable Integer orderId) {
         try {
-            cartService.clearCart(orderId);
-            return ResponseEntity.noContent().build();
+            String message = cartService.clearCart(orderId);
+            return ResponseEntity.ok(message);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {

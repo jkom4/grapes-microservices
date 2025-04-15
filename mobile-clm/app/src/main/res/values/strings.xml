@@ -55,4 +55,6 @@
     <string name="favorite_description">Favorite</string>
     <string name="settings">Settings</string>
     <string name="settings_language">Language</string>
+    <string name="settings_personnal">Personal Information</string>
+    <string name="settings_update">Update Personal Information</string>
 </resources>

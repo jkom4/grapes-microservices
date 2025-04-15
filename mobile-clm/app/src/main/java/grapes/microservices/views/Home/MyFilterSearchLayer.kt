@@ -40,22 +40,8 @@ fun MyFilterSearchLayer(
     onSearchResults: (List<Article>) -> Unit,
     onQueryChanged: (String) -> Unit
 ) {
-    val isBottomSheetOpen = rememberSaveable { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    val filterSettingsSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-    )
-
-    // Bottom sheet to manage filter options
-    MyFilterSettingsBottomSheet(
-        sheetState = filterSettingsSheetState,
-        isSheetOpen = isBottomSheetOpen
-    )
 
     Row(modifier = modifier) {
-        val viewmodel = koinViewModel<HomeViewModel>()
-        val currentSettings by viewmodel.filterSettings.collectAsState()
-
         // Search bar with callbacks
         MySearchBar(
             modifier = Modifier.weight(1f),
@@ -66,28 +52,5 @@ fun MyFilterSearchLayer(
                 onSearchResults(response)
             }
         )
-
-        Spacer(modifier = Modifier.width(20.dp))
-
-        // Settings icon to open filter sheet
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .clickable {
-                    scope.launch { isBottomSheetOpen.value = true }
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.settings),
-                contentDescription = "Filter Settings Icon",
-                modifier = Modifier.size(26.dp),
-                colorFilter = ColorFilter.tint(White)
-            )
-        }
     }
 }

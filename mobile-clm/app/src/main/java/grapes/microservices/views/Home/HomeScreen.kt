@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import grapes.microservices.R
 import grapes.microservices.models.data.Article
+import grapes.microservices.views.components.MySearchBar
 import grapes.microservices.views.components.PromoBox
 
 @Composable
@@ -72,19 +73,22 @@ fun HomeScreen(navController: NavHostController) {
 
             // Search bar and filter layer
             item {
-                MyFilterSearchLayer(
-                    modifier = Modifier.padding(bottom = space),
+                // Search bar
+                MySearchBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = space),
                     query = searchQuery,
+                    onQueryChanged = { newQuery ->
+                        searchQuery = newQuery
+                    },
                     onSearchStarted = {
                         isSearching = true
-                        searchResults = null
+                        searchResults = null // Optional: reset results during search
                     },
-                    onSearchResults = { results ->
-                        isSearching = false
+                    onResults = { results ->
                         searchResults = results
-                    },
-                    onQueryChanged = {
-                        searchQuery = it
+                        isSearching = false
                     }
                 )
             }

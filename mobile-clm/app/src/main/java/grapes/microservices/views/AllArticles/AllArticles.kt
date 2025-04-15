@@ -1,4 +1,4 @@
-package grapes.microservices.views.Home
+package grapes.microservices.views.AllArticles
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

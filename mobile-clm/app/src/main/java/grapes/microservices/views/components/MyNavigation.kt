@@ -16,7 +16,7 @@ import androidx.navigation.navArgument
 import grapes.microservices.Screen
 import grapes.microservices.views.ArticleDetails.ArticleDetailScreen
 import grapes.microservices.views.CartScreen.CartScreen
-import grapes.microservices.views.Home.AllArticlesScreen
+import grapes.microservices.views.AllArticles.AllArticlesScreen
 import grapes.microservices.views.Home.HomeScreen
 import grapes.microservices.views.Settings.SettingsScreen
 
@@ -56,7 +56,7 @@ fun MyNavigation() {
                 AllArticlesScreen(navController = navController)
             }
             composable("profile") {
-                SettingsScreen(context = LocalContext.current)
+                SettingsScreen(context = LocalContext.current, navController)
             }
         }
     }
