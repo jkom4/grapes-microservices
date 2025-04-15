@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  mariadb-secondary:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
+    container_name: mariadb-secondary
+    env_file: .env
+    environment:
+      MARIADB_REPLICATION_ROLE: slave
+      MARIADB_MASTER_HOST: ${MARIADB_MASTER_HOST}
+      MARIADB_REPLICATION_USER: ${MARIADB_REPLICATION_USER}
+      MARIADB_REPLICATION_PASSWORD: ${MARIADB_REPLICATION_PASSWORD}
+    ports:
+      - "3307:3306"
+
+  mongodb-secondary:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mongodb-grapes:latest
+    container_name: mongodb-secondary
+    command: ["--replSet", "rs0"]
+    ports:
+      - "27018:27017"
+
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: sonarqube
+    environment:
+      SONARQUBE_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonar
+      SONARQUBE_JDBC_USERNAME: ${SONARQUBE_JDBC_user}
+      SONARQUBE_JDBC_PASSWORD: ${SONARQUBE_JDBC_PASSWORD}
+    ports:
+      - "9000:9000"
+
+  sonarqube-db:
+    image: postgres:13
+    container_name: sonarqube-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+
+volumes:
+  mariadb_data:
+  mongodb_data:
