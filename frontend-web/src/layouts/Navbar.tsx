@@ -27,9 +27,9 @@ function Navbar() {
                 <Link to="/all-articles" className="text-black text-lg hover:text-accent">
                     {language === 'en' ? 'Our Product' : 'Nos Produits'}
                 </Link>
-                <a href="#" className="text-black text-2xl">
+                <Link to="#" className="text-black text-2xl">
                     <span>🛒</span>
-                </a>
+                </Link>
             </nav>
             <div className="flex items-center">
                 <button onClick={() => handleLanguageChange('en')} className="ml-4">
