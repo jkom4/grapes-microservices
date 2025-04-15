@@ -1,27 +1,62 @@
-version: '3.8'
+version: '3.9'
 
 services:
-### DATABASES
+  ### DATABASES
   mariadb:
     build: ./docker/mariadb
-    image: grapeshub/mariadb-grapes:latest
+    env_file:
+      - .env
+    image:  ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
     container_name: grapes-mariadb
+
     environment:
-      MARIADB_ROOT_PASSWORD: SparringMASI!
-      MARIADB_USER: module
-      MARIADB_PASSWORD: SparringMASI!
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - ./docker/mariadb/volumes/mariadb_data:/var/lib/mysql
+      - ./docker/mariadb/config/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    command:
+      [
+        "--server-id=1",
+        "--log-bin=mysql-bin",
+        "--binlog-do-db=sales_db",
+        "--binlog-do-db=payment_db",
+        "--bind-address=0.0.0.0"
+      ]
+
+  mariadb-slave:
+    image: mariadb:latest
+    container_name: grapes-mariadb-slave
+    environment:
+      MARIADB_ROOT_PASSWORD: SparringMASI!
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docker/mariadb/volumes/mariadb_slave_data:/var/lib/mysql
+    command:
+      [
+        "--server-id=2",
+        "--relay-log=relay-bin",
+        "--read-only=1",
+        "--bind-address=0.0.0.0"
+      ]
+    depends_on:
+      - mariadb-master
 
   mongodb:
     build: ./docker/mongodb
-    image: grapeshub/mongodb-grapes:latest
+    env_file:
+      - ./.env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mongodb-grapes:latest
     container_name: grapes-mongodb
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: SparringMASI!
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_USER_RW: ${MONGO_USER_RW}
+      MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
     ports:
       - "27017:27017"
     volumes:
@@ -31,14 +66,15 @@ services:
 ### Exchange
   rabbitmq:
     build: ./docker/rabbitmq
-    image: mydockerhub/rabbitmq-grapes:latest
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/rabbitmq-grapes:latest
     container_name: grapes-rabbitmq
     volumes:
       - ./docker/rabbitmq/volumes/data/:/var/lib/rabbitmq/mnesia
       - ./docker/rabbitmq/volumes/logs/:/var/log/rabbitmq/
     environment:
-      RABBITMQ_DEFAULT_USER: grapes
-      RABBITMQ_DEFAULT_PASS: grapes
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
       - "5672:5672"
       - "15673:15672"
@@ -89,14 +125,15 @@ services:
 
   api-gateway:
     build: ./api-gateway
-    image: grapeshub/api-gateway:latest
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/api-gateway:latest
 
     container_name: api-gateway
     ports:
       - "8090:8090"
     depends_on:
       - mongodb
-      - mariadb
+      - mariadb-master
       - data-mining-service
       - auth-service
       - sales-service
@@ -105,56 +142,68 @@ services:
 
   auth-service:
     build: ./auth-service/auth-backend
-    image: grapeshub/auth-service-backend:latest
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-backend:latest
     container_name: auth-backend
     ports:
       - "8091:8091"
     depends_on:
       - mongodb
-      - mariadb
+      - mariadb-master
 
   sales-service:
     build: ./sales-service
-    image: grapeshub/sales-service:latest
+    env_file: .env
+    image:  ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/sales-service:latest
     container_name: sales-backend
     ports:
       - "8092:8092"
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: grapes
+      RABBITMQ_PASSWORD: grapes
     depends_on:
-      - mariadb
+      - mariadb-master
+      - rabbitmq
+
 
   payment-service:
     build: ./payment-service/payment-backend
-    image: grapeshub/payment-service-backend:latest
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-backend:latest
     container_name: payment-backend
     ports:
       - "8094:8094"
     depends_on:
-      - mariadb
+      - mariadb-master
 
   chat-service:
     build: ./chat-service
-    image: grapeshub/chat-service:latest
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/chat-service:latest
     container_name: chat-backend
     ports:
       - "8095:8095"
     depends_on:
-      - mariadb
+      - mariadb-master
 
   data-mining-service:
     build: ./data-mining-service
-    image: grapeshub/data-mining-service:latest
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-mining-service:latest
     container_name: data-mining-backend
     ports:
       - "8096:8096"
     depends_on:
       - mongodb
-      - mariadb
+      - mariadb-master
 
 ### FRONTEND
 
   frontend-web:
     build: ./frontend-web
-    image: grapeshub/grapes-frontend:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/grapes-frontend:latest
     container_name: grapes-frontend
     ports:
       - "3001:80"
@@ -163,7 +212,7 @@ services:
 
   frontend-auth:
     build: ./auth-service/auth-frontend
-    image: grapeshub/auth-service-frontend:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-frontend:latest
     container_name: auth-frontend
     ports:
       - "3002:81"
@@ -172,8 +221,7 @@ services:
 
   frontend-payment:
     build: ./payment-service/payment-frontend
-    image: grapeshub/payment-service-frontend:latest
-    container_name: payment-frontend
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-frontend:latest
     ports:
       - "3003:82"
     depends_on:
@@ -183,3 +231,5 @@ volumes:
   mariadb_data:
   mongodb_data:
   sonarqube-data:
+
+

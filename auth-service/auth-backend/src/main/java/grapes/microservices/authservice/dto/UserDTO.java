@@ -29,7 +29,7 @@ public class UserDTO {
     private String firstName;
 
     @NotNull(message = "password cannot be null")
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[.;#!?])[A-Za-z\\d.;#!?]+$", message = "Password must contain at least one uppercase letter, one digit, and one special character")
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[.;#!?@])[A-Za-z\\d.;#!?@]+$", message = "Password must contain at least one uppercase letter, one digit, and one special character")
     @Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters long")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
@@ -59,7 +59,7 @@ public class UserDTO {
     @NotNull(message = "birthDate cannot be null")
     private Date birthDate;
 
-    private double age;
+    private int age;
 
     @NotNull(message = "gender cannot be null")
     private Gender gender;
@@ -72,9 +72,13 @@ public class UserDTO {
     @Pattern(regexp = "^\\d{4}$", message = "Pin code must contain only digits")
     private String pinCode;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Min(value = 0, message = "Loyalty points cannot be negative")
+    private Integer loyaltyPoints;
+
     private Role role;
     private String profession;
-    private Map<String, AuthMethod> authMethods;
+    private Map<String, AuthMean> authMethods;
     private Address deliveryAddress;
     private Address billingAddress;
 }

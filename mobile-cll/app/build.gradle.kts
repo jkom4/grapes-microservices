@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
-
+ 
 android {
     namespace = "com.example.mobile_cll"
     compileSdk = 35
@@ -57,6 +57,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.play.services.location)
+    implementation(libs.androidx.preference)
+    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -70,4 +72,14 @@ dependencies {
     implementation ("androidx.compose.ui:ui-tooling-preview:1.4.0")
     implementation ("androidx.compose.runtime:runtime-livedata:1.4.0")
     implementation ("androidx.compose.material:material-icons-extended:1.4.0")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.4.3")
+    implementation ("androidx.navigation:navigation-compose:2.6.0")
+    implementation ("androidx.navigation:navigation-fragment-ktx:2.6.0")
+    implementation ("androidx.navigation:navigation-ui-ktx:2.6.0")
+    implementation ("io.coil-kt:coil:2.2.2")
+    implementation ("io.coil-kt:coil-compose:2.2.2")
+    implementation ("com.github.gcacace:signature-pad:1.3.1")
+
 }

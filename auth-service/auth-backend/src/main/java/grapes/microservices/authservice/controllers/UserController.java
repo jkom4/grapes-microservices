@@ -3,11 +3,14 @@ package grapes.microservices.authservice.controllers;
 import grapes.microservices.authservice.dto.EmailDTO;
 import grapes.microservices.authservice.dto.UserDTO;
 import grapes.microservices.authservice.mapper.UserMapper;
+import grapes.microservices.authservice.models.AmountRequest;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,16 +20,10 @@ import grapes.microservices.authservice.utils.AuthLogger;
 /**
  * UserController handles HTTP requests related to user management.
  * It provides endpoints for user registration, retrieval, update, and deletion.
- * Endpoints:
- * - POST /auth/users/register → Register a new user.
- * - DELETE /auth/users/delete/{id} → Delete a user by ID.
- * - PUT /auth/users/update → Update an existing user.
- * - POST /auth/users/email → Retrieve a user by email.
- * - GET /auth/users/{id} → Retrieve a user by ID.
  * @author  Cameron
  */
 @RestController
-@RequestMapping("/auth/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -36,7 +33,7 @@ public class UserController {
     @Autowired
     private final UserMapper userMapper;
 
-    private static final Logger logger = AuthLogger.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
 
     @Transactional
@@ -44,6 +41,8 @@ public class UserController {
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
         logger.info("Received request to register a user: {}", userDTO);
         try {
+            userDTO.setActive(true);
+            userDTO.setLoyaltyPoints(0);
             User savedUser = userService.registerUser(userMapper.toEntity(userDTO));
             logger.info("User successfully registered: {}", savedUser);
             return ResponseEntity.ok(userMapper.toDTO(savedUser));
@@ -85,11 +84,27 @@ public class UserController {
     }
 
     @Transactional
-    @PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO) {
-        logger.info("Received request to update user: {}", userDTO);
+    @PutMapping(value = "/update/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO, @PathVariable String id) {
+        logger.info("Received request to update user: {}", id);
         try {
-            User updatedUser = userService.editUser(userMapper.toEntity(userDTO));
+            if (userDTO.getPassword() == null) {
+                logger.warn("Password is null in the request body");
+                return ResponseEntity.badRequest().body("Password cannot be null");
+            }
+            User userToUpdate = userMapper.toEntity(userDTO);
+            if (userToUpdate.getId() != null && !userToUpdate.getId().toHexString().equals(id)) {
+                logger.error("User ID in request body does not match path variable: {}", id);
+                return ResponseEntity.badRequest().body("User ID in request body does not match path variable");
+            }
+
+            User updatedUser = userService.editUser(id, userToUpdate);
+
+            if (!updatedUser.getId().toHexString().equals(id)) {
+                logger.error("Updated user ID does not match the requested ID: {}", id);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("The updated user does not match the requested ID.");
+            }
             logger.info("User successfully updated: {}", updatedUser);
             return ResponseEntity.ok(userMapper.toDTO(updatedUser));
         } catch (IllegalArgumentException e) {
@@ -122,6 +137,44 @@ public class UserController {
             return ResponseEntity.ok(userMapper.toDTO(user));
         } catch (IllegalArgumentException e) {
             logger.warn("Error during fetching user by ID: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Transactional
+    @PutMapping(value = "/{id}/points/add/", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> addPoints(@PathVariable String id, @RequestBody AmountRequest amount) {
+        logger.info("Received request to add {} points to user by ID: {}", amount, id);
+        try {
+            userService.addLoyaltyPoints(id, amount.getAmount());
+            return ResponseEntity.ok(id);
+        } catch (Exception e) {
+            logger.warn("Error during adding point(s) to user : {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Transactional
+    @PutMapping(value = "/{id}/points/remove/", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> removePoints(@PathVariable String id, @RequestBody AmountRequest amount) {
+        logger.info("Received request to remove {} points to user by ID: {}", amount, id);
+        try {
+            userService.deductLoyaltyPoints(id, amount.getAmount());
+            return ResponseEntity.ok(id);
+        } catch (Exception e) {
+            logger.warn("Error during adding point(s) to user : {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/points")
+    public ResponseEntity<?> getPoints(@PathVariable String id) {
+        logger.info("Received request to get points from user by ID: {}", id);
+        try {
+            int userPoints = userService.getLoyaltyPoints(id);
+            return ResponseEntity.ok(userPoints);
+        } catch (Exception e) {
+            logger.warn("Error during fetching user's point : {}", e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

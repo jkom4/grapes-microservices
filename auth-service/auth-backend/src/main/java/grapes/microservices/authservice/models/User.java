@@ -7,6 +7,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.*;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,7 +23,10 @@ import java.util.Map;
 @Document(collection = "users")
 public class User {
 
-    private static Logger logger = AuthLogger.getLogger();
+    private static Logger logger = LoggerFactory.getLogger(AuthLogger.class);
+
+    private static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
     @Field("_id")
     @Id
@@ -81,9 +85,12 @@ public class User {
     @NotNull
     private Role role;
 
+    @Min(value = 0, message = "Loyalty points cannot be negative")
+    private Integer loyaltyPoints;
+
     private String profession;
 
-    private Map<String, AuthMethod> authMethods;
+    private Map<String, AuthMean> authMethods;
 
     @Embedded
     private Address deliveryAddress;
@@ -140,7 +147,6 @@ public class User {
         logger.info("Starting encryption process for user with ID: {}", this.id);
 
         //encrypt password
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.password = passwordEncoder.encode(password);
         logger.debug("Password for user with ID: {} successfully encrypted.", this.id);
 
@@ -157,6 +163,15 @@ public class User {
             logger.error("Error encrypting sensitive data for user with ID: {}: {}", this.id, e.getMessage());
             throw new Exception("Error encrypting user data", e);
         }
+    }
+
+    /**
+     * Verify if a password provided by the user matches the stored hashed password.
+     * @param rawPassword the password provided by the user
+     * @return true if the password matches the stored hashed password, false otherwise
+     */
+    public boolean verifyPassword(String rawPassword) {
+        return passwordEncoder.matches(rawPassword, this.password);
     }
 }
 

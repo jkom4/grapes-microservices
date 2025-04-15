@@ -1,4 +1,3 @@
-
 # Auth-Service
 
 This project implements an **authentication service** with **Spring Boot** for the backend and **React** for the frontend.
@@ -32,12 +31,24 @@ db.find()
     cd auth-service/backend
     ```
 
-2. Run the following command to start the **MongoDB** and **Spring Boot** services:
+2. Fill the `.env` file at the root to export your environment variables:
+
+   Get your sendgrip api key [here](https://app.sendgrid.com/settings/api_keys)
+   Get your twilio auth token and account SID [here](https://console.twilio.com/)
+   Get your AES and JWT keys in the console at the first start of the service
+
+   ```bash
+    source ~/.zshrc
+    ```
+
+    *Note that the `GRAPES_AES_KEY` must be a 16-character string.* (you can find a generated key that you can paste in the console when you start the service)
+
+3. Run the following command to start the **MongoDB** and **Spring Boot** services:
 
     ```bash
     docker-compose up -d mongodb auth-service
     ```
-3. Install dependencies and run the project:
+4. Install dependencies and run the project:
 
     ```bash
     mvn clean install

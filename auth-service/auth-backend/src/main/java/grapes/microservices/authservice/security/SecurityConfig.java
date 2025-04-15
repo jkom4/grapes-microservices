@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private static final String[] SWAGGER_PATHS = {"/auth/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/swagger-ui/**"};
+    private static final String[] SWAGGER_PATHS = {"/users/**", "/auth/login", "auth/verify-challenge","/auth/register", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/swagger-ui/**"};
 
     @Bean
     public OpenAPI customOpenAPI() {
@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(SWAGGER_PATHS).permitAll()
                         .anyRequest().authenticated());
+                //.addFilterBefore(jwtAuthenticationFilter, JwtAuthenticationFilter.class);
         return http.build();
     }
 }

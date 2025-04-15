@@ -3,6 +3,7 @@ package grapes.microservices.authservice.services;
 import grapes.microservices.authservice.security.AESConfig;
 import grapes.microservices.authservice.utils.AuthLogger;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -20,7 +21,7 @@ import java.util.Base64;
  */
 public class EncryptionService {
 
-    private static final Logger logger = AuthLogger.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
     private static final String AES_ALGORITHM = "AES";
     private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final int GCM_TAG_LENGTH = 128;
@@ -30,7 +31,7 @@ public class EncryptionService {
     static {
         try {
             byte[] key = AESConfig.getKey();
-            if (key == null) {
+            if (key == null || key.length == 0) {
                 key = AESConfig.generateAESKey();
                 logger.warn("AES key is generated as it was not provided.");
             } else {

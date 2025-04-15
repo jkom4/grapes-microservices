@@ -7,7 +7,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import static grapes.microservices.authservice.validators.UserValidator.isValid;
@@ -25,7 +27,7 @@ public class UserService {
     @Autowired
     private final UserRepository userRepository;
 
-    private static final Logger logger = AuthLogger.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
     /**
      * Register a new user and verify the password strength and email uniqueness
@@ -36,10 +38,13 @@ public class UserService {
      */
     @Transactional
     public User registerUser(User user) throws Exception {
-        logger.info("Attempting to register user with email: {}", user.getEmail());
         if (userRepository.existsByEmail(user.getEmail())) {
             logger.error("Registration failed: an account already exists with this email: {}", user.getEmail());
             throw new IllegalArgumentException("Already exists an account with this email");
+        }
+        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+            logger.error("Registration failed: an account already exists with this phone number: {}", user.getPhoneNumber());
+            throw new IllegalArgumentException("Already exists an account with this phone number");
         }
         if(isValid(user)) {
             user.encryptUser();
@@ -63,7 +68,6 @@ public class UserService {
             throw new IllegalArgumentException("ID cannot be null");
         }
         ObjectId id = new ObjectId(idStr);
-        logger.info("Attempting to retrieve user by ID: {}", idStr);
         return userRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("No user found with ID: {}", idStr);
@@ -83,8 +87,6 @@ public class UserService {
             logger.error("User retrieval failed: Email cannot be null");
             throw new IllegalArgumentException("Email cannot be null");
         }
-
-        logger.info("Attempting to retrieve user by email: {}", email);
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     logger.error("No user found with email: {}", email);
@@ -100,18 +102,12 @@ public class UserService {
      * @throws IllegalArgumentException if no user is found with the provided ID.
      */
     @Transactional
-    public User editUser(User updatedUser) throws Exception {
-        User user;
-        if (updatedUser.getId() != null) {
-            user = getUserById(String.valueOf(updatedUser.getId()));
-        } else if (updatedUser.getEmail() != null) {
-            user = getUserByEmail(updatedUser.getEmail());
-        } else {
-            logger.error("Edit failed: ID or email cannot be null");
-            throw new IllegalArgumentException("ID or email cannot be null");
+    public User editUser(String idStr, User updatedUser) throws Exception {
+        User user = getUserById(idStr);
+        if (!user.verifyPassword(updatedUser.getPassword())) {
+            logger.warn("Password verification failed for user: {}", idStr);
+            throw new IllegalArgumentException("Password verification failed");
         }
-
-        logger.info("Attempting to update user with ID: {}", user.getId());
         user.update(updatedUser);
         if(isValid(user)) {
             user.encryptUser();
@@ -138,7 +134,6 @@ public class UserService {
         if (!user.isActive()) {
             throw new IllegalArgumentException("Deactivation failed : this user is already disabled");
         }
-        logger.info("Attempting to disable user with ID: {}", idStr);
         // Set user status to false
         user.setActive(false);
         logger.info("User with ID: {} disabled successfully", idStr);
@@ -161,10 +156,78 @@ public class UserService {
         if (user.isActive()) {
             throw new IllegalArgumentException("Activation failed : this user is already enabled");
         }
-        logger.info("Attempting to enable user with ID: {}", idStr);
         // Set user status to true
         user.setActive(true);
         logger.info("User with ID: {} enabled successfully", idStr);
         return userRepository.save(user);
+    }
+
+    /**
+     * Adds loyalty points to a user by their ID.
+     *
+     * @param idStr  the ID of the user
+     * @param points the number of points to add
+     */
+    @Transactional
+    public void addLoyaltyPoints(String idStr, int points) {
+        if (idStr == null) {
+            logger.error("Loyalty points update failed: ID cannot be null");
+            throw new IllegalArgumentException("ID cannot be null");
+        }
+        if (points < 0) {
+            logger.error("Loyalty points update failed: Points to add cannot be negative");
+            throw new IllegalArgumentException("Points to add cannot be negative");
+        }
+        if (points == 0 ) {
+            logger.error("Loyalty points update failed: Points to add cannot be O");
+            throw new IllegalArgumentException("Points to add cannot be 0");
+        }
+        ObjectId id = new ObjectId(idStr);
+        userRepository.updateLoyaltyPoints(id, points);
+    }
+
+    /**
+     * Deducts loyalty points from a user by their ID.
+     *
+     * @param idStr  the ID of the user
+     * @param points the number of points to deduct
+     */
+    @Transactional
+    public void deductLoyaltyPoints(String idStr, int points) {
+        if (idStr == null) {
+            logger.error("Loyalty points update failed: ID cannot be null");
+            throw new IllegalArgumentException("ID cannot be null");
+        }
+        if (points < 0) {
+            logger.error("Loyalty points update failed: Points to deduct cannot be negative");
+            throw new IllegalArgumentException("Points to deduct cannot be negative");
+        }
+        if (points == 0 ) {
+            logger.error("Loyalty points update failed: Points to deduct cannot be O");
+            throw new IllegalArgumentException("Points to deduct cannot be 0");
+        }
+        int currentPoints = getLoyaltyPoints(idStr);
+        if (currentPoints < points) {
+            logger.error("Loyalty points update failed: Not enough points to deduct");
+            throw new IllegalArgumentException("Not enough points to deduct");
+        }
+        ObjectId id = new ObjectId(idStr);
+        userRepository.updateLoyaltyPoints(id, -points);
+    }
+
+    /**
+     * Retrieves the loyalty points of a user by their ID.
+     * @param idStr the ID of the user
+     * @return the loyalty points of the user
+     */
+    public int getLoyaltyPoints(String idStr) {
+        ObjectId id = new ObjectId(idStr);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("No user found with ID: {}", id.toHexString());
+                    return new IllegalArgumentException("No user found with this ID");
+                });
+
+        return user.getLoyaltyPoints();
     }
 }
