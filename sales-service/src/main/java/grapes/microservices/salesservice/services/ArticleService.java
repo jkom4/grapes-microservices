@@ -59,6 +59,13 @@ public class ArticleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Article not found with id: " + id));
     }
 
+    public void deleteArticleById(Integer id) {
+        if (!articleRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Article not found with ID: " + id);
+        }
+        articleRepository.deleteById(id);
+    }
+
     private void validateArticleForCreation(Article article) {
         if (article.getName() == null || article.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Article name is required.");

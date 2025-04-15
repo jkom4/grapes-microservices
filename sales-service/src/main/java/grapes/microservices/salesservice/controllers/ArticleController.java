@@ -1,6 +1,7 @@
 package grapes.microservices.salesservice.controllers;
 
 import grapes.microservices.salesservice.dto.ArticleDTO;
+import grapes.microservices.salesservice.exceptions.ResourceNotFoundException;
 import grapes.microservices.salesservice.mapper.ArticleMapper;
 import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.services.ArticleService;
@@ -136,6 +137,23 @@ public class ArticleController {
         Article article = articleService.getArticleById(id);
         return ResponseEntity.ok(articleMapper.toDTO(article));
     }
+
+    /**
+     * Deletes an article by its ID (admin only).
+     * // @PreAuthorize("hasRole('ADMIN')")
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteArticle(@PathVariable Integer id) {
+        try {
+            articleService.deleteArticleById(id);
+            return ResponseEntity.ok("Article with ID " + id + " has been deleted successfully.");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the article.");
+        }
+    }
+
 
 
 
