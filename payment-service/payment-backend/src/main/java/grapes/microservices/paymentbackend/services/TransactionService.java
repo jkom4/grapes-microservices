@@ -62,7 +62,7 @@ public class TransactionService {
 
         // Create authentication token and associate it with the transaction
         AuthToken token = tokenService.generateToken(user);
-        transaction.setAuthCode(token.getTokenValue());
+        transaction.setAuthCode(token.getToken());
         transaction.setStatus(Transaction.TransactionStatus.PENDING);
 
         // Save updated transaction

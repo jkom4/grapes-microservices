@@ -28,7 +28,7 @@ public class TokenService {
 
         // Create a token that expires in 3 minutes
         AuthToken token = new AuthToken();
-        token.setTokenValue(tokenValue);
+        token.setToken(tokenValue);
         token.setUser(user);
         token.setCreatedAt(LocalDateTime.now());
         token.setExpiresAt(LocalDateTime.now().plusMinutes(3));
@@ -39,14 +39,14 @@ public class TokenService {
 
         // Send SMS with the token
         if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
-            smsService.sendSms(user.getPhoneNumber(), "Your verification code is: " + tokenValue);
+            smsService.sendOtp(user.getPhoneNumber(), "Your verification code is: " + tokenValue);
         }
 
         return savedToken;
     }
 
     public boolean verifyToken(String tokenValue) {
-        Optional<AuthToken> tokenOpt = tokenRepository.findByTokenValue(tokenValue);
+        Optional<AuthToken> tokenOpt = tokenRepository.findByToken(tokenValue);
 
         if (tokenOpt.isPresent()) {
             AuthToken token = tokenOpt.get();

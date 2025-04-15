@@ -45,4 +45,6 @@ public class AuthToken {
     public boolean isValid() {
         return !isUsed && LocalDateTime.now().isBefore(expiresAt);
     }
+
+
 }
