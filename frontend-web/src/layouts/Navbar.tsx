@@ -31,6 +31,9 @@ function Navbar() {
                 <Link to="/shopping-cart" className="text-black text-2xl hover:text-accent">
                     <span>🛒</span>
                 </Link>
+                <Link to="/admin" className="text-white text-lg bg-accent px-4 py-1 rounded hover:bg-secondary">
+                    Admin
+                </Link>
             </nav>
             <div className="flex items-center">
                 <button onClick={() => handleLanguageChange('en')} className="ml-4">
