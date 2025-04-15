@@ -255,11 +255,11 @@ jobs:
 #            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/data-mining-service:latest \
 #            --push ./data-mining-service
 
-      # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
-      - name: 🏗️ Build & Push Frontend Services (amd64 only)
-        run: |
-          docker compose build frontend-web frontend-auth frontend-payment mariadb-slave
-          docker compose push frontend-web frontend-auth frontend-payment mariadb-slave
+#      # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
+#      - name: 🏗️ Build & Push Frontend Services (amd64 only)
+#        run: |
+#          docker compose build frontend-web frontend-auth frontend-payment mariadb-slave
+#          docker compose push frontend-web frontend-auth frontend-payment mariadb-slave
   deploy-replica-monitoring:
     name: Deploy to VM 1 - Replica + Monitoring (Manual)
     runs-on: ubuntu-latest
