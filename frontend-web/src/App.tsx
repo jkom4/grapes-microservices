@@ -11,6 +11,7 @@ import AdminPage from "./pages/admin/Admin";
 
 const App: React.FC = () => {
     return (
+        /*   <AuthProvider> */
         <LanguageProvider>
             <Router>
                 <Navbar />
@@ -23,6 +24,7 @@ const App: React.FC = () => {
                 </Routes>
             </Router>
         </LanguageProvider>
+        /*  <AuthProvider /> */
     );
 };
 

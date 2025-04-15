@@ -55,6 +55,7 @@ export const fetchArticleById = async (id: number): Promise<Article> => {
 export const addArticle = async (article: Article): Promise<void> => {
     try {
         const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.addArticle}`;
+        console.log('Payload being sent:', JSON.stringify(article, null, 2)); // Log payload
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -64,7 +65,8 @@ export const addArticle = async (article: Article): Promise<void> => {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+            const errorText = await response.text(); // Capture server error details
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}. Details: ${errorText}`);
         }
     } catch (err) {
         throw new Error(err instanceof Error ? err.message : "An error occurred while adding the article");
