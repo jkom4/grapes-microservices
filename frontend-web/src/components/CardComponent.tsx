@@ -17,7 +17,7 @@ const CardComponent: React.FC<CardProps> = ({ article, handleAddToCart }) => {
         >
             <div
                 className="relative cursor-pointer"
-                onClick={() => navigate(`/clm/articles/clm/articles/${article.id}`)}
+                onClick={() => navigate(`/clm/articles/${article.id}`)}
             >
                 <div className="absolute top-2 left-2">
           <span className="bg-white text-secondary text-sm font-semibold px-3 py-1 rounded-full">
