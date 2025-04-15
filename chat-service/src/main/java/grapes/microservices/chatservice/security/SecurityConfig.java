@@ -22,6 +22,10 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/webjars/swagger-ui/**"
     };
+    //TO REMOVE FOR PROD
+    private static final String[] CHAT_PATHS = {
+            "/chat/**"
+    };
 
     // OpenAPI configuration for Swagger UI with Bearer authentication
     @Bean
@@ -45,6 +49,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(SWAGGER_PATHS).permitAll()   // Allow Swagger paths without authentication
+                        .requestMatchers(CHAT_PATHS).permitAll()   // TO REMOVE FOR PRODUCTION
                         .anyRequest().authenticated());              // All other requests require authentication
         return http.build();
     }
