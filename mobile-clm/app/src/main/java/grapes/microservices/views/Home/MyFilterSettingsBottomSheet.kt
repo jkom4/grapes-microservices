@@ -1,4 +1,4 @@
-package grapes.microservices.views.screens.home
+package grapes.microservices.views.Home
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -55,52 +55,6 @@ fun MyFilterSettingsBottomSheet(
             Column(
                 modifier = Modifier.verticalScroll(scrollState)
             ) {
-                val currentSettings by viewmodel.filterSettings.collectAsState()
-
-                Text("Filter settings",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = space))
-
-                Spacer(Modifier.height(space))
-
-                ExpandableCard(title = "Category" , space = space) {
-                    MySelectableTag(viewmodel.getCategories(),
-                        currentSettings.category,
-                        onSelected = { item -> viewmodel.updateCategory(item) })
-                }
-
-                Spacer(Modifier.height(space))
-
-                ExpandableCard(title = "Family", space = space) {
-                    MySelectableTag(viewmodel.getFamilies(),
-                        currentSettings.family,
-                        onSelected = { item -> viewmodel.updateFamily(item) })
-                }
-
-                Spacer(Modifier.height(space))
-
-                ExpandableCard(title = "Price", space = space) {
-                    MyRangeSlider(
-                        selectedRange = currentSettings.articleMinMaxPrice.currentInterval,
-                        onRangeChange = { newRange -> viewmodel.updatePriceRange(newRange) },
-                        limitInterval = currentSettings.articleMinMaxPrice.sliderLimit,
-                        steps = null,
-                        valueFormatter = { String.format("%.2f", it) }
-                    )
-                }
-
-                Spacer(Modifier.height(space))
-
-                ExpandableCard(title = "Rating", space = space) {
-                    MyRangeSlider(
-                        selectedRange = currentSettings.articleMinMaxRatting.currentInterval,
-                        onRangeChange = { newRange -> viewmodel.updateRattingRange(newRange) },
-                        limitInterval = currentSettings.articleMinMaxRatting.sliderLimit,
-                        steps = 4,
-                        valueFormatter = { String.format("%.0f", it) }
-                    )
-
-                }
             }
         }
     }

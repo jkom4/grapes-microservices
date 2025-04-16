@@ -4,6 +4,7 @@ FROM python:3.10
 LABEL authors="jkom"
 WORKDIR /app
 COPY backend/ .
+RUN apt-get update && apt-get install -y python3 python3-pip
 
 # Execute API
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8096"]

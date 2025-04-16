@@ -30,7 +30,6 @@ fun MySelectableTag(elements: List<String>,
         modifier = Modifier
             .padding(7.dp)
     ) {
-        // add "all" option (Empty String = all)
         val mutableList = elements.toMutableList()
         mutableList.add(0, "")
 
@@ -47,7 +46,6 @@ fun MySelectableTag(elements: List<String>,
                         CircleShape
                     )
                     .padding(horizontal = 16.dp, vertical = 8.dp)
-                    // Handle tag selection (when select the already selected tag, unselect it)
                     .clickable {
                         if (selectedItem == word) {
                             onSelected("")

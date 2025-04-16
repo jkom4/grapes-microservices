@@ -7,8 +7,6 @@ const getArticlesAPI = {
         articles: "/clm/articles",
         availableArticles: "/clm/articles/available",
         articleById: (id: number) => `/clm/articles/${id}`,
-        addArticle: "/clm/articles",
-        updateArticle: (id: number) => `/clm/articles/${id}`,
     },
 };
 
