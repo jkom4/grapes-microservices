@@ -343,6 +343,6 @@ jobs:
               --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
               cd grapes-microservices
               git pull origin main
-              docker compose pull 
-              docker compose down 
-              docker compose -f docker-compose-vm3.yml up -d
+              docker-compose pull 
+              docker-compose down 
+              docker-compose -f docker-compose-vm3.yml up -d
