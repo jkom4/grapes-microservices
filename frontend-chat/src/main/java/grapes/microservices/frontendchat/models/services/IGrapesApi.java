@@ -11,8 +11,10 @@ public interface IGrapesApi {
     /** Fetches the list of all topics */
     CompletableFuture<List<Topic>> fetchTopics();
 
-    /** Sends a message through the API (for wider distribution or persistence). */
-    CompletableFuture<Void> postMessage(Topic topic, Message message);
+    /**
+     * Sends a message through the API (for wider distribution or persistence).
+     */
+    void postMessage(Topic topic, Message message);
 
     /** Fetches the list of messages sent on a topic. */
     CompletableFuture<List<Message>> fetchMessages(int topicId);

@@ -5,6 +5,7 @@ import com.google.gson.JsonSyntaxException;
 import grapes.microservices.frontendchat.models.Message;
 import grapes.microservices.frontendchat.models.Topic;
 import grapes.microservices.frontendchat.models.dto.MessageDTO;
+import grapes.microservices.frontendchat.models.dto.MessageMapper;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -89,7 +90,7 @@ public class MulticastService implements IMulticastService {
 
     @Override
     public void sendMessage(Topic topic, Message message) throws IOException {
-        MessageDTO dto = MessageDTO.toDTO(message); // convert message into messageDTO
+        MessageDTO dto =MessageMapper.toDTO(message); // convert message into messageDTO
         String data = gson.toJson(dto); // convert messageDTO into json
         DatagramPacket dtg = new DatagramPacket(data.getBytes(), data.length(), adresseGroupe, port);
         // send
@@ -126,7 +127,7 @@ public class MulticastService implements IMulticastService {
                 System.err.println("Not valid Json: " + jsonPayload);
                 continue;
             }
-            Message message = MessageDTO.toEntity(dto);
+            Message message = MessageMapper.toEntity(dto);
 
             // notify listeners of new message
             messageReveiceObserver.set(message);
