@@ -29,6 +29,7 @@ public class FrontendChat extends Application {
     private AuthViewModel authVM;
 
     private final int MULTICAST_PORT = 8000;
+    private final String GRAPES_BASE = "http://localhost:8094/chat/";
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -38,7 +39,7 @@ public class FrontendChat extends Application {
 
         // 1. Instantiate Services (using Mocks for now)
         IMulticastService multicastService = new MulticastService(MULTICAST_PORT);
-        IGrapesApi apiService = new GrapesApi();
+        IGrapesApi apiService = new GrapesApi(GRAPES_BASE);
 
         // 2. Instantiate ViewModels, injecting services
         authVM = new AuthViewModel(apiService, sceneController);

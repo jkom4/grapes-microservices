@@ -21,8 +21,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class GrapesApi implements IGrapesApi {
-    public static final String BASE = "http://localhost:8094/chat/";
+    public final String base;
     public static final Gson GSON = new Gson();
+
+    public GrapesApi(String base) {
+        this.base = base;
+    }
 
     private final ExecutorService executor = Executors.newCachedThreadPool(runnable -> {
         Thread t = Executors.defaultThreadFactory().newThread(runnable);
@@ -53,7 +57,7 @@ public class GrapesApi implements IGrapesApi {
         return CompletableFuture.supplyAsync(() -> {
             // Build request
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE + "topics"))
+                    .uri(URI.create(base + "topics"))
 //                    .header("Authorization", "Bearer " + token)
                     .method("GET", HttpRequest.BodyPublishers.noBody())
                     .build();
@@ -75,7 +79,7 @@ public class GrapesApi implements IGrapesApi {
         return CompletableFuture.supplyAsync(() -> {
             // Build request
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE + "topic/" + topicId + "/messages"))
+                    .uri(URI.create(base + "topic/" + topicId + "/messages"))
 //                    .header("Authorization", "Bearer " + token)
                     .method("GET", HttpRequest.BodyPublishers.noBody())
                     .build();
@@ -100,7 +104,7 @@ public class GrapesApi implements IGrapesApi {
 
                 // Build the HTTP POST request
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(BASE + "topic/" + topic.id() + "/message"))
+                        .uri(URI.create(base + "topic/" + topic.id() + "/message"))
                         .header("Content-Type", "application/json")
                         // .header("Authorization", "Bearer " + token)
                         .POST(HttpRequest.BodyPublishers.ofString(jsonMessage))
