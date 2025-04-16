@@ -2,7 +2,7 @@ FROM node:18 AS build
 LABEL authors="jkom"
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build && ls
 

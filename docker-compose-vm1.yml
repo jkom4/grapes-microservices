@@ -7,6 +7,7 @@ services:
     env_file: .env
     environment:
       MARIADB_REPLICATION_ROLE: slave
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
       MARIADB_MASTER_HOST: ${MARIADB_MASTER_HOST}
       MARIADB_REPLICATION_USER: ${MARIADB_REPLICATION_USER}
       MARIADB_REPLICATION_PASSWORD: ${MARIADB_REPLICATION_PASSWORD}
@@ -25,7 +26,7 @@ services:
     container_name: sonarqube
     environment:
       SONARQUBE_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonar
-      SONARQUBE_JDBC_USERNAME: ${SONARQUBE_JDBC_user}
+      SONARQUBE_JDBC_USERNAME: ${SONARQUBE_JDBC_USERNAME}
       SONARQUBE_JDBC_PASSWORD: ${SONARQUBE_JDBC_PASSWORD}
     ports:
       - "9000:9000"

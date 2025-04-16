@@ -25,10 +25,10 @@ services:
     volumes:
       - mongodb_data:/data/db
     environment:
-  MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
-  MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-  MONGO_USER_RW: ${MONGO_USER_RW}
-  MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_USER_RW: ${MONGO_USER_RW}
+      MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
 
   rabbitmq:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/rabbitmq-grapes:latest
@@ -61,7 +61,7 @@ services:
       - "8091:8091"
 
   sales-service:
-    image:${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/sales-service:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/sales-service:latest
     container_name: sales-backend
     ports:
       - "8092:8092"
