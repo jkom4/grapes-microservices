@@ -27,9 +27,10 @@ function Navbar() {
                 <Link to="/all-articles" className="text-black text-lg hover:text-accent">
                     {language === 'en' ? 'Our Product' : 'Nos Produits'}
                 </Link>
-                <a href="#" className="text-black text-2xl">
+                {/* Link to the Shopping Cart page */}
+                <Link to="/shopping-cart" className="text-black text-2xl hover:text-accent">
                     <span>🛒</span>
-                </a>
+                </Link>
             </nav>
             <div className="flex items-center">
                 <button onClick={() => handleLanguageChange('en')} className="ml-4">

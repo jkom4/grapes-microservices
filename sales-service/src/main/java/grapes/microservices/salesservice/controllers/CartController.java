@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
  * confirming payment, and retrieving orders.
  */
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/clm/cart")
 public class CartController {
 
@@ -114,6 +115,8 @@ public class CartController {
             return ResponseEntity.internalServerError().body("Failed to clear cart: " + e.getMessage());
         }
     }
+
+
 
     /**
      * Finalizes the payment: verifies stock, updates quantities,
