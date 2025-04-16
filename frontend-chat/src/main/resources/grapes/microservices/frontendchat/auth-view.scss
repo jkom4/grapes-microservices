@@ -1,0 +1,49 @@
+@import "global";
+
+.auth-title {
+  -fx-text-fill: black;
+}
+
+.authPage {
+  -fx-background-color: $primary-light;
+}
+
+#errorMessageFx {
+  -fx-text-fill: #990000;
+  -fx-font-weight: bold;
+}
+
+#tokenTextfield {
+  -fx-font-family: "Segoe UI", sans-serif;
+  -fx-font-size: 14px;
+  -fx-text-fill: white;
+
+  -fx-background-color: $primary-dark;
+  -fx-background-radius: 25px;
+
+  -fx-border-color: #CCCCCC;
+  -fx-border-radius: 25px;
+  -fx-border-width: 1px;
+
+  -fx-padding: 8px 12px;
+
+}
+
+#authButton {
+  -fx-font-family: "Segoe UI Semibold", sans-serif;
+  -fx-font-size: 14px;
+  -fx-background-color: $secondary;
+  -fx-background-radius: 10px;
+  -fx-border-color: transparent;
+  -fx-border-radius: 10px;
+  -fx-padding: 8px 20px;
+  -fx-cursor: hand;
+  -fx-transition: background-color 0.2s ease-in-out;
+}
+#authButton:hover {
+  -fx-background-color: $secondary-light;
+}
+
+#authButton:pressed {
+  -fx-background-color: $secondary-dark;
+}
