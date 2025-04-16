@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(RabbitTestConfig.class)
 @ActiveProfiles(value = "test")
 class TransactionsServiceApplicationTests {
     @Autowired
@@ -237,7 +239,7 @@ class TransactionsServiceApplicationTests {
         String response = result.getResponse().getContentAsString();
         Integer createdArticleId = JsonPath.read(response, "$.id");
 
-        mockMvc.perform(get("/clm/articles/clm/articles/{id}", createdArticleId))
+        mockMvc.perform(get("/clm/articles/{id}", createdArticleId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(createdArticleId))
                 .andExpect(jsonPath("$.name").value("Banane"))
