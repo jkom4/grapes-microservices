@@ -280,6 +280,9 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM1_KEY }}
           script: |
+            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \
+            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
+            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
             cd grapes-microservices
             git pull origin main
             sudo docker compose pull 
@@ -306,6 +309,9 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM2_KEY }}
           script: |
+            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \
+            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
+            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
             cd grapes-microservices
             git pull origin main
             sudo docker compose pull 
@@ -332,6 +338,9 @@ jobs:
             username: ${{ secrets.VM_USER }}
             key: ${{ secrets.VM3_KEY }}
             script: |
+              echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \
+              -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
+              --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
               cd grapes-microservices
               git pull origin main
               sudo docker compose pull 
