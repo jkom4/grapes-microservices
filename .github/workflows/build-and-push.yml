@@ -285,9 +285,9 @@ jobs:
             --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
             cd grapes-microservices
             git pull origin main
-            sudo docker compose pull 
-            sudo docker compose down 
-            sudo docker compose -f docker-compose-vm1.yml up -d
+            docker compose pull 
+            docker compose down 
+            docker compose -f docker-compose-vm1.yml up -d
 
   deploy-frontend:
     name: Deploy to VM 2 - FRONTEND
@@ -314,9 +314,9 @@ jobs:
             --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
             cd grapes-microservices
             git pull origin main
-            sudo docker compose pull 
-            sudo docker compose down 
-            sudo docker compose -f docker-compose-vm2.yml up -d
+            docker compose pull 
+            docker compose down 
+            docker compose -f docker-compose-vm2.yml up -d
 
   deploy-bd-backend:
       name: Deploy to VM 3 - VM ARM (Manual)
@@ -343,6 +343,6 @@ jobs:
               --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
               cd grapes-microservices
               git pull origin main
-              sudo docker compose pull 
-              sudo docker compose down 
-              sudo docker compose -f docker-compose-vm3.yml up -d
+              docker compose pull 
+              docker compose down 
+              docker compose -f docker-compose-vm3.yml up -d
