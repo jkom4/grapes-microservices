@@ -2,7 +2,7 @@ import Article from "../utils/models/Articles";
 import { getArticlesAPI } from "./httpCommon";
 
 // Fetches paginated articles from the API
-const fetchFruits = async (
+export const fetchFruits = async (
     page: number, // Current page number (0-based index)
     size: number // Number of articles per page
 ): Promise<{ content: Article[]; totalPages: number }> => {
@@ -35,4 +35,20 @@ const fetchFruits = async (
     }
 };
 
-export default fetchFruits;
+export const fetchArticleById = async (id: number): Promise<Article> => {
+    try {
+        const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.articleById(id)}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return Article.parse(data);  // Assuming Article.parse() is a static method that parses the response
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while fetching the article");
+    }
+};
+
+export default {fetchFruits, fetchArticleById};

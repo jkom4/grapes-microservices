@@ -239,7 +239,7 @@ class TransactionsServiceApplicationTests {
         String response = result.getResponse().getContentAsString();
         Integer createdArticleId = JsonPath.read(response, "$.id");
 
-        mockMvc.perform(get("/clm/articles/clm/articles/{id}", createdArticleId))
+        mockMvc.perform(get("/clm/articles/{id}", createdArticleId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(createdArticleId))
                 .andExpect(jsonPath("$.name").value("Banane"))

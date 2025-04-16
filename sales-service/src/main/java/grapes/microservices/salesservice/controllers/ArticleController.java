@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping(value = "/clm/articles", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ArticleController {
 
@@ -129,7 +130,7 @@ public class ArticleController {
         }
     }
 
-    @GetMapping("/clm/articles/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ArticleDTO> getArticleById(@PathVariable Integer id) {
         Article article = articleService.getArticleById(id);
         return ResponseEntity.ok(articleMapper.toDTO(article));
