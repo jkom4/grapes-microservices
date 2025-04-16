@@ -124,9 +124,15 @@ public class CartController {
      */
     @PostMapping("/pay/{orderId}")
     @Transactional
-    public ResponseEntity<?> simulatePayment(@PathVariable Integer orderId) {
+    public ResponseEntity<?> simulatePayment(
+            @PathVariable Integer orderId,
+            @RequestParam String address,
+            @RequestParam String phoneNumber,
+            @RequestParam String customerName,
+            @RequestParam String country,
+            @RequestParam String postalCode) {
         try {
-            orderService.finalizePaymentAndClearCart(orderId);
+            orderService.finalizePaymentAndClearCart(orderId, address, phoneNumber, customerName, country, postalCode);
             return ResponseEntity.ok("Payment confirmed, stock updated and cart cleared.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -136,5 +142,8 @@ public class CartController {
             return ResponseEntity.internalServerError().body("Unexpected error: " + e.getMessage());
         }
     }
+
+
+
 
 }
