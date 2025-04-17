@@ -13,7 +13,7 @@ library(shiny)      # For showNotification
 # (Configuration remains the same)
 MYSQL_USER <- Sys.getenv("MYSQL_USER", "adminMASI")
 MYSQL_PWD <- Sys.getenv("MYSQL_PWD", "@adminMASI") # Check if '@' is correct, often just password
-MYSQL_HOST <- Sys.getenv("MYSQL_HOST", "localhost")
+MYSQL_HOST <- Sys.getenv("MYSQL_HOST", "127.0.0.1")
 MYSQL_DB_ACTIVITIES <- "BD_OPER_ACTIVITIES"
 MONGO_URI <- Sys.getenv("MONGO_URI", "mongodb://localhost:27017/")
 MONGO_DB_AUTH <- "BD_OPER_PROC_AUTH"
