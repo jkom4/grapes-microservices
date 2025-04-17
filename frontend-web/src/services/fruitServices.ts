@@ -1,3 +1,4 @@
+// src/services/fruitServices.ts
 import Article from "../utils/models/Articles";
 import { getArticlesAPI } from "./httpCommon";
 
@@ -51,4 +52,72 @@ export const fetchArticleById = async (id: number): Promise<Article> => {
     }
 };
 
-export default {fetchFruits, fetchArticleById};
+// Add a new article
+export const addArticle = async (article: Article): Promise<void> => {
+    try {
+        const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.addArticle}`;
+        console.log('Payload being sent:', JSON.stringify(article, null, 2)); // Log payload
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(article),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text(); // Capture server error details
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}. Details: ${errorText}`);
+        }
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while adding the article");
+    }
+};
+
+// Update an article
+export const updateArticle = async (id: number, article: Article): Promise<void> => {
+    try {
+        const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.updateArticle(id)}`;
+        const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(article),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+        }
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while updating the article");
+    }
+};
+
+// Delete an article
+export const deleteArticle = async (id: number): Promise<void> => {
+    try {
+        const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.deleteArticle(id)}`;
+        const response = await fetch(url, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text(); // Capture server error details
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}. Details: ${errorText}`);
+        }
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while deleting the article");
+    }
+};
+
+export default {
+    fetchFruits,
+    fetchArticleById,
+    addArticle,
+    updateArticle,
+    deleteArticle,
+};

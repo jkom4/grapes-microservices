@@ -49,7 +49,7 @@ fun CartScreen(
     val cartState = viewModel.cartScreenState.collectAsState()
     val paymentState = viewModel.paymentState.collectAsState()
 
-    // Form fields (front-end only)
+    // Form fields
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
@@ -62,6 +62,10 @@ fun CartScreen(
     var expiryDate by remember { mutableStateOf("") }
     var cvc by remember { mutableStateOf("") }
     var termsAccepted by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    // Retrieve the error message string in the composable scope
+    val errorRequiredFieldsMessage = stringResource(R.string.error_required_fields)
 
     // Animation state
     var showPaymentConfirmation by remember { mutableStateOf(false) }
@@ -439,7 +443,21 @@ fun CartScreen(
                                 ) {
                                     Button(
                                         onClick = {
-                                            viewModel.payAndClearCart(orderId = 1)
+                                            // Validate required fields
+                                            if (fullName.isBlank() || phoneNumber.isBlank() || address.isBlank() ||
+                                                country.isBlank() || zipCode.isBlank()) {
+                                                errorMessage = errorRequiredFieldsMessage // Use the pre-fetched string
+                                            } else {
+                                                errorMessage = ""
+                                                viewModel.payAndClearCart(
+                                                    orderId = 1,
+                                                    address = address,
+                                                    phoneNumber = phoneNumber,
+                                                    customerName = fullName,
+                                                    country = country,
+                                                    postalCode = zipCode
+                                                )
+                                            }
                                         },
                                         enabled = termsAccepted && cart.items.isNotEmpty(),
                                         modifier = Modifier
@@ -462,6 +480,17 @@ fun CartScreen(
                                             style = MaterialTheme.typography.titleMedium.copy(
                                                 fontWeight = FontWeight.SemiBold
                                             )
+                                        )
+                                    }
+
+                                    if (errorMessage.isNotEmpty()) {
+                                        Text(
+                                            text = errorMessage,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 8.dp)
                                         )
                                     }
 

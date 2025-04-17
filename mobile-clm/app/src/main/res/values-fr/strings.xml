@@ -57,4 +57,5 @@
     <string name="settings_language">Langage</string>
     <string name="settings_personnal">Informations personelles</string>
     <string name="settings_update">Modifier mes informations personnelles</string>
+    <string name="error_required_fields">Veuillez remplir tous les champs requis.</string>
 </resources>

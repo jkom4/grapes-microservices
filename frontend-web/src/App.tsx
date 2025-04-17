@@ -7,9 +7,11 @@ import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import AllArticles from "./pages/AllArticles";
 import ArticleDetails from "./pages/ArticleDetails";
 import ShoppingCart from "./pages/ShoppingCart";
+import AdminPage from "./pages/admin/Admin";
 
 const App: React.FC = () => {
     return (
+        /*   <AuthProvider> */
         <LanguageProvider>
             <Router>
                 <Navbar />
@@ -18,9 +20,11 @@ const App: React.FC = () => {
                     <Route path="/all-articles" element={<AllArticles />} />
                     <Route path="/clm/articles/:id" element={<ArticleDetails />} />
                     <Route path="/shopping-cart" element={<ShoppingCart />} />
+                    <Route path="/admin" element={<AdminPage />} />
                 </Routes>
             </Router>
         </LanguageProvider>
+        /*  <AuthProvider /> */
     );
 };
 

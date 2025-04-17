@@ -64,22 +64,8 @@ const CartPage = () => {
     };
 
     const isFormComplete = () => {
-        const { fullName, email, phone, address, country, city, state, zip, cardNumber, cardExpiry, cardCVC, termsAccepted } =
-            formData;
-        return (
-            fullName &&
-            email &&
-            phone &&
-            address &&
-            country &&
-            city &&
-            state &&
-            zip &&
-            cardNumber &&
-            cardExpiry &&
-            cardCVC &&
-            termsAccepted
-        );
+        const { fullName, phone, address, country, zip, termsAccepted } = formData;
+        return fullName && phone && address && country && zip && termsAccepted;
     };
 
     const handlePayment = async () => {
@@ -93,12 +79,20 @@ const CartPage = () => {
 
         setIsPaying(true);
         try {
-            await cartService.processPayment(orderId);
+            await cartService.processPayment(
+                orderId,
+                formData.address,
+                formData.phone,
+                formData.fullName,
+                formData.country,
+                formData.zip
+            );
             setShowSuccess(true);
 
             setTimeout(async () => {
                 try {
                     await cartService.clearCart(orderId);
+                    setCart(null); // Clear cart in UI
                 } catch (err) {
                     console.error("Error clearing cart:", err instanceof Error ? err.message : "Unknown error");
                 }
@@ -132,7 +126,6 @@ const CartPage = () => {
             setError(err instanceof Error ? err.message : "An unknown error occurred while removing the item");
         }
     };
-
 
     const handleAddItem = async (articleId: number, quantityKg: number, quantity: number) => {
         try {
@@ -258,7 +251,6 @@ const CartPage = () => {
                             type="email"
                             name="email"
                             placeholder={translations[language].email}
-                            required
                             className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-accent focus:border-transparent"
                             value={formData.email}
                             onChange={handleInputChange}
@@ -311,6 +303,7 @@ const CartPage = () => {
                                 type="text"
                                 name="zip"
                                 placeholder={translations[language].zip}
+                                required
                                 className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-accent focus:border-transparent"
                                 value={formData.zip}
                                 onChange={handleInputChange}
