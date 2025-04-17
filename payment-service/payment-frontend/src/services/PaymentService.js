@@ -1,38 +1,37 @@
-// src/services/PaymentService.js
 import axios from 'axios';
 
 // Base URL for API endpoints
 const API_URL = 'http://localhost:8093/api';
 
-// Axios instance with configuration
+// Axios instance with default configuration
 const apiClient = axios.create({
     baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true // Important for maintaining session
+    withCredentials: true // Enables session maintenance
 });
 
+// Handles payment processing and transaction management
 export const PaymentService = {
-    /**
-     * Process a payment by initiating 3D Secure verification
-     * @param {Payment} payment - The payment object with card details
-     * @returns {Promise} - Promise with payment result
-     */
+    // Initiates 3D Secure payment with card details
     processPayment: async (payment) => {
         try {
-            // Call the payment initiation endpoint
-            const response = await apiClient.post('/payment/initiate', payment.toJSON());
-
+            const response = await apiClient.post('/payment/initiate', {
+                cardNumber: payment.cardNumber,
+                expirationDate: payment.expirationDate,
+                cvv: payment.cvv,
+                amount: payment.amount,
+                merchantName: "Grapes"
+            });
             if (response.data.success) {
-                // Store payment ID in session storage
-                if (response.data.paymentId) {
-                    sessionStorage.setItem('pendingPaymentId', response.data.paymentId);
+                if (response.data.transactionId) {
+                    sessionStorage.setItem('pendingTransactionId', response.data.transactionId);
                 }
                 return {
                     success: true,
                     message: response.data.message,
-                    paymentId: response.data.paymentId
+                    transactionId: response.data.transactionId
                 };
             } else {
                 return {
@@ -49,18 +48,13 @@ export const PaymentService = {
         }
     },
 
-    /**
-     * Get current payment state from session
-     * @returns {string|null} - Current payment ID or null
-     */
-    getPendingPaymentId: () => {
-        return sessionStorage.getItem('pendingPaymentId');
+    // Retrieves current transaction ID from session
+    getPendingTransactionId: () => {
+        return sessionStorage.getItem('pendingTransactionId');
     },
 
-    /**
-     * Clear pending payment from session
-     */
-    clearPendingPayment: () => {
-        sessionStorage.removeItem('pendingPaymentId');
+    // Clears pending transaction from session
+    clearPendingTransaction: () => {
+        sessionStorage.removeItem('pendingTransactionId');
     }
 };

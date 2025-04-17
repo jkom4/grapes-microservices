@@ -1,34 +1,29 @@
-// --- START OF src/services/VerificationService.js ---
 import axios from 'axios';
 
 // Base URL for API endpoints
 const API_URL = 'http://localhost:8093/api';
 
-// Axios instance with configuration
+// Axios instance with default configuration
 const apiClient = axios.create({
     baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true // Important for maintaining session
+    withCredentials: true // Enables session maintenance
 });
 
+// Handles payment verification and retrieval of pending payment details
 export const VerificationService = {
-    /**
-     * Verify payment with OTP code
-     * @param {PaymentVerification} verification - The verification details with OTP code
-     * @returns {Promise} - Promise with verification result
-     */
+    // Verifies payment using OTP code
     verifyPayment: async (verification) => {
         try {
-            // Appel à /payment/complete avec le token OTP
-            const response = await apiClient.post('/payment/complete', verification.toJSON());
-
+            const response = await apiClient.post('/payment/complete', {
+                paymentToken: verification.paymentToken
+            });
             if (response.data.success) {
                 return {
                     success: true,
-                    message: response.data.message || 'Payment successful!', // Message générique
-                    // transactionId retiré de la réponse backend
+                    message: response.data.message || 'Payment successful!'
                 };
             } else {
                 return {
@@ -45,34 +40,31 @@ export const VerificationService = {
         }
     },
 
-    /**
-     * Get pending payment details from the backend session
-     * @returns {Promise} - Promise with payment details (amount, maskedCardNumber, merchantName)
-     */
+    // Fetches details of pending payment
     getPendingPaymentDetails: async () => {
         try {
-            // Appel au nouvel endpoint GET
             const response = await apiClient.get('/payment/pending-details');
             if (response.data.success) {
                 return {
                     success: true,
                     details: {
                         merchantName: response.data.merchantName,
-                        amount: response.data.amount, // Le backend renvoie déjà formaté
-                        cardNumber: response.data.maskedCardNumber // Le backend renvoie déjà masqué
+                        amount: response.data.amount,
+                        cardNumber: response.data.maskedCardNumber
                     }
                 };
             } else {
-                return { success: false, message: response.data.message || 'Could not retrieve details.' };
+                return {
+                    success: false,
+                    message: response.data.message || 'Could not retrieve details.'
+                };
             }
         } catch (error) {
             console.error('Error fetching pending payment details:', error);
             return {
                 success: false,
-                // Tente de récupérer le message d'erreur du backend, sinon message générique
                 message: error.response?.data?.message || 'Server error fetching payment details.'
             };
         }
     },
 };
-// --- END OF src/services/VerificationService.js ---

@@ -1,33 +1,22 @@
-// src/services/AuthService.js
-
 import axios from 'axios';
 
-// Configuration de base
-const API_BASE_URL = 'http://localhost:8093'; // Ajustez selon l'URL de votre backend Spring Boot
+// Base configuration
+const API_BASE_URL = 'http://localhost:8093';
 
+// Handles authentication-related operations
 export class AuthService {
-    /**
-     * Méthode pour se connecter à l'application
-     * @param {User} user - L'objet utilisateur contenant login et password
-     * @returns {Promise<Object>} Résultat de la connexion
-     */
+    // Authenticates user with email and password
     static async login(user) {
         try {
-            console.log(`Envoi de la requête d'authentification à ${API_BASE_URL}/api/login`);
-
-            // --- LA CORRECTION EST ICI ---
+            console.log(`Sending authentication request to ${API_BASE_URL}/api/login`);
             const response = await axios.post(`${API_BASE_URL}/api/login`, {
-                login: user.login,
+                email: user.login,
                 password: user.password
             }, {
-                // Ajoutez cet objet de configuration avec withCredentials
                 withCredentials: true
             });
-            // --- FIN DE LA CORRECTION ---
-
-            // Le reste de votre logique de traitement de la réponse...
             if (response.status === 200) {
-                console.log('Authentification réussie:', response.data);
+                console.log('Authentication successful:', response.data);
                 localStorage.setItem('sessionToken', response.data.token);
                 localStorage.setItem('userId', response.data.userId);
                 return {
@@ -60,38 +49,26 @@ export class AuthService {
                 };
             }
         }
-
     }
 
-    /**
-     * Vérifie si l'utilisateur est connecté
-     * @returns {boolean} État de connexion
-     */
+    // Checks if user is authenticated
     static isLoggedIn() {
         return localStorage.getItem('sessionToken') !== null;
     }
 
-    /**
-     * Déconnecte l'utilisateur
-     */
+    // Logs out user and clears session
     static logout() {
         localStorage.removeItem('sessionToken');
         localStorage.removeItem('userId');
         window.location.href = '/login';
     }
 
-    /**
-     * Récupère l'ID de l'utilisateur connecté
-     * @returns {string|null} ID de l'utilisateur
-     */
+    // Retrieves authenticated user's ID
     static getUserId() {
         return localStorage.getItem('userId');
     }
 
-    /**
-     * Récupère le token de session
-     * @returns {string|null} Token de session
-     */
+    // Retrieves session token
     static getToken() {
         return localStorage.getItem('sessionToken');
     }

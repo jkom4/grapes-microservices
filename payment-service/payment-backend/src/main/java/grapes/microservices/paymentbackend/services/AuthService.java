@@ -1,15 +1,20 @@
 package grapes.microservices.paymentbackend.services;
 
 import grapes.microservices.paymentbackend.models.AuthToken;
-import grapes.microservices.paymentbackend.models.User;
+import grapes.microservices.paymentbackend.models.Client;
 import grapes.microservices.paymentbackend.repositories.AuthTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.Random;
 
+/**
+ * Service handling authentication token operations for two-factor authentication.
+ * Manages OTP generation, storage, delivery, and verification for secure payments.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -19,8 +24,9 @@ public class AuthService {
     private final SmsService smsService;
 
     /**
-     * Generate a 6-digit OTP
-     * @return the OTP
+     * Generates a random 6-digit OTP (One-Time Password) code.
+     *
+     * @return A 6-digit numeric string
      */
     public String generateOtp() {
         Random random = new Random();
@@ -28,75 +34,94 @@ public class AuthService {
     }
 
     /**
-     * Create and store an authentication token for a user
-     * @param user the user
-     * @return the created token
+     * Creates and stores an authentication token for a client, and sends OTP via SMS.
+     * Uses transaction to ensure atomicity between token creation and notification.
+     *
+     * @param client The client requiring authentication
+     * @return The created and saved token
+     * @throws IllegalStateException If client has no phone number or SMS sending fails
      */
-    public AuthToken createToken(User user) {
+    @Transactional
+    public AuthToken createToken(Client client) {
         String otp = generateOtp();
-        AuthToken token = new AuthToken(otp, user);
+        // Use AuthToken constructor that initializes dates and isUsed flag
+        AuthToken token = new AuthToken(otp, client);
 
-        log.info("Generated OTP token for user {}: {}", user.getLogin(), otp);
+        log.info("Generated OTP token for client {}: {}", client.getEmail(), otp);
 
         // Send OTP via SMS
-        if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
-            smsService.sendOtp(user.getPhoneNumber(), otp);
-            log.info("OTP sent to phone number: {}", user.getPhoneNumber());
+        if (client.getPhoneNumber() != null && !client.getPhoneNumber().isEmpty()) {
+            try {
+                smsService.sendOtp(client.getPhoneNumber(), otp);
+                log.info("OTP sent to phone number: {}", client.getPhoneNumber());
+            } catch (RuntimeException e) {
+                log.error("Failed to send OTP SMS to client {}: {}", client.getEmail(), e.getMessage());
+                throw new IllegalStateException("Failed to send OTP via SMS", e);
+            }
         } else {
-            log.error("User {} doesn't have a registered phone number", user.getLogin());
-            throw new IllegalStateException("User doesn't have a registered phone number");
+            log.error("Client {} doesn't have a registered phone number", client.getEmail());
+            throw new IllegalStateException("Client doesn't have a registered phone number");
         }
 
+        // Save the token to the database
         return tokenRepository.save(token);
     }
 
     /**
-     * Save a token to the database
-     * @param token the token to save
-     * @return the saved token
+     * Saves a token to the database.
+     * Useful when token is created by another component (e.g., ACS server).
+     *
+     * @param token The token to save
+     * @return The saved token with database ID assigned
      */
+    @Transactional
     public AuthToken saveToken(AuthToken token) {
-        log.info("Saving token {} for user {}", token.getToken(), token.getUser().getLogin());
+        log.info("Saving token {} for client {}", token.getToken(), token.getClient().getEmail());
         return tokenRepository.save(token);
     }
 
     /**
-     * Verify if a token is valid
-     * @param tokenValue the token value
-     * @param user the user
-     * @return true if valid, false otherwise
+     * Verifies if a token is valid for a given client.
+     * Marks the token as used if valid to prevent replay attacks.
+     *
+     * @param tokenValue The token value (OTP) to verify
+     * @param client The client attempting authentication
+     * @return true if token is valid and not used/expired, false otherwise
      */
-    public boolean verifyToken(String tokenValue, User user) {
-        log.info("Verifying token {} for user {}", tokenValue, user.getLogin());
+    @Transactional
+    public boolean verifyToken(String tokenValue, Client client) {
+        log.info("Verifying token {} for client {}", tokenValue, client.getEmail());
 
-        Optional<AuthToken> tokenOpt = tokenRepository.findByTokenAndUser(tokenValue, user);
+        Optional<AuthToken> tokenOpt = tokenRepository.findByTokenAndClient(tokenValue, client);
 
         if (tokenOpt.isEmpty()) {
-            log.warn("Token not found for user {}", user.getLogin());
+            log.warn("Token '{}' not found for client {}", tokenValue, client.getEmail());
             return false;
         }
 
         AuthToken token = tokenOpt.get();
 
         if (!token.isValid()) {
-            log.warn("Token is expired or already used for user {}", user.getLogin());
+            log.warn("Token '{}' is expired or already used for client {}", tokenValue, client.getEmail());
             return false;
         }
 
-        // Mark token as used
+        // Mark token as used to prevent replay attacks
         token.setUsed(true);
         tokenRepository.save(token);
-        log.info("Token verified successfully for user {}", user.getLogin());
+        log.info("Token '{}' verified successfully and marked as used for client {}", tokenValue, client.getEmail());
 
         return true;
     }
 
     /**
-     * Get the last generated token for a user
-     * @param user the user
-     * @return the token if found, empty otherwise
+     * Retrieves the last generated token for a client.
+     * Useful for debugging or implementing resend functionality.
+     *
+     * @param client The client
+     * @return Optional containing the most recent token, if any
      */
-    public Optional<AuthToken> getLastToken(User user) {
-        return tokenRepository.findFirstByUserOrderByCreatedAtDesc(user);
+    public Optional<AuthToken> getLastToken(Client client) {
+        return tokenRepository.findFirstByClientOrderByCreatedAtDesc(client);
     }
 }

@@ -1,12 +1,16 @@
 package grapes.microservices.paymentbackend.dto;
 
+/**
+ * DTO for authentication response data.
+ * Contains authentication results including token, status and user information.
+ */
 public class LoginResponse {
     private String token;
     private String status;
     private String message;
     private Long userId;
 
-    // Constructeurs
+    // Constructors
     public LoginResponse() {
     }
 
@@ -17,7 +21,7 @@ public class LoginResponse {
         this.userId = userId;
     }
 
-    // Getters et Setters
+    // Getters and Setters
     public String getToken() {
         return token;
     }

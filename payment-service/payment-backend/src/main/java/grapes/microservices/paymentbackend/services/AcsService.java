@@ -1,6 +1,7 @@
 package grapes.microservices.paymentbackend.services;
 
-import grapes.microservices.paymentbackend.models.Transaction;
+import grapes.microservices.paymentbackend.models.TransactionEntity;
+import grapes.microservices.paymentbackend.models.Client;
 import grapes.microservices.paymentbackend.utils.DataUtils;
 import grapes.microservices.paymentbackend.utils.KeystoreUtils;
 import grapes.microservices.paymentbackend.utils.SignUtils;
@@ -13,52 +14,81 @@ import java.io.PrintWriter;
 import java.security.PrivateKey;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for communicating with the Authentication Control Server (ACS)
+ * during payment processing for 3D Secure verification.
+ */
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class AcsService {
 
     private static final String SOURCE = "client";
-    private static final int ACS_PORT = 8081;
 
-    @Value("${keystore.client.path}")
+    @Value("${app.ports.acs}")
+    private int acsPort;
+
+    // Client keystore and truststore configuration
+    @Value("${app.keystore.client.path}")
     private String clientKeystorePath;
 
-    @Value("${keystore.client.password}")
+    @Value("${app.keystore.client.password}")
     private String clientKeystorePassword;
 
-    @Value("${keystore.client.alias}")
+    @Value("${app.keystore.client.alias}")
     private String clientKeystoreAlias;
 
+    @Value("${app.keystore.client.key.password}")
+    private String clientKeyPassword;
 
-    // --- Truststore used to verify the server (ACS) certificate ---
-    @Value("${app.truststore.client.path}") // <-- Path to truststore containing ACS cert
-    private String clientTruststorePath; // RENAMED for clarity (was acsTruststorePath implicitly)
+    @Value("${app.truststore.acs.path}")
+    private String acsTruststorePath;
 
-    @Value("${app.truststore.client.password}") // <-- Inject the client truststore password
-    private String clientTruststorePassword;
+    @Value("${app.truststore.acs.password}")
+    private String acsTruststorePassword;
 
-    public boolean processPayment(Transaction transaction) {
+    /**
+     * Processes a payment by sending card details to the ACS server
+     * for 3D Secure authentication and OTP generation.
+     *
+     * @param transaction The transaction to process (contains amount and merchant details)
+     * @param client The client making the payment (contains card details)
+     * @return true if the process succeeded (OTP generated), false otherwise
+     */
+    public boolean processPayment(TransactionEntity transaction, Client client) {
         try {
-            // Get card details from user
-            String cardNumber = transaction.getUser().getCardNumber();
-            String expirationDate = transaction.getUser().getCardExpiration();
+            // Extract card details from client
+            String cardNumber = "";
+            String expirationDate = "";
 
-            if (cardNumber == null || expirationDate == null) {
-                System.err.println("[ERROR] Missing card details for user: " + transaction.getUser().getLogin());
+            var cards = client.getCards();
+            if (cards != null && !cards.isEmpty()) {
+                var card = cards.get(0); // First card or selection logic
+                cardNumber = card.getCardNumber();
+                expirationDate = card.getExpirationDate();
+            }
+
+            if (cardNumber == null || cardNumber.isEmpty() || expirationDate == null || expirationDate.isEmpty()) {
+                log.error("Missing card details for client: {}", client.getEmail());
                 return false;
             }
 
             // Format data for ACS
-            String dataToSign = "card=" + cardNumber + "#date=" + expirationDate + "#amount=" + transaction.getAmount() + "#merchant=" + transaction.getMerchant();
+            String dataToSign = "card=" + cardNumber + "#date=" + expirationDate +
+                    "#amount=" + transaction.getTransferAmount() +
+                    "#merchant=" + transaction.getMerchantName();
 
             // Get private key for signing
             PrivateKey privateKey = KeystoreUtils.getPrivateKey(
                     clientKeystorePath,
                     clientKeystorePassword,
                     clientKeystoreAlias,
-                    clientKeystorePassword
+                    clientKeyPassword
             );
 
             // Sign the data
@@ -67,52 +97,65 @@ public class AcsService {
 
             // Send to ACS and get response
             String acsResponse = sendToACS(formattedDataForAcs);
-            System.out.println("[INFO] Received response from ACS: " + acsResponse);
+            log.info("Received response from ACS: {}", acsResponse);
 
-            if (acsResponse == null) {
+            if (acsResponse == null || acsResponse.startsWith("ERROR:")) {
+                log.error("Received null or error response from ACS: {}", acsResponse);
                 return false;
             }
 
-            // Parse response
+            // Parse the response
             Map<String, String> parsedData = DataUtils.parseData(acsResponse);
 
             String responseSource = parsedData.get("source");
-            String code = parsedData.get("data");
+            String code = parsedData.get("data"); // Should be the OTP
             String signature = parsedData.get("signature");
 
             if (responseSource == null || !responseSource.equals("acs") || code == null || signature == null) {
-                System.err.println("[ERROR] Invalid response format from ACS");
+                log.error("Invalid response format from ACS: {}", acsResponse);
                 return false;
             }
 
-            // Verify signature (in a production environment)
-            // This is simplified for this implementation
+            // TODO: Verify ACS response signature with ACS public key
+            log.warn("ACS response signature verification is currently skipped.");
+
+            // If we get here, communication succeeded and format is correct
             return true;
 
         } catch (Exception e) {
-            System.err.println("[ERROR] Error processing payment through ACS: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error processing payment through ACS: {}", e.getMessage(), e);
             return false;
         }
     }
 
+    /**
+     * Establishes a secure connection with the ACS server and sends the message.
+     *
+     * @param message The formatted message to send to ACS
+     * @return The ACS server response or an error message
+     */
     private String sendToACS(String message) {
+        log.debug("Attempting to connect to ACS on port {} using truststore {}", acsPort, acsTruststorePath);
         try (SSLSocket acsSocket = SslUtils.createSslClientSocket(
-                ACS_PORT,
-                clientTruststorePath,      // Truststore to verify ACS server
-                clientTruststorePassword)) {
+                acsPort,
+                acsTruststorePath,
+                acsTruststorePassword)) {
+
+            log.debug("SSL Socket created for ACS. Connected: {}", acsSocket.isConnected());
             PrintWriter writer = new PrintWriter(acsSocket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(acsSocket.getInputStream()));
 
             // Send the message to the ACS
             writer.println(message);
-            System.out.println("[INFO] Message sent to ACS: " + message);
+            log.info("Message sent to ACS: {}", message);
 
             // Receive the response from the ACS
-            return reader.readLine();
+            String response = reader.readLine();
+            log.info("Raw response received from ACS: {}", response);
+            return response;
         } catch (Exception e) {
-            System.err.println("[ERROR] communicating with ACS: " + e.getMessage());
-            return null;
+            log.error("Error communicating with ACS on port {}: {}", acsPort, e.getMessage(), e);
+            return "ERROR:Communication failed - " + e.getMessage();
         }
     }
 }

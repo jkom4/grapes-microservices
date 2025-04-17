@@ -1,29 +1,25 @@
-/* ===================================================== */
-/* Styles Globaux                    */
-/* ===================================================== */
+/* Global Styles */
 body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f4;
   margin: 0;
-  padding: 20px; /* Padding initial pour desktop */
+  padding: 20px;
   box-sizing: border-box;
-  min-height: 100vh; /* Assure que le body prend au moins toute la hauteur */
+  min-height: 100vh;
 }
 
-/* ----------------------------------------------------- */
-/* Styles pour LoginPage              */
-/* ----------------------------------------------------- */
+/* LoginPage Styles */
 .login-container {
   background: white;
   border: 1px solid #e0e0e0;
-  width: 350px; /* Largeur pour desktop */
-  max-width: 95%; /* Empêche le dépassement sur les très petits écrans */
+  width: 350px;
+  max-width: 95%;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   padding: 20px;
   text-align: center;
-  margin: 20px auto; /* Marge verticale et centrage horizontal */
-  box-sizing: border-box; /* Inclure padding/border dans la largeur */
+  margin: 20px auto;
+  box-sizing: border-box;
 }
 
 .login-container .logo-container {
@@ -38,7 +34,6 @@ body {
   object-fit: contain;
 }
 
-/* Formulaires et inputs */
 .login-container input {
   width: 100%;
   padding: 10px;
@@ -70,7 +65,6 @@ body {
   font-weight: bold;
 }
 
-/* Password validation */
 .password-validation {
   text-align: left;
   margin-top: 10px;
@@ -103,7 +97,6 @@ body {
   margin-top: 5px;
 }
 
-/* Pour les inputs de card number (si utilisés dans Login) */
 .card-number-group {
   display: flex;
   gap: 10px;
@@ -111,13 +104,13 @@ body {
 }
 
 .card-part {
-  width: 23%; /* Peut nécessiter ajustement sur mobile si trop petit */
+  width: 23%;
   padding: 10px;
   border: none;
   border-bottom: 2px solid #ced4da;
   border-radius: 0;
   text-align: center;
-  box-sizing: border-box; /* Important */
+  box-sizing: border-box;
 }
 
 .card-part:focus {
@@ -125,20 +118,18 @@ body {
   outline: none;
 }
 
-/* ===================================================== */
-/* PaymentPage Styles                */
-/* ===================================================== */
+/* PaymentPage Styles */
 .payment-container {
   background: white;
   border: 1px solid #e0e0e0;
-  width: 400px; /* Largeur pour desktop */
-  max-width: 95%; /* Empêche le dépassement sur les très petits écrans */
+  width: 400px;
+  max-width: 95%;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   padding: 25px;
-  margin: 20px auto; /* Marge verticale et centrage horizontal */
+  margin: 20px auto;
   text-align: center;
-  box-sizing: border-box; /* Inclure padding/border dans la largeur */
+  box-sizing: border-box;
 }
 
 .payment-container .left-logo {
@@ -187,7 +178,7 @@ body {
 }
 
 .payment-container .card-part {
-  width: 23%; /* Peut nécessiter ajustement sur mobile si trop petit */
+  width: 23%;
   padding: 10px;
   border: none;
   border-bottom: 2px solid #ced4da;
@@ -195,7 +186,7 @@ body {
   text-align: center;
   font-family: monospace;
   letter-spacing: 2px;
-  box-sizing: border-box; /* Important */
+  box-sizing: border-box;
 }
 
 .payment-container .card-part:focus {
@@ -250,19 +241,16 @@ body {
   margin-top: 10px;
 }
 
-
-/* ----------------------------------------------------- */
-/* Styles pour PaymentVerificationPage      */
-/* ----------------------------------------------------- */
+/* PaymentVerificationPage Styles */
 .verification-container {
   font-family: Arial, sans-serif;
   background-color: #f4f4f4;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh; /* Utiliser min-height au lieu de height */
+  min-height: 100vh;
   margin: 0;
-  padding: 20px; /* Padding initial pour desktop */
+  padding: 20px;
   box-sizing: border-box;
 }
 
@@ -270,12 +258,12 @@ body {
   background: #fff;
   padding: 20px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  width: 400px; /* Largeur pour desktop */
-  max-width: 95%; /* Empêche le dépassement sur les très petits écrans */
+  width: 400px;
+  max-width: 95%;
   border-radius: 10px;
   text-align: center;
-  margin: 20px auto; /* Marge ajoutée pour petits écrans si .verification-container n'est pas 100vh */
-  box-sizing: border-box; /* Inclure padding/border dans la largeur */
+  margin: 20px auto;
+  box-sizing: border-box;
 }
 
 .verification-box .logo-container {
@@ -283,22 +271,22 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
-  flex-wrap: wrap; /* Permet aux logos de passer à la ligne si pas assez de place */
-  gap: 10px; /* Espace entre les logos s'ils passent à la ligne */
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .verification-box .left-logo {
-  text-align: left;
-  flex-basis: 100px; /* Donne une base de largeur */
-  flex-grow: 1;     /* Permet de grandir */
+  text-align: center;
+  flex-basis: 100px;
+  flex-grow: 1;
 }
 
 .verification-box .right-logos {
   display: flex;
   gap: 20px;
   align-items: center;
-  justify-content: center; /* Centre les logos de droite s'ils passent à la ligne */
-  flex-grow: 1; /* Permet de grandir */
+  justify-content: center;
+  flex-grow: 1;
 }
 
 .verification-box img {
@@ -355,28 +343,18 @@ body {
   margin-top: 15px;
 }
 
-
-/* ===================================================== */
-/* <<<<<   MEDIA QUERIES POUR MOBILE   >>>>>   */
-/* ===================================================== */
-
-/* Styles pour écrans jusqu'à 600px de large (typique pour mobile) */
+/* Mobile Media Queries */
 @media (max-width: 600px) {
-
   body {
-    padding: 10px; /* Réduire le padding global sur mobile */
+    padding: 10px;
   }
-
-  /* Ajuster les conteneurs principaux */
   .login-container,
   .payment-container,
   .verification-box {
-    width: 95%; /* Utiliser presque toute la largeur */
-    padding: 15px; /* Légère réduction du padding interne */
-    margin: 15px auto; /* Ajuster la marge verticale */
+    width: 95%;
+    padding: 15px;
+    margin: 15px auto;
   }
-
-  /* Optionnel : réduire la taille des logos si nécessaire */
   .login-container .logo-container img {
     max-height: 100px;
     max-width: 100px;
@@ -386,40 +364,30 @@ body {
     max-width: 80px;
   }
   .verification-box img {
-    max-width: 80px; /* Réduire la taille max des logos */
+    max-width: 80px;
     max-height: 80px;
   }
   .verification-box .right-logos {
-    gap: 10px; /* Réduire l'espace entre les logos de droite */
-    justify-content: flex-end; /* Les aligner à droite */
+    gap: 10px;
+    justify-content: flex-end;
   }
   .verification-box .logo-container {
-    justify-content: space-between; /* Garder l'espacement */
+    justify-content: space-between;
   }
-
-
-  /* Ajuster les inputs de carte */
   .card-number-group {
-    gap: 5px; /* Réduire l'espace entre les parties de la carte */
+    gap: 5px;
   }
-
   .card-part {
-    padding: 8px; /* Réduire légèrement le padding */
-    font-size: 14px; /* Réduire la taille de police si besoin */
-    letter-spacing: 1px; /* Réduire l'espacement des lettres */
-    /* La largeur en % devrait s'adapter, mais surveillez le rendu */
+    padding: 8px;
+    font-size: 14px;
+    letter-spacing: 1px;
   }
-
-  /* Ajuster les tailles de police spécifiques si elles sont trop grandes */
   .payment-container .amount {
     font-size: 20px;
   }
-
   .payment-container .merchant {
-    font-size: 14px; /* Si besoin */
+    font-size: 14px;
   }
-
-  /* Rendre les messages d'erreur/succès un peu plus petits si nécessaire */
   .error-message,
   .payment-container .error {
     font-size: 11px;
@@ -427,26 +395,22 @@ body {
   .verification-box .success-message {
     font-size: 16px;
   }
-
   .payment-container .security-note {
     font-size: 11px;
   }
 }
 
-/* Optionnel : Media Query pour très petits écrans (moins de 360px) */
 @media (max-width: 360px) {
   body {
-    padding: 5px; /* Encore moins de padding */
+    padding: 5px;
   }
   .login-container,
   .payment-container,
   .verification-box {
     padding: 10px;
   }
-
-  /* Ajustements plus fins si nécessaire pour les logos, polices, etc. */
   .card-part {
-    font-size: 12px; /* Peut devenir très petit */
+    font-size: 12px;
     letter-spacing: 0.5px;
   }
 }

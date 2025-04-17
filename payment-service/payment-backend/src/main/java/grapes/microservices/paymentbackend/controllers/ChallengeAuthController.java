@@ -1,7 +1,6 @@
 package grapes.microservices.paymentbackend.controllers;
 
-import grapes.microservices.paymentbackend.models.User;
-import grapes.microservices.paymentbackend.services.UserService;
+import grapes.microservices.paymentbackend.services.ClientService;
 import grapes.microservices.paymentbackend.utils.AesCryptoUtils;
 import grapes.microservices.paymentbackend.utils.ChallengeGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +16,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @CrossOrigin(origins = "*")
 public class ChallengeAuthController {
-
-    private final UserService userService;
+/*
+    private final ClientService userService;
 
     // Stockage des challenges actifs
     private static final ConcurrentHashMap<String, ChallengeSession> activeChallenges = new ConcurrentHashMap<>();
 
     @Autowired
-    public ChallengeAuthController(UserService userService) {
+    public ChallengeAuthController(ClientService userService) {
         this.userService = userService;
     }
 
@@ -32,7 +31,7 @@ public class ChallengeAuthController {
      * 1. Requête initiale (Client → Banque)
      * Nom: Demande d'authentification/challenge
      * Méthode: POST /api/auth/otp/initiate
-     */
+
     @PostMapping("/api/auth/otp/initiate")
     public ResponseEntity<Map<String, Object>> initiateChallenge(@RequestBody Map<String, String> request) {
         // Extraire les données de la requête
@@ -82,7 +81,7 @@ public class ChallengeAuthController {
      * 3. Requête finale (Client → Banque)
      * Nom: Soumission du digest/réponse
      * Méthode: POST /api/auth/validate
-     */
+
     @PostMapping("/api/auth/validate")
     public ResponseEntity<Map<String, Object>> validateChallenge(@RequestBody Map<String, String> request) {
         // Extraire les données de la requête
@@ -161,7 +160,7 @@ public class ChallengeAuthController {
 
     /**
      * Classe interne pour stocker les informations de session de challenge
-     */
+
     private static class ChallengeSession {
         private final String clientId;
         private final String challenge;
@@ -184,5 +183,5 @@ public class ChallengeAuthController {
         public long getCreatedAt() {
             return createdAt;
         }
-    }
+    }*/
 }

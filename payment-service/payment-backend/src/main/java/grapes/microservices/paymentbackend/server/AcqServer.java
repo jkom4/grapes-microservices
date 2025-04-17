@@ -13,11 +13,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.concurrent.Executors;
 
+/**
+ * Server component that acts as an Acquirer (ACQ) in the payment processing flow.
+ * Receives payment verification tokens and forwards them to the Authentication Server (ACS).
+ */
 @Component
 @Slf4j
 public class AcqServer implements CommandLineRunner {
 
-    // ... (Vos @Value et autres champs restent inchangés) ...
     @Value("${app.ports.acq}")
     private int acqPort;
 
@@ -36,18 +39,22 @@ public class AcqServer implements CommandLineRunner {
     @Value("${app.truststore.acs.path}")
     private String acsTruststorePath;
 
-    // Attention: La propriété reference app.keystore.password ici, assurez-vous que c'est le bon mot de passe pour acsTruststore
     @Value("${app.keystore.password}")
     private String acsTruststorePassword;
 
-
+    /**
+     * Starts the ACQ server in a separate thread when application launches.
+     */
     @Override
     public void run(String... args) {
         Executors.newSingleThreadExecutor().submit(this::startServer);
     }
 
+    /**
+     * Initializes and starts the SSL server socket that listens for client connections.
+     * Handles each client connection in a separate thread.
+     */
     private void startServer() {
-        // ... (startServer reste inchangé) ...
         log.info("Starting ACQ server on port {}", acqPort);
 
         try (SSLServerSocket serverSocket = SslUtils.createSslServerSocket(
@@ -66,14 +73,16 @@ public class AcqServer implements CommandLineRunner {
     }
 
     /**
-     * Handle a client request - VERSION CORRIGÉE
-     * @param clientSocket the client socket
+     * Processes client requests by receiving a 6-digit OTP token and
+     * forwarding it to the ACS for verification.
+     *
+     * @param clientSocket The SSL socket for the client connection
      */
     private void handleClientRequest(SSLSocket clientSocket) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
              PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
-            String requestData = reader.readLine(); // Reçoit "580856"
+            String requestData = reader.readLine();
             log.info("Received data from client: {}", requestData);
 
             if (requestData == null || requestData.isEmpty()) {
@@ -81,48 +90,48 @@ public class AcqServer implements CommandLineRunner {
                 return;
             }
 
-            // On suppose que le client (PaymentService) envoie JUSTE le token maintenant.
-            // Donc requestData EST le token.
-            String token = requestData.trim(); // Utilise directement requestData comme token
+            String token = requestData.trim();
 
-            // Validation simple du format (optionnel mais recommandé)
+            // Validate token format
             if (token.length() != 6 || !token.matches("\\d{6}")) {
                 log.warn("ACQ Server: Received data does not look like a 6-digit token: '{}'", token);
                 writer.println("Response from ACQ: Invalid token format received");
                 return;
             }
 
-
-            // --- CORRECTION ICI ---
-            // Appeler sendTokenToAcs avec SEULEMENT le token
+            // Forward token to ACS for verification
             log.info("Forwarding token to ACS for verification: {}", token);
-            String responseFromAcs = sendTokenToAcs(token); // Passe juste le token
-            // --- FIN CORRECTION ---
+            String responseFromAcs = sendTokenToAcs(token);
 
-            log.info("Received response from ACS: {}", responseFromAcs); // Log la réponse reçue (ACK ou NACK)
+            log.info("Received response from ACS: {}", responseFromAcs);
 
-            // Transférer la réponse de l'ACS telle quelle (ou préfixée comme avant)
-            writer.println("Response from ACQ: " + responseFromAcs); // Renvoie "Response from ACQ: ACK" ou "Response from ACQ: NACK"
+            // Return the response from ACS to the client
+            writer.println("Response from ACQ: " + responseFromAcs);
 
         } catch (Exception e) {
             log.error("Error handling client request: {}", e.getMessage(), e);
-            // Essayer d'envoyer une erreur au client si possible
             try (PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
                 writer.println("Response from ACQ: Error processing request");
             } catch (Exception ex) {
                 log.error("Error sending error response from ACQ: {}", ex.getMessage());
             }
         } finally {
-            try { if(clientSocket != null && !clientSocket.isClosed()) clientSocket.close(); } catch(Exception e){log.error("Error closing client socket in ACQ: {}", e.getMessage());}
+            try {
+                if(clientSocket != null && !clientSocket.isClosed())
+                    clientSocket.close();
+            } catch(Exception e) {
+                log.error("Error closing client socket in ACQ: {}", e.getMessage());
+            }
         }
     }
 
     /**
-     * Send ONLY the OTP token to ACS - SIGNATURE ET CORPS CORRIGÉS
-     * @param token The 6-digit OTP token
-     * @return the response from ACS (ACK or NACK)
+     * Forwards the received OTP token to the ACS server for validation.
+     *
+     * @param token The 6-digit OTP token to validate
+     * @return "ACK" if the token is valid, "NACK" otherwise
      */
-    private String sendTokenToAcs(String token) { // Ne prend que le token en argument
+    private String sendTokenToAcs(String token) {
         log.info("Sending token ONLY to ACS Money port: {}", token);
 
         try (SSLSocket acsSocket = SslUtils.createSslClientSocket(
@@ -133,20 +142,16 @@ public class AcqServer implements CommandLineRunner {
             PrintWriter writer = new PrintWriter(acsSocket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(acsSocket.getInputStream()));
 
-            // --- CORRECTION ICI ---
-            // Envoyer seulement le token
             writer.println(token);
             log.info("Token sent to ACS: {}", token);
-            // --- FIN CORRECTION ---
 
-            // Recevoir la réponse de l'ACS
             String response = reader.readLine();
-            log.info("Received response from ACS: {}", response); // Devrait être ACK ou NACK
+            log.info("Received response from ACS: {}", response);
 
-            return response; // Renvoie ACK ou NACK
+            return response;
         } catch (Exception e) {
             log.error("Error communicating with ACS Money port: {}", e.getMessage(), e);
-            return "NACK"; // Retourne NACK en cas d'erreur de communication
+            return "NACK";
         }
     }
 }

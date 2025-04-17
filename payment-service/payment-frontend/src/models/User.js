@@ -3,18 +3,19 @@
 /**
  * Model class for User
  */
+/**
+ * Model class for User
+ */
 export class User {
     /**
      * Create a new User
-     * @param {string} login - Username
+     * @param {string} login - Username or email
      * @param {string} password - Password
-     * @param {string} email - Email address (optional)
      * @param {string} phoneNumber - Phone number (optional)
      */
-    constructor(login, password, email = '', phoneNumber = '') {
+    constructor(login, password, phoneNumber = '') {
         this.login = login;
         this.password = password;
-        this.email = email;
         this.phoneNumber = phoneNumber;
         this.authenticated = false;
     }

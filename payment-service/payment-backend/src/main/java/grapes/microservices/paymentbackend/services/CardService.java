@@ -1,10 +1,12 @@
 package grapes.microservices.paymentbackend.services;
 
 import grapes.microservices.paymentbackend.dto.PaymentRequestDTO;
-import grapes.microservices.paymentbackend.models.User;
+import grapes.microservices.paymentbackend.models.Client;
+import grapes.microservices.paymentbackend.repositories.CardRepository;
 import grapes.microservices.paymentbackend.utils.KeystoreUtils;
 import grapes.microservices.paymentbackend.utils.SignUtils;
 import grapes.microservices.paymentbackend.utils.SslUtils;
+import grapes.microservices.paymentbackend.utils.DataUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,18 +18,21 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.security.PrivateKey;
 import java.util.Map;
-import java.util.UUID;
 
-import grapes.microservices.paymentbackend.utils.DataUtils;
-
+/**
+ * Service for handling card-related operations, particularly 3D Secure verification
+ * during payment processing. Facilitates communication with the Authentication Server (ACS).
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CardService {
 
+    // Main ACS server port (for initiation)
     @Value("${app.ports.acs}")
     private int acsPort;
 
+    // Client keystore configuration for signing requests
     @Value("${app.keystore.client.path}")
     private String clientKeystorePath;
 
@@ -40,35 +45,39 @@ public class CardService {
     @Value("${app.keystore.client.key.password}")
     private String clientKeyPassword;
 
+    // Client truststore configuration for trusting ACS server
     @Value("${app.truststore.acs.path}")
     private String acsTruststorePath;
 
     @Value("${app.truststore.acs.password}")
     private String acsTruststorePassword;
 
+    // Source identifier for messages sent to ACS
     private static final String SOURCE = "client";
 
     /**
-     * Send card details to ACS to initiate 3D Secure verification
-     * @param paymentRequest the payment request with card details
-     * @param user the authenticated user
-     * @param transactionId unique identifier for this transaction
-     * @return the OTP code sent to the user's phone if successful, null otherwise
+     * Sends card details to ACS to initiate 3D Secure verification.
+     * Signs the request with the client's private key and processes the ACS response.
+     *
+     * @param paymentRequest The payment request with card details (card number, expiration, amount, merchant)
+     * @param client The authenticated client (used for logging email)
+     * @param paymentAttemptId Unique identifier for this payment attempt
+     * @return The OTP code received from ACS if successful, null otherwise
      */
-    public String initiateCardVerification(PaymentRequestDTO paymentRequest, User user, String transactionId) {
-        log.info("Initiating 3D Secure verification for user: {}, transaction: {}", user.getLogin(), transactionId);
+    public String initiateCardVerification(PaymentRequestDTO paymentRequest, Client client, String paymentAttemptId) {
+        log.info("Initiating 3D Secure verification for client: {}, payment attempt ID: {}", client.getEmail(), paymentAttemptId);
 
         try {
-            // Format card data for ACS including transaction ID and merchant name
+            // Format card data for ACS including paymentAttemptId and merchant name
             String cardData = String.format(
                     "card=%s#date=%s#amount=%s#merchant=%s#transactionId=%s",
                     paymentRequest.getCardNumber(),
                     paymentRequest.getExpirationDate(),
                     paymentRequest.getAmount(),
                     paymentRequest.getMerchantName(),
-                    transactionId
+                    paymentAttemptId
             );
-            log.info("Card data prepared for transaction {}", transactionId);
+            log.info("Card data prepared for payment attempt {}", paymentAttemptId);
 
             // Sign the data with client's private key
             PrivateKey privateKey = KeystoreUtils.getPrivateKey(
@@ -79,56 +88,55 @@ public class CardService {
             );
 
             String signedData = SignUtils.signData(cardData, privateKey);
-            log.info("Card data signed successfully for transaction {}", transactionId);
+            log.info("Card data signed successfully for payment attempt {}", paymentAttemptId);
 
             // Format data for ACS
             String formattedDataForAcs = "source=" + SOURCE + "&data=" + cardData + "&signature=" + signedData;
 
             // Send to ACS and get response
             String acsResponse = sendToACS(formattedDataForAcs);
-            log.info("Received response from ACS for transaction {}: {}", transactionId, acsResponse);
+            log.info("Received response from ACS for payment attempt {}: {}", paymentAttemptId, acsResponse);
 
-            if (acsResponse == null || acsResponse.isEmpty()) {
-                log.error("Empty response from ACS for transaction {}", transactionId);
+            if (acsResponse == null || acsResponse.isEmpty() || acsResponse.startsWith("ERROR:")) {
+                log.error("Empty or error response from ACS for payment attempt {}: {}", paymentAttemptId, acsResponse);
                 return null;
             }
 
             // Parse ACS response
             Map<String, String> parsedResponse = DataUtils.parseData(acsResponse);
             String responseSource = parsedResponse.get("source");
-            String otpCode = parsedResponse.get("data");
-            String signature = parsedResponse.get("signature");
-            String responseTransactionId = parsedResponse.get("transactionId");
+            String otpCode = parsedResponse.get("data"); // OTP generated by ACS
+            String signature = parsedResponse.get("signature"); // OTP signature by ACS
 
-            // Validate response
+            // Validate response source and presence of data/signature
             if (!"acs".equals(responseSource) || otpCode == null || signature == null) {
-                log.error("Invalid response format from ACS for transaction {}", transactionId);
+                log.error("Invalid response format from ACS for payment attempt {}: {}", paymentAttemptId, acsResponse);
                 return null;
             }
 
-            // Validate transaction ID if provided in response
-            if (responseTransactionId != null && !transactionId.equals(responseTransactionId)) {
-                log.error("Transaction ID mismatch: expected {}, got {}", transactionId, responseTransactionId);
-                return null;
-            }
+            // TODO: Verify ACS response signature using ACS public key
+            log.warn("ACS response signature verification is currently skipped for payment attempt {}", paymentAttemptId);
 
             // Return the OTP code
-            log.info("Card verification initiated successfully for transaction {}, OTP sent to user's phone", transactionId);
+            log.info("Card verification initiated successfully for payment attempt {}, OTP should be sent to client's phone by ACS.", paymentAttemptId);
             return otpCode;
 
         } catch (Exception e) {
-            log.error("Error initiating card verification for transaction {}: {}", transactionId, e.getMessage(), e);
+            log.error("Error initiating card verification for payment attempt {}: {}", paymentAttemptId, e.getMessage(), e);
             return null;
         }
     }
 
     /**
-     * Send data to ACS
-     * @param data the data to send
-     * @return the response from ACS
+     * Sends data to ACS using SSL client socket.
+     * Establishes secure connection with ACS server for communication.
+     *
+     * @param data The formatted data string to send
+     * @return The response string from ACS, or null/error on failure
+     * @throws Exception If communication with ACS fails
      */
     private String sendToACS(String data) throws Exception {
-        log.info("Sending data to ACS: {}", data);
+        log.info("Sending data to ACS on port {}: {}", acsPort, data);
 
         try (SSLSocket acsSocket = SslUtils.createSslClientSocket(
                 acsPort,
@@ -139,16 +147,16 @@ public class CardService {
 
             // Send data to ACS
             writer.println(data);
-            log.info("Data sent to ACS");
+            log.info("Data sent to ACS: {}", data);
 
             // Read response
             String response = reader.readLine();
-            log.info("Received response from ACS: {}", response);
+            log.info("Response received from ACS: {}", response);
 
             return response;
         } catch (Exception e) {
-            log.error("Error communicating with ACS: {}", e.getMessage(), e);
-            throw e;
+            log.error("Error communicating with ACS on port {}: {}", acsPort, e.getMessage(), e);
+            throw e; // Propagate exception to be handled by caller
         }
     }
 }

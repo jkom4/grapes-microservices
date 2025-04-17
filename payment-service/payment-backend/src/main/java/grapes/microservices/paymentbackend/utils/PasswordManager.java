@@ -9,7 +9,8 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
- * Utility class to manage passwords
+ * Utility for secure password management.
+ * Provides methods for salting, hashing, and verifying passwords.
  */
 @Component
 public class PasswordManager {
@@ -18,17 +19,19 @@ public class PasswordManager {
     private String SALT;
 
     /**
-     * Salt a password before hashing
-     * @param password the password to salt
-     * @return the salted password
+     * Adds salt to a password before hashing.
+     *
+     * @param password The password to salt
+     * @return The salted password
      */
     public String saltPassword(String password) {
         return password + SALT;
     }
 
     /**
-     * Generate a random salt
-     * @return the salt as a Base64 string
+     * Generates a random salt for password hashing.
+     *
+     * @return The salt as a Base64 encoded string
      */
     public String generateSalt() {
         SecureRandom random = new SecureRandom();
@@ -39,9 +42,11 @@ public class PasswordManager {
     }
 
     /**
-     * Hash a password using SHA-256
-     * @param password the password to hash
-     * @return the hashed password as a Base64 string
+     * Hashes a password using SHA-256 algorithm.
+     *
+     * @param password The password to hash
+     * @return The hashed password as a Base64 encoded string
+     * @throws NoSuchAlgorithmException If SHA-256 algorithm is not available
      */
     public String hashPassword(String password) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -50,10 +55,11 @@ public class PasswordManager {
     }
 
     /**
-     * Verify if a raw password matches the hashed one
-     * @param rawPassword the raw password
-     * @param encodedPassword the encoded password
-     * @return true if matches, false otherwise
+     * Verifies if a raw password matches a stored hashed password.
+     *
+     * @param rawPassword The raw password to verify
+     * @param encodedPassword The stored encoded password
+     * @return true if the passwords match, false otherwise
      */
     public boolean matches(String rawPassword, String encodedPassword) {
         try {

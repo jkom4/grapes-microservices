@@ -12,8 +12,13 @@ import java.security.spec.KeySpec;
 import java.util.Base64;
 
 /**
- * Utilitaire pour le chiffrement/déchiffrement AES-256
+ * AesCryptoUtils.java
+ *
+ * This class provides utility methods for AES-256 encryption and decryption.
+ * It uses PBKDF2 with HmacSHA256 for key generation and CBC mode with PKCS5Padding for encryption.
+ *
  */
+
 public class AesCryptoUtils {
 
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
