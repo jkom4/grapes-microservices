@@ -121,7 +121,6 @@ class ArticleViewModel(
         }
     }
 
-    // Adds an article to the cart with specified quantities
     fun addToCart(articleId: Int, quantityKg: Float, quantityUnit: Float) {
         viewModelScope.launch {
             _cartState.value = CartState.Loading
@@ -163,7 +162,6 @@ class ArticleViewModel(
         }
     }
 
-    // Removes an item from the cart and refreshes the cart
     fun removeFromCart(itemId: Int, orderId: Int) {
         viewModelScope.launch {
             try {
@@ -179,12 +177,25 @@ class ArticleViewModel(
         }
     }
 
-    // Processes payment and clears the cart
-    fun payAndClearCart(orderId: Int) {
+    fun payAndClearCart(
+        orderId: Int,
+        address: String,
+        phoneNumber: String,
+        customerName: String,
+        country: String,
+        postalCode: String
+    ) {
         viewModelScope.launch {
             _paymentState.value = PaymentState.Loading
             try {
-                val payResponse = apiService.payCart(orderId)
+                val payResponse = apiService.payCart(
+                    orderId = orderId,
+                    address = address,
+                    phoneNumber = phoneNumber,
+                    customerName = customerName,
+                    country = country,
+                    postalCode = postalCode
+                )
                 if (!payResponse.isSuccessful) {
                     _paymentState.value = PaymentState.Error("Payment error")
                     return@launch
@@ -192,12 +203,11 @@ class ArticleViewModel(
 
                 val clearResponse = apiService.clearCart(orderId)
                 if (!clearResponse.isSuccessful) {
-                    _paymentState.value = PaymentState.Error("Error removing item from cart")
+                    _paymentState.value = PaymentState.Error("Error clearing cart")
                     return@launch
                 }
 
                 fetchCart(orderId)
-
                 _paymentState.value = PaymentState.Success
             } catch (e: Exception) {
                 _paymentState.value = PaymentState.Error(e.message ?: "Network error")
