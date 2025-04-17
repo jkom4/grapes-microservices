@@ -62,76 +62,98 @@ Ce projet utilise mTLS (mutual TLS) entre ses composants internes (Client <=> AC
 
 **Mot de passe utilisé pour tous les keystores/clés :** `bankservicepassword` (modifiable dans les commandes et `application.properties`).
 
-**Ouvrez un terminal dans le répertoire racine du projet `payment-backend`.**
+**Ouvrez un terminal dans le répertoire racine du projet `payment-backend`.**Parfait ! Si vous partez de zéro (aucun fichier keystore ou truststore existant), voici l'ensemble des commandes `keytool` à exécuter dans votre terminal, en vous plaçant à la **racine de votre projet `payment-backend`**.
 
-### 1. Créer le Répertoire Keystore
+Ces commandes vont créer les 3 paires de clés (privée + certificat public) pour chaque composant (Client/Backend, ACS, ACQ) et ensuite créer les 3 truststores en y important les certificats publics nécessaires pour établir la confiance mutuelle requise par le code modifié.
 
-```bash
-# Linux/macOS
-mkdir -p src/main/resources/keystore
+**Prérequis :**
 
-# Windows (si nécessaire)
-# mkdir src\main\resources\keystore
-```
+* Avoir le JDK installé et la commande `keytool` accessible dans votre PATH.
+* Le mot de passe utilisé ici est `bankservicepassword`. Si vous le changez, modifiez-le dans les commandes ET dans votre fichier `application.properties`.
+* Les alias utilisés ici (`client`, `acs`, `acq` pour les clés ; `client_trusted`, `acs_trusted`, `acq_trusted` pour les certificats importés) correspondent à ceux attendus par le code et la configuration `application.properties` que nous avons finalisée.
 
-### 2. Générer les Keystores (Clé Privée + Certificat Public)
+**Commandes à exécuter :**
 
-* **a) Keystore Client (`client_keystore.jks`) :** Identité du backend principal.
-    ```bash
-    keytool -genkeypair -alias client -keyalg RSA -keysize 3072 -sigalg SHA384withRSA -keystore src/main/resources/keystore/client_keystore.jks -storetype PKCS12 -storepass bankservicepassword -keypass bankservicepassword -validity 365 -dname "CN=payment.client.local, OU=Payment, O=Grapes, L=Liege, ST=Liege, C=BE"
-    ```
-
-* **b) Keystore ACS (`acs_keystore.jks`) :** Identité du serveur ACS intégré.
-    ```bash
-    keytool -genkeypair -alias acs -keyalg RSA -keysize 3072 -sigalg SHA384withRSA -keystore src/main/resources/keystore/acs_keystore.jks -storetype PKCS12 -storepass bankservicepassword -keypass bankservicepassword -validity 365 -dname "CN=acs.server.local, OU=Payment, O=Grapes, L=Liege, ST=Liege, C=BE"
-    ```
-
-* **c) Keystore ACQ (`acq_keystore.jks`) :** Identité du serveur ACQ intégré.
-    ```bash
-    keytool -genkeypair -alias acq -keyalg RSA -keysize 3072 -sigalg SHA384withRSA -keystore src/main/resources/keystore/acq_keystore.jks -storetype PKCS12 -storepass bankservicepassword -keypass bankservicepassword -validity 365 -dname "CN=acq.server.local, OU=Payment, O=Grapes, L=Liege, ST=Liege, C=BE"
-    ```
-
-### 3. Exporter les Certificats Publics
-
-* **a) Exporter Certificat Client :**
-    ```bash
-    keytool -exportcert -keystore src/main/resources/keystore/client_keystore.jks -alias client -file payment_client.cer -storepass bankservicepassword
-    ```
-
-* **b) Exporter Certificat ACS :**
-    ```bash
-    keytool -exportcert -keystore src/main/resources/keystore/acs_keystore.jks -alias acs -file acs_server.cer -storepass bankservicepassword
-    ```
-
-* **c) Exporter Certificat ACQ :**
-    ```bash
-    keytool -exportcert -keystore src/main/resources/keystore/acq_keystore.jks -alias acq -file acq_server.cer -storepass bankservicepassword
-    ```
-
-### 4. Créer les Truststores et Importer les Certificats
-
-* **a) Truststore Client (`client_truststore.jks` - pour que ACS fasse confiance au Client) :**
-    ```bash
-    keytool -importcert -keystore src/main/resources/keystore/client_truststore.jks -alias client_trusted -file payment_client.cer -storepass bankservicepassword -noprompt
-    ```
-
-* **b) Truststore ACS (`acs_truststore.jks` - pour que Client et ACQ fassent confiance à ACS) :**
-    ```bash
-    keytool -importcert -keystore src/main/resources/keystore/acs_truststore.jks -alias acs_server_trusted -file acs_server.cer -storepass bankservicepassword -noprompt
-    ```
-
-* **c) Truststore ACQ (`acq_truststore.jks` - pour que Client fasse confiance à ACQ) :**
-    ```bash
-    keytool -importcert -keystore src/main/resources/keystore/acq_truststore.jks -alias acq_server_trusted -file acq_server.cer -storepass bankservicepassword -noprompt
-    ```
-
-* *(Optionnel : supprimez les fichiers `.cer` après import)*
+1.  **Créer le répertoire (si inexistant)**
     ```bash
     # Linux/macOS
-    # rm *.cer
-    # Windows
-    # del *.cer
+    mkdir -p src/main/resources/keystore
+    # Windows (cmd/powershell)
+    # mkdir src\main\resources\keystore
     ```
+
+2.  **Générer les Keystores d'Identité (Clé privée + Certificat public auto-signé)**
+    *(Nous utilisons PKCS12 comme type de keystore, c'est un format moderne)*
+
+    a) Keystore Client/Backend (`client_keystore.jks`)
+    ```bash
+    keytool -genkeypair -alias client -keyalg RSA -keysize 3072 -sigalg SHA384withRSA -storetype PKCS12 -keystore src/main/resources/keystore/client_keystore.jks -storepass bankservicepassword -keypass bankservicepassword -validity 365 -dname "CN=payment.client.local, OU=Payment, O=Grapes, L=Liege, ST=Liege, C=BE"
+    ```
+
+    b) Keystore ACS (`acs_keystore.jks`)
+    ```bash
+    keytool -genkeypair -alias acs -keyalg RSA -keysize 3072 -sigalg SHA384withRSA -storetype PKCS12 -keystore src/main/resources/keystore/acs_keystore.jks -storepass bankservicepassword -keypass bankservicepassword -validity 365 -dname "CN=acs.server.local, OU=Payment, O=Grapes, L=Liege, ST=Liege, C=BE"
+    ```
+
+    c) Keystore ACQ (`acq_keystore.jks`)
+    ```bash
+    keytool -genkeypair -alias acq -keyalg RSA -keysize 3072 -sigalg SHA384withRSA -storetype PKCS12 -keystore src/main/resources/keystore/acq_keystore.jks -storepass bankservicepassword -keypass bankservicepassword -validity 365 -dname "CN=acq.server.local, OU=Payment, O=Grapes, L=Liege, ST=Liege, C=BE"
+    ```
+
+3.  **Exporter les Certificats Publics depuis les Keystores**
+    *(Ces fichiers `.cer` sont temporaires, juste pour l'importation dans les truststores)*
+
+    a) Exporter Certificat Public Client
+    ```bash
+    keytool -exportcert -keystore src/main/resources/keystore/client_keystore.jks -storetype PKCS12 -alias client -file client.cer -storepass bankservicepassword
+    ```
+
+    b) Exporter Certificat Public ACS
+    ```bash
+    keytool -exportcert -keystore src/main/resources/keystore/acs_keystore.jks -storetype PKCS12 -alias acs -file acs.cer -storepass bankservicepassword
+    ```
+
+    c) Exporter Certificat Public ACQ
+    ```bash
+    keytool -exportcert -keystore src/main/resources/keystore/acq_keystore.jks -storetype PKCS12 -alias acq -file acq.cer -storepass bankservicepassword
+    ```
+
+4.  **Créer les Truststores et Importer les Certificats Publics Requis**
+    *(Un truststore contient les certificats des *autres* entités auxquelles on doit faire confiance. Nous utilisons le type JKS pour les truststores, un format courant pour Java)*
+
+    a) Truststore Client/Backend (`client_truststore.jks`) : Doit faire confiance à ACS et ACQ.
+    ```bash
+    # Importer le certificat public ACS
+    keytool -importcert -keystore src/main/resources/keystore/client_truststore.jks -storetype JKS -alias acs_trusted -file acs.cer -storepass bankservicepassword -noprompt
+    # Importer le certificat public ACQ
+    keytool -importcert -keystore src/main/resources/keystore/client_truststore.jks -storetype JKS -alias acq_trusted -file acq.cer -storepass bankservicepassword -noprompt
+    ```
+
+    b) Truststore ACS (`acs_truststore.jks`) : Doit faire confiance au Client et à ACQ.
+    ```bash
+    # Importer le certificat public Client
+    keytool -importcert -keystore src/main/resources/keystore/acs_truststore.jks -storetype JKS -alias client_trusted -file client.cer -storepass bankservicepassword -noprompt
+    # Importer le certificat public ACQ
+    keytool -importcert -keystore src/main/resources/keystore/acs_truststore.jks -storetype JKS -alias acq_trusted -file acq.cer -storepass bankservicepassword -noprompt
+    ```
+
+    c) Truststore ACQ (`acq_truststore.jks`) : Doit faire confiance à ACS.
+    ```bash
+    # Importer le certificat public ACS
+    keytool -importcert -keystore src/main/resources/keystore/acq_truststore.jks -storetype JKS -alias acs_trusted -file acs.cer -storepass bankservicepassword -noprompt
+    ```
+
+5.  **(Optionnel) Nettoyer les fichiers de certificats temporaires**
+    ```bash
+    # Linux/macOS
+    rm client.cer acs.cer acq.cer
+    # Windows (cmd)
+    # del client.cer acs.cer acq.cer
+    # Windows (powershell)
+    # Remove-Item client.cer, acs.cer, acq.cer
+    ```
+
+Après avoir exécuté toutes ces commandes, vous devriez avoir les 6 fichiers JKS nécessaires (`client_keystore.jks`, `acs_keystore.jks`, `acq_keystore.jks`, `client_truststore.jks`, `acs_truststore.jks`, `acq_truststore.jks`) correctement configurés dans `src/main/resources/keystore/` pour que votre application `grapes` fonctionne avec la vérification mutuelle des signatures (mTLS et signatures applicatives).
 
 ### 5. Vérification (Optionnelle)
 

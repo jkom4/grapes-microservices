@@ -49,6 +49,12 @@ public class PaymentService {
     @Value("${app.truststore.acq.password}")
     private String acqTruststorePassword;
 
+
+    @Value("${app.truststore.client.path}")
+    private String clientTruststorePath;
+    @Value("${app.truststore.client.password}")
+    private String clientTruststorePassword;
+
     /**
      * Processes a payment after OTP verification by communicating with the ACQ server
      * to verify the token, then completing the transaction if successful.
@@ -156,8 +162,8 @@ public class PaymentService {
         log.info("Sending token to ACQ on port {} for verification: {}", acqPort, maskToken(token));
         try (SSLSocket acqSocket = SslUtils.createSslClientSocket(
                 acqPort,
-                acqTruststorePath,
-                acqTruststorePassword)) {
+                clientTruststorePath,
+                clientTruststorePassword)) {
             PrintWriter writer = new PrintWriter(acqSocket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(acqSocket.getInputStream()));
 
@@ -168,6 +174,7 @@ public class PaymentService {
             // Read the response
             String response = reader.readLine();
             log.info("Received raw response from ACQ: {}", response);
+
             return response;
         } catch (Exception e) {
             log.error("Error communicating with ACQ on port {}: {}", acqPort, e.getMessage(), e);

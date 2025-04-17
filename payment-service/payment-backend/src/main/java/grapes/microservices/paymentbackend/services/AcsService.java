@@ -12,6 +12,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.security.PrivateKey;
+import java.security.PublicKey; // <-- Import
+import java.security.cert.Certificate; // <-- Import
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Service;
 /**
  * Service for communicating with the Authentication Control Server (ACS)
  * during payment processing for 3D Secure verification.
+ * NOTE: This service seems less used now CardService handles initiation.
+ * Keeping the verification logic for consistency if it's called elsewhere.
  */
 @Service
 @RequiredArgsConstructor
@@ -36,21 +40,20 @@ public class AcsService {
     // Client keystore and truststore configuration
     @Value("${app.keystore.client.path}")
     private String clientKeystorePath;
-
     @Value("${app.keystore.client.password}")
     private String clientKeystorePassword;
-
     @Value("${app.keystore.client.alias}")
     private String clientKeystoreAlias;
-
     @Value("${app.keystore.client.key.password}")
     private String clientKeyPassword;
 
-    @Value("${app.truststore.acs.path}")
-    private String acsTruststorePath;
-
-    @Value("${app.truststore.acs.password}")
-    private String acsTruststorePassword;
+    // Truststore used by this client to trust ACS
+    @Value("${app.truststore.client.path}") // Use the client's truststore
+    private String clientTruststorePathForAcs; // Renamed for clarity
+    @Value("${app.truststore.client.password}")
+    private String clientTruststorePasswordForAcs;
+    @Value("${app.truststore.acs.alias:acs_trusted}") // Alias of ACS cert IN the client's truststore
+    private String acsTrustedAlias;
 
     /**
      * Processes a payment by sending card details to the ACS server
@@ -61,14 +64,15 @@ public class AcsService {
      * @return true if the process succeeded (OTP generated), false otherwise
      */
     public boolean processPayment(TransactionEntity transaction, Client client) {
+        // This method might be redundant if CardService.initiateCardVerification is always used.
+        // If used, it now verifies the ACS signature.
+        log.warn("AcsService.processPayment called. Ensure CardService.initiateCardVerification is not the primary entry point.");
         try {
-            // Extract card details from client
             String cardNumber = "";
             String expirationDate = "";
-
             var cards = client.getCards();
             if (cards != null && !cards.isEmpty()) {
-                var card = cards.get(0); // First card or selection logic
+                var card = cards.get(0);
                 cardNumber = card.getCardNumber();
                 expirationDate = card.getExpirationDate();
             }
@@ -78,24 +82,16 @@ public class AcsService {
                 return false;
             }
 
-            // Format data for ACS
             String dataToSign = "card=" + cardNumber + "#date=" + expirationDate +
                     "#amount=" + transaction.getTransferAmount() +
                     "#merchant=" + transaction.getMerchantName();
 
-            // Get private key for signing
             PrivateKey privateKey = KeystoreUtils.getPrivateKey(
-                    clientKeystorePath,
-                    clientKeystorePassword,
-                    clientKeystoreAlias,
-                    clientKeyPassword
+                    clientKeystorePath, clientKeystorePassword, clientKeystoreAlias, clientKeyPassword
             );
-
-            // Sign the data
             String signedData = SignUtils.signData(dataToSign, privateKey);
             String formattedDataForAcs = "source=" + SOURCE + "&data=" + dataToSign + "&signature=" + signedData;
 
-            // Send to ACS and get response
             String acsResponse = sendToACS(formattedDataForAcs);
             log.info("Received response from ACS: {}", acsResponse);
 
@@ -104,9 +100,7 @@ public class AcsService {
                 return false;
             }
 
-            // Parse the response
             Map<String, String> parsedData = DataUtils.parseData(acsResponse);
-
             String responseSource = parsedData.get("source");
             String code = parsedData.get("data"); // Should be the OTP
             String signature = parsedData.get("signature");
@@ -116,10 +110,30 @@ public class AcsService {
                 return false;
             }
 
-            // TODO: Verify ACS response signature with ACS public key
-            log.warn("ACS response signature verification is currently skipped.");
 
-            // If we get here, communication succeeded and format is correct
+            try {
+                log.debug("AcsService: Attempting to verify ACS signature using alias '{}' from truststore '{}'",
+                        acsTrustedAlias, clientTruststorePathForAcs);
+                Certificate acsCertificate = KeystoreUtils.getCertificate(
+                        clientTruststorePathForAcs,
+                        clientTruststorePasswordForAcs,
+                        acsTrustedAlias
+                );
+                PublicKey acsPublicKey = acsCertificate.getPublicKey();
+                String dataSignedByAcs = code;
+
+                if (!SignUtils.verifySignature(dataSignedByAcs, signature, acsPublicKey)) {
+                    log.error("AcsService: Invalid ACS signature received! Data='{}', Signature='{}'", dataSignedByAcs, signature);
+                    return false;
+                }
+                log.info("AcsService: ACS response signature verified successfully.");
+
+            } catch (Exception e) {
+                log.error("AcsService: Error verifying ACS signature: {}", e.getMessage(), e);
+                return false;
+            }
+
+
             return true;
 
         } catch (Exception e) {
@@ -135,21 +149,19 @@ public class AcsService {
      * @return The ACS server response or an error message
      */
     private String sendToACS(String message) {
-        log.debug("Attempting to connect to ACS on port {} using truststore {}", acsPort, acsTruststorePath);
+        // Corrected to use the client's truststore for ACS
+        log.debug("Attempting to connect to ACS on port {} using truststore {}", acsPort, clientTruststorePathForAcs);
         try (SSLSocket acsSocket = SslUtils.createSslClientSocket(
                 acsPort,
-                acsTruststorePath,
-                acsTruststorePassword)) {
+                clientTruststorePathForAcs, // Use client's truststore path
+                clientTruststorePasswordForAcs)) { // Use client's truststore password
 
             log.debug("SSL Socket created for ACS. Connected: {}", acsSocket.isConnected());
             PrintWriter writer = new PrintWriter(acsSocket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(acsSocket.getInputStream()));
 
-            // Send the message to the ACS
             writer.println(message);
             log.info("Message sent to ACS: {}", message);
-
-            // Receive the response from the ACS
             String response = reader.readLine();
             log.info("Raw response received from ACS: {}", response);
             return response;
