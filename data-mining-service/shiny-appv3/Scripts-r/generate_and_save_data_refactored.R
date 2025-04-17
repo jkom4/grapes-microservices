@@ -22,10 +22,10 @@ if(is.na(MYSQL_PORT_LOCAL) || MYSQL_PORT_LOCAL <= 0) {
     stop(paste0("MYSQL_PORT ('", mysql_port_value, "') could not be read or converted to a valid integer > 0. Check .Renviron."))
 }
 # --- End PORT Fix ---
-MYSQL_DB_ACTIVITIES_NAME <- Sys.getenv("MYSQL_DB_ACTIVITIES", "BD_OPER_ACTIVITIES")
+MYSQL_DB_ACTIVITIES_NAME <- Sys.getenv("MYSQL_DB_ACTIVITIES")
 
-MONGO_URI_LOCAL <- Sys.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/")
-MONGO_DB_AUTH_NAME <- Sys.getenv("MONGO_DB_AUTH", "BD_OPER_PROC_AUTH")
+MONGO_URI_LOCAL <- Sys.getenv("MONGO_URI")
+MONGO_DB_AUTH_NAME <- Sys.getenv("MONGO_DB_AUTH")
 # --- Generation Parameters ---
 TOTAL_CLIENTS <- 2000
 TOTAL_PRODUCTS <- 50

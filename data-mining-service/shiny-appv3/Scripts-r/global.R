@@ -17,12 +17,12 @@ library(shiny)
 #' Uses 'mariadb-db' as hostname default (for docker), falls back to 'localhost'.
 #' @return A DBIConnection object or NULL on failure.
 get_oper_db_connection <- function() {
-    user <- Sys.getenv("MYSQL_USER", "adminMasi")
-    pwd <- Sys.getenv("MYSQL_PWD", "@adminMASI")
+    user <- Sys.getenv("MYSQL_USER")
+    pwd <- Sys.getenv("MYSQL_PWD")
     # *** CHANGE: Default hostname to the Docker service name ***
-    host <- Sys.getenv("MYSQL_HOST", "mariadb-db") # Default to service name
+    host <- Sys.getenv("MYSQL_HOST") # Default to service name
     # If MYSQL_HOST env var is set (e.g. to 'localhost' locally), it will override.
-    dbname <- Sys.getenv("MYSQL_DB_ACTIVITIES", "BD_OPER_ACTIVITIES")
+    dbname <- Sys.getenv("MYSQL_DB_ACTIVITIES")
 
     message(paste("Attempting MariaDB connection: User=", user, "Host=", host, "DB=", dbname)) # More debug info
 
@@ -50,10 +50,10 @@ get_decis_mongo_connection <- function(collection_name = "analysis_submissions")
     # Construct URI using default or environment var, fallback to localhost if needed? More complex.
     # Safer: Assume MONGO_URI covers everything if set, otherwise build for Docker/local
     default_uri <- paste0("mongodb://", mongo_host, ":27017/") # Default URI using service name or localhost
-    uri <- Sys.getenv("MONGO_URI", default_uri) # Use full URI if set, else construct
+    uri <- Sys.getenv("MONGO_URI") # Use full URI if set, else construct
 
     # Decision DB name
-    dbname <- Sys.getenv("DECIS_MONGO_DB", "BD_DECIS_TEMP")
+    dbname <- Sys.getenv("DECIS_MONGO_DB")
 
     message(paste("Attempting Decision MongoDB connection: URI=", uri, "DB=", dbname, "Coll=", collection_name)) # More debug info
 

@@ -212,9 +212,9 @@ services:
       - MYSQL_HOST=mariadb
       - MYSQL_PORT=3306
       - MYSQL_DB_ACTIVITIES=BD_OPER_ACTIVITIES
-      - MONGO_URI=mongodb://root:SparringMASI!@mongodb:27017/
+      - MONGO_URI=${DATA_MINING_MONGO_URI}
       - MONGO_DB_AUTH=BD_OPER_PROC_AUTH
-      - DECIS_MONGO_URI=mongodb://root:SparringMASI!@mongodb:27017/
+      - DECIS_MONGO_URI=${DATA_MINING_MONGO_URI}
       - DECIS_MONGO_DB=BD_DECIS_TEMP
       - USER=${USER:-unknown}
     depends_on:
