@@ -200,6 +200,27 @@ services:
       - mongodb
       - mariadb
 
+  shiny-app:
+    build: ./data-mining-service
+    container_name: grapes-insights-app
+    restart: unless-stopped
+    ports:
+      - "3838:3838"
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PWD=${DB_PASSWORD}
+      - MYSQL_HOST=mariadb
+      - MYSQL_PORT=3306
+      - MYSQL_DB_ACTIVITIES=BD_OPER_ACTIVITIES
+      - MONGO_URI=mongodb://root:SparringMASI!@mongodb:27017/
+      - MONGO_DB_AUTH=BD_OPER_PROC_AUTH
+      - DECIS_MONGO_URI=mongodb://root:SparringMASI!@mongodb:27017/
+      - DECIS_MONGO_DB=BD_DECIS_TEMP
+      - USER=${USER:-unknown}
+    depends_on:
+      - mariadb
+      - mongodb
+
 ### FRONTEND
 
   frontend-web:

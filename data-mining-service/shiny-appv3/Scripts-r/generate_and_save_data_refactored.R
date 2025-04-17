@@ -11,11 +11,11 @@ library(uuid)
 `%||%` <- function(a, b) if (!is.null(a)) a else b
 
 # --- 1. Configuration & Parameters ---
-MYSQL_USER_LOCAL <- Sys.getenv("MYSQL_USER", "adminMasi")
-MYSQL_PWD_LOCAL <- Sys.getenv("MYSQL_PWD", "@adminMASI") # Use correct password from .Renviron
-MYSQL_HOST_LOCAL <- Sys.getenv("MYSQL_HOST", "127.0.0.1")
+MYSQL_USER_LOCAL <- Sys.getenv("MYSQL_USER")
+MYSQL_PWD_LOCAL <- Sys.getenv("MYSQL_PWD") # Use correct password from .Renviron
+MYSQL_HOST_LOCAL <- Sys.getenv("MYSQL_HOST")
 # --- FIX: More robust Port check ---
-mysql_port_value <- Sys.getenv("MYSQL_PORT", "3307") # Read as string first
+mysql_port_value <- Sys.getenv("MYSQL_PORT") # Read as string first
 MYSQL_PORT_LOCAL <- suppressWarnings(as.integer(mysql_port_value)) # Suppress warning here
 # Explicit stop if NA or non-positive
 if(is.na(MYSQL_PORT_LOCAL) || MYSQL_PORT_LOCAL <= 0) {
@@ -24,7 +24,7 @@ if(is.na(MYSQL_PORT_LOCAL) || MYSQL_PORT_LOCAL <= 0) {
 # --- End PORT Fix ---
 MYSQL_DB_ACTIVITIES_NAME <- Sys.getenv("MYSQL_DB_ACTIVITIES", "BD_OPER_ACTIVITIES")
 
-MONGO_URI_LOCAL <- Sys.getenv("MONGO_URI", "mongodb://127.0.0.1:27018/")
+MONGO_URI_LOCAL <- Sys.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/")
 MONGO_DB_AUTH_NAME <- Sys.getenv("MONGO_DB_AUTH", "BD_OPER_PROC_AUTH")
 # --- Generation Parameters ---
 TOTAL_CLIENTS <- 2000
@@ -227,7 +227,7 @@ main <- function() {
   # Mongo connection established per operation via get_mongo_connection_local
 
   # Use on.exit for MariaDB connection
-  on.exit({ if (!is.null(mysql_con)) safe_db_disconnect(mysql_con) })
+  #on.exit({ if (!is.null(mysql_con)) safe_db_disconnect(mysql_con) })
 
   if (is.null(mysql_con)) { message("Cannot proceed without DB connection. Exiting."); return(invisible(NULL)) }
 

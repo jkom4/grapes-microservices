@@ -75,7 +75,6 @@ mod_acm_ui <- function(id) {
     ) # End fluidRow
   ) # End tagList
 }
-}
 
 # --- Server Function ---
 
