@@ -22,6 +22,7 @@ class UserTest {
         user.setFirstName("Doe");
         user.setEmail("john.doe@example.com");
         user.setPhoneNumber("1234567890");
+        user.setPinCode("1234");
         user.setNationalId("11111111111");
         user.encryptUser();
     }

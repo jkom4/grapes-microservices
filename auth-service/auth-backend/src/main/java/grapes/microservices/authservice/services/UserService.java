@@ -125,7 +125,9 @@ public class UserService {
         userToUpdate.update(updatedUser);
         userToUpdate.setActive(true);
         userToUpdate.setUpdatedAt(new java.util.Date());
+
         List<String> tempValues = bypassEncryptedVerification(userToUpdate);
+
         if (isValid(userToUpdate)) {
             restoreEncryptedVerification(userToUpdate, tempValues);
             logger.info("User with ID: {} updated successfully", userToUpdate.getId());
@@ -339,7 +341,7 @@ public class UserService {
 
     /**
      * Bypass encrypted verification for a user because encrypted fields don't respect Jakarta validation
-     *
+     * Replaces the password and pin code with temporary values to bypass validation
      * @param user the user to bypass verification for
      * @return the list of bypassed fields
      */
