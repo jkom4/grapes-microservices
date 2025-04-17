@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,9 +20,6 @@ public class ChallengeService {
 
     @Value("${authservice.challenge.validity-period}")
     private int VALIDITY_PERIOD_IN_SECONDS;
-
-    @Autowired
-    private ApplicationContext context;
 
     /**
      * Save the challenge for the user in the cache

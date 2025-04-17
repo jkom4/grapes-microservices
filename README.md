@@ -113,7 +113,7 @@ This will rebuild the images and restart the services.
 - [Jobelin KOM](https://linkedin.com/in/jobelin-kom/).
 - [Smets NGOUMOU](https://linkedin.com/).
 - [Benjamin SUKRANLI](https://linkedin.com/).
-- [Cameron NOUPOUE](https://linkedin.com).
+- [Cameron NOUPOUE](https://linkedin.com/cnoupoue).
 - [Mathys FRANCO](https://linkedin.com).
 - [Nassim BELLI](https://linkedin.com).
 - [Dounia KILANE](https://linkedin.com).
