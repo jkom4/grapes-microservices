@@ -8,12 +8,12 @@ const HeaderSection: React.FC = () => {
     // Text content in both languages (English and French)
     const text = {
         en: {
-            heading: "Enjoy your fruits\nbefore your activity",
+            heading: "Enjoy your \nbefore your activity",
             description: "Elevate your day and energize your business\nwith the fresh, vibrant taste of our premium fruits.",
             button: "Order now"
         },
         fr: {
-            heading: "Savourez vos fruits\navant votre activité",
+            heading: "Savourez vos \navant votre activité",
             description: "Boostez votre journée et dynamisez votre activité\navec le goût frais et vibrant de nos fruits premium.",
             button: "Commander maintenant"
         }

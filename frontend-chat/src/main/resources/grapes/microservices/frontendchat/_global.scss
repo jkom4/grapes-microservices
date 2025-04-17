@@ -1,0 +1,49 @@
+$primary-light: #ae17e6;
+$primary: #9b14cc;
+$secondary: #ff00ff;
+$secondary-light: #ff4dff;
+$secondary-dark: #cc00cc;
+$primary-dark: #610d80;
+$dark: rgba(0, 0, 0, 0.2);
+$background-light: #eeeeee;
+$background: #9a9a9a;
+
+@mixin border-bottom {
+  -fx-border-color: transparent transparent $dark transparent;
+  -fx-border-width: 0 0 1px 0;
+}
+
+.header {
+  @include border-bottom
+}
+
+.footer {
+  -fx-border-color: $dark transparent transparent transparent;
+  -fx-border-width: 1px 0 0 0;
+}
+
+.button-icon {
+  -fx-opacity: 0.2;
+}
+.button-icon:hover {
+  -fx-opacity: 0.4;
+}
+.button-icon:pressed {
+  -fx-opacity: 0.1;
+}
+
+// SCROLL BAR
+.scroll-bar:vertical {
+  -fx-padding: 0;
+  -fx-background-color: transparent; /* Background for scrollbar track */
+}
+
+.scroll-bar:vertical .increment-button,
+.scroll-bar:vertical .decrement-button {
+  -fx-background-color: transparent; /* Hide increment/decrement buttons */
+}
+
+.scroll-bar:vertical .thumb {
+  -fx-background-insets: 2;
+  -fx-background-radius: 5; /* Rounded corners */
+}

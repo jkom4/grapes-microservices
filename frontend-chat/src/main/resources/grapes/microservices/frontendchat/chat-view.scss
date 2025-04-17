@@ -1,0 +1,31 @@
+@import "global";
+
+.split-pane > .split-pane-divider {
+  -fx-padding: 0px 0px;
+}
+
+.split-chat-view, .topic-zone {
+  -fx-background-color: $primary;
+}
+
+.message-zone {
+  -fx-background-color: $background-light;
+}
+
+.side-container {
+  -fx-background-color: $primary-dark;
+}
+
+#messageTextfield {
+  -fx-pref-width: 300px;
+  -fx-background-color: transparent;
+  -fx-border-width: 0;
+  -fx-font-size: 12px;
+  -fx-focus-color: transparent;
+  -fx-faint-focus-color: transparent;
+  -fx-transition: all 0.3s ease; /* Smooth transitions */
+}
+
+.window {
+
+}
