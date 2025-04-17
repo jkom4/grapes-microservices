@@ -1,6 +1,7 @@
 package grapes.microservices.salesservice.services;
 
 import grapes.microservices.salesservice.models.Delivery;
+import grapes.microservices.salesservice.models.DeliveryMessage;
 import grapes.microservices.salesservice.models.DeliveryStatus;
 import grapes.microservices.salesservice.repositories.DeliveryRepository;
 import grapes.microservices.salesservice.repositories.DeliveryStatusRepository;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -21,58 +21,60 @@ public class DeliveryConsumerService {
     private final DeliveryStatusRepository deliveryStatusRepository;
     private final OrderRepository orderRepository;
 
+    private static final Integer PENDING_STATUS_ID = 1;
+
     @RabbitListener(queues = "order-paid-queue")
-    public void receiveOrder(Integer orderId) {
-        System.out.println("Message received from RabbitMQ: Order ID = " + orderId);
+    public void receiveOrder(DeliveryMessage message) {
 
         try {
-            var order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + orderId));
+            var order = orderRepository.findById(message.getOrderId())
+                    .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + message.getOrderId()));
 
-            // 🛠️ 1. recuperate the random delivery man
-            Integer deliveryManId = findRandomDeliveryManId();
+            Integer deliveryManId = findBestDeliveryManId();
 
             if (deliveryManId == null) {
-                throw new IllegalStateException("No available deliveryman found!");
+                throw new IllegalStateException(" No available deliveryman found!");
             }
 
             DeliveryStatus pendingStatus = deliveryStatusRepository.findByLabel("Pending")
                     .orElseThrow(() -> new IllegalArgumentException("'Pending' delivery status not found"));
 
-            // create delivery
             Delivery delivery = Delivery.builder()
-                    .orderId(orderId)
+                    .orderId(message.getOrderId())
                     .userId(deliveryManId)
                     .deliveryStatusId(pendingStatus.getId())
                     .deliveryDate(LocalDateTime.now())
+                    .name(message.getCustomerName())
+                    .address(message.getAddress())
+                    .postalCode(message.getPostalCode())
+                    .country(message.getCountry())
+                    .phoneNumber(message.getPhoneNumber())
                     .build();
 
             deliveryRepository.save(delivery);
 
-            System.out.println("Delivery automatically created for order ID: " + orderId + ", assigned to deliveryman ID: " + deliveryManId);
 
         } catch (Exception ex) {
-            System.err.println("Error while creating delivery: " + ex.getMessage());
+            System.err.println(" Error while creating delivery: " + ex.getMessage());
         }
     }
 
-    private Integer findRandomDeliveryManId() {
+    //  Find the delivery man who has the less "Pending" deliveries
+    private Integer findBestDeliveryManId() {
         List<Integer> deliveryMenIds = List.of(2, 3, 4);
 
-        if (deliveryMenIds.isEmpty()) {
-            return null;
+        Integer bestDeliveryManId = null;
+        long minPendingDeliveries = Long.MAX_VALUE;
+
+        for (Integer deliveryManId : deliveryMenIds) {
+            long pendingDeliveries = deliveryRepository.countByUserIdAndDeliveryStatusId(deliveryManId, PENDING_STATUS_ID);
+
+            if (pendingDeliveries < minPendingDeliveries) {
+                minPendingDeliveries = pendingDeliveries;
+                bestDeliveryManId = deliveryManId;
+            }
         }
 
-        Random random = new Random();
-        int randomIndex = random.nextInt(deliveryMenIds.size());
-        return deliveryMenIds.get(randomIndex);
-    }
-
-
-
-
-    // (Optional) Generate a tracking URL
-    private String generateTrackingUrl(Integer orderId) {
-        return "https://grapes.delivery/track/" + orderId;
+        return bestDeliveryManId;
     }
 }
