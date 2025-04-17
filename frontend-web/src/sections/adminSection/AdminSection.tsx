@@ -1,11 +1,12 @@
-import {useLanguage} from "../../features/LanguageContext";
+// src/components/AdminSection.tsx
+import { useLanguage } from "../../features/LanguageContext";
 import Article from "../../utils/models/Articles";
-import {useEffect, useState} from "react";
-import {addArticle, fetchArticleById, fetchFruits, updateArticle} from "../../services/fruitServices";
-import {AdminHeader} from "../../components/admin/AdminHeader";
-import {ArticleTable} from "../../components/admin/ArticleTable";
-import {PaginationControls} from "../../components/admin/PaginationControls";
-import {ArticleModal} from "../../components/admin/ArticleModal";
+import { useEffect, useState } from "react";
+import { addArticle, fetchArticleById, fetchFruits, updateArticle, deleteArticle } from "../../services/fruitServices";
+import { AdminHeader } from "../../components/admin/AdminHeader";
+import { ArticleTable } from "../../components/admin/ArticleTable";
+import { PaginationControls } from "../../components/admin/PaginationControls";
+import { ArticleModal } from "../../components/admin/ArticleModal";
 
 const AdminSection: React.FC = () => {
     const { language } = useLanguage();
@@ -67,6 +68,7 @@ const AdminSection: React.FC = () => {
             error_prices_negative: "Prices cannot be negative",
             error_stock_negative: "Stock values cannot be negative",
             error_saving_article: "An error occurred while saving the article",
+            error_deleting_article: "An error occurred while deleting the article",
         },
         fr: {
             header: "Gestion des Articles",
@@ -104,6 +106,7 @@ const AdminSection: React.FC = () => {
             error_prices_negative: "Les prix ne peuvent pas être négatifs",
             error_stock_negative: "Les valeurs de stock ne peuvent pas être négatives",
             error_saving_article: "Une erreur s'est produite lors de l'enregistrement de l'article",
+            error_deleting_article: "Une erreur s'est produite lors de la suppression de l'article",
         },
     };
 
@@ -191,6 +194,27 @@ const AdminSection: React.FC = () => {
         }
     };
 
+    // Handle article deletion
+    const handleDelete = async (id: number) => {
+        if (!window.confirm("Are you sure you want to delete this article?")) {
+            return;
+        }
+        try {
+            await deleteArticle(id);
+            // Refresh articles
+            const { content, totalPages } = await fetchFruits(currentPage, pageSize);
+            setArticles(content);
+            setTotalPages(totalPages);
+            // If the current page is empty after deletion, go to the previous page
+            if (content.length === 0 && currentPage > 0) {
+                setCurrentPage(currentPage - 1);
+            }
+        } catch (error) {
+            console.error('Error deleting article:', error);
+            setErrorMessage(error instanceof Error ? error.message : text[language].error_deleting_article);
+        }
+    };
+
     // Open modal for adding new article
     const openAddModal = () => {
         setEditingArticle(null);
@@ -244,6 +268,7 @@ const AdminSection: React.FC = () => {
                 <ArticleTable
                     articles={articles}
                     onEdit={openEditModal}
+                    onDelete={handleDelete}
                     translations={{
                         column_id: text[language].column_id,
                         column_name: text[language].column_name,

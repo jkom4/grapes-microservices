@@ -1,3 +1,4 @@
+// src/services/fruitServices.ts
 import Article from "../utils/models/Articles";
 import { getArticlesAPI } from "./httpCommon";
 
@@ -93,9 +94,30 @@ export const updateArticle = async (id: number, article: Article): Promise<void>
     }
 };
 
+// Delete an article
+export const deleteArticle = async (id: number): Promise<void> => {
+    try {
+        const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.deleteArticle(id)}`;
+        const response = await fetch(url, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text(); // Capture server error details
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}. Details: ${errorText}`);
+        }
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while deleting the article");
+    }
+};
+
 export default {
     fetchFruits,
     fetchArticleById,
     addArticle,
-    updateArticle
+    updateArticle,
+    deleteArticle,
 };

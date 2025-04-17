@@ -3,6 +3,7 @@ import Article from "../Articles";
 export interface ArticleTableProps {
     articles: Article[];
     onEdit: (id: number) => void;
+    onDelete: (id: number) => void;
     translations: {
         column_id: string;
         column_name: string;

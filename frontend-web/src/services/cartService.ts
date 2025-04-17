@@ -64,13 +64,23 @@ export const cartService = {
     },
 
     // Process payment for the cart
-    async processPayment(orderId: string): Promise<void> {
-        const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.pay(orderId)}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+    async processPayment(
+        orderId: string,
+        address: string,
+        phoneNumber: string,
+        customerName: string,
+        country: string,
+        postalCode: string
+    ): Promise<void> {
+        const response = await fetch(
+            `${cartAPI.baseURL}${cartAPI.endpoints.pay(orderId, { address, phoneNumber, customerName, country, postalCode })}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         if (!response.ok) {
             const errorDetails = await response.text();
             throw new Error(`Payment failed. Details: ${errorDetails}`);

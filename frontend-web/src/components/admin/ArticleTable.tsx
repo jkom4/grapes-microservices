@@ -1,7 +1,8 @@
 import {ArticleTableProps} from "../../utils/models/interface/ArticleTabsProps";
 
-export const ArticleTable: React.FC<ArticleTableProps> = ({ articles, onEdit, translations }) => (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+export const ArticleTable: React.FC<ArticleTableProps> = ({ articles, onEdit, onDelete, translations }) => {
+    return (
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
             <tr>
@@ -32,10 +33,18 @@ export const ArticleTable: React.FC<ArticleTableProps> = ({ articles, onEdit, tr
                         >
                             ✏️
                         </button>
+                        <button
+                            onClick={() => onDelete(article.id)}
+                            className="text-red-600 hover:text-red-900"
+                            aria-label={`Delete ${article.name}`}
+                        >
+                            🗑️
+                        </button>
                     </td>
                 </tr>
             ))}
             </tbody>
         </table>
     </div>
-);
+    );
+};
