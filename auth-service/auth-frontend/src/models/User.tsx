@@ -3,50 +3,48 @@
 export type AuthMethod =
     | 'EMAIL'
     | 'SMS'
+    | 'EID'
 
 export interface AuthMean {
     enabled: boolean;
-    name: AuthMethod;
-    publicKey: string | null;
-    challenge: string | null;
-    lastLogin: string; // Date ISO format
-    counter: number | null;
-    token: string | null;
+    lastLogin: string;
+    counter: number;
 }
 
 export interface Address {
     street: string;
     postalCode: string;
     country: string;
-    countryCode: string;
     number: string;
-    province: string;
+    city: string;
 }
 
-export type Gender = 'Male' | 'Female' | 'Other';
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 
 export type Role = 'USER' | 'ADMIN' | 'DELIVERY';
 
 export interface User {
-    id: string;
-    isActive: boolean;
-    bankId: string;
+    id?: string;
+    active?: boolean;
+    passwordValid: boolean;
     name: string;
     firstName: string;
     email: string;
     emailVerified: boolean;
+    password: string;
     phoneNumber: string;
     phoneVerified: boolean;
     nationalId: string;
-    birthDate: string; // ISO format, ex: '1990-01-01'
     age: number;
+    birthDate: string; // ISO format, ex: '1990-01-01'
     gender: Gender;
-    cardNumber: string;
     pinCode: string;
-    loyaltyPoints: number;
+    loyaltyPoints?: number;
     role: Role;
     profession: string;
-    authMethods: Record<string, AuthMean>;
+    authMeans: Record<AuthMethod, AuthMean>;
     deliveryAddress: Address;
     billingAddress: Address;
+    createdAt: string; // ISO format, ex: '2023-10-01T12:00:00Z'
+    updatedAt: string; // ISO format, ex: '2023-10-01T12:00:00Z'
 }
