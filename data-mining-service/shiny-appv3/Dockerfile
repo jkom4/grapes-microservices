@@ -1,6 +1,6 @@
 FROM rocker/shiny-verse:latest
 
-# --- 1. Installer les dépendances système supplémentaires ---
+# --- 1. Install additional system dependencies ---
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
     libmariadb-dev \
@@ -15,13 +15,13 @@ RUN apt-get update -qq && \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# --- 2. Copier le script R qui installe tous les packages ---
+# --- 2. Copy the R script that installs all packages ---
 COPY install_packages.R /tmp/install_packages.R
 
-# --- 3. Lancer l'installation dans une R session propre ---
+# --- 3. Run the installation in a clean R session ---
 RUN Rscript /tmp/install_packages.R
 
-# --- 4. Copier ton application ---
+# --- 4. Copy your application ---
 WORKDIR /srv/shiny-server/app
 COPY global.R .
 COPY ui.R .
@@ -32,8 +32,7 @@ COPY modules ./modules
 
 # COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
-
-# --- 5. Propriétés et port ---
+# --- 5. Properties and port ---
 RUN chown -R shiny:shiny .
 EXPOSE 3838
 

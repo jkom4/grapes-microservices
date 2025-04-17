@@ -17,46 +17,46 @@ library(graphics) # For mosaicplot
 mod_chisq_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h3("Test du Chi-Carré d'Indépendance"),
+    h3("Chi-Square Independence Test"),
     fluidRow(
       column(width = 3,
              wellPanel(
-               h4("Options Chi²"),
-               helpText("Teste s'il existe une association statistiquement significative entre deux variables catégorielles."),
-               selectInput(ns("var1_select_chisq"), "Choisir la Première Variable Catégorielle:",
+               h4("Chi² Options"),
+               helpText("Tests if there is a statistically significant association between two categorical variables."),
+               selectInput(ns("var1_select_chisq"), "Select the First Categorical Variable:",
                            choices = NULL),
-               selectInput(ns("var2_select_chisq"), "Choisir la Deuxième Variable Catégorielle:",
+               selectInput(ns("var2_select_chisq"), "Select the Second Categorical Variable:",
                            choices = NULL),
                hr(),
-               actionButton(ns("run_chisq"), "Lancer/Actualiser Test Chi²")
+               actionButton(ns("run_chisq"), "Run/Update Chi² Test")
              ),
              wellPanel(
                h4("Actions"),
-               textAreaInput(ns("conclusion_chisq"), "Conclusion / Interprétation:", rows = 4),
-               actionButton(ns("save_chisq"), "Soumettre l'analyse Chi²", icon = icon("database")),
+               textAreaInput(ns("conclusion_chisq"), "Conclusion / Interpretation:", rows = 4),
+               actionButton(ns("save_chisq"), "Submit Chi² Analysis", icon = icon("database")),
                hr(),
-               h5("Télécharger les Résultats:"),
-               downloadButton(ns("dl_chisq_summary"), "Résumé Test (.txt)"),
-               downloadButton(ns("dl_chisq_table"), "Tableau Contingence (.xlsx)")
+               h5("Download Results:"),
+               downloadButton(ns("dl_chisq_summary"), "Test Summary (.txt)"),
+               downloadButton(ns("dl_chisq_table"), "Contingency Table (.xlsx)")
              )
       ), # End Options Column
       column(width = 9,
-             h3("Résultats Chi-Carré"),
+             h3("Chi-Square Results"),
              tabsetPanel(
-               tabPanel("Test du Chi-Carré",
-                        helpText("Teste l'hypothèse nulle d'indépendance. Un P-value (p.value) faible (< 0.05) suggère une association significative."),
+               tabPanel("Chi-Square Test",
+                        helpText("Tests the null hypothesis of independence. A low P-value (p.value) (< 0.05) suggests a significant association."),
                         withSpinner(verbatimTextOutput(ns("chisq_test_output")))
                ),
-               tabPanel("Tableau de Contingence",
-                        helpText("Table croisée montrant les effectifs observés pour chaque combinaison."),
+               tabPanel("Contingency Table",
+                        helpText("Cross-tabulation showing observed counts for each combination."),
                         withSpinner(tableOutput(ns("contingency_table")))
                ),
-               tabPanel("Effectifs Attendus",
-                        helpText("Effectifs attendus si les variables étaient indépendantes. Utile pour vérifier les conditions du test."),
+               tabPanel("Expected Counts",
+                        helpText("Expected counts if the variables were independent. Useful for verifying test conditions."),
                         withSpinner(tableOutput(ns("expected_table")))
                ),
-               tabPanel("Graphique (Mosaic Plot)",
-                        helpText("Visualisation de l'association."),
+               tabPanel("Mosaic Plot",
+                        helpText("Visualization of the association."),
                         withSpinner(plotOutput(ns("mosaic_plot")))
                )
              ) # End tabsetPanel

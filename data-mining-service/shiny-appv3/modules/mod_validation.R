@@ -14,16 +14,17 @@ library(jsonlite) # To potentially parse key_results display
 mod_validation_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2("Validation des Analyses Soumises"),
-    p("Interface pour le Chief Data Scientist (simulé)."),
+    h2("Validation of Submitted Analyses"),
+    p("Interface for the Chief Data Scientist (simulated)."),
     hr(),
-    actionButton(ns("refresh_submissions"), "Rafraîchir la Liste", icon = icon("sync")),
+    actionButton(ns("refresh_submissions"), "Refresh List", icon = icon("sync")),
     hr(),
-    h4("Analyses en Attente d'Approbation ('Pending Approval')"),
+    h4("Analyses Awaiting Approval ('Pending Approval')"),
     withSpinner(DT::dataTableOutput(ns("pending_submissions_table")))
     # Potentially add another table later for Approved/Rejected history
   )
 }
+
 
 
 # --- Server Function ---

@@ -14,64 +14,64 @@ library(mongolite) # Ensure mongolite is loaded
 library(jsonlite)
 
 # --- UI Function ---
-# (UI function mod_acp_ui remains the same as the previous version)
 mod_acp_ui <- function(id) {
   ns <- NS(id)
   tagList(
     fluidRow(
       column(width = 3,
              wellPanel(
-               h4("Options ACP"),
-               helpText("Sélectionnez des variables quantitatives non redondantes."),
-               selectInput(ns("vars_select"), "Variables pour l'ACP:",
+               h4("PCA Options"),
+               helpText("Select non-redundant quantitative variables."),
+               selectInput(ns("vars_select"), "Variables for PCA:",
                            choices = NULL, multiple = TRUE, selected = NULL),
-               numericInput(ns("axe_x"), "Axe horizontal:", value = 1, min = 1, step = 1),
-               numericInput(ns("axe_y"), "Axe vertical:", value = 2, min = 1, step = 1),
-               actionButton(ns("run_pca"), "Lancer/Actualiser ACP")
+               numericInput(ns("axe_x"), "Horizontal Axis:", value = 1, min = 1, step = 1),
+               numericInput(ns("axe_y"), "Vertical Axis:", value = 2, min = 1, step = 1),
+               actionButton(ns("run_pca"), "Run/Update PCA")
              ),
              wellPanel(
-               h4("Données d'entrée (Aperçu)"),
+               h4("Input Data Preview"),
                DT::dataTableOutput(ns("head_data_pca"))
              ),
              wellPanel(
                h4("Actions"),
-               textAreaInput(ns("conclusion_pca"), "Conclusion / Interprétation:", rows = 4),
-               actionButton(ns("save_pca"), "Soumettre l'analyse", icon = icon("database")),
+               textAreaInput(ns("conclusion_pca"), "Conclusion / Interpretation:", rows = 4),
+               actionButton(ns("save_pca"), "Submit Analysis", icon = icon("database")),
                hr(),
-               h5("Télécharger les Résultats:"),
-               downloadButton(ns("dl_pca_eig_plot"), "Graphique Éboulis (.png)"),
-               downloadButton(ns("dl_pca_ind_plot"), "Graphique Individus (.png)"),
-               downloadButton(ns("dl_pca_var_plot"), "Cercle Corrélations (.png)"),
-               downloadButton(ns("dl_pca_contrib_table"), "Table Contributions (.xlsx)"),
-               downloadButton(ns("dl_pca_cos2_table"), "Table Cos2 (.xlsx)")
+               h5("Download Results:"),
+               downloadButton(ns("dl_pca_eig_plot"), "Scree Plot (.png)"),
+               downloadButton(ns("dl_pca_ind_plot"), "Individuals Plot (.png)"),
+               downloadButton(ns("dl_pca_var_plot"), "Correlation Circle (.png)"),
+               downloadButton(ns("dl_pca_contrib_table"), "Contributions Table (.xlsx)"),
+               downloadButton(ns("dl_pca_cos2_table"), "Cos2 Table (.xlsx)")
              )
       ),
       column(width = 9,
-             h3("Résultats ACP"),
+             h3("PCA Results"),
              tabsetPanel(
-               tabPanel("Éboulis des valeurs propres", withSpinner(plotOutput(ns("eig_plot")))),
-               tabPanel("Graphique des Individus", withSpinner(plotOutput(ns("pca_ind_plot")))),
-               tabPanel("Cercle de Corrélation", withSpinner(plotOutput(ns("pca_var_plot")))),
+               tabPanel("Scree Plot of Eigenvalues", withSpinner(plotOutput(ns("eig_plot")))),
+               tabPanel("Individuals Plot", withSpinner(plotOutput(ns("pca_ind_plot")))),
+               tabPanel("Correlation Circle", withSpinner(plotOutput(ns("pca_var_plot")))),
                tabPanel("Contributions (Variables)",
                         fluidRow(
-                          column(6, h4("Contribution aux Axes (Table)"), withSpinner(DT::dataTableOutput(ns("pca_var_contrib_table")))),
-                          column(6, h4("Contribution à l'Axe X"), withSpinner(plotOutput(ns("pca_var_contrib_plot_x"))))
+                          column(6, h4("Contribution to Axes (Table)"), withSpinner(DT::dataTableOutput(ns("pca_var_contrib_table")))),
+                          column(6, h4("Contribution to Axis X"), withSpinner(plotOutput(ns("pca_var_contrib_plot_x"))))
                         ),
                         fluidRow(
-                          column(6, offset=6, h4("Contribution à l'Axe Y"), withSpinner(plotOutput(ns("pca_var_contrib_plot_y"))))
+                          column(6, offset=6, h4("Contribution to Axis Y"), withSpinner(plotOutput(ns("pca_var_contrib_plot_y"))))
                         )
                ),
-               tabPanel("Qualité Cos2 (Variables)",
-                        h4("Qualité de Représentation (Cos2)"),
+               tabPanel("Cos2 Quality (Variables)",
+                        h4("Representation Quality (Cos2)"),
                         withSpinner(DT::dataTableOutput(ns("pca_var_cos2_table")))
                ),
-               tabPanel("Matrice de Corrélation", withSpinner(plotOutput(ns("corr_plot")))
+               tabPanel("Correlation Matrix", withSpinner(plotOutput(ns("corr_plot")))
                )
              ) # End tabsetPanel
       ) # End column
     ) # End fluidRow
   ) # End tagList
 }
+
 
 # --- Server Function ---
 mod_acp_server <- function(id, data_reactive) {

@@ -25,22 +25,22 @@ ui <- dashboardPage(
     width = 250,
     sidebarMenu(
       id = "tabs",
-      menuItem(text = "Vue d'ensemble", tabName = "overview", icon = icon("tachometer-alt")),
-      menuItem(text = "Analyses Factorielles", icon = icon("project-diagram"), startExpanded = FALSE,
-               menuSubItem(text = "ACP (Quantitatif)", tabName = "acp", icon = icon("chart-line")),
-               menuSubItem(text = "ACM (Qualitatif)", tabName = "acm", icon = icon("chart-pie"))
+      menuItem(text = "Overview", tabName = "overview", icon = icon("tachometer-alt")),
+      menuItem(text = "Factorial Analyses", icon = icon("project-diagram"), startExpanded = FALSE,
+               menuSubItem(text = "PCA (Quantitative)", tabName = "acp", icon = icon("chart-line")),
+               menuSubItem(text = "MCA (Qualitative)", tabName = "acm", icon = icon("chart-pie"))
       ),
-      menuItem(text = "Clustering (CAH)", tabName = "clustering", icon = icon("users-cog")),
-      menuItem(text = "Régression", tabName = "regression", icon = icon("chart-area")),
-      menuItem(text = "Tests Statistiques", icon = icon("flask"), startExpanded = FALSE, # Combined Tests
+      menuItem(text = "Clustering (HAC)", tabName = "clustering", icon = icon("users-cog")),
+      menuItem(text = "Regression", tabName = "regression", icon = icon("chart-area")),
+      menuItem(text = "Statistical Tests", icon = icon("flask"), startExpanded = FALSE, # Combined Tests
                menuSubItem(text = "ANOVA", tabName = "anova", icon = icon("chart-bar")),
-               menuSubItem(text = "Chi-Carré", tabName = "chisq", icon = icon("table-list"))
+               menuSubItem(text = "Chi-Square", tabName = "chisq", icon = icon("table-list"))
       ),
       # <<< VALIDATION MENU ITEM >>>
       menuItem(text = "Validation (CDS)", tabName = "validation", icon = icon("check-circle"))
     ) # End sidebarMenu
   ), # End dashboardSidebar
-  
+
   dashboardBody(
     tags$head( tags$style(HTML(".shiny-spinner-output-container { position: relative; } .load-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }")) ),
     tabItems(

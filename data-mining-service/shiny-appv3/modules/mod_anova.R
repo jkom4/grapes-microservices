@@ -13,34 +13,34 @@ library(jsonlite)
 mod_anova_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2("Analyse de la Variance (ANOVA)"),
+    h2("Analysis of Variance (ANOVA)"),
     fluidRow(
       column(4,
              wellPanel(
-               h4("Options ANOVA"), # Added H4 title
-               selectInput(ns("quant_var"), "Variable Quantitative:", choices = NULL),
-               selectInput(ns("cat_var"), "Variable Catégorielle:", choices = NULL),
+               h4("ANOVA Options"), # Added H4 title
+               selectInput(ns("quant_var"), "Quantitative Variable:", choices = NULL),
+               selectInput(ns("cat_var"), "Categorical Variable:", choices = NULL),
                # <<< ADD helpText regarding cluster >>>
-               helpText(em("Note: Pour executer ANOVA, exécuter le module 'Clustering (CAH)' d'abord.")),
+               helpText(em("Note: To run ANOVA, execute the 'Clustering (CAH)' module first.")),
                # <<< END ADD >>>
-               checkboxInput(ns("run_tukey"), "Inclure test post-hoc Tukey", value = FALSE),
-               actionButton(ns("run_anova"), "Exécuter ANOVA", icon = icon("play")),
+               checkboxInput(ns("run_tukey"), "Include Tukey post-hoc test", value = FALSE),
+               actionButton(ns("run_anova"), "Run ANOVA", icon = icon("play")),
                hr(), # Added hr for separation
-               h4("Sauvegarde"), # Added H4 title
-               textAreaInput(ns("conclusion"), "Conclusion/Interprétation:", "", rows = 3),
-               actionButton(ns("save_anova"), "Soumettre Analyse", icon = icon("save")), # Changed label slightly
+               h4("Save"), # Added H4 title
+               textAreaInput(ns("conclusion"), "Conclusion/Interpretation:", "", rows = 3),
+               actionButton(ns("save_anova"), "Submit Analysis", icon = icon("save")), # Changed label slightly
                hr(), # Added hr
-               h5("Télécharger"), # Changed to H5
-               downloadButton(ns("download_summary"), "Exporter Résumé (.txt)"), # Added file type
-               downloadButton(ns("download_boxplot"), "Exporter Boxplot (.png)") # Added file type
+               h5("Download"), # Changed to H5
+               downloadButton(ns("download_summary"), "Export Summary (.txt)"), # Added file type
+               downloadButton(ns("download_boxplot"), "Export Boxplot (.png)") # Added file type
              )
       ),
       column(8,
-             h3("Résultats ANOVA"), # Moved H3 inside column
+             h3("ANOVA Results"), # Moved H3 inside column
              tabsetPanel(
-               tabPanel("Résumé ANOVA", verbatimTextOutput(ns("anova_summary")) %>% withSpinner()),
+               tabPanel("ANOVA Summary", verbatimTextOutput(ns("anova_summary")) %>% withSpinner()),
                tabPanel("Boxplot", plotOutput(ns("anova_boxplot")) %>% withSpinner()),
-               tabPanel("Moyennes Groupes", DTOutput(ns("group_means_table")) %>% withSpinner()),
+               tabPanel("Group Means", DTOutput(ns("group_means_table")) %>% withSpinner()),
                # ConditionalPanel requires the tabPanel INSIDE it
                conditionalPanel( condition = paste0("input['", ns("run_tukey"), "'] == true"),
                                  tabPanel("Tukey HSD", DTOutput(ns("tukey_results_table")) %>% withSpinner())
@@ -50,6 +50,7 @@ mod_anova_ui <- function(id) {
     ) # End FluidRow
   ) # End tagList
 }
+
 
 # Server Function
 mod_anova_server <- function(id, data_reactive, clustered_data_reactive) {

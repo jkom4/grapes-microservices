@@ -18,66 +18,66 @@ library(jsonlite)  # For saving results
 mod_regression_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h3("Modélisation par Régression"),
+    h3("Regression Modeling"),
     fluidRow(
       # --- Options Column ---
       column(width = 3,
              wellPanel(
-               h4("Options Régression"),
-               radioButtons(ns("model_type"), "Type de Régression:",
-                            choices = list("Linéaire (Variable quantitative)" = "linear",
-                                           "Logistique (Variable binaire 0/1)" = "logistic"),
+               h4("Regression Options"),
+               radioButtons(ns("model_type"), "Regression Type:",
+                            choices = list("Linear (Quantitative Variable)" = "linear",
+                                           "Logistic (Binary Variable 0/1)" = "logistic"),
                             selected = "linear"),
                hr(),
                # Dependent Variable (Choices updated dynamically)
-               selectInput(ns("vars_select_dependent"), "Choisir la Variable Dépendante (Y):",
+               selectInput(ns("vars_select_dependent"), "Select Dependent Variable (Y):",
                            choices = NULL),
                hr(),
                # Independent Variables (Choices updated dynamically)
-               selectInput(ns("vars_select_independent"), "Choisir les Variables Indépendantes (X):",
+               selectInput(ns("vars_select_independent"), "Select Independent Variables (X):",
                            choices = NULL, multiple = TRUE, selected = NULL),
                hr(),
-               actionButton(ns("run_regression"), "Lancer/Actualiser Régression")
+               actionButton(ns("run_regression"), "Run/Update Regression")
              ),
              wellPanel(
                h4("Actions"),
-               textAreaInput(ns("conclusion_reg"), "Conclusion / Interprétation:", rows = 4),
-               actionButton(ns("save_reg"), "Soumettre l'analyse Régression", icon = icon("database")),
+               textAreaInput(ns("conclusion_reg"), "Conclusion / Interpretation:", rows = 4),
+               actionButton(ns("save_reg"), "Submit Regression Analysis", icon = icon("database")),
                hr(),
-               h5("Télécharger les Résultats:"),
-               downloadButton(ns("dl_reg_summary"), "Résumé Modèle (.txt)"),
-               downloadButton(ns("dl_reg_data"), "Données Utilisées (.xlsx)")
+               h5("Download Results:"),
+               downloadButton(ns("dl_reg_summary"), "Model Summary (.txt)"),
+               downloadButton(ns("dl_reg_data"), "Data Used (.xlsx)")
                # Add download for plots later if needed
              )
       ), # End Options Column
-      
+
       # --- Results Column ---
       column(width = 9,
-             h3("Résultats Régression"),
+             h3("Regression Results"),
              tabsetPanel(
-               tabPanel("Résumé du Modèle",
-                        helpText("Interprétation: Significativité des variables (Pr(>|t|)), qualité d'ajustement (R-squared / AIC), etc."),
+               tabPanel("Model Summary",
+                        helpText("Interpretation: Significance of variables (Pr(>|t|)), goodness of fit (R-squared / AIC), etc."),
                         withSpinner(verbatimTextOutput(ns("model_summary")))
                ),
                # Conditional panel for Linear Regression Diagnostics
                conditionalPanel(
                  condition = paste0("input['", ns("model_type"), "'] == 'linear'"),
-                 tabPanel("Diagnostiques Linéaire",
-                          helpText("Graphiques standards pour vérifier les hypothèses de la régression linéaire (linéarité, homoscédasticité, normalité des résidus, outliers)."),
+                 tabPanel("Linear Diagnostics",
+                          helpText("Standard plots to check linear regression assumptions (linearity, homoscedasticity, normality of residuals, outliers)."),
                           withSpinner(plotOutput(ns("diagnostic_plots")))
                  )
                ),
                # Conditional panel for Logistic Regression Extras
                conditionalPanel(
                  condition = paste0("input['", ns("model_type"), "'] == 'logistic'"),
-                 tabPanel("Extras Logistique",
-                          helpText("Probabilités prédites vs Réalité, ou autres métriques spécifiques."),
+                 tabPanel("Logistic Extras",
+                          helpText("Predicted probabilities vs. reality, or other specific metrics."),
                           # Placeholder for future plots/tables (e.g., ROC, Conf Matrix)
                           withSpinner(verbatimTextOutput(ns("logistic_extras")))
                  )
                ),
-               tabPanel("Données Utilisées",
-                        helpText("Aperçu des données après traitement NA, utilisées pour entraîner le modèle."),
+               tabPanel("Data Used",
+                        helpText("Preview of data after NA handling, used to train the model."),
                         withSpinner(DT::dataTableOutput(ns("head_data_regression")))
                )
              ) # End tabsetPanel

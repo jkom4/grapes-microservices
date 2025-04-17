@@ -1,8 +1,8 @@
 library(shiny)
 
-# Charger les composants de l'UI et du serveur
+# load server and ui components
 source("ui.R")
 source("server.R")
 
-# Lancer l'application
+# Run the app
 shinyApp(ui = ui, server = server)

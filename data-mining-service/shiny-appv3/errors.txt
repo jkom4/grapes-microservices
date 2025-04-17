@@ -1,6 +1,0 @@
---- Starting Data Generation and Saving ---
-LOCAL SCRIPT Connecting MariaDB: User= adminMasi Host= 127.0.0.1 Port= 3307 DB= BD_OPER_ACTIVITIES
-Failed to connect to local MariaDB/MySQL: Failed to connect: Access denied for user 'adminMasi'@'172.19.0.1' (using password: YES)
-Cannot proceed without DB connection. Exiting.
-Main execution completed.
-https://prod.liveshare.vsengsaas.visualstudio.com/join?21669CDFCA7C7C336A1B38A47CF66924C6E7

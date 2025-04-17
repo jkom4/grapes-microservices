@@ -1,4 +1,4 @@
-# modules/mod_acm.R
+    # modules/mod_acm.R
 
 # --- Libraries needed by this module ---
 library(shiny)
@@ -21,58 +21,60 @@ library(tibble)
 
 # --- UI Function ---
 # (UI function mod_acm_ui remains the same as the previous version)
+# --- UI Function ---
 mod_acm_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h3("Analyse des Correspondances Multiples (ACM)"),
+    h3("Multiple Correspondence Analysis (MCA)"),
     fluidRow(
       column(width = 3,
              wellPanel(
-               h4("Options ACM"),
-               selectInput(ns("vars_select_mca"), "Choisir les variables (facteurs) pour l'ACM:",
+               h4("MCA Options"),
+               selectInput(ns("vars_select_mca"), "Select variables (factors) for MCA:",
                            choices = NULL, multiple = TRUE, selected = NULL),
-               numericInput(ns("axe_x_mca"), "Axe horizontal:", value = 1, min = 1, step = 1),
-               numericInput(ns("axe_y_mca"), "Axe vertical:", value = 2, min = 1, step = 1),
-               actionButton(ns("run_mca"), "Lancer/Actualiser ACM")
+               numericInput(ns("axe_x_mca"), "Horizontal Axis:", value = 1, min = 1, step = 1),
+               numericInput(ns("axe_y_mca"), "Vertical Axis:", value = 2, min = 1, step = 1),
+               actionButton(ns("run_mca"), "Run/Update MCA")
              ),
              wellPanel(
-               h4("Aperçu Données d'Entrée (ACM)"),
+               h4("Input Data Preview (MCA)"),
                DT::dataTableOutput(ns("head_data_mca"))
              ),
              wellPanel(
                h4("Actions"),
-               textAreaInput(ns("conclusion_mca"), "Conclusion / Interprétation:", rows = 4),
-               actionButton(ns("save_mca"), "Soumettre l'analyse", icon = icon("database")),
+               textAreaInput(ns("conclusion_mca"), "Conclusion / Interpretation:", rows = 4),
+               actionButton(ns("save_mca"), "Submit Analysis", icon = icon("database")),
                hr(),
-               h5("Télécharger les Résultats:"),
-               downloadButton(ns("dl_mca_eig_plot"), "Graphique Éboulis (.png)"),
+               h5("Download Results:"),
+               downloadButton(ns("dl_mca_eig_plot"), "Scree Plot (.png)"),
                downloadButton(ns("dl_mca_biplot"), "Biplot (.png)"),
-               downloadButton(ns("dl_mca_contrib_table"), "Table Contributions (.xlsx)"),
-               downloadButton(ns("dl_mca_cos2_table"), "Table Cos2 (.xlsx)")
+               downloadButton(ns("dl_mca_contrib_table"), "Contributions Table (.xlsx)"),
+               downloadButton(ns("dl_mca_cos2_table"), "Cos2 Table (.xlsx)")
              )
       ),
       column(width = 9,
-             h3("Résultats ACM"),
+             h3("MCA Results"),
              tabsetPanel(
-               tabPanel("Éboulis des valeurs propres", withSpinner(plotOutput(ns("mca_eig_plot")))),
-               tabPanel("Biplot (Variables & Individus)", withSpinner(plotOutput(ns("mca_biplot")))),
-               tabPanel("Contributions (Catégories Var.)",
+               tabPanel("Scree Plot of Eigenvalues", withSpinner(plotOutput(ns("mca_eig_plot")))),
+               tabPanel("Biplot (Variables & Individuals)", withSpinner(plotOutput(ns("mca_biplot")))),
+               tabPanel("Contributions (Variable Categories)",
                         fluidRow(
-                          column(6, h4("Contribution aux Axes (Table)"), withSpinner(DT::dataTableOutput(ns("mca_var_contrib_table")))),
-                          column(6, h4("Contribution à l'Axe X"), withSpinner(plotOutput(ns("mca_var_contrib_plot_x"))))
+                          column(6, h4("Contribution to Axes (Table)"), withSpinner(DT::dataTableOutput(ns("mca_var_contrib_table")))),
+                          column(6, h4("Contribution to Axis X"), withSpinner(plotOutput(ns("mca_var_contrib_plot_x"))))
                         ),
                         fluidRow(
-                          column(6, offset=6, h4("Contribution à l'Axe Y"), withSpinner(plotOutput(ns("mca_var_contrib_plot_y"))))
+                          column(6, offset=6, h4("Contribution to Axis Y"), withSpinner(plotOutput(ns("mca_var_contrib_plot_y"))))
                         )
                ),
-               tabPanel("Qualité Cos2 (Catégories Var.)",
-                        h4("Qualité de Représentation (Cos2)"),
+               tabPanel("Cos2 Quality (Variable Categories)",
+                        h4("Representation Quality (Cos2)"),
                         withSpinner(DT::dataTableOutput(ns("mca_var_cos2_table")))
                )
              ) # End tabsetPanel
       ) # End column
     ) # End fluidRow
   ) # End tagList
+}
 }
 
 # --- Server Function ---

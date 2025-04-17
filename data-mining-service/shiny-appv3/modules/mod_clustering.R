@@ -21,40 +21,40 @@ library(tibble)
 mod_clustering_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h3("Classification Ascendante Hiérarchique (CAH / HCPC)"),
+    h3("Hierarchical Agglomerative Clustering (HAC / HCPC)"),
     fluidRow(
       column(width = 3,
              wellPanel(
-               h4("Options HCPC"),
-               helpText("Classification basée sur les résultats de l'ACP précédente (dimensions principales)."),
-               numericInput(ns("hcpc_n_dim"), "Nb. dimensions ACP à utiliser:", value = 5, min = 2, step = 1),
-               numericInput(ns("hcpc_n_clust"), "Nb. clusters (0 = auto):", value = 0, min = 0, step = 1),
-               actionButton(ns("run_hcpc"), "Lancer/Actualiser Clustering")
+               h4("HCPC Options"),
+               helpText("Classification based on the results of the previous PCA (principal dimensions)."),
+               numericInput(ns("hcpc_n_dim"), "Number of PCA Dimensions to Use:", value = 5, min = 2, step = 1),
+               numericInput(ns("hcpc_n_clust"), "Number of Clusters (0 = auto):", value = 0, min = 0, step = 1),
+               actionButton(ns("run_hcpc"), "Run/Update Clustering")
              ),
              wellPanel(
                h4("Actions"),
-               textAreaInput(ns("conclusion_hcpc"), "Conclusion / Interprétation des Clusters:", rows = 4),
-               actionButton(ns("save_hcpc"), "Soumettre l'analyse Clustering", icon = icon("database")),
+               textAreaInput(ns("conclusion_hcpc"), "Cluster Conclusion / Interpretation:", rows = 4),
+               actionButton(ns("save_hcpc"), "Submit Clustering Analysis", icon = icon("database")),
                hr(),
-               h5("Télécharger les Résultats:"),
-               downloadButton(ns("dl_hcpc_dendro"), "Dendrogramme (.png)"),
-               downloadButton(ns("dl_hcpc_map"), "Carte Factorielle Clusters (.png)"),
-               downloadButton(ns("dl_hcpc_desc"), "Description Clusters (.xlsx)")
+               h5("Download Results:"),
+               downloadButton(ns("dl_hcpc_dendro"), "Dendrogram (.png)"),
+               downloadButton(ns("dl_hcpc_map"), "Cluster Factor Map (.png)"),
+               downloadButton(ns("dl_hcpc_desc"), "Cluster Description (.xlsx)")
                # Potentially add download for clustered data
-               # downloadButton(ns("dl_hcpc_data_clust"), "Données avec Clusters (.xlsx)")
+               # downloadButton(ns("dl_hcpc_data_clust"), "Data with Clusters (.xlsx)")
              )
       ),
       column(width = 9,
-             h3("Résultats HCPC"),
+             h3("HCPC Results"),
              tabsetPanel(
-               tabPanel("Carte Factorielle", withSpinner(plotOutput(ns("hcpc_map_plot")))),
-               tabPanel("Dendrogramme", withSpinner(plotOutput(ns("hcpc_dendro_plot")))),
+               tabPanel("Factor Map", withSpinner(plotOutput(ns("hcpc_map_plot")))),
+               tabPanel("Dendrogram", withSpinner(plotOutput(ns("hcpc_dendro_plot")))),
                # <<< Reverted back to verbatimTextOutput >>>
-               tabPanel("Description des Clusters (Variables Quanti)",
+               tabPanel("Cluster Description (Quantitative Variables)",
                         withSpinner(verbatimTextOutput(ns("hcpc_desc_quanti")))
                ),
                # <<< End Revert >>>
-               tabPanel("Données avec Clusters", withSpinner(DT::dataTableOutput(ns("hcpc_data_clust"))))
+               tabPanel("Data with Clusters", withSpinner(DT::dataTableOutput(ns("hcpc_data_clust"))))
              ) # End tabsetPanel
       ) # End column
     ) # End fluidRow

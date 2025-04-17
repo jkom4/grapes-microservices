@@ -14,7 +14,7 @@ library(RColorBrewer)
 mod_overview_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    h2("Vue d'ensemble des données"),
+    h2("Data Overview"),
     fluidRow(
       valueBoxOutput(outputId = ns("vb_total_revenue"), width = 4),
       valueBoxOutput(outputId = ns("vb_total_transactions"), width = 4),
@@ -22,41 +22,41 @@ mod_overview_ui <- function(id) {
     ),
     fluidRow(
       box(
-        title = "Méthodes d'Authentification Utilisées", status = "success", solidHeader = TRUE, width = 6,
+        title = "Authentication Methods Used", status = "success", solidHeader = TRUE, width = 6,
         # Using renderPlot for the pie chart now
         withSpinner(plotOutput(outputId = ns("plot_pie_auth_methods")), type = 6, color = "#2ECC71")
       ),
       box(
-        title = "Top Services Demandés", status = "danger", solidHeader = TRUE, width = 6,
+        title = "Top Requested Services", status = "danger", solidHeader = TRUE, width = 6,
         withSpinner(plotOutput(outputId = ns("plot_bar_service_requests")), type = 6, color = "#E74C3C")
       )
     ),
     fluidRow(
       box(
-        title = "Distribution du Montant par Groupe d'Âge", status = "primary", solidHeader = TRUE, width = 6,
+        title = "Amount Distribution by Age Group", status = "primary", solidHeader = TRUE, width = 6,
         # Using renderPlot
         withSpinner(plotOutput(outputId = ns("plot_boxplot_age_montant")), type = 6, color = "#8E44AD")
       ),
       box(
-        title = "Montant Total par Saison de Produit", status = "info", solidHeader = TRUE, width = 6,
+        title = "Total Amount by Product Season", status = "info", solidHeader = TRUE, width = 6,
         # Using renderPlot
         withSpinner(plotOutput(outputId = ns("plot_barchart_saison_montant")), type = 6, color = "#3498DB")
       )
     ),
     fluidRow(
       box(
-        title = "Montant Total par Région Client", status = "warning", solidHeader = TRUE, width = 6,
+        title = "Total Amount by Client Region", status = "warning", solidHeader = TRUE, width = 6,
         # Using renderPlot
         withSpinner(plotOutput(outputId = ns("plot_barchart_region_montant")), type = 6, color = "#F39C12")
       ),
       box(
-        title = "Résumé Statistique (Échantillon Transactions)", status = "success", solidHeader = TRUE, width = 6,
+        title = "Statistical Summary (Transaction Sample)", status = "success", solidHeader = TRUE, width = 6,
         verbatimTextOutput(ns("summary"))
       )
     ),
     fluidRow(
       box(
-        title = "Aperçu des Données Brutes (Échantillon Transactions)", status = "primary", solidHeader = TRUE, width = 12,
+        title = "Raw Data Preview (Transaction Sample)", status = "primary", solidHeader = TRUE, width = 12,
         withSpinner(DT::dataTableOutput(ns("head_data")), type = 6, color = "#8E44AD")
       )
     )
