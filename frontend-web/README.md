@@ -76,12 +76,9 @@ src/
 │-- assets/               # Contains images, icons, and other static files
 │-- components/           # Reusable components (forms, buttons, etc.)
 │-- features/             # Feature-specific components (e.g., login, dashboard)
-│-- hooks/                # Custom hooks (e.g., useAuth, useFetch)
 │-- layouts/              # Page layouts (e.g., Header, Footer, Sidebar)
 │-- pages/                # Components representing specific pages (e.g., Home, About)
-│-- routes/               # Route management with React Router
 │-- sections/             # Section representing specific parts of a page
-│-- styles/               # CSS/SCSS files or styled-components
 │-- services/             # Use to call API endpoints (fetch, ...)
 │-- utils/                # Utility functions (helpers, formatters, models, etc.)
 │-- App.tsx               # Main application component

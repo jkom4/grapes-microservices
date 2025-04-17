@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root fx:id="bubbleMessageContainer" stylesheets="@bubble-message-component.css" type="javafx.scene.layout.VBox" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+    <!--MESSAGE HEADER (author + date)-->
+    <HBox fx:id="messageHeaderContainer" nodeOrientation="LEFT_TO_RIGHT">
+        <VBox.margin>
+            <Insets bottom="-1.0" left="55.0" right="55.0" top="5.0"/>
+        </VBox.margin>
+        <Label fx:id="messageAuthor" minHeight="-Infinity" text="Jean" wrapText="true"/>
+        <Pane prefWidth="20.0"/>
+        <Label fx:id="messageDate" layoutX="10.0" layoutY="10.0" minHeight="-Infinity" text="10/03/2025 10:43"
+               wrapText="true"/>
+    </HBox>
+    <!--MESSAGE (picture + message)-->
+    <HBox fx:id="messageOrienter" alignment="CENTER_LEFT" nodeOrientation="LEFT_TO_RIGHT">
+        <ImageView fx:id="sendMessageButton" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@../profile.png" />
+         <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </HBox.margin>
+        </ImageView>
+        <VBox fx:id="messageBubble" alignment="CENTER_LEFT" styleClass="message-bubble">
+            <Label fx:id="bubbleLabel" minHeight="-Infinity" text="TEST MY MESSAGE TEST MY MESSAGE TEST MY MESSAGETEST MY MESSAGE" wrapText="true">
+                <VBox.margin>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                </VBox.margin>
+            </Label>
+        </VBox>
+    </HBox>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</fx:root>
