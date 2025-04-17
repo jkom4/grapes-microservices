@@ -6,6 +6,7 @@ import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.models.OrderItem;
 import grapes.microservices.salesservice.repositories.ArticleRepository;
 import grapes.microservices.salesservice.repositories.OrderItemRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -117,6 +118,8 @@ public class CartService {
         orderItemRepository.deleteById(itemId);
     }
 
+
+    @Transactional
     public String clearCart(Integer orderId) {
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
 
@@ -128,4 +131,6 @@ public class CartService {
 
         return "Cart cleared successfully for order ID: " + orderId;
     }
+
 }
+

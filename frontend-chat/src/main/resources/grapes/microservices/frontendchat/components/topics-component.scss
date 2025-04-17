@@ -1,0 +1,46 @@
+@import "../global";
+
+#topicTextfield {
+  -fx-pref-width: 300px; /* Set the width */
+  //-fx-padding: 10px; /* Add padding inside */
+  -fx-background-color: $primary-dark; /* Light background color */
+  //-fx-border-width: 2px; /* Border thickness */
+  -fx-border-radius: 25px; /* Rounded corners */
+  -fx-background-radius: 25px; /* Match the border radius */
+  -fx-font-size: 12px; /* Text size */
+  -fx-text-fill: white; /* Text color */
+  //-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0.5, 0, 2); /* Subtle shadow for depth */
+  -fx-focus-color: transparent; /* Remove focus border color */
+  -fx-faint-focus-color: transparent; /* Remove faint focus color */
+  -fx-transition: all 0.3s ease; /* Smooth transitions */
+  -fx-prompt-text-fill: $primary
+}
+#topicTextfield:hover {
+  //-fx-border-color: $primary;
+}
+#topicTextfield:focused {
+  //-fx-border-color: $primary-light;
+}
+
+#topicsContainer, #loadingFx {
+  -fx-background-color: $primary-light;
+}
+
+#topicScroller {
+  -fx-padding: 0;
+  -fx-background-color: transparent;
+}
+
+// SCROLL BAR
+.scroll-bar:vertical .thumb {
+  -fx-background-color: $secondary;
+}
+
+.scroll-bar .thumb:hover {
+  -fx-background-color: $secondary-light;
+}
+
+#profileLabel {
+  //-fx-text-fill: white;
+  -fx-font-weight: bold;
+}
