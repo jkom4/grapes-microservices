@@ -34,4 +34,11 @@ const cartAPI = {
     },
 };
 
-export { getArticlesAPI, searchArticlesAPI, cartAPI };
+const orderAPI = {
+    baseURL: BASE_URL,
+    endpoints: {
+        orderHistory: (userId: number) => `/cll/orders/orders/history/${userId}`,
+    },
+};
+
+export { getArticlesAPI, searchArticlesAPI, cartAPI, orderAPI };
