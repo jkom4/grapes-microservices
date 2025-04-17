@@ -6,6 +6,7 @@ import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.models.OrderItem;
 import grapes.microservices.salesservice.repositories.ArticleRepository;
 import grapes.microservices.salesservice.repositories.OrderItemRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -117,21 +118,19 @@ public class CartService {
         orderItemRepository.deleteById(itemId);
     }
 
-    public void clearCart(Integer orderId) {
+
+    @Transactional
+    public String clearCart(Integer orderId) {
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
 
         if (items.isEmpty()) {
             throw new IllegalArgumentException("Cart is already empty or does not exist.");
         }
 
-        //  Correction : we should not delete the items.
-        for (OrderItem item : items) {
-            item.setCartId(null);
-        }
-        orderItemRepository.saveAll(items);
+        orderItemRepository.deleteAll(items);
+
+        return "Cart cleared successfully for order ID: " + orderId;
     }
 
-
-
-
 }
+

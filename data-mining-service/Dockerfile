@@ -1,34 +1,42 @@
+FROM rocker/shiny-verse:latest
 
-# Use Python Image for Backend
-FROM python:3.10
-LABEL authors="jkom"
-WORKDIR /app
-COPY backend/ .
+# --- 1. Install additional system dependencies ---
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+    libmariadb-dev \
+    libsasl2-dev \
+    libssl-dev \
+    libzip-dev \
+    libcurl4-openssl-dev \
+    libxml2-dev \
+    libxt-dev \
+    libx11-dev \
+    libgl1 \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Execute API
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8096"]
+# --- 2. Copy the R script that installs all packages ---
+COPY shiny-appv3/Scripts-r/install_packages.R /tmp/install_packages.R
+
+# --- 3. Launch installation in a clean R session ---
+RUN Rscript /tmp/install_packages.R
+RUN R -e "install.packages(c('FactoMineR', 'factoextra','RMySQL'))"
+
+# --- 4. Copy your Application ---
+WORKDIR /srv/shiny-server/app
+COPY shiny-appv3/Scripts-r/global.R .
+COPY shiny-appv3/ui.R .
+COPY shiny-appv3/server.R .
+COPY shiny-appv3/Scripts-r/load_data.R .
+COPY shiny-appv3/Scripts-r/generate_and_save_data_refactored.R .
+COPY shiny-appv3/modules ./modules
+
+# COPY Rprofile.site /usr/local/lib/R/etc/Rprofile.site
 
 
-# Use an official R base image
-FROM rocker/verse:latest
+# ---  Properties and port---
+RUN chown -R shiny:shiny .
+EXPOSE 3838
 
-# Set the working directory
-WORKDIR /app
+CMD ["R", "-e", "shiny::runApp('/srv/shiny-server/app', host='0.0.0.0', port=3838)"]
 
-# Copy the R scripts and data into the container
-COPY scripts-r/generate_data/generate_transaction_data.R /app/scripts-r/generate_data/
-#COPY data/ /app/data/
-
-# Install R packages
-RUN R -e "install.packages(c('dplyr', 'ggplot2', 'lubridate', 'tidyr', 'stringi', 'mongolite'), repos='http://cran.rstudio.com/')"
-# Install Python dependancy
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the entrypoint script
-COPY entrypoint.R /app/entrypoint.R
-
-# Set the entrypoint to run the R script
-ENTRYPOINT ["Rscript", "entrypoint.R"]
-# Execute API
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "9090"]
