@@ -47,6 +47,7 @@ public class InvoiceGenerator {
         PdfDocument pdf = new PdfDocument(writer);
         Document document = new Document(pdf);
 
+
         pdf.addEventHandler(com.itextpdf.kernel.events.PdfDocumentEvent.END_PAGE, new FooterHandler());
 
         // Logo
@@ -62,11 +63,13 @@ public class InvoiceGenerator {
             e.printStackTrace();
         }
 
+
         document.add(new Paragraph("GRAPES - INVOICE")
                 .setFontSize(22)
                 .setBold()
                 .setFontColor(ColorConstants.MAGENTA)
                 .setTextAlignment(TextAlignment.LEFT));
+
 
         Table infoTable = new Table(UnitValue.createPercentArray(new float[]{1, 2})).useAllAvailableWidth();
         infoTable.addCell(createInfoCell("Order ID:"));
@@ -76,7 +79,9 @@ public class InvoiceGenerator {
         infoTable.addCell(createInfoCell("Date:"));
         infoTable.addCell(createValueCell(LocalDate.now().toString()));
         document.add(infoTable);
+
         document.add(new Paragraph("\n"));
+
 
         Table customerTable = new Table(UnitValue.createPercentArray(new float[]{1, 2})).useAllAvailableWidth();
         customerTable.addCell(createInfoCell("Customer Name:"));
@@ -91,6 +96,7 @@ public class InvoiceGenerator {
         customerTable.addCell(createValueCell(phoneNumber));
         document.add(customerTable);
         document.add(new Paragraph("\n"));
+
 
         Table articleTable = new Table(UnitValue.createPercentArray(new float[]{1, 3, 1, 1, 1, 1}))
                 .useAllAvailableWidth()
@@ -157,7 +163,6 @@ public class InvoiceGenerator {
 
     }
 
-
     private static class FooterHandler implements com.itextpdf.kernel.events.IEventHandler {
         @Override
         public void handleEvent(com.itextpdf.kernel.events.Event event) {
@@ -182,8 +187,6 @@ public class InvoiceGenerator {
     }
 
 
-
-    // Utils
     private static Cell center(Object value) {
         return new Cell().add(new Paragraph(value != null ? value.toString() : "-"))
                 .setTextAlignment(TextAlignment.CENTER);

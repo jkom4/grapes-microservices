@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<fx:root styleClass="card-margin" stylesheets="@card-component.css" type="javafx.scene.layout.VBox" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox styleClass="card">
+        <Text fx:id="titleFx" styleClass="card-title" text="Topic 1" />
+        <Text fx:id="descriptionFx" styleClass="card-description" text="Description" />
+    </VBox>
+</fx:root>

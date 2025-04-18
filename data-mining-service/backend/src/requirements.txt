@@ -1,6 +1,0 @@
-fastapi
-uvicorn
-pandas
-numpy
-rpy2
-requests

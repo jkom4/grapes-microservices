@@ -53,7 +53,7 @@ public class Order {
     @PrePersist
     public void generateCode() {
         if (this.code == null) {
-            this.code = (int) (Math.random() * 900000) + 100000;
+            this.code = (int) (Math.random() * 900000) + 100000; // between 100000 et 999999
         }
     }
 

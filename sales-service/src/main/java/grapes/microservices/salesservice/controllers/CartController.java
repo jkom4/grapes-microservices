@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
  * confirming payment, and retrieving orders.
  */
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/clm/cart")
 public class CartController {
 
@@ -119,12 +120,15 @@ public class CartController {
         }
     }
 
+
+
     /**
      * Finalizes the payment: verifies stock, updates quantities,
      * generates invoice, and clears cart.
      */
     @PostMapping("/pay")
     @Transactional
+
     public ResponseEntity<?> simulatePayment(@RequestBody PaymentRequestDTO request) {
         try {
             orderService.finalizePaymentAndClearCart(
@@ -135,6 +139,7 @@ public class CartController {
                     request.getCountry(),
                     request.getPostalCode()
             );
+
             return ResponseEntity.ok("Payment confirmed, stock updated and cart cleared.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -144,5 +149,8 @@ public class CartController {
             return ResponseEntity.internalServerError().body("Unexpected error: " + e.getMessage());
         }
     }
+
+
+
 
 }
