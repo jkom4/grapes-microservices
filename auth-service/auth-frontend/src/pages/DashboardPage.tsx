@@ -25,7 +25,6 @@ const DashboardPage = () => {
         id: '',
         name: '',
         firstName: '',
-        password: '',
         passwordValid: true,
         email: '',
         emailVerified: false,
@@ -35,7 +34,6 @@ const DashboardPage = () => {
         birthDate: '',
         age: 0,
         gender: 'MALE',
-        pinCode: '',
         role: 'USER',
         profession: '',
         deliveryAddress: {
@@ -122,7 +120,7 @@ const DashboardPage = () => {
 
         try {
             const res = await handleUserUpdate({
-                updatedUser: { ...formData, pinCode: "1111" },
+                updatedUser: { ...formData },
                 setUser,
                 onSuccess: () => toast.success('User updated successfully!', { autoClose: 2000 }),
             });

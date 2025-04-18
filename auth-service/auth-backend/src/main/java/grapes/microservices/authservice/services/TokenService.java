@@ -94,7 +94,7 @@ public class TokenService {
                 .claim("name", name)
                 .claim("role", role.getRole())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME * 60 * 1000))
                 .signWith(SECRET_KEY)
                 .compact();
     }

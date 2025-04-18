@@ -53,7 +53,7 @@ public class UserService {
     public User registerUser(User user) throws Exception {
         validateRegistrationCriteria(user);
         initializeDefaultUserValues(user);
-        if (isValid(user)) {
+        if (isValid(user, true)) {
             user.encryptUser();
             logger.info("User registered successfully with email: {}", user.getEmail());
             return userRepository.save(user);
@@ -117,8 +117,6 @@ public class UserService {
     public User updateUser(String idStr, User updatedUser) {
         User userToUpdate = getUserById(idStr, false);
 
-        updatedUser.setPinCode(null);
-        updatedUser.setPassword(null);
         checkPasswordAndPinHaveNotChanged(userToUpdate, updatedUser);
         checkAccountIsUnique(userToUpdate, updatedUser);
 
@@ -126,10 +124,7 @@ public class UserService {
         userToUpdate.setActive(true);
         userToUpdate.setUpdatedAt(new java.util.Date());
 
-        List<String> tempValues = bypassEncryptedVerification(userToUpdate);
-
-        if (isValid(userToUpdate)) {
-            restoreEncryptedVerification(userToUpdate, tempValues);
+        if (isValid(userToUpdate, false)) {
             logger.info("User with ID: {} updated successfully", userToUpdate.getId());
             return userRepository.save(userToUpdate);
         }
@@ -337,31 +332,6 @@ public class UserService {
         authMeans.put(AuthMethod.SMS, new AuthMean(false, null, 0));
         authMeans.put(AuthMethod.EID, new AuthMean(false, null, 0));
         user.setAuthMeans(authMeans);
-    }
-
-    /**
-     * Bypass encrypted verification for a user because encrypted fields don't respect Jakarta validation
-     * Replaces the password and pin code with temporary values to bypass validation
-     * @param user the user to bypass verification for
-     * @return the list of bypassed fields
-     */
-    private List<String> bypassEncryptedVerification(User user) {
-        String tempPassword = user.getPassword();
-        String tempPinCode = user.getPinCode();
-        user.setPassword("P@ssw0rd");
-        user.setPinCode("1234");
-        return List.of(tempPassword, tempPinCode);
-    }
-
-    /**
-     * Restores the original values of the user after bypassing encrypted verification
-     *
-     * @param user       the user to restore
-     * @param tempValues the list of bypassed fields
-     */
-    private void restoreEncryptedVerification(User user, List<String> tempValues) {
-        user.setPassword(tempValues.get(0));
-        user.setPinCode(tempValues.get(1));
     }
 
     /**

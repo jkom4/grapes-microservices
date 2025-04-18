@@ -71,7 +71,7 @@ const AdminPage = () => {
         setLoading(true);
         try {
             await handleUserUpdate({
-                updatedUser: { ...user, pinCode: "1111" },
+                updatedUser: { ...user},
                 reload: true,
             });
             if (user.id === id) {

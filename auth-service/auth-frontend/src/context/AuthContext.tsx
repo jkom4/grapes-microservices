@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
         };
 
-        const interval = setInterval(refreshSession, 20000);
+        const interval = setInterval(refreshSession, 20 * 1000);
         return () => clearInterval(interval);
     }, [navigate, location]);
 

@@ -31,14 +31,12 @@ export interface User {
     firstName: string;
     email: string;
     emailVerified: boolean;
-    password: string;
     phoneNumber: string;
     phoneVerified: boolean;
     nationalId: string;
     age: number;
     birthDate: string; // ISO format, ex: '1990-01-01'
     gender: Gender;
-    pinCode: string;
     loyaltyPoints?: number;
     role: Role;
     profession: string;

@@ -31,8 +31,16 @@ public class UserValidator {
      * @param user the user to validate
      * @throws IllegalArgumentException if a field is invalid
      */
-    public static boolean isValid(User user) {
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
+    public static boolean isValid(User user, boolean verifyPasswordAndPin) {
+        Set<ConstraintViolation<User>> violations;
+
+        if (verifyPasswordAndPin) {
+            violations = validator.validate(user);
+        } else {
+            // ignore password and pin validation
+            violations = validator.validate(user, WithoutPassword.class);
+        }
+
         if (!violations.isEmpty()) {
             StringBuilder errorMessage = new StringBuilder("Validation errors: ");
             for (ConstraintViolation<User> violation : violations) {

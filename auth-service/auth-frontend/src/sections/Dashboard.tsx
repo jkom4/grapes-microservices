@@ -21,7 +21,6 @@ interface FormData {
     profession: string;
     deliveryAddress: Address;
     billingAddress: Address;
-    pinCode: string;
     authMeans: {
         [key: string]: {
             enabled: boolean;
