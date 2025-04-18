@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/cll/orders")
+@RequestMapping("/clm/orders")
 public class OrderController {
 
     @Autowired
@@ -41,7 +41,7 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/orders/history/{userId}")
+    @GetMapping("/history/{userId}")
     public ResponseEntity<List<OrderSummaryDTO>> getOrderHistory(@PathVariable Integer userId) {
         List<Order> orders = orderService.getOrdersByUserId(userId);
         List<OrderSummaryDTO> dtos = orders.stream()
@@ -52,7 +52,7 @@ public class OrderController {
     }
 
 
-    @GetMapping("/orders/{orderId}/items")
+    @GetMapping("/{orderId}/items")
     public ResponseEntity<List<OrderDTO>> getOrderItems(@PathVariable Integer orderId) {
         List<OrderItem> items = orderService.getOrderItemsByOrderId(orderId);
 
@@ -62,8 +62,6 @@ public class OrderController {
 
         return ResponseEntity.ok(dtos);
     }
-
-
 
 
 }
