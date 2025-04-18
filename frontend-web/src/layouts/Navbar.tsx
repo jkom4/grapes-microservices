@@ -22,9 +22,9 @@ function Navbar() {
                 </div>
             </Link>
             <nav className="flex gap-8 flex-grow justify-center items-center">
-                <a href="#aboutus" className="text-black text-lg hover:text-accent">
-                    {language === 'en' ? 'About Us' : 'À propos'}
-                </a>
+                <Link to="/" className="text-black text-lg hover:text-accent">
+                    {language === 'en' ? 'Home' : 'Accueil'}
+                </Link>
                 <Link to="/all-articles" className="text-black text-lg hover:text-accent">
                     {language === 'en' ? 'Our Product' : 'Nos Produits'}
                 </Link>

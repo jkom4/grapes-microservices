@@ -8,6 +8,7 @@ import AllArticles from "./pages/AllArticles";
 import ArticleDetails from "./pages/ArticleDetails";
 import ShoppingCart from "./pages/ShoppingCart";
 import AdminPage from "./pages/admin/Admin";
+import {ToastContainer} from "react-toastify";
 
 const App: React.FC = () => {
     return (
@@ -22,6 +23,16 @@ const App: React.FC = () => {
                     <Route path="/shopping-cart" element={<ShoppingCart />} />
                     <Route path="/admin" element={<AdminPage />} />
                 </Routes>
+                <ToastContainer
+                    position="top-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop
+                    closeOnClick
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                />
             </Router>
         </LanguageProvider>
         /*  <AuthProvider /> */
