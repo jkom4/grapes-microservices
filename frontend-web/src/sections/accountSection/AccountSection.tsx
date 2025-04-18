@@ -1,25 +1,23 @@
-// src/components/OrderHistory.tsx
 import { useEffect, useState } from "react";
 import { Order, SortConfig } from "../../utils/models/interface/Order";
 import accountService from "../../services/accountService";
 import { useLanguage } from "../../features/LanguageContext";
-import {enUS, fr} from "date-fns/locale";
+import { enUS, fr } from "date-fns/locale";
 import { format } from "date-fns";
 
-
-// OrderHistory Component: Displays a table of user orders with sorting, filtering, and PDF invoice viewing
+// OrderHistory Component
 const OrderHistory: React.FC = () => {
-    const { language } = useLanguage(); // State to manage language toggle
+    const { language } = useLanguage();
     const [orders, setOrders] = useState<Order[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
     const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'createdAt', direction: 'desc' });
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [viewError, setViewError] = useState<string | null>(null);
-    const [searchCode, setSearchCode] = useState<string>(''); // Search term for order code
-    const [searchDateTime, setSearchDateTime] = useState<string>(''); // Search term for date and time
-    const [selectedPdfUrl, setSelectedPdfUrl] = useState<string | null>(null);
+    const [searchCode, setSearchCode] = useState<string>('');
+    const [searchDateTime, setSearchDateTime] = useState<string>('');
     const [numPages, setNumPages] = useState<number | null>(null);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const ordersPerPage = 20; // Constant for number of orders per page
 
     // Text content in both languages (English and French)
     const text = {
@@ -40,8 +38,9 @@ const OrderHistory: React.FC = () => {
             na: "N/A",
             currency: "$",
             searchCodePlaceholder: "Search by order code",
-            searchDateTimePlaceholder: "Search by date or time (e.g., April 17, 2025 or 09:40)",
-            pdfPreview: "Invoice Preview"
+            searchDateTimePlaceholder: "Search by date or time",
+            pdfPreview: "Invoice Preview",
+            pagination: "Page {currentPage} of {totalPages}",
         },
         fr: {
             heading: "Historique des commandes",
@@ -60,8 +59,9 @@ const OrderHistory: React.FC = () => {
             na: "N/A",
             currency: "€",
             searchCodePlaceholder: "Rechercher par code de commande",
-            searchDateTimePlaceholder: "Rechercher par date ou heure (ex. : 17 avril 2025 ou 09:40)",
-            pdfPreview: "Aperçu de la facture"
+            searchDateTimePlaceholder: "Rechercher par date ou heure",
+            pdfPreview: "Aperçu de la facture",
+            pagination: "Page {currentPage} sur {totalPages}",
         }
     };
 
@@ -71,8 +71,9 @@ const OrderHistory: React.FC = () => {
             try {
                 const userId = 1; // Replace with logic to get user ID
                 const data = await accountService.fetchOrderHistory(userId);
+                console.log(data);
                 setOrders(data);
-                setFilteredOrders(data);
+                setFilteredOrders(data); // Store all orders initially
                 setLoading(false);
             } catch (err) {
                 setError(err instanceof Error ? err.message : text[language].error.replace('{error}', 'An error occurred'));
@@ -86,24 +87,20 @@ const OrderHistory: React.FC = () => {
     useEffect(() => {
         const locale = language === 'en' ? enUS : fr;
         const filtered = orders.filter((order) => {
-            // Search by code
             const codeMatch = searchCode
                 ? order.code.toString().toLowerCase().includes(searchCode.toLowerCase())
                 : true;
 
-            // Search by date and time
             let dateTimeMatch = true;
             if (searchDateTime) {
                 const orderDate = new Date(order.createdAt);
-                // Format order date in multiple ways for flexible matching
-                const formattedDateFull = format(orderDate, 'PPp', { locale }); // e.g., "April 17, 2025, 9:40 AM"
-                const formattedDateShort = format(orderDate, 'PP', { locale }); // e.g., "April 17, 2025"
-                const formattedYear = format(orderDate, 'yyyy', { locale }); // e.g., "2025"
-                const formattedMonthYear = format(orderDate, 'MMMM yyyy', { locale }); // e.g., "April 2025"
-                const formattedDayMonth = format(orderDate, 'd MMMM', { locale }); // e.g., "17 April"
-                const formattedTime = format(orderDate, 'HH:mm', { locale }); // e.g., "09:40"
+                const formattedDateFull = format(orderDate, 'PPp', { locale });
+                const formattedDateShort = format(orderDate, 'PP', { locale });
+                const formattedYear = format(orderDate, 'yyyy', { locale });
+                const formattedMonthYear = format(orderDate, 'MMMM yyyy', { locale });
+                const formattedDayMonth = format(orderDate, 'd MMMM', { locale });
+                const formattedTime = format(orderDate, 'HH:mm', { locale });
 
-                // Check if search term matches any formatted date/time
                 dateTimeMatch = [
                     formattedDateFull,
                     formattedDateShort,
@@ -116,7 +113,8 @@ const OrderHistory: React.FC = () => {
 
             return codeMatch && dateTimeMatch;
         });
-        setFilteredOrders(filtered);
+        setFilteredOrders(filtered); // Update the filtered orders
+        setCurrentPage(1); // Reset to the first page when search changes
     }, [orders, searchCode, searchDateTime, language]);
 
     // Sorting logic for the orders table
@@ -144,11 +142,18 @@ const OrderHistory: React.FC = () => {
         setSortConfig({ key, direction });
     };
 
-
-    // Handle successful PDF load
-    const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-        setNumPages(numPages);
+    // Pagination logic
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
     };
+
+    // Calculate the orders to display on the current page
+    const indexOfLastOrder = currentPage * ordersPerPage;
+    const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+    const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
     // Format date for display based on language
     const formatDate = (dateString: string): string => {
@@ -168,63 +173,35 @@ const OrderHistory: React.FC = () => {
 
     return (
         <div className="container mx-auto p-6">
-            {/* Page heading */}
             <h1 className="text-3xl font-bold mb-6 text-gray-800">{text[language].heading}</h1>
-            {/* Search inputs */}
             <div className="mb-6 flex flex-col sm:flex-row gap-4">
                 <input
                     type="text"
                     value={searchCode}
                     onChange={(e) => setSearchCode(e.target.value)}
                     placeholder={text[language].searchCodePlaceholder}
-                    className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
                 />
                 <input
                     type="text"
                     value={searchDateTime}
                     onChange={(e) => setSearchDateTime(e.target.value)}
                     placeholder={text[language].searchDateTimePlaceholder}
-                    className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="px-6 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
                 />
             </div>
-            {/* Display view error if any */}
-            {viewError && (
-                <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-md">
-                    {text[language].viewError.replace('{error}', viewError)}
-                </div>
-            )}
-            {/* PDF viewer section */}
-            {selectedPdfUrl && (
-                <div className="mb-6 p-4 bg-gray-100 rounded-md">
-                    <h2 className="text-xl font-semibold mb-4">{text[language].pdfPreview}</h2>
-                    <button
-                        onClick={() => setSelectedPdfUrl(null)}
-                        className="mb-4 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                    >
-                        {text[language].close}
-                    </button>
-                </div>
-            )}
+
             <div className="overflow-x-auto shadow-md rounded-lg">
                 <table className="min-w-full bg-white">
                     <thead className="bg-gray-100">
                     <tr>
-                        <th
-                            className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer"
-                            onClick={() => handleSort('code')}
-                        >
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort('code')}>
                             {text[language].orderCode} {sortConfig.key === 'code' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                         </th>
-                        <th
-                            className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer"
-                            onClick={() => handleSort('createdAt')}
-                        >
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort('createdAt')}>
                             {text[language].date} {sortConfig.key === 'createdAt' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                         </th>
-                        <th
-                            className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer"
-                            onClick={() => handleSort('totalPrice')}
-                        >
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer" onClick={() => handleSort('totalPrice')}>
                             {text[language].total} {sortConfig.key === 'totalPrice' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                         </th>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">{text[language].status}</th>
@@ -232,7 +209,7 @@ const OrderHistory: React.FC = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {filteredOrders.map((order) => (
+                    {currentOrders.map((order) => (
                         <tr key={order.id} className="border-b hover:bg-gray-50">
                             <td className="px-6 py-4 text-gray-700">{order.code}</td>
                             <td className="px-6 py-4 text-gray-700">{formatDate(order.createdAt)}</td>
@@ -240,18 +217,20 @@ const OrderHistory: React.FC = () => {
                                 {order.totalPrice ? `${text[language].currency}${order.totalPrice.toFixed(2)}` : '-'}
                             </td>
                             <td className="px-6 py-4">
-                                <span
-                                    className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${
-                                        order.paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                    }`}
-                                >
-                                    {order.paid ? text[language].paid : text[language].pending}
-                                </span>
+                  <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${order.paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {order.paid ? text[language].paid : text[language].pending}
+                  </span>
                             </td>
                             <td className="px-6 py-4">
                                 {order.facturePath ? (
                                     <button
-                                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                                        onClick={() => {
+                                            const link = document.createElement('a');
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            document.body.removeChild(link);
+                                        }}
+                                        className="bg-accent text-white px-4 py-2 rounded-md hover:bg-accent transition"
                                     >
                                         {text[language].view}
                                     </button>
@@ -263,6 +242,49 @@ const OrderHistory: React.FC = () => {
                     ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Pagination Section */}
+            <div className="flex justify-center mt-6">
+                {/* Previous Button */}
+                {currentPage > 1 && (
+                    <button
+                        className="px-3 py-2 mx-1 bg-accent text-white rounded-md hover:bg-secondary focus:outline-none"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                    >
+                        &lt;
+                    </button>
+                )}
+
+                {/* Page Numbers */}
+                {[...Array(totalPages).keys()].map((page) => {
+                    const pageNumber = page + 1;
+                    if (pageNumber === 1 || pageNumber === totalPages || (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2)) {
+                        return (
+                            <button
+                                key={pageNumber}
+                                onClick={() => handlePageChange(pageNumber)}
+                                className={`px-3 py-2 mx-1 rounded-md ${pageNumber === currentPage ? 'bg-accent text-white' : 'bg-gray-200 hover:bg-gray-300'} focus:outline-none`}
+                            >
+                                {pageNumber}
+                            </button>
+                        );
+                    }
+                    if (pageNumber === currentPage - 3 || pageNumber === currentPage + 3) {
+                        return <span key={pageNumber} className="px-3 py-2 mx-1 text-gray-600">...</span>;
+                    }
+                    return null;
+                })}
+
+                {/* Next Button */}
+                {currentPage < totalPages && (
+                    <button
+                        className="px-3 py-2 mx-1 bg-accent text-white rounded-md hover:bg-secondary focus:outline-none"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                    >
+                        &gt;
+                    </button>
+                )}
             </div>
         </div>
     );

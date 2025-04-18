@@ -60,10 +60,9 @@ const AccountPage: React.FC = () => {
                     <ul className="space-y-2">
                         <li>
                             <button
-                                className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-100 hover:text-blue-600 rounded-md transition"
+                                className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary hover:text-black rounded-md transition"
                                 onClick={() => {
-                                    /* Logique pour naviguer vers l'historique */
-                                    setIsSidebarOpen(false); // Ferme le menu sur mobile après clic
+                                    setIsSidebarOpen(false);
                                 }}
                             >
                                 {text[language].orderHistory}
@@ -71,16 +70,14 @@ const AccountPage: React.FC = () => {
                         </li>
                         <li>
                             <button
-                                className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-100 hover:text-blue-600 rounded-md transition"
+                                className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary hover:text-black rounded-md transition"
                                 onClick={() => {
-                                    /* Logique pour naviguer vers le profil */
                                     setIsSidebarOpen(false);
                                 }}
                             >
                                 {text[language].profile}
                             </button>
                         </li>
-                        {/* Ajoutez d'autres liens ici */}
                     </ul>
                 </nav>
             </div>
@@ -90,7 +87,7 @@ const AccountPage: React.FC = () => {
                 {/* Toggle button for mobile */}
                 <button
                     onClick={toggleSidebar}
-                    className="md:hidden mb-4 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="md:hidden mb-4 p-2 bg-primary text-white rounded-md hover:bg-accent"
                     aria-label={isSidebarOpen ? text[language].closeMenu : text[language].openMenu}
                 >
                     {isSidebarOpen ? (
