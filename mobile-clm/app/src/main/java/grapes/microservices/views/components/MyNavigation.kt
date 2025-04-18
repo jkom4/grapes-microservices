@@ -18,6 +18,7 @@ import grapes.microservices.views.ArticleDetails.ArticleDetailScreen
 import grapes.microservices.views.CartScreen.CartScreen
 import grapes.microservices.views.AllArticles.AllArticlesScreen
 import grapes.microservices.views.Home.HomeScreen
+import grapes.microservices.views.OrderHistory.OrderHistoryScreen
 import grapes.microservices.views.Settings.SettingsScreen
 
 @Composable
@@ -57,6 +58,9 @@ fun MyNavigation() {
             }
             composable("profile") {
                 SettingsScreen(context = LocalContext.current, navController)
+            }
+            composable("order_history") {
+                OrderHistoryScreen(navController = navController)
             }
         }
     }
