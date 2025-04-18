@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import OrderHistory from "../sections/accountSection/AccountSection";
 import { useLanguage } from "../features/LanguageContext";
+import ProfileSection from "../sections/profileSection/ProfileSection";
 
 // AccountPage Component: Displays a settings page with a collapsible sidebar and main content
 const AccountPage: React.FC = () => {
     const { language } = useLanguage(); // State to manage language toggle
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false); // State to toggle sidebar
+    const [activeSection, setActiveSection] = useState<'orderHistory' | 'profile'>('orderHistory'); // State to toggle between sections
 
     // Text content in both languages (English and French)
     const text = {
@@ -62,6 +64,7 @@ const AccountPage: React.FC = () => {
                             <button
                                 className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary hover:text-black rounded-md transition"
                                 onClick={() => {
+                                    setActiveSection('orderHistory');
                                     setIsSidebarOpen(false);
                                 }}
                             >
@@ -72,6 +75,7 @@ const AccountPage: React.FC = () => {
                             <button
                                 className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary hover:text-black rounded-md transition"
                                 onClick={() => {
+                                    setActiveSection('profile');
                                     setIsSidebarOpen(false);
                                 }}
                             >
@@ -100,8 +104,10 @@ const AccountPage: React.FC = () => {
                         </svg>
                     )}
                 </button>
+
                 {/* Content */}
-                <OrderHistory />
+                {activeSection === 'orderHistory' && <OrderHistory />}
+                {activeSection === 'profile' && <ProfileSection />}
             </div>
 
             {/* Overlay for mobile when sidebar is open */}

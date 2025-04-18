@@ -17,7 +17,6 @@ export const fetchOrderHistory = async (userId: number): Promise<Order[]> => {
         }
 
         const data = await response.json();
-        // Mappez les données si nécessaire (si Order.parse existe)
         return data.map((item: any) => Order.parse ? Order.parse(item) : item);
     } catch (err) {
         throw new Error(err instanceof Error ? err.message : "An error occurred while fetching order history");
