@@ -24,11 +24,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Service responsible for payment processing operations including validation,
- * OTP verification, and transaction completion.
+ * OTP verification via ACQ, client validation against OTP, and transaction completion.
  */
 @Service
 @RequiredArgsConstructor
@@ -42,189 +41,177 @@ public class PaymentService {
     // ACQ communication configuration
     @Value("${app.ports.acq}")
     private int acqPort;
-
-    @Value("${app.truststore.acq.path}")
-    private String acqTruststorePath;
-
-    @Value("${app.truststore.acq.password}")
-    private String acqTruststorePassword;
-
-
     @Value("${app.truststore.client.path}")
     private String clientTruststorePath;
     @Value("${app.truststore.client.password}")
     private String clientTruststorePassword;
 
+
     /**
-     * Processes a payment after OTP verification by communicating with the ACQ server
-     * to verify the token, then completing the transaction if successful.
+     * Processes a payment after OTP verification.
+     * 1. Verifies card ownership.
+     * 2. Sends OTP and transaction context (transactionId) to ACQ/ACS for global validation.
+     * 3. If ACK received (meaning OTP is valid AND matches the client for the transaction), completes the transaction.
+     * 4. If NACK received, returns false allowing retry, does NOT fail the transaction immediately.
      *
      * @param token The OTP token submitted by the user
-     * @param paymentRequest The original payment request containing card details
-     * @param client The authenticated client making the payment
+     * @param paymentRequest The original payment request details (retrieved from cache)
+     * @param client The authenticated client making the payment (from session)
+     * @param transactionId The specific ID of the transaction being processed
      * @return true if payment verification and processing succeeded, false otherwise
      */
     @Transactional
-    public boolean processPayment(String token, PaymentRequestDTO paymentRequest, Client client) {
-        String transactionContextId = "paymentAttempt-" + UUID.randomUUID().toString();
+    public boolean processPayment(String token, PaymentRequestDTO paymentRequest, Client client, Long transactionId) {
+        String context = "transactionId-" + transactionId + "-client-" + client.getId();
         log.info("Processing payment completion for client {} with token '{}' for context {}",
-                client.getEmail(), maskToken(token), transactionContextId);
+                client.getEmail(), maskToken(token), context);
 
         try {
             // 1. Verify card ownership
             verifyCardOwnership(paymentRequest.getCardNumber(), client.getId());
 
-            // 2. Verify OTP token with ACQ server
-            String acqResponse = sendTokenToAcq(token);
+            // 2. Verify OTP token value AND context with ACQ/ACS
+            String acqResponse = sendTokenAndContextToAcq(token, transactionId);
 
             // 3. Parse ACQ response
-            log.info("Checking ACQ response for context {}. Raw response: '{}'",
-                    transactionContextId, acqResponse);
-
+            log.info("Checking ACQ response for context {}. Raw response: '{}'", context, acqResponse);
             String expectedAckResponse = "Response from ACQ: ACK";
-            boolean isVerified = false;
-
-            if (acqResponse != null) {
-                // Exact case-sensitive comparison
-                isVerified = acqResponse.trim().equals(expectedAckResponse);
-                log.info("Does the response ('{}') exactly match the expected ACK ('{}')? {} (Context: {})",
-                        acqResponse.trim(), expectedAckResponse, isVerified, transactionContextId);
-            } else {
-                log.warn("Received null response from ACQ. Verification failed. (Context: {})", transactionContextId);
-            }
+            boolean isVerifiedByAcs = acqResponse != null && acqResponse.trim().equals(expectedAckResponse);
 
             // 4. Process verification result
-            if (isVerified) {
-                // Token is valid - proceed with account debit and finalization
-                log.info("OTP token '{}' successfully verified via ACQ for client {} and context {}",
-                        maskToken(token), client.getEmail(), transactionContextId);
+            if (isVerifiedByAcs) {
+                // 4a. OTP and context are valid, proceed with transaction completion
+                log.info("OTP token '{}' globally verified via ACQ/ACS for context {}", maskToken(token), context);
 
-                // 5. Complete the transaction (debit account, update transaction status)
+                // Complete the transaction (handles balance check, updates status)
                 TransactionEntity completedTransaction = transactionService.completePaymentTransaction(
                         client,
                         paymentRequest.getAmount(),
-                        transactionContextId
+                        transactionId
                 );
-
                 log.info("Payment transaction ID {} completed successfully for client {} and context {}",
-                        completedTransaction.getId(), client.getEmail(), transactionContextId);
-                return true;
+                        completedTransaction.getId(), client.getEmail(), context);
+                return true; // Success
 
             } else {
-                // Token is invalid or ACQ returned error/NACK
-                log.warn("Payment verification failed for client {}. Submitted OTP: '{}'. ACQ raw response: '{}'. Context: {}",
-                        client.getEmail(), maskToken(token), acqResponse, transactionContextId);
-                return false;
+                // 4b. OTP/Context invalid, expired, or ACQ/ACS issue.
+                // DO NOT fail the transaction here. Allow user to retry.
+                log.warn("Payment verification failed (ACQ/ACS NACK or invalid response) for client {}. Submitted OTP: '{}'. Context: {}. User can retry.",
+                        client.getEmail(), maskToken(token), context);
+                // REMOVED: transactionService.failTransaction(...) call is removed
+                return false; // Indicate failure, allow retry
             }
-        } catch (IllegalArgumentException cardEx) {
-            // Card ownership verification failure
-            log.error("Payment processing aborted due to card ownership verification failure for context {}: {}",
-                    transactionContextId, cardEx.getMessage());
+            // Handle specific validation/state errors that occur *before* or *during* completion attempt
+        } catch (IllegalArgumentException | SecurityException | IllegalStateException validationOrStateException) {
+            log.error("Payment processing aborted due to validation or state issue for context {}: {}",
+                    context, validationOrStateException.getMessage());
+            // Fail transaction on critical validation/state errors (e.g., insufficient balance detected during completion attempt)
+            try {
+                // Check if transaction still exists and is in 'Initiated' state before failing
+                Optional<TransactionEntity> txOpt = transactionService.findTransactionById(transactionId);
+                if (txOpt.isPresent() && "Initiated".equals(txOpt.get().getStatus())) {
+                    transactionService.failTransaction(transactionId, "Validation or State Error: " + validationOrStateException.getMessage());
+                } else {
+                    log.warn("Transaction {} not failed after validation/state error because it was not found or not in 'Initiated' state.", transactionId);
+                }
+            } catch (Exception failEx) {
+                log.error("Also failed to mark transaction {} as failed after validation/state error: {}", transactionId, failEx.getMessage());
+            }
             return false;
-        } catch (IllegalStateException balanceEx) {
-            // Insufficient balance error during transaction completion
-            log.error("Payment processing aborted due to insufficient balance for context {}: {}",
-                    transactionContextId, balanceEx.getMessage());
-            return false;
+            // Handle unexpected errors during the process
         } catch (Exception e) {
-            // Other errors (ACQ communication, database, etc.)
             log.error("Unexpected error during payment completion for context {}: {}",
-                    transactionContextId, e.getMessage(), e);
+                    context, e.getMessage(), e);
+            // Fail transaction on unexpected errors if it's still pending
+            try {
+                Optional<TransactionEntity> txOpt = transactionService.findTransactionById(transactionId);
+                if (txOpt.isPresent() && "Initiated".equals(txOpt.get().getStatus())) {
+                    transactionService.failTransaction(transactionId, "Unexpected Processing Exception");
+                } else {
+                    log.warn("Transaction {} not failed after unexpected error because it was not found or not in 'Initiated' state.", transactionId);
+                }
+            } catch (Exception failEx) {
+                log.error("Also failed to mark transaction {} as failed after unexpected error: {}", transactionId, failEx.getMessage());
+            }
             return false;
         }
     }
 
     /**
      * Verifies that a card belongs to the specified client.
-     *
-     * @param cardNumber The card number to verify
-     * @param clientId The client ID who should own the card
-     * @throws IllegalArgumentException if the card doesn't belong to the client
+     * (Private helper method)
      */
     private void verifyCardOwnership(String cardNumber, Long clientId) {
         Optional<Card> cardOpt = cardRepository.findByCardNumberAndClientId(cardNumber, clientId);
         if (cardOpt.isEmpty()) {
-            log.error("Card {} does not belong to client {}", maskCardNumber(cardNumber), clientId);
-            throw new IllegalArgumentException("Card does not belong to this client");
+            String maskedCard = maskCardNumber(cardNumber); // Use masking method
+            log.error("Card ending in {} does not belong to client {}", maskedCard.substring(maskedCard.length() - 4), clientId);
+            throw new SecurityException("Card does not belong to this client");
         }
-        log.debug("Card ownership verified for card ending in {} and client {}",
-                cardNumber.substring(cardNumber.length() - 4), clientId);
+        // log.debug("Card ownership verified for client {}", clientId);
     }
 
     /**
-     * Sends an OTP token to the ACQ server for verification.
-     *
-     * @param token The OTP token to verify
-     * @return The ACQ server response
-     * @throws Exception if communication with ACQ fails
+     * Sends an OTP token AND transaction context to the ACQ server for verification.
+     * (Private helper method)
      */
-    private String sendTokenToAcq(String token) throws Exception {
-        log.info("Sending token to ACQ on port {} for verification: {}", acqPort, maskToken(token));
+    private String sendTokenAndContextToAcq(String token, Long transactionId) {
+        String dataToSend = token + "#" + transactionId; // Simple format: token#txId
+        log.debug("Sending token {} and txId {} to ACQ on port {} using truststore {}",
+                maskToken(token), transactionId, acqPort, clientTruststorePath);
         try (SSLSocket acqSocket = SslUtils.createSslClientSocket(
                 acqPort,
-                clientTruststorePath,
+                clientTruststorePath,      // Client's truststore to trust ACQ
                 clientTruststorePassword)) {
             PrintWriter writer = new PrintWriter(acqSocket.getOutputStream(), true);
             BufferedReader reader = new BufferedReader(new InputStreamReader(acqSocket.getInputStream()));
 
-            // Send only the token as expected by AcqServer.handleClientRequest
-            writer.println(token);
-            log.info("Token sent to ACQ.");
+            writer.println(dataToSend); // Send combined token and txId
+            log.debug("Token and context sent to ACQ.");
 
-            // Read the response
-            String response = reader.readLine();
-            log.info("Received raw response from ACQ: {}", response);
+            String response = reader.readLine(); // Read raw response
+            log.info("Raw response received from ACQ: {}", response);
 
             return response;
         } catch (Exception e) {
             log.error("Error communicating with ACQ on port {}: {}", acqPort, e.getMessage(), e);
-            throw e;
+            throw new RuntimeException("Failed to communicate with ACQ verification server.", e);
         }
     }
 
     /**
-     * Masks a card number for display or logging purposes, showing only last 4 digits.
-     *
-     * @param cardNumber The card number to mask
-     * @return The masked card number
+     * Masks a card number for display or logging purposes.
+     * (Public utility method)
      */
     public String maskCardNumber(String cardNumber) {
         if (cardNumber == null || cardNumber.length() < 4) {
             return "****";
         }
         int length = cardNumber.length();
-        return "X".repeat(length - 4) + cardNumber.substring(length - 4);
+        return "************" + cardNumber.substring(length - 4);
     }
 
     /**
-     * Masks an OTP token for secure logging, showing only first and last digits.
-     *
-     * @param token The token to mask
-     * @return The masked token
+     * Masks an OTP token for secure logging.
+     * (Private helper method)
      */
     private String maskToken(String token) {
         if (token == null || token.length() < 2) {
             return "****";
         }
-        // Show first and last digit, mask the rest
         return token.charAt(0) + "*".repeat(Math.max(0, token.length() - 2)) + token.charAt(token.length() - 1);
     }
 
     /**
      * Validates a card number format using the Luhn algorithm.
-     *
-     * @param cardNumber The card number to validate
-     * @return true if the card number is valid, false otherwise
+     * (Public utility method)
      */
     public boolean validateCardNumber(String cardNumber) {
         if (cardNumber == null) return false;
-        String cleanedCardNumber = cardNumber.replaceAll("\\s+", ""); // Remove spaces
+        String cleanedCardNumber = cardNumber.replaceAll("\\s+", "");
         if (cleanedCardNumber.length() < 13 || cleanedCardNumber.length() > 19 || !cleanedCardNumber.matches("\\d+")) {
-            log.warn("Invalid card number format or length: {}", maskCardNumber(cardNumber));
             return false;
         }
-
-        // Luhn algorithm
         int sum = 0;
         boolean alternate = false;
         for (int i = cleanedCardNumber.length() - 1; i >= 0; i--) {
@@ -238,49 +225,25 @@ public class PaymentService {
             sum += digit;
             alternate = !alternate;
         }
-        boolean isValid = (sum % 10 == 0);
-        log.debug("Luhn validation for card ending in {}: {}", cleanedCardNumber.substring(cleanedCardNumber.length()-4), isValid);
-        return isValid;
+        return (sum % 10 == 0);
     }
 
     /**
-     * Verifies if a payment amount is acceptable (positive and within limits).
-     *
-     * @param amount The payment amount to verify
-     * @return true if the amount is acceptable, false otherwise
-     */
-    public boolean isAmountAcceptable(BigDecimal amount) {
-        if (amount == null) return false;
-        boolean acceptable = amount.compareTo(BigDecimal.ZERO) > 0 // Strictly positive
-                && amount.compareTo(new BigDecimal("10000")) < 0; // Less than 10000 (arbitrary limit)
-        if (!acceptable) {
-            log.warn("Payment amount {} is not acceptable (must be > 0 and < 10000).", amount);
-        }
-        return acceptable;
-    }
-
-    /**
-     * Verifies if a card expiration date is valid and not expired.
-     * Expected format: MM/YYYY
-     *
-     * @param expirationDateStr The expiration date string to verify
-     * @return true if the date is valid and not expired, false otherwise
+     * Verifies if a card expiration date is valid (format MM/YYYY) and not expired.
+     * (Public utility method)
      */
     public boolean isExpirationDateValid(String expirationDateStr) {
-        if (expirationDateStr == null || !expirationDateStr.matches("^(0[1-9]|1[0-2])/20[2-9][0-9]$")) {
-            log.warn("Invalid expiration date format received: {}", expirationDateStr);
+        // Regex updated for MM/YYYY and years 2024 onwards
+        if (expirationDateStr == null || !expirationDateStr.matches("^(0[1-9]|1[0-2])\\/20(2[4-9]|[3-9]\\d)$")) {
+            log.warn("Invalid expiration date format received (expecting MM/YYYY, >= 2024): {}", expirationDateStr);
             return false;
         }
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
             YearMonth expirationYearMonth = YearMonth.parse(expirationDateStr, formatter);
             YearMonth currentYearMonth = YearMonth.now(ZoneId.systemDefault());
-            // Card is valid if expiration month/year is >= current month/year
-            boolean isValid = !expirationYearMonth.isBefore(currentYearMonth);
-            if (!isValid) {
-                log.warn("Expiration date {} is in the past.", expirationDateStr);
-            }
-            return isValid;
+            // Card is valid if expiration month/year is not before the current month/year
+            return !expirationYearMonth.isBefore(currentYearMonth);
         } catch (DateTimeParseException e) {
             log.error("Error parsing expiration date: {}", expirationDateStr, e);
             return false;
@@ -288,23 +251,30 @@ public class PaymentService {
     }
 
     /**
+     * Verifies if a payment amount is acceptable (positive and within limits).
+     * (Public utility method)
+     */
+    public boolean isAmountAcceptable(BigDecimal amount) {
+        if (amount == null) return false;
+        // Example: Amount must be > 0 and < 10000
+        return amount.compareTo(BigDecimal.ZERO) > 0
+                && amount.compareTo(new BigDecimal("10000")) < 0;
+    }
+
+    /**
      * Gets the account balance for a client by finding their most recent account.
-     *
-     * @param client The client whose balance to retrieve
-     * @return The account balance
-     * @throws IllegalStateException if the client has no account or balance is null
+     * (Public utility method)
      */
     public BigDecimal getAccountBalance(Client client) {
+        // Find the most recently opened account for the client
         Optional<Account> accountOpt = accountRepository.findFirstByClientIdOrderByOpeningDateDesc(client.getId());
         if (accountOpt.isEmpty()) {
             log.error("No account found for client ID: {}", client.getId());
+            // Throwing exception as balance check is usually critical
             throw new IllegalStateException("Client has no associated account");
         }
         Account account = accountOpt.get();
-        if (account.getBalance() == null) {
-            log.warn("Account {} for client {} has a null balance.", account.getAccountNumber(), client.getId());
-            return BigDecimal.ZERO;
-        }
-        return account.getBalance();
+        // Return Zero if balance is null to prevent NullPointerExceptions later
+        return account.getBalance() != null ? account.getBalance() : BigDecimal.ZERO;
     }
 }

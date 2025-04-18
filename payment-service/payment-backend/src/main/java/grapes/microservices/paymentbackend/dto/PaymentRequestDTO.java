@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.math.BigDecimal;
-
+import java.io.Serializable;
 /**
  * DTO representing the data required for a payment request,
  * including card details and amount, with validation constraints.
@@ -16,7 +16,10 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentRequestDTO {
+public class PaymentRequestDTO implements Serializable {
+
+
+    private static final long serialVersionUID = 1L;
 
     @NotBlank(message = "Card number is required")
     @Pattern(regexp = "^[0-9]{13,19}$", message = "Invalid card number format")
@@ -36,6 +39,5 @@ public class PaymentRequestDTO {
     // Name of the merchant initiating the payment
     private String merchantName;
 
-    // For session support (e.g., linking asynchronous operations)
-    private Long transactionId;
+
 }
