@@ -1,4 +1,3 @@
-// src/components/AdminSection.tsx
 import { useLanguage } from "../../features/LanguageContext";
 import Article from "../../utils/models/Articles";
 import { useEffect, useState } from "react";
@@ -7,6 +6,8 @@ import { AdminHeader } from "../../components/admin/AdminHeader";
 import { ArticleTable } from "../../components/admin/ArticleTable";
 import { PaginationControls } from "../../components/admin/PaginationControls";
 import { ArticleModal } from "../../components/admin/ArticleModal";
+import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
 const AdminSection: React.FC = () => {
     const { language } = useLanguage();
@@ -137,6 +138,7 @@ const AdminSection: React.FC = () => {
     // Handle form submission for adding/updating article
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        toast.success("Article has been saved successfully.");
         setErrorMessage('');
         try {
             // Client-side validation
@@ -205,13 +207,14 @@ const AdminSection: React.FC = () => {
             const { content, totalPages } = await fetchFruits(currentPage, pageSize);
             setArticles(content);
             setTotalPages(totalPages);
+            toast.success("Article successfully deleted.");
             // If the current page is empty after deletion, go to the previous page
             if (content.length === 0 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             }
         } catch (error) {
-            console.error('Error deleting article:', error);
             setErrorMessage(error instanceof Error ? error.message : text[language].error_deleting_article);
+            toast.error("Error, this item is not delete");
         }
     };
 
