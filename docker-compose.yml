@@ -149,8 +149,7 @@ services:
     depends_on:
       - prometheus
 
-
-### BACKEND
+  ### BACKEND
 
   api-gateway:
     build: ./api-gateway
@@ -219,11 +218,6 @@ services:
       - "8094:8094"
     depends_on:
       - mariadb
-    environment:
-      - SALES_SERVICE_PORT=${SALES_SERVICE_PORT}
-      - SALES_DB_URL=${SALES_DB_URL}
-      - SALES_DB_USER=${SALES_DB_USER}
-      - SALES_DB_PASSWORD=${SALES_DB_PASSWORD}
 
   data-mining-service:
     build: ./data-mining-service
