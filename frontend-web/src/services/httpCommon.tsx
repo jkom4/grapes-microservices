@@ -37,7 +37,7 @@ const cartAPI = {
 const orderAPI = {
     baseURL: BASE_URL,
     endpoints: {
-        orderHistory: (userId: number) => `/cll/orders/orders/history/${userId}`,
+        orderHistory: (userId: number) => `/cll/orders/history/${userId}`,
     },
 };
 
