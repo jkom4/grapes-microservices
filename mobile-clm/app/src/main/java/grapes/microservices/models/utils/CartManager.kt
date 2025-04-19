@@ -32,7 +32,7 @@ class CartManager private constructor(
         CoroutineScope(Dispatchers.IO).launch {
             if (_orderId.value == null) {
                 try {
-                    val response = apiService.initCart(InitCartRequest(userId = userId))
+                    val response = apiService.initCart(InitCartRequest(userId = 1))
                     if (response.isSuccessful) {
                         val newOrderId = response.body()?.id
                         if (newOrderId != null) {

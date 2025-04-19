@@ -79,4 +79,5 @@
     <string name="status_pending">Pending</string>
     <string name="no_orders">No orders found</string>
     <string name="error_message">Error: %s</string>
+    <string name="settings_logout">Logout</string>
 </resources>

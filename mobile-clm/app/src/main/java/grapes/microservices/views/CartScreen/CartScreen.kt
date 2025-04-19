@@ -1,5 +1,7 @@
 package grapes.microservices.views.CartScreen
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -43,7 +45,7 @@ import kotlinx.coroutines.delay
 fun CartScreen(
     navController: NavController
 ) {
-    // Obtenir le Context pour initialiser CartManager
+    // Obtenir le Context pour initialiser CartManager et ouvrir l'URL
     val context = LocalContext.current
 
     // Initialiser les dépendances
@@ -450,6 +452,11 @@ fun CartScreen(
                                         .padding(bottom = 16.dp),
                                     verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
+                                    // Form validation for Stripe button
+                                    val formIsValid = fullName.isNotBlank() && phoneNumber.isNotBlank() &&
+                                            address.isNotBlank() && cardNumber.isNotBlank() &&
+                                            expiryDate.isNotBlank() && cvc.isNotBlank()
+
                                     Button(
                                         onClick = {
                                             // Validate required fields
@@ -486,6 +493,37 @@ fun CartScreen(
                                     ) {
                                         Text(
                                             text = stringResource(R.string.pay_button),
+                                            style = MaterialTheme.typography.titleMedium.copy(
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                        )
+                                    }
+
+                                    // Stripe Button
+                                    Button(
+                                        onClick = {
+                                            context.startActivity(
+                                                Intent(Intent.ACTION_VIEW, Uri.parse("https://buy.stripe.com/test_fZe3cr0INeIK50c6oo"))
+                                            )
+                                        },
+                                        enabled = termsAccepted && cart.items.isNotEmpty() && formIsValid,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(56.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.secondary,
+                                            contentColor = MaterialTheme.colorScheme.onSecondary,
+                                            disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                                            disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
+                                        ),
+                                        elevation = ButtonDefaults.buttonElevation(
+                                            defaultElevation = 2.dp,
+                                            pressedElevation = 4.dp
+                                        )
+                                    ) {
+                                        Text(
+                                            text = "Stripe",
                                             style = MaterialTheme.typography.titleMedium.copy(
                                                 fontWeight = FontWeight.SemiBold
                                             )

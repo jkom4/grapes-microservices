@@ -73,7 +73,7 @@ interface ArticleApiService {
 }
 
 interface OrderApiService {
-    @GET("cll/orders/orders/history/{userId}")
+    @GET("cll/orders/history/{userId}")
     suspend fun getOrderHistory(
         @Path("userId") userId: Int,
         @Query("page") page: Int,

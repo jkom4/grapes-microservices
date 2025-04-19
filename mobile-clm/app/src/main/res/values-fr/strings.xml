@@ -79,4 +79,5 @@
     <string name="status_pending">En attente</string>
     <string name="no_orders">Aucune commande trouvée</string>
     <string name="error_message">Erreur : %s</string>
+    <string name="settings_logout">Déconnexion</string>
 </resources>
