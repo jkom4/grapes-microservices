@@ -294,8 +294,8 @@ class TransactionsServiceApplicationTests {
     }
 */
 
-   @Test
-   @Disabled("Ce test est ignoré")
+    @Test
+    @Disabled("Ce test est ignoré")
     void testGetArticleById() throws Exception {
         String articleJson = """
         {
@@ -331,7 +331,7 @@ class TransactionsServiceApplicationTests {
 
 
 
-   @Test
+    @Test
     @Disabled("Ce test est ignoré")
     void testEndToEndOrderPaymentAndDeliveryCreation() throws Exception {
 

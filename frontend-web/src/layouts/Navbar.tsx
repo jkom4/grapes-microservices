@@ -21,11 +21,12 @@ function Navbar() {
                     <img src={logo} alt="logo" className="h-auto w-auto" />
                 </div>
             </Link>
-            <nav className="flex gap-8 flex-grow justify-center items-center">
-                <a href="#aboutus" className="text-black  hover:text-accent">
+            <nav className="flex gap-8 flex-grow justify-center">
+                <Link to="#aboutus" className="text-black text-lg hover:text-accent">
                     {language === 'en' ? 'About Us' : 'À propos'}
-                </a>
-                <Link to="/all-articles" className="text-black  hover:text-accent">
+                </Link>
+                {/* Use Link to navigate to AllArticles page */}
+                <Link to="/all-articles" className="text-black text-lg hover:text-accent">
                     {language === 'en' ? 'Our Product' : 'Nos Produits'}
                 </Link>
                 <Link to="/account" className="text-black text hover:text-accent">
