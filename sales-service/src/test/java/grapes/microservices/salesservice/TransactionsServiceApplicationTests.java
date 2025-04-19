@@ -1,8 +1,8 @@
 package grapes.microservices.salesservice;
 
 import com.jayway.jsonpath.JsonPath;
-
-import grapes.microservices.salesservice.RabbitTestConfig;
+import grapes.microservices.salesservice.models.*;
+import grapes.microservices.salesservice.repositories.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -11,10 +11,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.junit.jupiter.api.Disabled;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles(value = "test")
 @Import(RabbitTestConfig.class)
 class TransactionsServiceApplicationTests {
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -44,7 +45,6 @@ class TransactionsServiceApplicationTests {
     private OrderRepository orderRepository;
     @Autowired
     private OrderItemRepository orderItemRepository;
-
 
 
     @Test
@@ -91,9 +91,6 @@ class TransactionsServiceApplicationTests {
                 .andExpect(jsonPath("$[0].name").value("Fruits"));
     }
 
-
-
-
     @Test
     void testUpdateDeliveryStatus() throws Exception {
         if (deliveryStatusRepository.findByLabel("In Progress").isEmpty()) {
@@ -107,7 +104,6 @@ class TransactionsServiceApplicationTests {
                     .label("Pending")
                     .build());
         }
-
 
         Delivery delivery = Delivery.builder()
                 .orderId(8)
@@ -174,7 +170,6 @@ class TransactionsServiceApplicationTests {
     }
 
     @Test
-
     @Disabled("Ce test est ignoré")
     void testGetAllArticles() throws Exception {
         Article article = new Article();
