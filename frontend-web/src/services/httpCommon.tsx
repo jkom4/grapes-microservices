@@ -28,7 +28,7 @@ const cartAPI = {
         get: (orderId: number | string) => `/clm/cart/${orderId}`,
         pay: (orderId: number | string, params: { address: string; phoneNumber: string; customerName: string; country: string; postalCode: string }) =>
             `/clm/cart/pay/${orderId}?address=${encodeURIComponent(params.address)}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&customerName=${encodeURIComponent(params.customerName)}&country=${encodeURIComponent(params.country)}&postalCode=${encodeURIComponent(params.postalCode)}`,
-        remove: (itemId: number) => `/clm/cart/remove/${itemId}`,
+        remove: (orderId: number | string, itemId: number) => `/clm/cart/remove/${orderId}/${itemId}`,
         clear: (orderId: number | string) => `/clm/cart/clear/${orderId}`,
     },
 };

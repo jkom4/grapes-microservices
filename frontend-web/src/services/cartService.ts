@@ -97,8 +97,8 @@ export const cartService = {
     },
 
     // Remove an item from the cart
-    async removeItem(itemId: number): Promise<void> {
-        const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.remove(itemId)}`, {
+    async removeItem(orderId: number | string, itemId: number): Promise<void> {
+        const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.remove(orderId, itemId)}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

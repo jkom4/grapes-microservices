@@ -100,12 +100,11 @@ const CartPage = () => {
 
         setIsPaying(true);
         try {
-            // Send data with JSON
             await cartService.processPayment(
                 orderId,
                 formData.address,
                 formData.phone,
-                formData.fullName,
+                formData.fullName
             );
             setShowSuccess(true);
 
@@ -114,8 +113,7 @@ const CartPage = () => {
                     await cartService.clearCart(orderId);
                     setCart(null);
                     setOrderId(null);
-                    // Clear all relevant localStorage data after successful purchase
-                    localStorage.clear(); // Or selectively remove specific keys
+                    localStorage.clear();
                 } catch (err) {
                     console.error(
                         "Error clearing cart:",
@@ -136,30 +134,17 @@ const CartPage = () => {
         }
     };
 
-    const handleRemoveItem = async (itemId: number) => {
+    const handleRemoveItem = async (orderId: string | null, itemId: number) => {
+        if (!orderId) {
+            setError("Order ID is not available.");
+            return;
+        }
         try {
-            await cartService.removeItem(itemId);
-            setCart((prevCart) => {
-                if (!prevCart) return null;
-                const updatedItems = prevCart.items.filter(
-                    (item) => item.id !== itemId
-                );
-                const updatedTotalPrice = updatedItems.reduce(
-                    (total, item) =>
-                        total +
-                        (item.quantityKg > 0
-                            ? item.price * item.quantityKg
-                            : item.price * item.quantity),
-                    0
-                );
-                return {
-                    ...prevCart,
-                    items: updatedItems,
-                    totalPrice: updatedTotalPrice,
-                };
-            });
-            // Check if cart is empty after removing item and clear localStorage
-            if (cart && cart.items.length === 1) {
+            setError(null);
+            await cartService.removeItem(Number(orderId), itemId);
+            const updatedCart = await cartService.fetchCart(orderId);
+            setCart(updatedCart);
+            if (updatedCart.items.length === 0) {
                 localStorage.removeItem("orderId");
                 setOrderId(null);
             }
@@ -341,7 +326,6 @@ const CartPage = () => {
                             value={formData.address}
                             onChange={handleInputChange}
                         />
-
                         <h2 className="text-lg font-semibold mt-6 text-gray-800">
                             {translations[language].payNow}
                         </h2>
@@ -416,11 +400,14 @@ const CartPage = () => {
                                         </p>
                                     </div>
                                     <span className="font-semibold text-gray-800">
-                    {calculateItemPrice(item)} €
-                  </span>
+                                        {calculateItemPrice(item)} €
+                                    </span>
                                     <button
-                                        onClick={() => handleRemoveItem(item.id)}
-                                        className="ml-4 text-red-600 hover:text-red-800 transition"
+                                        onClick={() => orderId && handleRemoveItem(orderId, item.id)}
+                                        disabled={!orderId}
+                                        className={`ml-4 text-red-600 hover:text-red-800 transition ${
+                                            !orderId ? "opacity-50 cursor-not-allowed" : ""
+                                        }`}
                                         aria-label={`Remove ${item.articleName} from cart`}
                                     >
                                         🗑️

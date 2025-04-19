@@ -7,7 +7,7 @@ import searchArticles from "../../services/searchFruitsServices";
 import CardComponent from "../../components/CardComponent";
 import { cartService } from "../../services/cartService";
 
-function AllArticlesSection() {
+function AllArticlesSection({ limit = 0 }: { limit?: number }) {
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -27,6 +27,9 @@ function AllArticlesSection() {
     const [quantityKg, setQuantityKg] = useState<string>("0");
     const [quantityUnits, setQuantityUnits] = useState<string>("1");
     const [unitType, setUnitType] = useState<"kg" | "units">("units");
+    const [orderId, setOrderId] = useState<string | null>(null); // Nouvel état pour orderId
+
+    const userId = 1;
 
     const text = {
         en: {
@@ -63,6 +66,35 @@ function AllArticlesSection() {
         en: { header: "Search an article by name..." },
         fr: { header: "Rechercher un article via le nom..." },
     };
+
+    // Initialiser le panier et charger les articles
+    useEffect(() => {
+        const initializeCartAndFetchArticles = async () => {
+            try {
+                setLoading(true);
+
+                // Vérifier si orderId existe dans localStorage
+                let dynamicOrderId = localStorage.getItem("orderId");
+                if (!dynamicOrderId) {
+                    const initResponse = await cartService.initializeCart(userId);
+                    dynamicOrderId = initResponse.id.toString();
+                    localStorage.setItem("orderId", dynamicOrderId);
+                }
+                setOrderId(dynamicOrderId);
+
+                // Charger les articles
+                const { content } = await fetchFruits(0, limit);
+                setArticles(content);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "An error occurred");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        initializeCartAndFetchArticles();
+    }, [limit, userId]);
+
 
     // Sync component state with URL parameters
     const syncStateWithURL = () => {
@@ -131,17 +163,16 @@ function AllArticlesSection() {
     };
 
     const handleAddToCart = async () => {
-        if (!selectedArticle) {
+        if (!selectedArticle || !orderId) {
             setToast({ message: text[language].addToCartError, type: "error" });
             return;
         }
 
-        const orderId = 1; // Hardcoded orderId
         const articleId = selectedArticle.id;
         const quantityKgValue = unitType === "kg" ? parseFloat(quantityKg) || 0 : 0;
         const quantityUnitsValue = unitType === "units" ? parseInt(quantityUnits) || 1 : 0;
 
-        // Validate stock
+        // Valider le stock
         if (unitType === "kg" && quantityKgValue > selectedArticle.stockKg) {
             setToast({ message: text[language].stockError, type: "error" });
             return;
@@ -157,10 +188,15 @@ function AllArticlesSection() {
         }
 
         try {
-            await cartService.addItemToCart(orderId, articleId, quantityKgValue, quantityUnitsValue);
+            await cartService.addItemToCart(
+                parseInt(orderId),
+                articleId,
+                quantityKgValue,
+                quantityUnitsValue
+            );
             setToast({ message: text[language].addToCartSuccess, type: "success" });
 
-            // Reset animation after a delay
+            // Réinitialiser l'animation après un délai
             setTimeout(() => {
                 setCartAnimation({ id: null, x: 0, y: 0 });
             }, 1000);
@@ -172,6 +208,7 @@ function AllArticlesSection() {
             setCartAnimation({ id: null, x: 0, y: 0 });
         }
     };
+
 
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages) {
