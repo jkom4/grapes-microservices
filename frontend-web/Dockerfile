@@ -2,7 +2,9 @@ FROM node:18 AS build
 LABEL authors="jkom"
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm install
+ARG REACT_APP_API_URL_SALES
+ENV REACT_APP_API_URL_SALES=$REACT_APP_API_URL_SALES
+RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build && ls
 

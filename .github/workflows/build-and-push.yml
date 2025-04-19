@@ -51,14 +51,25 @@ jobs:
         with:
           node-version: 18
 
-      - name: "📦 Install Frontend Dependencies"
+      - name: "📦 Install Frontend-web Dependencies"
         run: |
           cd frontend-web
-          npm install
+          npm ci --legacy-peer-deps
           npm run-script build
-  
 
-  test :
+      - name: "📦 Install Frontend-auth Dependencies"
+        run: |
+          cd auth-service/auth-frontend
+          npm ci --legacy-peer-deps
+          npm run-script build
+
+      - name: "📦 Install Frontend-Payment Dependencies"
+        run: |
+          cd payment-service/payment-frontend
+          npm ci --legacy-peer-deps
+          npm run-script build
+
+  tests :
     name: Test Microservices
     runs-on: ubuntu-latest
 
@@ -98,23 +109,23 @@ jobs:
           pip install -r requirements.txt
           pytest
 
-#      ## FRONTEND
-#      - name: 🌐 Install Node.js
-#        uses: actions/setup-node@v3
-#        with:
-#          node-version: 18
-#
-#      - name: 🧪 Run Frontend Tests
-#        working-directory: ./frontend-web
-#        run: |
-#          npm run test
+      ## FRONTEND
+      - name: 🌐 Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 🧪 Run Frontend Tests
+        working-directory: ./frontend-web
+        run: |
+          npm run test
 
   docker-build-and-push:
     name: Build & Push Docker Images
     runs-on: ubuntu-latest
     needs:
       - build
-      - test
+      - tests
 
     steps:
       - name: 📥 Checkout repository
@@ -184,10 +195,20 @@ jobs:
           # 🛠️ SonarQube
           SONARQUBE_HOST=http://localhost:9000
           SONARQUBE_TOKEN=${{ secrets.SONARQUBE_TOKEN }}
+          SONARQUBE_JDBC_USERNAME=${{ secrets.SONARQUBE_JDBC_USERNAME }}
+          SONARQUBE_JDBC_PASSWORD=${{ secrets.SONARQUBE_JDBC_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
 
           # ☁️ Oracle Cloud (OCIR)
           ORACLE_REGION_ID=${{ secrets.ORACLE_REGION_ID }}
           ORACLE_TENANCY_NAMESPACE=${{ secrets.ORACLE_TENANCY_NAMESPACE }}
+          
+          #REPLICATION
+          DB_REPLICATION_USER=${{ secrets.DB_REPLICATION_USER }}
+          DB_REPLICATION_PASSWORD=${{ secrets.DB_REPLICATION_PASSWORD }}
+          MARIADB_MASTER_HOST=${{ secrets.VM3_IP }}
           EOF
           
 
@@ -195,33 +216,57 @@ jobs:
         run:  |
           echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
 
-      # 🐳 Multi-arch build & push for required images
-      - name: 🏗️ Build & Push Multi-Arch (MariaDB, MongoDB, RabbitMQ)
+      # 🐳 Multi-Arch build for ARM-hosted services (VM3)
+      - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
         run: |
           docker buildx build --platform linux/amd64,linux/arm64 \
-          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mariadb-grapes:latest \
-          --push ./docker/mariadb
-          
-          docker buildx build --platform linux/amd64,linux/arm64 \
-          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mongodb-grapes:latest \
-          --push ./docker/mongodb
-          
-          docker buildx build --platform linux/amd64,linux/arm64 \
-          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/rabbitmq-grapes:latest \
-          --push ./docker/rabbitmq
+            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mariadb-grapes:latest \
+            --push ./docker/mariadb
 
-      # 🐳 Simple build & push for the rest (amd64 only)
-      - name: 🏗️ Build & Push Remaining Services
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mongodb-grapes:latest \
+            --push ./docker/mongodb
+
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/rabbitmq-grapes:latest \
+            --push ./docker/rabbitmq
+
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
+            --push ./api-gateway
+
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/auth-service-backend:latest \
+            --push ./auth-service/auth-backend
+
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/sales-service:latest \
+            --push ./sales-service
+
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/payment-service-backend:latest \
+            --push ./payment-service/payment-backend
+
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/chat-service:latest \
+            --push ./chat-service
+
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/data-mining-service:latest \
+            --push ./data-mining-service
+
+      # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
+      - name: 🏗️ Build & Push Frontend Services (amd64 only)
         run: |
-            docker compose build api-gateway auth-service sales-service payment-service chat-service frontend-web frontend-auth frontend-payment
-            docker compose push api-gateway auth-service sales-service payment-service chat-service frontend-web frontend-auth frontend-payment
-
-  deploy-backend:
-    name: Deploy to VM 1 - BACKEND (Manual)
+          docker compose build frontend-web frontend-auth frontend-payment shiny-app
+          docker compose push frontend-web frontend-auth frontend-payment shiny-app
+  deploy-replica-monitoring:
+    name: Deploy to VM 1 - Replica + Monitoring (Manual)
     runs-on: ubuntu-latest
     needs:
       - build
       - tests
+      - docker-build-and-push
     if: github.event_name == 'workflow_dispatch'  # Launches only if manual
 
     steps:
@@ -235,18 +280,22 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM1_KEY }}
           script: |
+            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \
+            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
+            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
             cd grapes-microservices
             git pull origin main
-            sudo docker compose pull 
-            sudo docker compose down 
-            sudo docker compose -f docker-compose.vm1.yml up -d
+            docker compose pull 
+            docker compose down 
+            docker compose -f docker-compose-vm1.yml up -d
 
   deploy-frontend:
-    name: Deploy to VM 1 - FRONTEND + GATEWAY (Manual)
+    name: Deploy to VM 2 - FRONTEND
     runs-on: ubuntu-latest
     needs:
       - build
       - tests
+      - docker-build-and-push
     if: github.event_name == 'workflow_dispatch'  # Launches only if manual
 
     steps:
@@ -260,18 +309,22 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM2_KEY }}
           script: |
+            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \
+            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
+            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
             cd grapes-microservices
             git pull origin main
-            sudo docker compose pull 
-            sudo docker compose down 
-            sudo docker compose -f docker-compose.vm2.yml up -d
+            docker compose pull 
+            docker compose down 
+            docker compose -f docker-compose-vm2.yml up -d
 
-  deploy-bd:
-      name: Deploy to VM 3 - DB + MONITORING (Manual)
+  deploy-bd-backend:
+      name: Deploy to VM 3 - VM ARM (Manual)
       runs-on: ubuntu-latest
       needs:
         - build
         - tests
+        - docker-build-and-push
       if: github.event_name == 'workflow_dispatch'  # Launches only if manual
 
       steps:
@@ -285,8 +338,11 @@ jobs:
             username: ${{ secrets.VM_USER }}
             key: ${{ secrets.VM3_KEY }}
             script: |
+              echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \
+              -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
+              --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
               cd grapes-microservices
               git pull origin main
-              sudo docker compose pull 
-              sudo docker compose down 
-              sudo docker compose -f docker-compose.vm3.yml up -d
+              docker compose pull 
+              docker compose down 
+              docker compose -f docker-compose-vm3.yml up -d

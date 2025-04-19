@@ -1,4 +1,3 @@
-import { useState } from "react";
 import choose from "../../assets/images/choose.png";
 import deliver from "../../assets/images/deliver.png";
 import enjoy from "../../assets/images/enjoy.png";

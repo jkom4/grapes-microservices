@@ -1,6 +1,4 @@
-
 package grapes.microservices.salesservice;
-
 
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
