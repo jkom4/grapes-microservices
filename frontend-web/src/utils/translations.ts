@@ -35,6 +35,8 @@ export const translations = {
         shippingAddress: "Shipping Address",
         itemsOrdered: "Items Ordered",
         redirecting: "Redirecting to homepage...",
+        payWith3DSecure: "Pay with 3D Secure",
+        payWithStripe: "Pay with Stripe",
     },
     fr: {
         checkout: "Commande",
@@ -71,5 +73,7 @@ export const translations = {
         shippingAddress: "Adresse de livraison",
         itemsOrdered: "Articles commandés",
         redirecting: "Redirection vers la page d'accueil...",
+        payWith3DSecure: "Payer avec 3D Secure",
+        payWithStripe: "Payer avec Stripe",
     },
 };

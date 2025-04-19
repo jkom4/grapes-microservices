@@ -16,20 +16,27 @@ const AccountPage: React.FC = () => {
             orderHistory: "Order History",
             profile: "Profile",
             closeMenu: "Close Menu",
-            openMenu: "Open Menu"
+            openMenu: "Open Menu",
+            logout: "Logout"
         },
         fr: {
             settings: "Paramètres",
             orderHistory: "Historique des commandes",
             profile: "Profil",
             closeMenu: "Fermer le menu",
-            openMenu: "Ouvrir le menu"
+            openMenu: "Ouvrir le menu",
+            logout: "Déconnexion"
         }
     };
 
     // Toggle sidebar visibility
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem("authToken");
+        alert("You're logout !");
     };
 
     return (
@@ -80,6 +87,15 @@ const AccountPage: React.FC = () => {
                                 }}
                             >
                                 {text[language].profile}
+                            </button>
+                        </li>
+                        {/* Logout Button */}
+                        <li>
+                            <button
+                                onClick={handleLogout}
+                                className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 rounded-md transition"
+                            >
+                                {text[language].logout}
                             </button>
                         </li>
                     </ul>

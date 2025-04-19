@@ -134,6 +134,22 @@ const CartPage = () => {
         }
     };
 
+    const handleStripePayment = async () => {
+        if (!orderId) {
+            setFormError("Order ID is not available. Please try again.");
+            return;
+        }
+
+        setFormError(null);
+        setPaymentError(null);
+
+        if (!isFormComplete()) {
+            setFormError(translations[language].completeForm);
+            return;
+        }
+        window.location.href = "https://buy.stripe.com/test_fZe3cr0INeIK50c6oo";
+    };
+
     const handleRemoveItem = async (orderId: string | null, itemId: number) => {
         if (!orderId) {
             setError("Order ID is not available.");
@@ -433,31 +449,44 @@ const CartPage = () => {
                                 <span>{total.toFixed(2)} €</span>
                             </div>
                         </div>
-                    </div>
-                    <button
-                        onClick={handlePayment}
-                        disabled={isPaying || isCartEmpty}
-                        className={`w-full py-3 mt-6 rounded-lg transition-all ${
-                            isPaying || isCartEmpty
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-secondary hover:bg-accent"
-                        } text-white font-semibold`}
-                    >
-                        {isPaying
-                            ? translations[language].processing
-                            : translations[language].payNow}
-                    </button>
-                    {paymentError && (
-                        <div className="mt-4 text-red-600 text-sm">{paymentError}</div>
-                    )}
-                    <div className="mt-4 text-xs text-gray-600 flex items-start space-x-2">
-                        <span className="text-lg">🔒</span>
-                        <p>
-                            <strong>{translations[language].secureCheckout}</strong>
-                            <br />
-                            Ensuring your financial and personal details are secure during
-                            every transaction.
-                        </p>
+                        {/* Modified button section */}
+                        <button
+                            onClick={handlePayment}
+                            disabled={isPaying || isCartEmpty}
+                            className={`w-full py-3 mt-6 rounded-lg transition-all ${
+                                isPaying || isCartEmpty
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-secondary hover:bg-accent"
+                            } text-white font-semibold`}
+                        >
+                            {isPaying
+                                ? translations[language].processing
+                                : "Payer avec 3D Secure" /* Updated text */}
+                        </button>
+                        <button
+                            onClick={handleStripePayment}
+                            disabled={isPaying || isCartEmpty}
+                            className={`w-full py-3 rounded-lg transition-all ${
+                                isPaying || isCartEmpty
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-blue-600 hover:bg-blue-700" /* Different color for Stripe */
+                            } text-white font-semibold`}
+                        >
+                            {isPaying
+                                ? translations[language].processing
+                                : "Payer avec Stripe" /* New Stripe button */}
+                        </button>
+                        {paymentError && (
+                            <div className="mt-4 text-red-600 text-sm">{paymentError}</div>
+                        )}
+                        <div className="mt-4 text-xs text-gray-600 flex items-start space-x-2">
+                            <span className="text-lg">🔒</span>
+                            <p>
+                                <strong>{translations[language].secureCheckout}</strong>
+                                <br />
+                                Ensuring your financial and personal details are secure during every transaction.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

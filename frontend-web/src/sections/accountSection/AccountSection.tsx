@@ -215,7 +215,7 @@ const OrderHistory: React.FC = () => {
                             <td className="px-6 py-4 text-gray-700">{order.code}</td>
                             <td className="px-6 py-4 text-gray-700">{formatDate(order.createdAt)}</td>
                             <td className="px-6 py-4 text-gray-700">
-                                {order.totalPrice ? `${text[language].currency}${order.totalPrice.toFixed(2)}` : '-'}
+                                {order.totalPrice ? `${text[language].currency}${(order.totalPrice + 5).toFixed(2)}` : '-'}
                             </td>
                             <td className="px-6 py-4">
                   <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${order.paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
@@ -225,7 +225,7 @@ const OrderHistory: React.FC = () => {
                             <td className="px-6 py-4">
                                 {order.facturePath ? (
                                     <a
-                                        href={`http://localhost:3000/uploads${order.facturePath}`}  // Utiliser le chemin complet vers le fichier
+                                        href={`http://localhost:3000/uploads${order.facturePath}`}
                                         download
                                         target="_blank"
                                         rel="noopener noreferrer"
