@@ -146,14 +146,15 @@ const OrderHistory: React.FC = () => {
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
+    const paidOrders = filteredOrders.filter(order => order.paid);
 
     // Calculate the orders to display on the current page
     const indexOfLastOrder = currentPage * ordersPerPage;
     const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-    const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+    const currentOrders = paidOrders.slice(indexOfFirstOrder, indexOfLastOrder);
 
     // Calculate total pages
-    const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+    const totalPages = Math.ceil(paidOrders.length / ordersPerPage);
 
     // Format date for display based on language
     const formatDate = (dateString: string): string => {
@@ -209,7 +210,7 @@ const OrderHistory: React.FC = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {currentOrders.map((order) => (
+                    {currentOrders.filter(order => order.paid).map((order) => (
                         <tr key={order.id} className="border-b hover:bg-gray-50">
                             <td className="px-6 py-4 text-gray-700">{order.code}</td>
                             <td className="px-6 py-4 text-gray-700">{formatDate(order.createdAt)}</td>
@@ -223,17 +224,15 @@ const OrderHistory: React.FC = () => {
                             </td>
                             <td className="px-6 py-4">
                                 {order.facturePath ? (
-                                    <button
-                                        onClick={() => {
-                                            const link = document.createElement('a');
-                                            document.body.appendChild(link);
-                                            link.click();
-                                            document.body.removeChild(link);
-                                        }}
-                                        className="bg-accent text-white px-4 py-2 rounded-md hover:bg-accent transition"
+                                    <a
+                                        href={`http://localhost:3000/uploads${order.facturePath}`}  // Utiliser le chemin complet vers le fichier
+                                        download
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="bg-accent text-white px-4 py-2 rounded-md hover:bg-accent transition inline-block"
                                     >
                                         {text[language].view}
-                                    </button>
+                                    </a>
                                 ) : (
                                     <span className="text-gray-500">{text[language].na}</span>
                                 )}
