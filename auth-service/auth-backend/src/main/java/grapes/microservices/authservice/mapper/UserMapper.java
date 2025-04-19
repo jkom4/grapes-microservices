@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -32,6 +33,9 @@ public interface UserMapper {
     static String objectIdToString(ObjectId id) {
         return id != null ? id.toHexString() : null;
     }
+
+    List<UserDTO> toDTOList(List<User> users);
+
 
     /**
      * Compute the age based on the birthDate

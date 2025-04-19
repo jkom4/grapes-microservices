@@ -9,6 +9,7 @@ import ArticleDetails from "./pages/ArticleDetails";
 import ShoppingCart from "./pages/ShoppingCart";
 import AdminPage from "./pages/admin/Admin";
 import {ToastContainer} from "react-toastify";
+import AccountPage from "./pages/AccountPage";
 
 const App: React.FC = () => {
     return (
@@ -21,6 +22,7 @@ const App: React.FC = () => {
                     <Route path="/all-articles" element={<AllArticles />} />
                     <Route path="/clm/articles/:id" element={<ArticleDetails />} />
                     <Route path="/shopping-cart" element={<ShoppingCart />} />
+                    <Route path="/account" element={<AccountPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                 </Routes>
                 <ToastContainer

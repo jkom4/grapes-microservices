@@ -19,6 +19,9 @@ public class AuthMethodService {
 
     @Autowired
     private SmsAuthProvider smsAuthProvider;
+
+    @Autowired
+    private EidAuthProvider eidAuthProvider;
     //need to add others here later
 
     /**
@@ -30,6 +33,7 @@ public class AuthMethodService {
         return switch (authMethod) {
             case EMAIL -> emailAuthProvider;
             case SMS -> smsAuthProvider;
+            case EID -> eidAuthProvider;
             default -> throw new IllegalArgumentException("Invalid auth method");
         };
     }
