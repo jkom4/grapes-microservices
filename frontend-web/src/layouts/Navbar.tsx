@@ -28,7 +28,10 @@ function Navbar() {
                 <Link to="/all-articles" className="text-black text-lg hover:text-accent">
                     {language === 'en' ? 'Our Product' : 'Nos Produits'}
                 </Link>
-                <Link to="/shopping-cart" className="text-black text-2xl hover:text-accent">
+                <Link to="/account" className="text-black text hover:text-accent">
+                    {language === 'en' ? 'Account' : 'Mon compte'}
+                </Link>
+                <Link to="/shopping-cart" className="text-black text-xl hover:text-accent">
                     <span>🛒</span>
                 </Link>
                 {/* user?.role === 'admin' && ( */}
