@@ -3,15 +3,19 @@ package grapes.microservices.salesservice.services;
 import grapes.microservices.salesservice.dto.CartItemViewDTO;
 import grapes.microservices.salesservice.dto.CartResponseDTO;
 import grapes.microservices.salesservice.models.Article;
+import grapes.microservices.salesservice.models.Order;
 import grapes.microservices.salesservice.models.OrderItem;
 import grapes.microservices.salesservice.repositories.ArticleRepository;
 import grapes.microservices.salesservice.repositories.OrderItemRepository;
+import grapes.microservices.salesservice.repositories.OrderRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service class responsible for managing the shopping cart logic.
@@ -23,6 +27,10 @@ public class CartService {
 
     private final ArticleRepository articleRepository;
     private final OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
 
     /**
      * Constructor for CartService.
@@ -72,49 +80,46 @@ public class CartService {
 
 
     public CartResponseDTO getCartContent(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Aucune commande trouvée avec l'ID: " + orderId));
+
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
 
-        List<CartItemViewDTO> enrichedItems = items.stream()
-                .map(item -> {
-                    String name = articleRepository.findById(item.getArticleId())
-                            .map(Article::getName)
-                            .orElse("Unknown");
+        List<CartItemViewDTO> cartItems = items.stream().map(item -> {
+            Article article = articleRepository.findById(item.getArticleId())
+                    .orElse(null);
 
-                    return CartItemViewDTO.builder()
-                            .id(item.getId())
-                            .articleId(item.getArticleId())
-                            .articleName(name)
-                            .quantityKg(item.getQuantityKg())
-                            .quantity(item.getQuantity())
-                            .price(item.getPrice())
-                            .build();
-                })
-                .toList();
+            return CartItemViewDTO.builder()
+                    .id(item.getId())
+                    .articleId(item.getArticleId())
+                    .articleName(article != null ? article.getName() : "Article inconnu")
+                    .picturePath(article != null ? article.getPicturePath() : null)
+                    .quantityKg(item.getQuantityKg())
+                    .quantity(item.getQuantity())
+                    .price(item.getPrice())
+                    .build();
+        }).collect(Collectors.toList());
 
-        BigDecimal total = enrichedItems.stream()
-                .map(i -> {
-                    BigDecimal qty;
-                    if (i.getQuantityKg() != null && i.getQuantityKg().compareTo(BigDecimal.ZERO) > 0) {
-                        qty = i.getQuantityKg();
-                    } else {
-                        qty = i.getQuantity();
-                    }
-                    return i.getPrice().multiply(qty);
-                })
+        BigDecimal total = cartItems.stream()
+                .map(i -> i.getPrice().multiply(i.getQuantityKg() != null ? i.getQuantityKg() :
+                        (i.getQuantity() != null ? i.getQuantity() : BigDecimal.ZERO)))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return CartResponseDTO.builder()
-                .items(enrichedItems)
-                .totalPrice(total.setScale(2, RoundingMode.HALF_UP))
-                .build();
+        return new CartResponseDTO(cartItems, total.setScale(2, RoundingMode.HALF_UP));
     }
 
 
 
-    public void removeFromCart(Integer itemId) {
-        if (!orderItemRepository.existsById(itemId)) {
-            throw new IllegalArgumentException("Cart item not found with ID: " + itemId);
+
+
+    public void removeFromCart(Integer orderId, Integer itemId) {
+        OrderItem item = orderItemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found."));
+
+        if (!item.getOrderId().equals(orderId)) {
+            throw new IllegalArgumentException("This item does not belong to order ID: " + orderId);
         }
+
         orderItemRepository.deleteById(itemId);
     }
 
