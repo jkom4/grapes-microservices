@@ -1,4 +1,3 @@
-// src/components/CartPage.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../features/LanguageContext";
@@ -10,6 +9,7 @@ const CartPage = () => {
     const { language } = useLanguage();
     const navigate = useNavigate();
     const [cart, setCart] = useState<CartResponse | null>(null);
+    const [orderId, setOrderId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -31,8 +31,6 @@ const CartPage = () => {
     const [paymentError, setPaymentError] = useState<string | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
 
-    // Hardcoded orderId for all operations
-    const orderId = "1";
     // Hardcoded userId for initializeCart
     const userId = 1;
 
@@ -40,13 +38,31 @@ const CartPage = () => {
         const initializeAndFetchCart = async () => {
             try {
                 setLoading(true);
-                // Initialize cart with userId
-                await cartService.initializeCart(userId);
-                // Fetch cart with hardcoded orderId
-                const data = await cartService.fetchCart(orderId);
+                let dynamicOrderId = localStorage.getItem("orderId");
+
+                // If no orderId exists, initialize a new cart
+                if (!dynamicOrderId) {
+                    const initResponse = await cartService.initializeCart(userId);
+                    dynamicOrderId = initResponse.id.toString();
+                    localStorage.setItem("orderId", dynamicOrderId);
+                }
+                setOrderId(dynamicOrderId);
+
+                // Fetch cart with dynamic orderId
+                const data = await cartService.fetchCart(dynamicOrderId);
                 setCart(data);
+
+                // Clear localStorage if cart is empty
+                if (data.items.length === 0) {
+                    localStorage.removeItem("orderId");
+                    setOrderId(null);
+                }
             } catch (err) {
-                setError(err instanceof Error ? err.message : "An unknown error occurred while initializing or fetching the cart");
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : "An unknown error occurred while initializing or fetching the cart"
+                );
             } finally {
                 setLoading(false);
             }
@@ -64,11 +80,16 @@ const CartPage = () => {
     };
 
     const isFormComplete = () => {
-        const { fullName, phone, address, country, zip, termsAccepted } = formData;
-        return fullName && phone && address && country && zip && termsAccepted;
+        const { fullName, phone, address, termsAccepted } = formData;
+        return fullName && phone && address && termsAccepted;
     };
 
     const handlePayment = async () => {
+        if (!orderId) {
+            setFormError("Order ID is not available. Please try again.");
+            return;
+        }
+
         setFormError(null);
         setPaymentError(null);
 
@@ -79,28 +100,37 @@ const CartPage = () => {
 
         setIsPaying(true);
         try {
+            // Send data with JSON
             await cartService.processPayment(
                 orderId,
                 formData.address,
                 formData.phone,
                 formData.fullName,
-                formData.country,
-                formData.zip
             );
             setShowSuccess(true);
 
             setTimeout(async () => {
                 try {
                     await cartService.clearCart(orderId);
-                    setCart(null); // Clear cart in UI
+                    setCart(null);
+                    setOrderId(null);
+                    // Clear all relevant localStorage data after successful purchase
+                    localStorage.clear(); // Or selectively remove specific keys
                 } catch (err) {
-                    console.error("Error clearing cart:", err instanceof Error ? err.message : "Unknown error");
+                    console.error(
+                        "Error clearing cart:",
+                        err instanceof Error ? err.message : "Unknown error"
+                    );
                 }
                 setShowSuccess(false);
                 navigate("/");
             }, 5000);
         } catch (err) {
-            setPaymentError(err instanceof Error ? err.message : translations[language].paymentError);
+            setPaymentError(
+                err instanceof Error
+                    ? err.message
+                    : translations[language].paymentError
+            );
         } finally {
             setIsPaying(false);
         }
@@ -111,9 +141,15 @@ const CartPage = () => {
             await cartService.removeItem(itemId);
             setCart((prevCart) => {
                 if (!prevCart) return null;
-                const updatedItems = prevCart.items.filter((item) => item.id !== itemId);
+                const updatedItems = prevCart.items.filter(
+                    (item) => item.id !== itemId
+                );
                 const updatedTotalPrice = updatedItems.reduce(
-                    (total, item) => total + (item.quantityKg > 0 ? item.price * item.quantityKg : item.price * item.quantity),
+                    (total, item) =>
+                        total +
+                        (item.quantityKg > 0
+                            ? item.price * item.quantityKg
+                            : item.price * item.quantity),
                     0
                 );
                 return {
@@ -122,22 +158,26 @@ const CartPage = () => {
                     totalPrice: updatedTotalPrice,
                 };
             });
+            // Check if cart is empty after removing item and clear localStorage
+            if (cart && cart.items.length === 1) {
+                localStorage.removeItem("orderId");
+                setOrderId(null);
+            }
         } catch (err) {
-            setError(err instanceof Error ? err.message : "An unknown error occurred while removing the item");
-        }
-    };
-
-    const handleAddItem = async (articleId: number, quantityKg: number, quantity: number) => {
-        try {
-            const updatedCart = await cartService.addItemToCart(parseInt(orderId), articleId, quantityKg, quantity);
-            setCart(updatedCart);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to add item to cart");
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "An unknown error occurred while removing the item"
+            );
         }
     };
 
     const calculateItemPrice = (item: CartItemModel) => {
-        return (item.quantityKg > 0 ? item.price * item.quantityKg : item.price * item.quantity).toFixed(2);
+        return (
+            item.quantityKg > 0
+                ? item.price * item.quantityKg
+                : item.price * item.quantity
+        ).toFixed(2);
     };
 
     const getItemQuantityDisplay = (item: CartItemModel) => {
@@ -147,20 +187,41 @@ const CartPage = () => {
     };
 
     const getUnitPriceDisplay = (item: CartItemModel) => {
-        return `${item.price.toFixed(2)} €/${item.quantityKg > 0 ? translations[language].kg : translations[language].unit}`;
+        return `${item.price.toFixed(2)} €/${
+            item.quantityKg > 0
+                ? translations[language].kg
+                : translations[language].unit
+        }`;
     };
 
     const calculateSubtotal = () => {
         if (!cart || cart.items.length === 0) return 0;
         return cart.items.reduce(
-            (total, item) => total + (item.quantityKg > 0 ? item.price * item.quantityKg : item.price * item.quantity),
+            (total, item) =>
+                total +
+                (item.quantityKg > 0
+                    ? item.price * item.quantityKg
+                    : item.price * item.quantity),
             0
         );
     };
 
-    if (loading) return <div className="text-center p-8">{translations[language].checkout}...</div>;
-    if (error) return <div className="text-center p-8 text-red-600">Error: {error}</div>;
-    if (!cart) return <div className="text-center p-8">{translations[language].emptyCart}</div>;
+    if (loading)
+        return (
+            <div className="text-center p-8">
+                {translations[language].checkout}...
+            </div>
+        );
+    if (error)
+        return (
+            <div className="text-center p-8 text-red-600">Error: {error}</div>
+        );
+    if (!cart)
+        return (
+            <div className="text-center p-8">
+                {translations[language].emptyCart}
+            </div>
+        );
 
     const isCartEmpty = cart.items.length === 0;
     const subtotal = calculateSubtotal();
@@ -190,23 +251,26 @@ const CartPage = () => {
                             {translations[language].transactionSummary}
                         </h2>
                         <div className="mb-6">
-                            <h3 className="text-lg font-semibold text-gray-800">{translations[language].shippingAddress}</h3>
+                            <h3 className="text-lg font-semibold text-gray-800">
+                                {translations[language].shippingAddress}
+                            </h3>
                             <div className="mt-2 text-gray-600 space-y-1">
                                 <p>{formData.fullName}</p>
                                 <p>{formData.email}</p>
                                 <p>{formData.phone}</p>
                                 <p>{formData.address}</p>
-                                <p>
-                                    {formData.city}, {formData.state} {formData.zip}
-                                </p>
-                                <p>{formData.country}</p>
                             </div>
                         </div>
                         <div className="mb-6">
-                            <h3 className="text-lg font-semibold text-gray-800">{translations[language].itemsOrdered}</h3>
+                            <h3 className="text-lg font-semibold text-gray-800">
+                                {translations[language].itemsOrdered}
+                            </h3>
                             <div className="mt-2 space-y-2 max-h-64 overflow-y-auto">
                                 {cart.items.map((item) => (
-                                    <div key={item.id} className="flex justify-between text-gray-600">
+                                    <div
+                                        key={item.id}
+                                        className="flex justify-between text-gray-600"
+                                    >
                                         <div>
                                             <p className="font-medium">{item.articleName}</p>
                                             <p className="text-sm">{getItemQuantityDisplay(item)}</p>
@@ -230,13 +294,17 @@ const CartPage = () => {
                                 <span>{total.toFixed(2)} €</span>
                             </div>
                         </div>
-                        <p className="text-gray-600 text-center mt-6">{translations[language].redirecting}</p>
+                        <p className="text-gray-600 text-center mt-6">
+                            {translations[language].redirecting}
+                        </p>
                     </div>
                 </div>
             )}
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white rounded-xl p-8 shadow-lg">
-                    <h1 className="text-3xl font-bold text-secondary mb-6">{translations[language].checkout}</h1>
+                    <h1 className="text-3xl font-bold text-secondary mb-6">
+                        {translations[language].checkout}
+                    </h1>
                     <form className="space-y-4">
                         <input
                             type="text"
@@ -273,43 +341,10 @@ const CartPage = () => {
                             value={formData.address}
                             onChange={handleInputChange}
                         />
-                        <input
-                            type="text"
-                            name="country"
-                            placeholder={translations[language].country}
-                            required
-                            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-accent focus:border-transparent"
-                            value={formData.country}
-                            onChange={handleInputChange}
-                        />
-                        <div className="grid grid-cols-3 gap-4">
-                            <input
-                                type="text"
-                                name="city"
-                                placeholder={translations[language].city}
-                                className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-accent focus:border-transparent"
-                                value={formData.city}
-                                onChange={handleInputChange}
-                            />
-                            <input
-                                type="text"
-                                name="state"
-                                placeholder={translations[language].state}
-                                className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-accent focus:border-transparent"
-                                value={formData.state}
-                                onChange={handleInputChange}
-                            />
-                            <input
-                                type="text"
-                                name="zip"
-                                placeholder={translations[language].zip}
-                                required
-                                className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-accent focus:border-transparent"
-                                value={formData.zip}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <h2 className="text-lg font-semibold mt-6 text-gray-800">{translations[language].payNow}</h2>
+
+                        <h2 className="text-lg font-semibold mt-6 text-gray-800">
+                            {translations[language].payNow}
+                        </h2>
                         <input
                             type="text"
                             name="cardNumber"
@@ -347,28 +382,42 @@ const CartPage = () => {
                             <span>{translations[language].terms}</span>
                         </label>
                     </form>
-                    {formError && <div className="mt-4 text-red-600 text-sm">{formError}</div>}
+                    {formError && (
+                        <div className="mt-4 text-red-600 text-sm">{formError}</div>
+                    )}
                 </div>
                 <div className="bg-primary rounded-xl p-8 shadow-xl">
-                    <h2 className="text-xl font-bold text-gray-800 mb-6">{translations[language].titleCart}</h2>
+                    <h2 className="text-xl font-bold text-gray-800 mb-6">
+                        {translations[language].titleCart}
+                    </h2>
                     {isCartEmpty ? (
-                        <div className="text-red-600 text-center p-4">{translations[language].emptyCart}</div>
+                        <div className="text-red-600 text-center p-4">
+                            {translations[language].emptyCart}
+                        </div>
                     ) : (
                         <div className="space-y-4 max-h-[280px] overflow-y-auto pr-2">
                             {cart.items.map((item) => (
-                                <div key={item.id} className="flex items-center bg-gray-50 rounded-lg p-4 shadow-sm">
+                                <div
+                                    key={item.id}
+                                    className="flex items-center bg-gray-50 rounded-lg p-4 shadow-sm"
+                                >
                                     <img
                                         src={item.picturePath || "/default-image.jpg"}
                                         alt={item.articleName}
                                         className="w-16 h-16 object-cover rounded-lg mr-4"
                                     />
                                     <div className="flex-1">
-                                        <h3 className="font-semibold text-gray-800">{item.articleName}</h3>
+                                        <h3 className="font-semibold text-gray-800">
+                                            {item.articleName}
+                                        </h3>
                                         <p className="text-sm text-gray-500">
-                                            {getItemQuantityDisplay(item)} - {getUnitPriceDisplay(item)}
+                                            {getItemQuantityDisplay(item)} -{" "}
+                                            {getUnitPriceDisplay(item)}
                                         </p>
                                     </div>
-                                    <span className="font-semibold text-gray-800">{calculateItemPrice(item)} €</span>
+                                    <span className="font-semibold text-gray-800">
+                    {calculateItemPrice(item)} €
+                  </span>
                                     <button
                                         onClick={() => handleRemoveItem(item.id)}
                                         className="ml-4 text-red-600 hover:text-red-800 transition"
@@ -402,18 +451,25 @@ const CartPage = () => {
                         onClick={handlePayment}
                         disabled={isPaying || isCartEmpty}
                         className={`w-full py-3 mt-6 rounded-lg transition-all ${
-                            isPaying || isCartEmpty ? "bg-gray-400 cursor-not-allowed" : "bg-secondary hover:bg-accent"
+                            isPaying || isCartEmpty
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-secondary hover:bg-accent"
                         } text-white font-semibold`}
                     >
-                        {isPaying ? translations[language].processing : translations[language].payNow}
+                        {isPaying
+                            ? translations[language].processing
+                            : translations[language].payNow}
                     </button>
-                    {paymentError && <div className="mt-4 text-red-600 text-sm">{paymentError}</div>}
+                    {paymentError && (
+                        <div className="mt-4 text-red-600 text-sm">{paymentError}</div>
+                    )}
                     <div className="mt-4 text-xs text-gray-600 flex items-start space-x-2">
                         <span className="text-lg">🔒</span>
                         <p>
                             <strong>{translations[language].secureCheckout}</strong>
                             <br />
-                            Ensuring your financial and personal details are secure during every transaction.
+                            Ensuring your financial and personal details are secure during
+                            every transaction.
                         </p>
                     </div>
                 </div>

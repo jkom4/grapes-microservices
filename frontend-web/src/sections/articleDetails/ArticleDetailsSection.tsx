@@ -11,6 +11,8 @@ function ArticleDetailsSection() {
     const [isFavorite, setIsFavorite] = useState(false);
     const { language } = useLanguage();
     const navigate = useNavigate();
+    const [orderId, setOrderId] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     // State for quantity, measurement type, and animations
     const [quantity, setQuantity] = useState<number>(1);
@@ -21,6 +23,9 @@ function ArticleDetailsSection() {
         y: 0,
     });
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+    // Hardcoded userId pour initializeCart
+    const userId = 1;
 
     const text = {
         en: {
@@ -33,6 +38,7 @@ function ArticleDetailsSection() {
             addToCartError: "Failed to add item to cart",
             kg: "kg",
             unit: "unit",
+            stockError: "Quantity exceeds available stock!",
         },
         fr: {
             loading: "Chargement...",
@@ -44,24 +50,36 @@ function ArticleDetailsSection() {
             addToCartError: "Échec de l'ajout au panier",
             kg: "kg",
             unit: "unité",
+            stockError: "La quantité dépasse le stock disponible !",
         },
     };
 
     useEffect(() => {
-        const fetchArticle = async () => {
+        const initializeCartAndFetchArticle = async () => {
             if (!id) return;
-            const articleId = parseInt(id);
+
             try {
+                let dynamicOrderId = localStorage.getItem("orderId");
+                if (!dynamicOrderId) {
+                    const initResponse = await cartService.initializeCart(userId);
+                    console.log("Initialized cart with id:", initResponse.id);
+                    dynamicOrderId = initResponse.id.toString();
+                    localStorage.setItem("orderId", dynamicOrderId);
+                }
+                setOrderId(dynamicOrderId);
+
+                const articleId = parseInt(id);
                 console.log("Fetching article with ID:", articleId);
                 const articleData = await fetchArticleById(articleId);
                 console.log("Article fetched successfully:", articleData);
                 setArticle(articleData);
             } catch (err) {
-                console.error("Failed to fetch article:", err);
+                console.error("Failed to initialize cart or fetch article:", err);
+                setError(err instanceof Error ? err.message : "An unknown error occurred");
             }
         };
 
-        fetchArticle();
+        initializeCartAndFetchArticle();
     }, [id]);
 
     // Auto-dismiss toast after 3 seconds
@@ -73,17 +91,28 @@ function ArticleDetailsSection() {
     }, [toast]);
 
     const handleAddToCart = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        if (!article) return;
+        if (!article || !orderId) {
+            console.error("Article or Order ID is missing, cannot add to cart");
+            setToast({ message: text[language].addToCartError, type: "error" });
+            return;
+        }
 
-        console.log("Attempting to add item to the cart...");
+        console.log("Attempting to add item to the cart with orderId:", orderId);
 
-        const orderId = 1; // Replace with actual order ID logic
         const articleId = article.id;
         const quantityKg = measurementType === "kg" ? quantity : 0;
         const selectedQuantity = measurementType === "unit" ? quantity : 0;
 
-        if (!articleId) {
-            console.error("Article ID is missing, cannot add to cart");
+        // Validate stock
+        if (measurementType === "kg" && quantityKg > article.stockKg) {
+            setToast({ message: text[language].stockError, type: "error" });
+            return;
+        }
+        if (measurementType === "unit" && selectedQuantity > article.stockUnit) {
+            setToast({ message: text[language].stockError, type: "error" });
+            return;
+        }
+        if (quantityKg <= 0 && selectedQuantity <= 0) {
             setToast({ message: text[language].addToCartError, type: "error" });
             return;
         }
@@ -100,7 +129,7 @@ function ArticleDetailsSection() {
         try {
             // Use cartService to add item to cart
             const response = await cartService.addItemToCart(
-                orderId,
+                parseInt(orderId),
                 articleId,
                 quantityKg,
                 selectedQuantity
@@ -113,9 +142,12 @@ function ArticleDetailsSection() {
             setTimeout(() => {
                 setCartAnimation({ id: null, x: 0, y: 0 });
             }, 1000);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error adding item to cart:", error);
-            setToast({ message: text[language].addToCartError, type: "error" });
+            const errorMessage = error.message.includes("Failed to add item to cart")
+                ? error.message
+                : text[language].addToCartError;
+            setToast({ message: errorMessage, type: "error" });
             setCartAnimation({ id: null, x: 0, y: 0 });
         }
     };
@@ -135,6 +167,10 @@ function ArticleDetailsSection() {
         const newQuantity = Math.max(1, Math.min(quantity + delta, maxQuantity));
         setQuantity(newQuantity);
     };
+
+    if (error) {
+        return <div className="text-center mt-10 text-red-600">Error: {error}</div>;
+    }
 
     if (!article) {
         return <div className="text-center mt-10 text-gray-500">{text[language].loading}</div>;
@@ -212,8 +248,8 @@ function ArticleDetailsSection() {
                         <div className="text-2xl font-semibold text-accent transition-all duration-300">
                             {calculateTotalPrice()} €{" "}
                             <span className="text-gray-500 text-base ml-2">
-                ({measurementType === "kg" ? `${article.priceKg} € / kg` : `${article.priceUnit} € / unit`})
-              </span>
+                                ({measurementType === "kg" ? `${article.priceKg} € / kg` : `${article.priceUnit} € / unit`})
+                            </span>
                         </div>
 
                         {/* Stock */}
@@ -288,15 +324,18 @@ function ArticleDetailsSection() {
                                 </button>
                             </div>
                             <span className="ml-2 text-sm text-gray-600">
-                {measurementType === "kg" ? text[language].kg : text[language].unit}
-              </span>
+                                {measurementType === "kg" ? text[language].kg : text[language].unit}
+                            </span>
                         </div>
 
                         {/* Add to cart button */}
                         <div className="flex gap-4 items-center mt-8">
                             <button
                                 onClick={handleAddToCart}
-                                className="bg-accent text-white font-semibold px-8 py-4 rounded-lg shadow-lg transition transform hover:bg-[#D43F97] hover:scale-105 relative overflow-hidden"
+                                disabled={!orderId} // Désactiver le bouton si orderId n'est pas défini
+                                className={`bg-accent text-white font-semibold px-8 py-4 rounded-lg shadow-lg transition transform hover:bg-[#D43F97] hover:scale-105 relative overflow-hidden ${
+                                    !orderId ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
                             >
                                 {text[language].addToCart}
                                 <span className="pulse-effect absolute inset-0 rounded-lg bg-white opacity-0"></span>

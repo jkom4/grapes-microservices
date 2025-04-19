@@ -21,18 +21,18 @@ function Navbar() {
                     <img src={logo} alt="logo" className="h-auto w-auto" />
                 </div>
             </Link>
-            <nav className="flex gap-8 flex-grow justify-center">
-                <Link to="#aboutus" className="text-black text-lg hover:text-accent">
-                    {language === 'en' ? 'About Us' : 'À propos'}
+            <nav className="flex gap-8 flex-grow justify-center items-center">
+                <Link to="/" className="text-blackhover:text-accent">
+                    {language === 'en' ? 'Home' : 'Accueil'}
                 </Link>
                 {/* Use Link to navigate to AllArticles page */}
-                <Link to="/all-articles" className="text-black text-lg hover:text-accent">
+                <Link to="/all-articles" className="text-black hover:text-accent">
                     {language === 'en' ? 'Our Product' : 'Nos Produits'}
                 </Link>
-                <Link to="/account" className="text-black text hover:text-accent">
+                <Link to="/account" className="text-black hover:text-accent">
                     {language === 'en' ? 'Account' : 'Mon compte'}
                 </Link>
-                <Link to="/shopping-cart" className="text-black text-xl hover:text-accent">
+                <Link to="/shopping-cart" className="text-black hover:text-accent">
                     <span>🛒</span>
                 </Link>
                 {/* user?.role === 'admin' && ( */}

@@ -1,9 +1,16 @@
-// src/services/cartService.ts
 import { cartAPI } from "./httpCommon"; // Adjust path if needed
 import CartItemModel from "../utils/models/CartItem";
 
 interface InitCartResponse {
-    orderId: number;
+    id: number;
+    code?: number;
+    userId?: number;
+    facturePath?: string | null;
+    totalPrice?: number | null;
+    createdAt?: string;
+    orderItems?: any[] | null;
+    paid?: boolean;
+    finished?: boolean;
 }
 
 export interface CartResponse {
@@ -69,18 +76,20 @@ export const cartService = {
         address: string,
         phoneNumber: string,
         customerName: string,
-        country: string,
-        postalCode: string
     ): Promise<void> {
-        const response = await fetch(
-            `${cartAPI.baseURL}${cartAPI.endpoints.pay(orderId, { address, phoneNumber, customerName, country, postalCode })}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        const response = await fetch(`${cartAPI.baseURL}/clm/cart/pay`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                orderId,
+                address,
+                phoneNumber,
+                customerName,
+            }),
+        });
+
         if (!response.ok) {
             const errorDetails = await response.text();
             throw new Error(`Payment failed. Details: ${errorDetails}`);
@@ -99,22 +108,6 @@ export const cartService = {
             const errorDetails = await response.text();
             throw new Error(`Failed to remove item. Details: ${errorDetails}`);
         }
-    },
-
-    // Apply a promo code to the cart
-    async applyPromoCode(orderId: string, promoCode: string): Promise<CartResponse> {
-        const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.applyPromo}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ orderId, promoCode }),
-        });
-        if (!response.ok) {
-            const errorDetails = await response.text();
-            throw new Error(`Failed to apply promo code. Details: ${errorDetails}`);
-        }
-        return response.json();
     },
 
     // Clear the cart

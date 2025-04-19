@@ -135,9 +135,7 @@ public class CartController {
                     request.getOrderId(),
                     request.getAddress(),
                     request.getPhoneNumber(),
-                    request.getCustomerName(),
-                    request.getCountry(),
-                    request.getPostalCode()
+                    request.getCustomerName()
             );
 
             return ResponseEntity.ok("Payment confirmed, stock updated and cart cleared.");

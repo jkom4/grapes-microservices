@@ -29,7 +29,6 @@ const cartAPI = {
         pay: (orderId: number | string, params: { address: string; phoneNumber: string; customerName: string; country: string; postalCode: string }) =>
             `/clm/cart/pay/${orderId}?address=${encodeURIComponent(params.address)}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&customerName=${encodeURIComponent(params.customerName)}&country=${encodeURIComponent(params.country)}&postalCode=${encodeURIComponent(params.postalCode)}`,
         remove: (itemId: number) => `/clm/cart/remove/${itemId}`,
-        applyPromo: "/clm/cart/apply-promo",
         clear: (orderId: number | string) => `/clm/cart/clear/${orderId}`,
     },
 };
@@ -37,7 +36,7 @@ const cartAPI = {
 const orderAPI = {
     baseURL: BASE_URL,
     endpoints: {
-        orderHistory: (userId: number) => `/cll/orders/orders/history/${userId}`,
+        orderHistory: (userId: number) => `/cll/orders/history/${userId}`,
     },
 };
 

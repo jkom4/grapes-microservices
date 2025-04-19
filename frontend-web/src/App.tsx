@@ -3,16 +3,15 @@ import './index.css';
 import Navbar from './layouts/Navbar';
 import MainPage from './pages/Home';
 import { LanguageProvider } from './features/LanguageContext';
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
-import AllArticles from "./pages/AllArticles";
-import ArticleDetails from "./pages/ArticleDetails";
-import ShoppingCart from "./pages/ShoppingCart";
-import AdminPage from "./pages/admin/Admin";
-import AccountPage from "./pages/AccountPage";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import AllArticles from './pages/AllArticles';
+import ArticleDetails from './pages/ArticleDetails';
+import ShoppingCart from './pages/ShoppingCart';
+import AdminPage from './pages/admin/Admin';
+import AccountPage from './pages/AccountPage';
 
 const App: React.FC = () => {
     return (
-        /*   <AuthProvider> */
         <LanguageProvider>
             <Router>
                 <Navbar />
@@ -26,7 +25,6 @@ const App: React.FC = () => {
                 </Routes>
             </Router>
         </LanguageProvider>
-        /*  <AuthProvider /> */
     );
 };
 
