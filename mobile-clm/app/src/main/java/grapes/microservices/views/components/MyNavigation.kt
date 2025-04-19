@@ -3,7 +3,6 @@ package grapes.microservices.views.components
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -15,8 +14,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import grapes.microservices.Screen
 import grapes.microservices.views.ArticleDetails.ArticleDetailScreen
-import grapes.microservices.views.CartScreen.CartScreen
 import grapes.microservices.views.AllArticles.AllArticlesScreen
+import grapes.microservices.views.CartScreen.CartScreen
 import grapes.microservices.views.Home.HomeScreen
 import grapes.microservices.views.OrderHistory.OrderHistoryScreen
 import grapes.microservices.views.Settings.SettingsScreen

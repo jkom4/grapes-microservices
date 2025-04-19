@@ -2,8 +2,10 @@ package grapes.microservices.models.network
 
 import grapes.microservices.models.data.Article
 import grapes.microservices.models.data.Cart
+import grapes.microservices.models.data.CartResponse
 import grapes.microservices.models.data.Order
 import okhttp3.OkHttpClient
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -42,24 +44,20 @@ interface ArticleApiService {
     @GET("clm/cart/{orderId}")
     suspend fun getCart(@Path("orderId") orderId: Int): Cart
 
-    @DELETE("clm/cart/remove/{itemId}")
-    suspend fun removeFromCart(@Path("itemId") itemId: Int): retrofit2.Response<Unit>
-
-    @POST("clm/cart/pay/{orderId}")
-    suspend fun payCart(
+    @DELETE("clm/cart/remove/{orderId}/{itemId}")
+    suspend fun removeFromCart(
         @Path("orderId") orderId: Int,
-        @Query("address") address: String,
-        @Query("phoneNumber") phoneNumber: String,
-        @Query("customerName") customerName: String,
-        @Query("country") country: String,
-        @Query("postalCode") postalCode: String
-    ): retrofit2.Response<Unit>
+        @Path("itemId") itemId: Int
+    ): Response<Unit>
+
+    @POST("clm/cart/pay")
+    suspend fun payCart(@Body request: PayCartRequest): Response<Unit>
 
     @DELETE("clm/cart/clear/{orderId}")
     suspend fun clearCart(@Path("orderId") orderId: Int): retrofit2.Response<Unit>
 
     @POST("clm/cart/init")
-    suspend fun initCart(@Body request: InitCartRequest): retrofit2.Response<Unit>
+    suspend fun initCart(@Body request: InitCartRequest): Response<CartResponse>
 
     @POST("clm/cart/add")
     suspend fun addToCart(@Body request: AddToCartRequest): retrofit2.Response<Unit>
@@ -86,9 +84,19 @@ interface OrderApiService {
 }
 
 data class InitCartRequest(val userId: Int)
+
 data class AddToCartRequest(
     val orderId: Int,
     val articleId: Int,
     val quantityKg: Float,
     val quantity: Float
+)
+
+data class PayCartRequest(
+    val orderId: Int,
+    val customerName: String,
+    val phoneNumber: String,
+    val address: String,
+    val country: String,
+    val postalCode: String
 )

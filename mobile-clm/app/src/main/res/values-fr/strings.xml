@@ -21,7 +21,7 @@
     <string name="field_name">Nom</string>
     <string name="field_email">Adresse e-mail</string>
     <string name="field_phone">Numéro de téléphone</string>
-    <string name="field_address">Adresse</string>
+    <string name="field_address">Adresse complète</string>
     <string name="field_country">Pays</string>
     <string name="field_city">Ville</string>
     <string name="field_state">État</string>

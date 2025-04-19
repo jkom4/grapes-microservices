@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.*
@@ -23,6 +22,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -30,14 +31,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import grapes.microservices.R
 import grapes.microservices.models.network.RetrofitClient
 import grapes.microservices.models.repository.ArticleRepository
 import grapes.microservices.viewmodel.ArticleState
 import grapes.microservices.viewmodel.ArticleViewModel
 import grapes.microservices.viewmodel.ArticleViewModelFactory
 import grapes.microservices.viewmodel.CartState
-import androidx.compose.ui.res.stringResource
-import grapes.microservices.R
 import kotlinx.coroutines.delay
 
 @Composable
@@ -47,11 +47,24 @@ fun ArticleDetailScreen(
 ) {
     var showConfirmation by remember { mutableStateOf(false) }
 
-    // Initialize the repository and ViewModel
-    val repository = ArticleRepository(RetrofitClient.articleApiService)
-    val viewModel: ArticleViewModel = viewModel(
-        factory = ArticleViewModelFactory(repository, RetrofitClient.articleApiService)
-    )
+    // Obtenir le Context pour initialiser CartManager
+    val context = LocalContext.current
+
+    // Initialiser les dépendances
+    val repository = remember { ArticleRepository(RetrofitClient.articleApiService) }
+    val apiService = remember { RetrofitClient.articleApiService }
+
+    // Créer la factory avec CartManager
+    val viewModelFactory = remember {
+        ArticleViewModelFactory.createFactory(
+            context = context,
+            repository = repository,
+            apiService = apiService
+        )
+    }
+
+    // Initialiser le ViewModel
+    val viewModel: ArticleViewModel = viewModel(factory = viewModelFactory)
     val articleState = viewModel.articleState.collectAsState()
     val cartState = viewModel.cartState.collectAsState()
 
@@ -234,7 +247,7 @@ fun ArticleDetailScreen(
                                     showConfirmation = true
                                     delay(1500)
                                     showConfirmation = false
-                                    viewModel.resetCartState()
+                                    viewModel.resetPaymentState()
                                     navController.popBackStack()
                                 }
 

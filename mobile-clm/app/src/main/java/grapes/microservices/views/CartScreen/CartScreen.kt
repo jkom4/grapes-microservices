@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
@@ -27,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import grapes.microservices.R
 import grapes.microservices.models.network.RetrofitClient
 import grapes.microservices.models.repository.ArticleRepository
 import grapes.microservices.viewmodel.ArticleViewModel
@@ -34,18 +37,30 @@ import grapes.microservices.viewmodel.ArticleViewModelFactory
 import grapes.microservices.viewmodel.CartScreenState
 import grapes.microservices.viewmodel.PaymentState
 import kotlinx.coroutines.delay
-import androidx.compose.ui.res.stringResource
-import grapes.microservices.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     navController: NavController
 ) {
-    val repository = ArticleRepository(RetrofitClient.articleApiService)
-    val viewModel: ArticleViewModel = viewModel(
-        factory = ArticleViewModelFactory(repository, RetrofitClient.articleApiService)
-    )
+    // Obtenir le Context pour initialiser CartManager
+    val context = LocalContext.current
+
+    // Initialiser les dépendances
+    val repository = remember { ArticleRepository(RetrofitClient.articleApiService) }
+    val apiService = remember { RetrofitClient.articleApiService }
+
+    // Créer la factory avec CartManager
+    val viewModelFactory = remember {
+        ArticleViewModelFactory.createFactory(
+            context = context,
+            repository = repository,
+            apiService = apiService
+        )
+    }
+
+    // Initialiser le ViewModel
+    val viewModel: ArticleViewModel = viewModel(factory = viewModelFactory)
     val cartState = viewModel.cartScreenState.collectAsState()
     val paymentState = viewModel.paymentState.collectAsState()
 
@@ -54,10 +69,6 @@ fun CartScreen(
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
-    var country by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
-    var department by remember { mutableStateOf("") }
-    var zipCode by remember { mutableStateOf("") }
     var cardNumber by remember { mutableStateOf("") }
     var expiryDate by remember { mutableStateOf("") }
     var cvc by remember { mutableStateOf("") }
@@ -81,10 +92,12 @@ fun CartScreen(
     // Shipping Fee
     val shippingFee = 5f
 
+    // Charger le panier au démarrage
     LaunchedEffect(Unit) {
-        viewModel.fetchCart(orderId = 1)
+        viewModel.fetchCart()
     }
 
+    // Gérer le succès du paiement
     LaunchedEffect(paymentState.value) {
         if (paymentState.value is PaymentState.Success) {
             showPaymentConfirmation = true
@@ -236,7 +249,7 @@ fun CartScreen(
                                                 }
                                                 IconButton(
                                                     onClick = {
-                                                        viewModel.removeFromCart(item.id, orderId = 1)
+                                                        viewModel.removeFromCart(item.id)
                                                     },
                                                     modifier = Modifier
                                                         .size(40.dp)
@@ -374,10 +387,6 @@ fun CartScreen(
                                             Triple(R.string.field_email, email, { newValue: String -> email = newValue }),
                                             Triple(R.string.field_phone, phoneNumber, { newValue: String -> phoneNumber = newValue }),
                                             Triple(R.string.field_address, address, { newValue: String -> address = newValue }),
-                                            Triple(R.string.field_country, country, { newValue: String -> country = newValue }),
-                                            Triple(R.string.field_city, city, { newValue: String -> city = newValue }),
-                                            Triple(R.string.field_state, department, { newValue: String -> department = newValue }),
-                                            Triple(R.string.field_zip, zipCode, { newValue: String -> zipCode = newValue }),
                                             Triple(R.string.field_card_number, cardNumber, { newValue: String -> cardNumber = newValue }),
                                             Triple(R.string.field_expiry, expiryDate, { newValue: String -> expiryDate = newValue }),
                                             Triple(R.string.field_cvc, cvc, { newValue: String -> cvc = newValue })
@@ -445,17 +454,17 @@ fun CartScreen(
                                         onClick = {
                                             // Validate required fields
                                             if (fullName.isBlank() || phoneNumber.isBlank() || address.isBlank() ||
-                                                country.isBlank() || zipCode.isBlank()) {
-                                                errorMessage = errorRequiredFieldsMessage // Use the pre-fetched string
+                                                cardNumber.isBlank() || expiryDate.isBlank() || cvc.isBlank()
+                                            ) {
+                                                errorMessage = errorRequiredFieldsMessage
                                             } else {
                                                 errorMessage = ""
                                                 viewModel.payAndClearCart(
-                                                    orderId = 1,
                                                     address = address,
                                                     phoneNumber = phoneNumber,
                                                     customerName = fullName,
-                                                    country = country,
-                                                    postalCode = zipCode
+                                                    country = "",
+                                                    postalCode = ""
                                                 )
                                             }
                                         },
