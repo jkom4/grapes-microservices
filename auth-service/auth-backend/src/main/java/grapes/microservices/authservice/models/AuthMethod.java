@@ -10,7 +10,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum AuthMethod {
     EMAIL("EMAIL"),
-    SMS("SMS");
+    SMS("SMS"),
+    EID("EID");
 
     private final String name;
 }

@@ -1,6 +1,6 @@
 package grapes.microservices.authservice.services;
 
-import grapes.microservices.authservice.models.User;
+import grapes.microservices.authservice.models.Role;
 import grapes.microservices.authservice.utils.AuthLogger;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
@@ -34,7 +34,7 @@ public class TokenService {
     private String secretKey;
 
     @Value("${auth.service.jwt.expiration.time}")
-    private long expirationTime;
+    private long EXPIRATION_TIME;
 
     @Autowired
     private SessionService sessionService;
@@ -84,20 +84,24 @@ public class TokenService {
     /**
      * Generates a token for the given email
      * The token is valid for 24 hours
+     *
      * @param idStr the identifier to be used in the token
      * @return the generated token
      */
-    public String generateToken(String idStr) {
+    public String generateToken(String idStr, String name, Role role) {
         return Jwts.builder()
                 .setSubject(idStr)
+                .claim("name", name)
+                .claim("role", role.getRole())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME * 60 * 1000))
                 .signWith(SECRET_KEY)
                 .compact();
     }
 
     /**
      * Get the refresh token for the given user ID from the session service
+     *
      * @param userId the user ID
      * @return the refresh token
      */
@@ -111,6 +115,7 @@ public class TokenService {
 
     /**
      * Extracts the user ID from the given token
+     *
      * @param token the token to extract the user ID from
      * @return the user ID
      */
@@ -129,23 +134,28 @@ public class TokenService {
     }
 
     /**
-     * Validates the given token
-     * @param token the token to validate
-     * @return true if the token is valid, false otherwise
+     * Extracts the user's role from the given token
+     *
+     * @param token the token to extract the user's role from
+     * @return the user's role
      */
-    private boolean isTokenExpired(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration()
-                .before(new Date());
+    public String extractUserRole(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSECRET_KEY())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.get("role", String.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
      * Checks if the token is valid
      * The token is valid if it is not expired and the signature is valid
+     *
      * @param token the token to check
      * @return true if the token is valid, false otherwise
      */

@@ -8,15 +8,16 @@ import grapes.microservices.salesservice.models.OrderItem;
 import grapes.microservices.salesservice.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/cll/orders")
 public class OrderController {
 
@@ -41,7 +42,8 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/orders/history/{userId}")
+
+    @GetMapping("/history/{userId}")
     public ResponseEntity<List<OrderSummaryDTO>> getOrderHistory(@PathVariable Integer userId) {
         List<Order> orders = orderService.getOrdersByUserId(userId);
         List<OrderSummaryDTO> dtos = orders.stream()
@@ -52,7 +54,8 @@ public class OrderController {
     }
 
 
-    @GetMapping("/orders/{orderId}/items")
+
+    @GetMapping("/{orderId}/items")
     public ResponseEntity<List<OrderDTO>> getOrderItems(@PathVariable Integer orderId) {
         List<OrderItem> items = orderService.getOrderItemsByOrderId(orderId);
 
@@ -62,8 +65,6 @@ public class OrderController {
 
         return ResponseEntity.ok(dtos);
     }
-
-
 
 
 }

@@ -1,0 +1,90 @@
+version: '3.9'
+
+services:
+  mariadb:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
+    container_name: mariadb-primary
+    env_file: .env
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MARIADB_REPLICATION_USER: ${MARIADB_REPLICATION_USER}
+      MARIADB_REPLICATION_PASSWORD: ${MARIADB_REPLICATION_PASSWORD}
+      MARIADB_REPLICATION_ROLE: master
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  mongodb:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mongodb-grapes:latest
+    container_name: mongodb-primary
+    env_file: .env
+    command: ["--replSet", "rs0"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_USER_RW: ${MONGO_USER_RW}
+      MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
+
+  rabbitmq:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/rabbitmq-grapes:latest
+    container_name: rabbitmq
+    env_file: .env
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  redis-master:
+    image: redis:7
+    container_name: redis-master
+    ports:
+      - "6379:6379"
+
+  # Backends & Gateway
+  api-gateway:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/api-gateway:latest
+    container_name: api-gateway
+    env_file: .env
+    ports:
+      - "8090:8090"
+
+  auth-service:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-backend:latest
+    container_name: auth-backend
+    ports:
+      - "8091:8091"
+
+  sales-service:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/sales-service:latest
+    container_name: sales-backend
+    ports:
+      - "8092:8092"
+
+  payment-service:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-backend:latest
+    container_name: payment-backend
+    ports:
+      - "8094:8094"
+
+  chat-service:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/chat-service:latest
+    container_name: chat-backend
+    ports:
+      - "8095:8095"
+
+  data-mining-service:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-mining-service:latest
+    container_name: data-mining-backend
+    ports:
+      - "8096:8096"
+
+volumes:
+  mariadb_data:
+  mongodb_data:
+  rabbitmq_data:

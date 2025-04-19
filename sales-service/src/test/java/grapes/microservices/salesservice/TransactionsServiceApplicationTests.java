@@ -11,10 +11,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.junit.jupiter.api.Disabled;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles(value = "test")
 @Import(RabbitTestConfig.class)
 class TransactionsServiceApplicationTests {
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -293,8 +294,8 @@ class TransactionsServiceApplicationTests {
     }
 */
 
-   @Test
-   @Disabled("Ce test est ignoré")
+    @Test
+    @Disabled("Ce test est ignoré")
     void testGetArticleById() throws Exception {
         String articleJson = """
         {
@@ -330,7 +331,7 @@ class TransactionsServiceApplicationTests {
 
 
 
-   @Test
+    @Test
     @Disabled("Ce test est ignoré")
     void testEndToEndOrderPaymentAndDeliveryCreation() throws Exception {
 

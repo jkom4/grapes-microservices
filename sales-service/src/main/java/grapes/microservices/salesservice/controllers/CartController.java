@@ -3,6 +3,7 @@ package grapes.microservices.salesservice.controllers;
 import grapes.microservices.salesservice.dto.CartRequestDTO;
 import grapes.microservices.salesservice.dto.CartResponseDTO;
 import grapes.microservices.salesservice.dto.CreateOrderRequestDTO;
+import grapes.microservices.salesservice.dto.PaymentRequestDTO;
 import grapes.microservices.salesservice.models.Order;
 import grapes.microservices.salesservice.models.OrderItem;
 import grapes.microservices.salesservice.services.CartService;
@@ -20,7 +21,7 @@ import java.io.FileNotFoundException;
  * confirming payment, and retrieving orders.
  */
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 @RequestMapping("/clm/cart")
 public class CartController {
 
@@ -87,11 +88,13 @@ public class CartController {
     /**
      * Removes a specific item from the cart.
      */
-    @DeleteMapping("/remove/{itemId}")
+    @DeleteMapping("/remove/{orderId}/{itemId}")
     @Transactional
-    public ResponseEntity<?> removeItemFromCart(@PathVariable Integer itemId) {
+    public ResponseEntity<?> removeItemFromCart(
+            @PathVariable Integer orderId,
+            @PathVariable Integer itemId) {
         try {
-            cartService.removeFromCart(itemId);
+            cartService.removeFromCart(orderId, itemId);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -99,6 +102,7 @@ public class CartController {
             return ResponseEntity.internalServerError().body("Failed to remove item: " + e.getMessage());
         }
     }
+
 
     /**
      * Clears all items from a cart by order ID.
@@ -122,17 +126,20 @@ public class CartController {
      * Finalizes the payment: verifies stock, updates quantities,
      * generates invoice, and clears cart.
      */
-    @PostMapping("/pay/{orderId}")
+    @PostMapping("/pay")
     @Transactional
-    public ResponseEntity<?> simulatePayment(
-            @PathVariable Integer orderId,
-            @RequestParam String address,
-            @RequestParam String phoneNumber,
-            @RequestParam String customerName,
-            @RequestParam String country,
-            @RequestParam String postalCode) {
+
+    public ResponseEntity<?> simulatePayment(@RequestBody PaymentRequestDTO request) {
         try {
-            orderService.finalizePaymentAndClearCart(orderId, address, phoneNumber, customerName, country, postalCode);
+            orderService.finalizePaymentAndClearCart(
+                    request.getOrderId(),
+                    request.getAddress(),
+                    request.getPhoneNumber(),
+                    request.getCustomerName(),
+                    request.getCountry(),
+                    request.getPostalCode()
+            );
+
             return ResponseEntity.ok("Payment confirmed, stock updated and cart cleared.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
