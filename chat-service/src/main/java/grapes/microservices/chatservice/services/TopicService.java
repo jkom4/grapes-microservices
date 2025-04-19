@@ -1,11 +1,13 @@
 package grapes.microservices.chatservice.services;
 
+import grapes.microservices.chatservice.config.RabbitMQConfig;
 import grapes.microservices.chatservice.dto.MessageDto;
 import grapes.microservices.chatservice.dto.TopicDto;
 import grapes.microservices.chatservice.models.Message;
 import grapes.microservices.chatservice.repositories.ChatRepository;
 import grapes.microservices.chatservice.repositories.MessageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,8 +18,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TopicService {
 
-    private final ChatRepository chatRepository;
+    private final ChatRepository    chatRepository;
     private final MessageRepository messageRepository;
+    private final RabbitTemplate    rabbitTemplate;
 
     public List<TopicDto> getAllTopics() {
         return chatRepository.findAll()
@@ -42,20 +45,30 @@ public class TopicService {
     }
 
     public MessageDto postMessage(String topicId, String userId, String content) {
+
         Message message = Message.builder()
                 .chatId(topicId)
-                .senderId(userId) // userId comes directly from the token
+                .senderId(userId)
                 .content(content)
                 .createdAt(LocalDateTime.now())
                 .build();
+        Message saved = messageRepository.save(message);
 
-        Message savedMessage = messageRepository.save(message);
 
-        return MessageDto.builder()
-                .userId(savedMessage.getSenderId())
-                .content(savedMessage.getContent())
-                .createdAt(savedMessage.getCreatedAt().toString())
-                .topicId(savedMessage.getChatId())
+        MessageDto dto = MessageDto.builder()
+                .userId(saved.getSenderId())
+                .content(saved.getContent())
+                .createdAt(saved.getCreatedAt().toString())
+                .topicId(saved.getChatId())
                 .build();
+
+        String routingKey = "chat.to.room." + topicId;
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE_NAME,
+                routingKey,
+                dto
+        );
+
+        return dto;
     }
 }
