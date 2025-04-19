@@ -1,6 +1,7 @@
 package grapes.microservices.authservice.services;
 
 import grapes.microservices.authservice.utils.AuthLogger;
+import grapes.microservices.authservice.utils.challenge_request_limiter.OneCallPerMinutePerUser;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,7 @@ public class SmsService {
      * @param recipientPhoneNumber the phone number of the recipient
      * @param content the message to send
      */
+    @OneCallPerMinutePerUser
     public boolean sendSms(String recipientPhoneNumber, String content) {
         // Check if the phone number is valid
         if (!isValidPhoneNumber(recipientPhoneNumber, "+32")) {

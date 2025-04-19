@@ -1,0 +1,37 @@
+.header {
+  -fx-border-color: transparent transparent rgba(0, 0, 0, 0.2) transparent;
+  -fx-border-width: 0 0 1px 0; }
+
+.footer {
+  -fx-border-color: rgba(0, 0, 0, 0.2) transparent transparent transparent;
+  -fx-border-width: 1px 0 0 0; }
+
+.button-icon {
+  -fx-opacity: 0.2; }
+
+.button-icon:hover {
+  -fx-opacity: 0.4; }
+
+.button-icon:pressed {
+  -fx-opacity: 0.1; }
+
+.scroll-bar:vertical {
+  -fx-padding: 0;
+  -fx-background-color: transparent;
+  /* Background for scrollbar track */ }
+
+.scroll-bar:vertical .increment-button,
+.scroll-bar:vertical .decrement-button {
+  -fx-background-color: transparent;
+  /* Hide increment/decrement buttons */ }
+
+.scroll-bar:vertical .thumb {
+  -fx-background-insets: 2;
+  -fx-background-radius: 5;
+  /* Rounded corners */ }
+
+.scroll-bar:vertical .thumb {
+  -fx-background-color: #9a9a9a; }
+
+.scroll-bar .thumb:hover {
+  -fx-background-color: rgba(0, 0, 0, 0.2); }

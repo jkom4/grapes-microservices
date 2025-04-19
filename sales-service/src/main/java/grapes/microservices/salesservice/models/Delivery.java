@@ -51,4 +51,20 @@ public class Delivery {
     @Column(name = "signature")
     private byte[] signature;
 
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "postal_code")
+    private String postalCode;
+
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+
 }

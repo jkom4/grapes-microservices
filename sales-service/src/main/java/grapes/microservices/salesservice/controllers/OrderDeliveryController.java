@@ -26,4 +26,13 @@ public class OrderDeliveryController {
         orderDeliveryService.markOrderItemAsScanned(orderItemId);
         return ResponseEntity.ok("OrderItem marked as scanned successfully.");
     }
+
+    @PatchMapping("/scan-all/{tripId}")
+    public ResponseEntity<String> markAllOrderItemsAsScanned(@PathVariable Integer tripId) {
+        orderDeliveryService.markAllOrderItemsAsScannedForTrip(tripId);
+        return ResponseEntity.ok("All order items for trip " + tripId + " marked as scanned successfully.");
+    }
+
+
+
 }

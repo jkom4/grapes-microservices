@@ -1,0 +1,10 @@
+@import "../global";
+
+// SCROLL BAR
+.scroll-bar:vertical .thumb {
+  -fx-background-color: $background;
+}
+
+.scroll-bar .thumb:hover {
+  -fx-background-color: $dark;
+}
