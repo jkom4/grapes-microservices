@@ -273,16 +273,16 @@ fun ArticleDetailScreen(
                         // Add to cart button
                         Button(
                             onClick = {
-                                val qty = quantity.toFloatOrNull() ?: 0f
+                                val qty = quantity.toIntOrNull() ?: 0
                                 if (qty > 0) {
                                     viewModel.addToCart(
                                         articleId = articleId,
-                                        quantityKg = if (!isUnitSelected) qty else 0f,
-                                        quantityUnit = if (isUnitSelected) qty else 0f
+                                        quantityKg = if (!isUnitSelected) qty.toFloat() else 0f,
+                                        quantityUnit = if (isUnitSelected) qty else 0
                                     )
                                 }
                             },
-                            enabled = quantity.toFloatOrNull()?.let { it > 0 } ?: false,
+                            enabled = quantity.toIntOrNull()?.let { it > 0 } ?: false,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 20.dp, bottom = 20.dp)

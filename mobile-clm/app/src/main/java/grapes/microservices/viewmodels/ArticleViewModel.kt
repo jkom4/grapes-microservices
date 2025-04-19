@@ -118,7 +118,7 @@ class ArticleViewModel(
         }
     }
 
-    fun addToCart(articleId: Int, quantityKg: Float, quantityUnit: Float) {
+    fun addToCart(articleId: Int, quantityKg: Float, quantityUnit: Int) {
         viewModelScope.launch {
             _cartState.value = CartState.Loading
             try {
@@ -134,11 +134,12 @@ class ArticleViewModel(
                         orderId = orderId,
                         articleId = articleId,
                         quantityKg = quantityKg,
-                        quantity = quantityUnit
+                        quantity = quantityUnit.toFloat() // Convertir en Float pour l'API
                     )
                 )
                 if (addResponse.isSuccessful) {
                     _cartState.value = CartState.Success
+                    fetchCart() // Rafraîchir le panier après ajout
                 } else {
                     _cartState.value = CartState.Error("Error adding to cart")
                 }
@@ -153,14 +154,32 @@ class ArticleViewModel(
             val orderId = cartManager.orderId.value
             if (orderId == null) {
                 _cartScreenState.value = CartScreenState.Error("Cart not initialized")
+                Log.e(TAG, "fetchCart failed: orderId is null")
                 return@launch
             }
             _cartScreenState.value = CartScreenState.Loading
             try {
                 val cart = apiService.getCart(orderId)
-                _cartScreenState.value = CartScreenState.Success(cart)
+                Log.d(TAG, "Cart fetched: $cart")
+                cart.items.forEach { item ->
+                    Log.d(TAG, "Item: ${item.articleName}, quantityKg: ${item.quantityKg}, quantity: ${item.quantity}, price: ${item.price}, itemTotal: ${if (item.quantityKg > 0) item.quantityKg * item.price else item.quantity * item.price}")
+                }
+                Log.d(TAG, "API totalPrice: ${cart.totalPrice}")
+                // Recalculer totalPrice
+                val calculatedTotalPrice = cart.items.sumOf { item ->
+                    if (item.quantityKg > 0) {
+                        (item.quantityKg * item.price).toDouble()
+                    } else {
+                        (item.quantity * item.price).toDouble()
+                    }
+                }.toFloat()
+                Log.d(TAG, "Calculated totalPrice: $calculatedTotalPrice")
+                // Créer un nouvel objet Cart avec le totalPrice corrigé
+                val correctedCart = cart.copy(totalPrice = calculatedTotalPrice)
+                _cartScreenState.value = CartScreenState.Success(correctedCart)
             } catch (e: Exception) {
                 _cartScreenState.value = CartScreenState.Error(e.message ?: "Error fetching cart")
+                Log.e(TAG, "fetchCart error: ${e.message}")
             }
         }
     }
