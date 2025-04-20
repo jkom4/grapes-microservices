@@ -2,10 +2,12 @@ package grapes.microservices.chatservice.controllers;
 
 import grapes.microservices.chatservice.dto.MessageDto;
 import grapes.microservices.chatservice.dto.TopicDto;
+import grapes.microservices.chatservice.dto.UserDto;
 import grapes.microservices.chatservice.services.TopicService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,5 +44,17 @@ public class TopicController {
         String content = body.get("content");
 
         return topicService.postMessage(id, token, content);
+    }
+
+    @GetMapping("/user")
+    public UserDto getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        String userId = null;
+        String username = null;
+
+        return new UserDto(userId, username);
     }
 }
