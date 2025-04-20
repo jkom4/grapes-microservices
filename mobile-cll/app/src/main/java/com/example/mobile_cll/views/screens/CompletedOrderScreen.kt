@@ -1,7 +1,10 @@
 package com.example.mobile_cll.views
 
+import android.app.Activity
+import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -25,24 +28,15 @@ import com.example.mobile_cll.views.components.TopSection
 import com.example.mobile_cll.viewmodels.CompletedOrderViewModel
 import com.example.mobile_cll.viewmodels.CompletedOrderViewModelFactory
 
-/**
- * Screen to display the completed order form.
- * Allows users to add comments, upload images, provide a signature, and submit the order.
- *
- * @param navController Navigation controller to handle navigation.
- * @param tripId ID of the trip for which the order is completed.
- * @param viewModel ViewModel to manage UI state and business logic.
- */
 @Composable
 fun CompletedOrderScreen(
     navController: NavController,
     tripId: String,
     viewModel: CompletedOrderViewModel = viewModel(factory = CompletedOrderViewModelFactory(LocalContext.current))
 ) {
-    Log.d("CompletedOrderScreen", "tripId receive in start: $tripId")
+    Log.d("CompletedOrderScreen", "tripId reçu au démarrage: $tripId")
     val context = LocalContext.current
 
-    // Collect UI state from ViewModel
     val commentState by viewModel.commentState.collectAsState()
     val imageUris by viewModel.imageUris.collectAsState()
     val isDoorstepDelivery by viewModel.isDoorstepDelivery.collectAsState()
@@ -50,21 +44,17 @@ fun CompletedOrderScreen(
     val showSignatureDialog by viewModel.showSignatureDialog.collectAsState()
     val saveStatus by viewModel.saveStatus.collectAsState()
 
-    /**
-     * Image picker launcher that allows users to select an image from their device.
-     * The selected image URI is added to the ViewModel.
-     */
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> uri?.let { viewModel.addImage(it) } }
 
-    /**
-     * Observes the save status and navigates to the last screen if the save is successful.
-     */
     LaunchedEffect(saveStatus) {
         saveStatus?.let { status ->
-            if (status == "Success") {
-                navController.navigate("lastScreen")
+            Log.d("CompletedOrderScreen", "saveStatus modifié: $status")
+            if (status.startsWith("Erreur")) {
+                Log.e("CompletedOrderScreen", "Erreur de soumission: $status")
+                Toast.makeText(context, "Erreur: $status", Toast.LENGTH_LONG).show()
+                viewModel.resetSaveStatus()
             }
         }
     }
@@ -79,13 +69,10 @@ fun CompletedOrderScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Text("Completed Order", fontSize = 22.sp, color = Color.Black)
+            Text("CompletedOrder", fontSize = 22.sp, color = Color.Black)
             Spacer(modifier = Modifier.height(16.dp))
 
-            /**
-             * Input field for adding a comment.
-             */
-            Text("Add a comment", fontSize = 16.sp, color = Color.Gray)
+            Text("Ajouter un commentaire", fontSize = 16.sp, color = Color.Gray)
             TextField(
                 value = commentState,
                 onValueChange = { viewModel.updateComment(it) },
@@ -93,15 +80,12 @@ fun CompletedOrderScreen(
                     .fillMaxWidth()
                     .height(150.dp)
                     .padding(8.dp),
-                placeholder = { Text("Enter a comment...", color = Color.Gray) }
+                placeholder = { Text("Entrez un commentaire...", color = Color.Gray) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Click Pictures of the product", fontSize = 16.sp, color = Color.Gray)
+            Text("Prendre des photos du produit", fontSize = 16.sp, color = Color.Gray)
 
-            /**
-             * Displays selected images in a horizontal list.
-             */
             LazyRow {
                 items(imageUris) { uri ->
                     Image(
@@ -116,62 +100,45 @@ fun CompletedOrderScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            /**
-             * Button to open the image picker and select photos.
-             */
             Button(
                 onClick = { imagePicker.launch("image/*") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E))
             ) {
-                Text("Add Photos", color = Color.White)
+                Text("Ajouter des photos", color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            /**
-             * Switch to enable or disable doorstep delivery.
-             */
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Switch(
                     checked = isDoorstepDelivery,
                     onCheckedChange = { viewModel.toggleDoorstepDelivery(it) }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Doorstep Delivery", fontSize = 16.sp)
+                Text("Livraison à domicile", fontSize = 16.sp)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            /**
-             * Button to submit the completed order form.
-             * Logs the input data before submitting it.
-             */
             Button(
                 onClick = {
-                    Log.d("CompletedOrderScreen", "Datas before recording :")
+                    Log.d("CompletedOrderScreen", "Soumission des données:")
                     Log.d("CompletedOrderScreen", "tripId: $tripId")
-                    Log.d("CompletedOrderScreen", "deliveryStatusId: 1")
-                    Log.d("CompletedOrderScreen", "comment: $commentState")
+                    Log.d("CompletedOrderScreen", "commentaire: $commentState")
                     Log.d("CompletedOrderScreen", "imageUris: $imageUris")
                     Log.d("CompletedOrderScreen", "isDoorstepDelivery: $isDoorstepDelivery")
                     Log.d("CompletedOrderScreen", "signatureBitmap: ${signatureBitmap != null}")
 
-                    viewModel.saveDeliveryForTrip(
-                        tripId = tripId,
-                        deliveryStatusId = 1
-                    )
+                    viewModel.confirmDelivery(tripId)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E))
             ) {
-                Text("Submit", color = Color.White)
+                Text("Soumettre", color = Color.White)
             }
         }
 
-        /**
-         * Dialog for collecting user signature.
-         */
         if (showSignatureDialog) {
             AlertDialog(
                 onDismissRequest = { viewModel.dismissSignatureDialog() },
@@ -181,13 +148,13 @@ fun CompletedOrderScreen(
                             onClick = { viewModel.clearSignature() },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.7f))
                         ) {
-                            Text("Clear")
+                            Text("Effacer")
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
-                            onClick = { viewModel.dismissSignatureDialog() }
+                            onClick = { viewModel.confirmDelivery(tripId) }
                         ) {
-                            Text("Confirm")
+                            Text("Confirmer")
                         }
                     }
                 },

@@ -10,8 +10,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mobile_cll.models.DatabaseHelper
-import com.example.mobile_cll.models.repository.DeliveryDriverRepository
 
 /**
  * Composable displaying a top section with:
@@ -23,13 +21,10 @@ import com.example.mobile_cll.models.repository.DeliveryDriverRepository
 @Composable
 fun TopSection(
     tripCount: Int,
-    isFinished: Boolean = false
+    isFinished: Boolean = false,
 ) {
     val context = LocalContext.current
-    val databaseHelper = remember { DatabaseHelper(context) }
-    val driverRepository = remember { DeliveryDriverRepository(databaseHelper) }
 
-    val driver by remember { mutableStateOf(driverRepository.getDeliveryDriver()) }
 
     Column(
         modifier = Modifier
@@ -40,15 +35,13 @@ fun TopSection(
         horizontalAlignment = Alignment.Start
     ) {
         Spacer(modifier = Modifier.height(35.dp))
-        if (driver != null) {
-            Text(
-                "Hello ${driver!!.firstName}",
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        } else {
-            throw IllegalStateException("Driver information is missing or incomplete. Application cannot proceed without a valid driver name.")
-        }
+
+        Text(
+            text = "Hello Mathys",
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.onPrimary
+        )
+
         Text(
             text = "$tripCount trips ${if (isFinished) "done" else "to do"}",
             fontSize = 28.sp,

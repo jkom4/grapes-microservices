@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.mobile_cll.models.DatabaseHelper
 import com.example.mobile_cll.network.RetrofitClient
 import com.example.mobile_cll.repository.OrderRepository
 import com.example.mobile_cll.ScanCodeInput
@@ -31,7 +30,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ScanView(
     navController: NavController?,
-    databaseHelper: DatabaseHelper,
     orderId: String = "",
     tripId: String = ""
 ) {
@@ -156,6 +154,4 @@ private suspend fun submitScanCode(orderId: String, apiService: RetrofitClient.A
 @Composable
 fun ScanViewPreview() {
     val dummyContext = null
-    val dummyDatabaseHelper = dummyContext?.let { DatabaseHelper(it) }
-    ScanView(navController = null, databaseHelper = dummyDatabaseHelper!!, orderId = "138", tripId = "186")
 }

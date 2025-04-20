@@ -62,22 +62,4 @@ class TripDetailsViewModel(private val orderRepository: OrderRepository) : ViewM
             Log.d(TAG, "No update needed, trip is unchanged: $trip")
         }
     }
-
-    /**
-     * Forces a reload of orders for the current trip, if a trip is already loaded.
-     */
-    fun refreshOrders() {
-        _trip.value?.let {
-            loadId(it, forceRefresh = true)
-        }
-    }
-
-    /**
-     * Placeholder function for handling order scan clicks. Currently not implemented.
-     *
-     * @param orderItemId The ID of the order that was scanned.
-     */
-    fun onScanClick(orderItemId: String) {
-        // Can be used for additional actions if needed
-    }
 }

@@ -42,7 +42,7 @@ fun TripDetailsScreen(
     tripAddress: String,
     viewModel: TripDetailsViewModel = viewModel(factory = TripDetailsViewModelFactory())
 ) {
-    viewModel.loadId(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress))
+    viewModel.loadId(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress, isFinished = false))
 
     val trip by viewModel.trip
     val orders by viewModel.orders
@@ -57,7 +57,7 @@ fun TripDetailsScreen(
     // Reload data after a scan
     LaunchedEffect(navController) {
         navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("scannedOrderId")?.observeForever { _ ->
-            viewModel.loadId(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress), forceRefresh = true)
+            viewModel.loadId(Trip(id = tripId, name = tripName, distance = tripDistance, address = tripAddress, isFinished = false), forceRefresh = true)
         }
     }
 

@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.NavHostController
-import com.example.mobile_cll.models.DatabaseHelper
 import com.example.mobile_cll.views.screens.EmailSentScreen
 import com.example.mobile_cll.views.screens.HomeScreen
 import com.example.mobile_cll.views.screens.ScanView
@@ -21,7 +20,7 @@ import com.example.mobile_cll.views.screens.TripDetailsScreen
  * @param databaseHelper The DatabaseHelper instance for database operations.
  */
 @Composable
-fun MyNavigation(navController: NavHostController, databaseHelper: DatabaseHelper) {
+fun MyNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "home") {
         // Home screen route
         composable("home") { HomeScreen(navController) }
@@ -61,7 +60,6 @@ fun MyNavigation(navController: NavHostController, databaseHelper: DatabaseHelpe
             val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
             ScanView(
                 navController = navController,
-                databaseHelper = databaseHelper,
                 orderId = orderId,
                 tripId = tripId
             )
@@ -71,7 +69,6 @@ fun MyNavigation(navController: NavHostController, databaseHelper: DatabaseHelpe
         composable("scan") {
             ScanView(
                 navController = navController,
-                databaseHelper = databaseHelper,
                 orderId = "",
                 tripId = ""
             )
