@@ -1,12 +1,14 @@
 package grapes.microservices.salesservice.services;
 
 import grapes.microservices.salesservice.dto.OrderDTO;
+import grapes.microservices.salesservice.models.Delivery;
 import grapes.microservices.salesservice.models.OrderItem;
 import grapes.microservices.salesservice.repositories.OrderItemRepository;
 import grapes.microservices.salesservice.repositories.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,5 +74,13 @@ public class OrderDeliveryService {
         }
 
         orderItemRepository.saveAll(orderItems);
+    }
+
+    public void updateScannedTimestamp(Integer tripId, LocalDateTime timestamp) {
+        Delivery delivery = deliveryRepository.findByOrderId(tripId)
+                .orElseThrow(() -> new IllegalArgumentException("Delivery not found with ORDER_ID: " + tripId));
+
+        delivery.setScannedAt(timestamp);
+        deliveryRepository.save(delivery);
     }
 }
