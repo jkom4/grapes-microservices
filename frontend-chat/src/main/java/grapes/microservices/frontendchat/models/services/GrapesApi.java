@@ -4,21 +4,19 @@ import com.google.gson.Gson;
 import grapes.microservices.frontendchat.models.Message;
 import grapes.microservices.frontendchat.models.Topic;
 import grapes.microservices.frontendchat.models.User;
-import grapes.microservices.frontendchat.models.dto.MessageDTO;
-import grapes.microservices.frontendchat.models.dto.MessageMapper;
-import grapes.microservices.frontendchat.models.dto.TopicDTO;
-import grapes.microservices.frontendchat.models.dto.TopicMapper;
+import grapes.microservices.frontendchat.models.dto.*;
+import grapes.microservices.frontendchat.models.exceptions.MyApiBadRequestException;
+import grapes.microservices.frontendchat.models.exceptions.MyApiConnectionException;
+import grapes.microservices.frontendchat.models.shared.UserSession;
 
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class GrapesApi implements IGrapesApi {
     public final String base;
@@ -35,20 +33,27 @@ public class GrapesApi implements IGrapesApi {
     });
 
     @Override
-    public CompletableFuture<User> authUser(String token) {
+    public CompletableFuture<User> getUser() {
         return CompletableFuture.supplyAsync(() -> {
-            // --- Simulate Network Delay ---
-            try {
-                System.out.println("[GrapesApi] checking user auth token");
-                TimeUnit.SECONDS.sleep(2); // Simulate 2 seconds delay
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // Restore interrupt status
-                System.err.println("SERVICE: Fetch interrupted!");
-                return null; // Return empty list on interruption
+            // Build request
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(base + "user"))
+                    .header("Authorization", "Bearer " + UserSession.getToken())
+                    .method("GET", HttpRequest.BodyPublishers.noBody())
+                    .build();
+
+            // Send request
+            var response = sendRequest(request);
+
+            if (response.statusCode() == 403) {
+                throw new CompletionException(new MyApiBadRequestException("Your request is unauthorized"));
             }
 
-            System.out.println("[GrapesApi] user auth token is valid");
-            return new User(2, "Jean");
+            // convert response
+            System.out.println("[GrapesApi] user loaded");
+            UserDTO user = GSON.fromJson(response.body(), UserDTO.class);
+            return UserMapper.toEntity(user);
+//            return new User("1", "Jean");
         }, executor);
     }
 
@@ -58,7 +63,7 @@ public class GrapesApi implements IGrapesApi {
             // Build request
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(base + "topics"))
-//                    .header("Authorization", "Bearer " + token)
+                    .header("Authorization", "Bearer " + UserSession.getToken())
                     .method("GET", HttpRequest.BodyPublishers.noBody())
                     .build();
 
@@ -80,7 +85,7 @@ public class GrapesApi implements IGrapesApi {
             // Build request
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(base + "topic/" + topicId + "/messages"))
-//                    .header("Authorization", "Bearer " + token)
+                    .header("Authorization", "Bearer " + UserSession.getToken())
                     .method("GET", HttpRequest.BodyPublishers.noBody())
                     .build();
 
@@ -106,7 +111,7 @@ public class GrapesApi implements IGrapesApi {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(base + "topic/" + topic.id() + "/message"))
                         .header("Content-Type", "application/json")
-                        // .header("Authorization", "Bearer " + token)
+                         .header("Authorization", "Bearer " + UserSession.getToken())
                         .POST(HttpRequest.BodyPublishers.ofString(jsonMessage))
                         .build();
 
@@ -133,6 +138,11 @@ public class GrapesApi implements IGrapesApi {
             Thread.currentThread().interrupt(); // Restore interrupt status
             System.err.println("[GrapesApi] request interrupted!");
             throw new RuntimeException("Error: " + e.getMessage(), e); // Return empty list on interruption
+        } catch (ConnectException e) {
+            // I cannot throw my exception here because we are in a lambda expression that doesn't allow it, so
+            //  instead we put it in another exception that is allowed.
+            var message = "Cannot connect to the Chat API! Is the API up? Is the device connected to Internet?";
+            throw new CompletionException(new MyApiConnectionException(message));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -12,5 +12,9 @@ public class UserSession {
     private ObjectProperty<User> authenticatedUser = new SimpleObjectProperty<>(null);
 
     @Getter
+    @Setter
+    private static String token = "";
+
+    @Getter
     private static final UserSession INSTANCE = new UserSession();
 }

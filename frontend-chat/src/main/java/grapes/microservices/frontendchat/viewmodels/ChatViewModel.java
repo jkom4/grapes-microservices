@@ -71,18 +71,16 @@ public class ChatViewModel {
         this.areMessagesLoading.set(true);
 
         this.apiService.fetchMessages(selectedTopicId)
-                .whenComplete((data, error) -> {
-                    Platform.runLater(() -> {
-                        if (error != null) {
-                            // Handle error case
-                            throw new RuntimeException(error);
-                        } else if (data != null) {
-                            // Handle success case
-                            messageListObserver.addAll(data);
-                        }
-                        this.areMessagesLoading.set(false);
-                    });
-                });
+                .whenComplete((data, error) -> Platform.runLater(() -> {
+                    if (error != null) {
+                        // Handle error case
+                        throw new RuntimeException(error);
+                    } else if (data != null) {
+                        // Handle success case
+                        messageListObserver.addAll(data);
+                    }
+                    this.areMessagesLoading.set(false);
+                }));
     }
 
     /**
@@ -176,7 +174,7 @@ public class ChatViewModel {
         // 2. /!\ CURRENTLY I MANAGE THE MESSAGE UNICITY BY THE DATE, to avoid duplicated messages (not the best way)
         // 3. As there is limited number of multicast groups (253), collisions can happen => so i check topic id
         multicastService.getMessageReveiceObserver().addListener((change, oldMessage, newMessage) -> {
-            final boolean IS_HIS_OWN_MESSAGE = newMessage.sender().id() == currentTopicObserver.get().id();
+            final boolean IS_HIS_OWN_MESSAGE = newMessage.sender().id().equals(UserSession.getINSTANCE().getAuthenticatedUser().get().id());
             final boolean IS_UNIQUE = !isMessageDateInLast10(messageListObserver, newMessage.getDateToString());
             final boolean IS_MESSAGE_FROM_ANOTHER_TOPIC = newMessage.topicId() != currentTopicObserver.get().id();
 

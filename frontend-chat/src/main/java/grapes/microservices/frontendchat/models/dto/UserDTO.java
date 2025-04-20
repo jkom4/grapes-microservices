@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class MessageDTO {
-    private String topicId;
-    private String userId;
+public class UserDTO {
+    private String id;
     private String username;
-    private String content;
-    private String createdAt;
 }

@@ -12,7 +12,7 @@ public class MessageMapper {
 
     public static MessageDTO toDTO(Message msg) {
         return new MessageDTO(
-                msg.topicId(),
+                msg.topicId() + "",
                 msg.sender().id(),
                 msg.sender().username(),
                 msg.content(),
@@ -22,7 +22,7 @@ public class MessageMapper {
 
     public static Message toEntity(MessageDTO dto) {
         return new Message(
-                dto.getTopicId(),
+                Integer.parseInt(dto.getTopicId()),
                 new User(dto.getUserId(), dto.getUsername()), // Create a User instance
                 dto.getContent(),
                 LocalDateTime.parse(dto.getCreatedAt(), formatter)

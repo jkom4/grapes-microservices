@@ -35,6 +35,7 @@ public class ChatViewController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Because there is no selected topic in the beginning, the message view is hidden
         chatFx.setVisible(false);
+
     }
 
     /**
