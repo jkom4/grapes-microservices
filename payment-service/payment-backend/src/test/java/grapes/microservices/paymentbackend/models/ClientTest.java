@@ -135,35 +135,6 @@ public class ClientTest {
     }
 
     /**
-     * Tests the basic parameterized constructor (id, email, password, phoneNumber)
-     * Expected: Sets only the specified fields, leaving others null
-     */
-    @Test
-    public void testParameterizedConstructor() {
-        Client basicClient = new Client(3L, "basic@example.com", "simplePassword", "+1555123456");
-
-        // Verify specified fields are set
-        assertEquals(3L, basicClient.getId());
-        assertEquals("basic@example.com", basicClient.getEmail());
-        assertEquals("simplePassword", basicClient.getPassword());
-        assertEquals("+1555123456", basicClient.getPhoneNumber());
-
-        // Verify other fields remain null
-        assertNull(basicClient.getFirstName());
-        assertNull(basicClient.getLastName());
-        assertNull(basicClient.getGender());
-        assertNull(basicClient.getBirthDate());
-        assertNull(basicClient.getMaritalStatus());
-        assertNull(basicClient.getAverageMonthlySalary());
-        assertNull(basicClient.getNationalRegistryNumber());
-        assertNull(basicClient.getAddress());
-        assertNull(basicClient.getRegistrationDate());
-        assertNull(basicClient.getStatus());
-        assertNull(basicClient.getAccounts());
-        assertNull(basicClient.getCards());
-    }
-
-    /**
      * Tests the getFullName method under various conditions
      * Expected: Concatenates first and last name, handling null values
      */

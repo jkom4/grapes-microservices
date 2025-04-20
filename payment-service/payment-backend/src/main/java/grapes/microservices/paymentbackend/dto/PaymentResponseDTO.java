@@ -7,26 +7,26 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentResponseDTO {
+
+
     private Long transactionId;
-    private PaymentStatus status;
+    private String status;
     private BigDecimal amount;
     private String merchantName;
     private LocalDateTime timestamp;
     private String message;
     private String maskedCardNumber;
 
-    public enum PaymentStatus {
-        PENDING,
-        INITIATED,
-        COMPLETED,
-        FAILED,
-        SUCCESS,
-        ERROR
+    public PaymentResponseDTO(Long transactionId, String status, BigDecimal amount, String merchantName) {
+        this.transactionId = transactionId;
+        this.status = status;
+        this.amount = amount;
+        this.merchantName = merchantName;
+        this.timestamp = LocalDateTime.now();
     }
-
-
 }
