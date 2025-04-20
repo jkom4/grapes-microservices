@@ -5,6 +5,7 @@ import grapes.microservices.paymentbackend.models.*;
 import grapes.microservices.paymentbackend.repositories.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +26,10 @@ public class TransactionService {
     private final AccountRepository accountRepository;
     private final MerchantRepository merchantRepository;
 
-    private static final String GRAPES_ACCOUNT_NUMBER = "BE15203672485394";
+
+    @Value("${app.grapes.account.number}")
+    private String grapesAccountNumber;
+
 
     /**
      * Creates a new transaction record for a payment initiation.
@@ -34,7 +38,6 @@ public class TransactionService {
      * @param paymentRequest DTO containing payment details (amount, merchant name)
      * @param client The client initiating the payment
      * @return The newly created and saved TransactionEntity
-     * @throws IllegalStateException if the client has no associated account
      */
     @Transactional
     public TransactionEntity createPaymentTransaction(PaymentRequestDTO paymentRequest, Client client) {
@@ -90,7 +93,7 @@ public class TransactionService {
     public TransactionEntity completePaymentTransaction(Client client, BigDecimal amount, Long transactionId) {
         log.info("Completing payment transaction ID: {}, client ID: {}, amount: {}", transactionId, client.getId(), amount);
 
-        // 1. Find THE specific transaction by ID
+        // Find and validate the transaction
         Optional<TransactionEntity> transactionOpt = transactionRepository.findById(transactionId);
         if (transactionOpt.isEmpty()) {
             log.error("Cannot complete transaction: Transaction not found with ID: {}", transactionId);
@@ -98,77 +101,114 @@ public class TransactionService {
         }
         TransactionEntity transaction = transactionOpt.get();
 
-        // 2. Verify current state and ownership
+        validateTransactionForCompletion(transaction, client, amount);
+
+
+        Account clientAccount = updateClientAccountBalance(transaction);
+
+
+        Account grapesAccount = updateGrapesAccountBalance(amount);
+
+
+        updateTransactionStatus(transaction, clientAccount.getBalance(), grapesAccount.getBalance());
+
+        return transaction;
+    }
+
+    /**
+     * Validates if a transaction can be completed
+     */
+    private void validateTransactionForCompletion(TransactionEntity transaction, Client client, BigDecimal amount) {
         if (!"Initiated".equals(transaction.getStatus())) {
             log.warn("Transaction {} is not in 'Initiated' state (current: {}). Cannot complete.",
-                    transactionId, transaction.getStatus());
-            throw new IllegalStateException("Transaction "+ transactionId + " is not in a completable state (" + transaction.getStatus() + ").");
+                    transaction.getId(), transaction.getStatus());
+            throw new IllegalStateException("Transaction " + transaction.getId() +
+                    " is not in a completable state (" + transaction.getStatus() + ").");
         }
+
         if (!transaction.getClientId().equals(client.getId())) {
             log.error("Security Alert: Client ID {} attempting to complete transaction {} owned by client {}",
-                    client.getId(), transactionId, transaction.getClientId());
+                    client.getId(), transaction.getId(), transaction.getClientId());
             throw new SecurityException("Client mismatch for the transaction completion.");
         }
+
         if (transaction.getTransferAmount().compareTo(amount) != 0) {
             log.error("Amount mismatch for transaction {}. Expected: {}, Received for completion: {}",
-                    transactionId, transaction.getTransferAmount(), amount);
-            // Mark as failed? Or just throw an exception? Let's throw an exception.
+                    transaction.getId(), transaction.getTransferAmount(), amount);
             transaction.markAsFailed("Amount Mismatch");
             transactionRepository.save(transaction);
             throw new IllegalStateException("Amount mismatch during transaction completion.");
         }
+    }
 
-        // 3. Find client's account (should exist as it was checked during initiation)
+    /**
+     * Updates the client's account balance
+     */
+    private Account updateClientAccountBalance(TransactionEntity transaction) {
         Optional<Account> accountOpt = accountRepository.findByAccountNumber(transaction.getClientAccountNumber());
         if (accountOpt.isEmpty()) {
-            log.error("Cannot complete transaction {}: Client Account {} not found in DB!", transactionId, transaction.getClientAccountNumber());
+            log.error("Cannot complete transaction {}: Client Account {} not found in DB!",
+                    transaction.getId(), transaction.getClientAccountNumber());
             transaction.markAsFailed("Client Account Not Found");
             transactionRepository.save(transaction);
             throw new IllegalStateException("Client account associated with the transaction not found.");
         }
-        Account account = accountOpt.get();
 
-        // 4. Check and update client balance
+        Account account = accountOpt.get();
+        BigDecimal amount = transaction.getTransferAmount();
+
+        // Check if balance is sufficient
         if (account.getBalance() == null || account.getBalance().compareTo(amount) < 0) {
-            log.error("Insufficient balance for client ID: {} / Account {} to complete transaction {}. Required: {}, Available: {}.",
-                    client.getId(), account.getAccountNumber(), transactionId, amount, account.getBalance());
+            log.error("Insufficient balance for account {} to complete transaction {}. Required: {}, Available: {}.",
+                    account.getAccountNumber(), transaction.getId(), amount, account.getBalance());
             transaction.markAsFailed("Insufficient Balance");
             transactionRepository.save(transaction);
             throw new IllegalStateException("Insufficient account balance to complete the payment.");
         }
+
+        // Update balance
         BigDecimal newBalance = account.getBalance().subtract(amount);
         account.setBalance(newBalance);
         accountRepository.save(account);
         log.info("Debited account: {}. New balance: {}", account.getAccountNumber(), newBalance);
 
-        // 5. Get and update Grapes account (creditor)
-        Optional<Account> grapesAccountOpt = accountRepository.findByAccountNumber(GRAPES_ACCOUNT_NUMBER);
+        return account;
+    }
+
+    /**
+     * Updates the Grapes account balance
+     */
+    private Account updateGrapesAccountBalance(BigDecimal amount) {
+        Optional<Account> grapesAccountOpt = accountRepository.findByAccountNumber(grapesAccountNumber);
         Account grapesAccount = grapesAccountOpt.orElseGet(() -> {
-            log.warn("Grapes account {} not found! Creating it.", GRAPES_ACCOUNT_NUMBER);
+            log.warn("Grapes account {} not found! Creating it.", grapesAccountNumber);
             Account newGrapesAcc = new Account();
-            newGrapesAcc.setAccountNumber(GRAPES_ACCOUNT_NUMBER);
+            newGrapesAcc.setAccountNumber(grapesAccountNumber);
             newGrapesAcc.setBalance(BigDecimal.ZERO);
             newGrapesAcc.setAccountType("Internal");
             newGrapesAcc.setStatus("Active");
-
             return newGrapesAcc;
         });
-        BigDecimal currentGrapesBalance = grapesAccount.getBalance() != null ? grapesAccount.getBalance() : BigDecimal.ZERO;
+
+        BigDecimal currentGrapesBalance = grapesAccount.getBalance() != null ?
+                grapesAccount.getBalance() : BigDecimal.ZERO;
         BigDecimal newGrapesBalance = currentGrapesBalance.add(amount);
         grapesAccount.setBalance(newGrapesBalance);
         accountRepository.save(grapesAccount);
-        log.info("Credited Grapes account: {}. New balance: {}", GRAPES_ACCOUNT_NUMBER, newGrapesBalance);
+        log.info("Credited Grapes account: {}. New balance: {}", grapesAccountNumber, newGrapesBalance);
 
-        // 6. Update THE transaction found by ID
-        transaction.markAsCompleted(newBalance); // Sets status, status3DS, debtor balance
-        transaction.setCreditorAccountNewBalance(newGrapesBalance);
+        return grapesAccount;
+    }
+
+    /**
+     * Updates the transaction status to completed
+     */
+    private void updateTransactionStatus(TransactionEntity transaction, BigDecimal clientNewBalance, BigDecimal grapesNewBalance) {
+        transaction.markAsCompleted(clientNewBalance);
+        transaction.setCreditorAccountNewBalance(grapesNewBalance);
         transaction.setTransactionDateTime(LocalDateTime.now());
-
-        // 7. Save updated transaction
-        TransactionEntity completedTransaction = transactionRepository.save(transaction);
-        log.info("Transaction ID {} successfully marked as completed.", completedTransaction.getId());
-
-        return completedTransaction;
+        transactionRepository.save(transaction);
+        log.info("Transaction ID {} successfully marked as completed.", transaction.getId());
     }
 
     /**
@@ -185,7 +225,6 @@ public class TransactionService {
         Optional<TransactionEntity> transactionOpt = transactionRepository.findById(transactionId);
         if (transactionOpt.isEmpty()) {
             log.error("Cannot fail transaction: Transaction not found with ID: {}", transactionId);
-            // Not throwing an exception here allows the caller to continue if trying to fail a non-existent transaction
             return null;
         }
 
@@ -193,11 +232,12 @@ public class TransactionService {
 
         // Check if already completed or failed to avoid unintended state changes
         if ("Completed".equals(transaction.getStatus()) || "Failed".equals(transaction.getStatus())) {
-            log.warn("Transaction ID {} is already in final state '{}'. Not marking as failed again.", transactionId, transaction.getStatus());
-            return transaction; // Return current state
+            log.warn("Transaction ID {} is already in final state '{}'. Not marking as failed again.",
+                    transactionId, transaction.getStatus());
+            return transaction;
         }
 
-        // Mark transaction as failed - The markAsFailed method updates the statuses
+        // Mark transaction as failed
         transaction.markAsFailed(reason);
 
         // Save the updated transaction

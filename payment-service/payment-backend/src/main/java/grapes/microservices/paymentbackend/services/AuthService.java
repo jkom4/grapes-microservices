@@ -29,14 +29,7 @@ public class AuthService {
         return String.format("%06d", random.nextInt(1000000));
     }
 
-    /**
-     * Creates and stores an authentication token for a client, and sends OTP via SMS.
-     * Uses transaction to ensure atomicity between token creation and notification.
-     *
-     * @param client The client requiring authentication
-     * @return The created and saved token
-     * @throws IllegalStateException If client has no phone number or SMS sending fails
-     */
+
     @Transactional
     public AuthToken createToken(Client client) {
         String otp = generateOtp();
@@ -70,14 +63,7 @@ public class AuthService {
         return tokenRepository.save(token);
     }
 
-    /**
-     * Verifies if a token is valid for a given client.
-     * Marks the token as used if valid to prevent replay attacks.
-     *
-     * @param tokenValue The token value (OTP) to verify
-     * @param client The client attempting authentication
-     * @return true if token is valid and not used/expired, false otherwise
-     */
+
     @Transactional
     public boolean verifyToken(String tokenValue, Client client) {
         log.info("Verifying token {} for client {}", tokenValue, client.getEmail());
@@ -104,13 +90,7 @@ public class AuthService {
         return true;
     }
 
-    /**
-     * Retrieves the last generated token for a client.
-     * Useful for debugging or implementing resend functionality.
-     *
-     * @param client The client
-     * @return Optional containing the most recent token, if any
-     */
+
     public Optional<AuthToken> getLastToken(Client client) {
         return tokenRepository.findFirstByClientOrderByCreatedAtDesc(client);
     }

@@ -38,7 +38,7 @@ export const VerificationService = {
             });
 
             if (response.data && response.data.success) {
-                // Clean up the transaction ID from session storage upon successful verification
+                // Clean up the transaction ID from session storage upon successful verification only
                 sessionStorage.removeItem('pendingTransactionId');
                 console.log('Payment verification successful, pendingTransactionId removed.');
                 return {
@@ -47,6 +47,7 @@ export const VerificationService = {
                 };
             } else {
                 // Handle verification failure indicated by the backend
+                // Important: DON'T remove pendingTransactionId to allow retry
                 return {
                     success: false,
                     message: response.data?.message || 'Verification failed. Please check the code and try again.'
@@ -58,15 +59,23 @@ export const VerificationService = {
             const status = error.response?.status;
 
             // Handle specific errors like conflict (already processed) or not found/expired
+            // Only remove pendingTransactionId for specific errors where retrying won't help
             if (status === 409) { // Conflict - potentially already completed or failed
                 sessionStorage.removeItem('pendingTransactionId'); // Clean up context
                 return { success: false, message: message + " (Transaction may already be completed or expired)." };
             }
-            if (status === 404 || status === 410) { // Not Found or Gone - transaction doesn't exist or expired
+            if (status === 404 || status === 410) { // Not Found or Gone
                 sessionStorage.removeItem('pendingTransactionId'); // Clean up context
-                return { success: false, message: message + " (Transaction not found or expired)." };
+                return { success: false, message: message + ` (Status: ${status})` };
             }
-            // General error message for other cases
+
+            // For 400 Bad Request, only remove if it's explicitly about expiration
+            if (status === 400 && message.includes("not found or expired")) {
+                sessionStorage.removeItem('pendingTransactionId'); // Clean up context
+                return { success: false, message: "Payment request not found or expired. Please restart the payment." };
+            }
+
+            // For other errors (including network errors), DON'T remove pendingTransactionId to allow retry
             return {
                 success: false,
                 message: `Verification failed: ${message} ${status ? `(Status: ${status})` : '(Network error)'}`
@@ -90,7 +99,7 @@ export const VerificationService = {
                 };
             }
 
-            console.log(`Workspaceing pending payment details for transactionId: ${transactionId}`);
+            console.log(`Fetching pending payment details for transactionId: ${transactionId}`);
             // Endpoint path with transactionId as a query parameter
             const response = await apiClient.get(`/payment/pending-details?transactionId=${transactionId}`);
 
@@ -99,7 +108,7 @@ export const VerificationService = {
                 const details = {
                     merchantName: response.data.merchantName || 'N/A',
                     amount: response.data.amount || 'N/A',
-                    cardNumber: response.data.maskedCardNumber || 'XXXX XXXX XXXX XXXX'
+                    cardNumber: response.data.maskedCardNumber || 'XXXX XXXX XXXX XXXX' // Backend sends maskedCardNumber
                 };
                 return {
                     success: true,
@@ -108,11 +117,19 @@ export const VerificationService = {
             } else {
                 // Handle cases where details retrieval failed server-side
                 const message = response.data?.message || 'Could not retrieve payment details.';
-                // Clean up context if the transaction is explicitly gone or not found
-                if (response.status === 410 || response.status === 404) {
+
+                // Clean up context only for specific errors where retrying won't help
+                if (response.status === 410 || response.status === 404) { // Not Found or Gone
                     sessionStorage.removeItem('pendingTransactionId');
-                    return { success: false, message: message + " (Transaction not found or expired)." };
+                    return { success: false, message: message + ` (Status: ${response.status})` };
                 }
+
+                // For 400 Bad Request, only remove if it's explicitly about expiration
+                if (response.status === 400 && message.includes("not found or expired")) {
+                    sessionStorage.removeItem('pendingTransactionId');
+                    return { success: false, message: "No pending payment found or it has expired." };
+                }
+
                 return {
                     success: false,
                     message: message
@@ -123,12 +140,19 @@ export const VerificationService = {
             const status = error.response?.status;
             const message = error.response?.data?.message || 'Server error fetching payment details.';
 
-            // Clean up context for specific error statuses indicating the transaction is invalid/inaccessible
+            // Clean up context only for specific errors where retrying won't help
             if (status === 401 || status === 403 || status === 404 || status === 410) {
                 sessionStorage.removeItem('pendingTransactionId');
                 return { success: false, message: message + ` (Status: ${status} - Session cleaned)` };
             }
-            // General error
+
+            // For 400 Bad Request, only remove if it's explicitly about expiration
+            if (status === 400 && message.includes("not found or expired")) {
+                sessionStorage.removeItem('pendingTransactionId');
+                return { success: false, message: "No pending payment found or it has expired." };
+            }
+
+            // For other errors (including network errors), DON'T remove pendingTransactionId to allow retry
             return {
                 success: false,
                 message: message + (status ? ` (Status: ${status})` : ' (Network error)')

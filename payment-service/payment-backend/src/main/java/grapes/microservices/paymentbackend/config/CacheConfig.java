@@ -17,8 +17,6 @@ import java.time.Duration;
 @Configuration
 @EnableCaching
 public class CacheConfig {
-
-    // Define constants for TTL values
     private static final Duration DEFAULT_CACHE_TTL = Duration.ofMinutes(30);
     private static final Duration PENDING_PAYMENTS_CACHE_TTL = Duration.ofMinutes(10);
     public static final String PENDING_PAYMENTS_CACHE_NAME = "pendingPayments";

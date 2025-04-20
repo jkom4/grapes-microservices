@@ -1,6 +1,7 @@
 package grapes.microservices.paymentbackend.services;
 
 import grapes.microservices.paymentbackend.dto.ClientDTO;
+import grapes.microservices.paymentbackend.mappers.UserMapper;
 import grapes.microservices.paymentbackend.models.Account;
 import grapes.microservices.paymentbackend.models.Card;
 import grapes.microservices.paymentbackend.models.Client;
@@ -32,33 +33,15 @@ public class ClientService {
     private final CardRepository cardRepository;
     private final PasswordManager passwordManager;
 
-    /**
-     * Finds a client by their email address.
-     *
-     * @param email The email address to search for
-     * @return Optional containing the matching client, if found
-     */
     public Optional<Client> findByEmail(String email) {
         return clientRepository.findByEmail(email);
     }
 
-    /**
-     * Finds a client by their ID.
-     *
-     * @param id The client ID to search for
-     * @return Optional containing the matching client, if found
-     */
     public Optional<Client> findById(Long id) {
         return clientRepository.findById(id);
     }
 
-    /**
-     * Verifies client credentials for authentication.
-     *
-     * @param email The client's email address
-     * @param password The password to verify
-     * @return true if credentials are valid, false otherwise
-     */
+
     public boolean verifyCredentials(String email, String password) {
         Optional<Client> clientOpt = clientRepository.findByEmail(email);
 
@@ -73,22 +56,12 @@ public class ClientService {
         return matches;
     }
 
-    /**
-     * Retrieves all payment cards owned by a client.
-     *
-     * @param clientId The client's ID
-     * @return List of cards belonging to the client
-     */
+
     public List<Card> getClientCards(Long clientId) {
         return cardRepository.findByClientId(clientId);
     }
 
-    /**
-     * Retrieves all accounts owned by a client.
-     *
-     * @param clientId The client's ID
-     * @return List of accounts belonging to the client
-     */
+
     public List<Account> getClientAccounts(Long clientId) {
         return accountRepository.findByClientId(clientId);
     }
@@ -113,20 +86,9 @@ public class ClientService {
         String saltedPassword = passwordManager.saltPassword(clientDTO.getPassword());
         String hashedPassword = passwordManager.hashPassword(saltedPassword);
 
-        // Create and save client entity
-        Client client = new Client();
-        client.setId(clientDTO.getId());
-        client.setEmail(clientDTO.getEmail());
+        // Create and save client entity using mapper
+        Client client = UserMapper.toEntity(clientDTO);
         client.setPassword(hashedPassword);
-        client.setPhoneNumber(clientDTO.getPhoneNumber());
-        client.setFirstName(clientDTO.getFirstName());
-        client.setLastName(clientDTO.getLastName());
-        client.setAddress(clientDTO.getAddress());
-        client.setGender(clientDTO.getGender());
-        client.setMaritalStatus(clientDTO.getMaritalStatus());
-        client.setBirthDate(clientDTO.getBirthDate());
-        client.setAverageMonthlySalary(clientDTO.getAverageMonthlySalary());
-        client.setNationalRegistryNumber(clientDTO.getNationalRegistryNumber());
         client.setStatus("Active");
         client.setRegistrationDate(java.time.LocalDate.now());
 
@@ -177,13 +139,7 @@ public class ClientService {
         return true;
     }
 
-    /**
-     * Verifies if a card belongs to a specific client.
-     *
-     * @param cardNumber The card number to check
-     * @param clientId The client's ID
-     * @return true if the card belongs to the client, false otherwise
-     */
+
     public boolean isCardOwnedByClient(String cardNumber, Long clientId) {
         return cardRepository.findByCardNumberAndClientId(cardNumber, clientId).isPresent();
     }

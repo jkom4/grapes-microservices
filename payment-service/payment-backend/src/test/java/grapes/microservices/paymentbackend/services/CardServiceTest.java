@@ -2,175 +2,285 @@ package grapes.microservices.paymentbackend.services;
 
 import grapes.microservices.paymentbackend.dto.PaymentRequestDTO;
 import grapes.microservices.paymentbackend.models.Client;
+import grapes.microservices.paymentbackend.utils.DataUtils;
 import grapes.microservices.paymentbackend.utils.KeystoreUtils;
 import grapes.microservices.paymentbackend.utils.SignUtils;
 import grapes.microservices.paymentbackend.utils.SslUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
+import javax.net.ssl.SSLSocket;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Test class for CardService
- * Focuses on testing card verification process and related error handling
- */
 @ExtendWith(MockitoExtension.class)
 class CardServiceTest {
 
     @InjectMocks
     private CardService cardService;
 
-    // Mock dependencies
-    @Mock private PaymentRequestDTO mockPaymentRequest;
-    @Mock private Client mockClient;
-    @Mock private PrivateKey mockPrivateKey;
-
-    // Static mocks
-    private static MockedStatic<KeystoreUtils> keystoreUtilsMockedStatic;
-    private static MockedStatic<SignUtils> signUtilsMockedStatic;
-    private static MockedStatic<SslUtils> sslUtilsMockedStatic;
-
-    // Test constants
-    private final String DUMMY_CARD_NUMBER = "9876543210987654";
-    private final String DUMMY_EXP_DATE = "11/2026";
-    private final BigDecimal DUMMY_AMOUNT = new BigDecimal("12.34");
-    private final String DUMMY_MERCHANT = "TestMart";
-    private final String DUMMY_PAYMENT_ID = "attempt-123";
-    private final String DUMMY_CLIENT_SIGNATURE = "clientSignedData";
+    private PaymentRequestDTO paymentRequest;
+    private Client client;
+    private String paymentAttemptId;
 
     @BeforeEach
     void setUp() {
-        // Clean up any existing static mocks
-        closeStaticMocks();
+        // Initialize test data
+        paymentRequest = new PaymentRequestDTO();
+        paymentRequest.setCardNumber("4111111111111111");
+        paymentRequest.setExpirationDate("12/25");
+        paymentRequest.setAmount(BigDecimal.valueOf(100.0));
+        paymentRequest.setMerchantName("Test Merchant");
 
-        // Initialize static mocks
-        keystoreUtilsMockedStatic = mockStatic(KeystoreUtils.class);
-        signUtilsMockedStatic = mockStatic(SignUtils.class);
-        sslUtilsMockedStatic = mockStatic(SslUtils.class);
+        client = new Client();
+        client.setId(1L);
+        client.setEmail("test@example.com");
+        client.setPhoneNumber("+15555555555");
 
-        // Inject @Value properties required by CardService
-        ReflectionTestUtils.setField(cardService, "acsPort", 8081);
-        ReflectionTestUtils.setField(cardService, "clientKeystorePath", "dummy/client_keystore.jks");
-        ReflectionTestUtils.setField(cardService, "clientKeystorePassword", "ksPass");
-        ReflectionTestUtils.setField(cardService, "clientKeystoreAlias", "clientAlias");
-        ReflectionTestUtils.setField(cardService, "clientKeyPassword", "keyPass");
-        ReflectionTestUtils.setField(cardService, "clientTruststorePathForAcs", "dummy/client_truststore.jks");
-        ReflectionTestUtils.setField(cardService, "clientTruststorePasswordForAcs", "tsPass");
-        ReflectionTestUtils.setField(cardService, "acsTrustedAlias", "acsAlias");
+        paymentAttemptId = "test-payment-123";
+
+        // Set properties through reflection (normally set by @Value)
+        ReflectionTestUtils.setField(cardService, "acsPort", 8443);
+        ReflectionTestUtils.setField(cardService, "clientKeystorePath", "client.keystore");
+        ReflectionTestUtils.setField(cardService, "clientKeystorePassword", "password");
+        ReflectionTestUtils.setField(cardService, "clientKeystoreAlias", "client");
+        ReflectionTestUtils.setField(cardService, "clientKeyPassword", "keypassword");
+        ReflectionTestUtils.setField(cardService, "clientTruststorePathForAcs", "client.truststore");
+        ReflectionTestUtils.setField(cardService, "clientTruststorePasswordForAcs", "trustpass");
+        ReflectionTestUtils.setField(cardService, "acsTrustedAlias", "acs_trusted");
     }
 
-    @AfterEach
-    void tearDown() {
-        closeStaticMocks();
-    }
-
-    /**
-     * Helper method to safely close all static mocks
-     */
-    private void closeStaticMocks() {
-        if (keystoreUtilsMockedStatic != null && !keystoreUtilsMockedStatic.isClosed()) keystoreUtilsMockedStatic.close();
-        if (signUtilsMockedStatic != null && !signUtilsMockedStatic.isClosed()) signUtilsMockedStatic.close();
-        if (sslUtilsMockedStatic != null && !sslUtilsMockedStatic.isClosed()) sslUtilsMockedStatic.close();
-    }
-
-    /**
-     * Tests scenario where retrieving the private key fails
-     * Expected: Returns null without attempting signature or SSL connection
-     */
     @Test
-    void initiateCardVerification_GetPrivateKeyFails_ReturnsNull() throws Exception {
-        // Arrange - Set up required mock data
-        when(mockClient.getEmail()).thenReturn("client@test.com");
-        when(mockPaymentRequest.getCardNumber()).thenReturn(DUMMY_CARD_NUMBER);
-        when(mockPaymentRequest.getExpirationDate()).thenReturn(DUMMY_EXP_DATE);
-        when(mockPaymentRequest.getAmount()).thenReturn(DUMMY_AMOUNT);
-        when(mockPaymentRequest.getMerchantName()).thenReturn(DUMMY_MERCHANT);
+    void initiateCardVerification_Success() throws Exception {
+        // Arrange
+        PrivateKey mockPrivateKey = mock(PrivateKey.class);
+        Certificate mockCertificate = mock(Certificate.class);
+        PublicKey mockPublicKey = mock(PublicKey.class);
+        SSLSocket mockSslSocket = mock(SSLSocket.class);
 
-        // Configure failure in keystore access
-        keystoreUtilsMockedStatic.when(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()))
-                .thenThrow(new RuntimeException("Keystore error"));
+        // Set up input/output streams for the socket
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintWriter writer = new PrintWriter(outputStream, true);
+        String mockResponse = "source=acs&data=123456&signature=validSignature";
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(mockResponse.getBytes());
 
-        // Act
-        String resultOtp = cardService.initiateCardVerification(mockPaymentRequest, mockClient, DUMMY_PAYMENT_ID);
+        // Setup parsed response
+        Map<String, String> parsedResponse = new HashMap<>();
+        parsedResponse.put("source", "acs");
+        parsedResponse.put("data", "123456");
+        parsedResponse.put("signature", "validSignature");
 
-        // Assert
-        assertNull(resultOtp);
+        try (MockedStatic<KeystoreUtils> keystoreUtilsMock = mockStatic(KeystoreUtils.class);
+             MockedStatic<SignUtils> signUtilsMock = mockStatic(SignUtils.class);
+             MockedStatic<SslUtils> sslUtilsMock = mockStatic(SslUtils.class);
+             MockedStatic<DataUtils> dataUtilsMock = mockStatic(DataUtils.class)) {
 
-        // Verify - Ensure subsequent operations were not attempted
-        signUtilsMockedStatic.verify(() -> SignUtils.signData(anyString(), any()), never());
-        sslUtilsMockedStatic.verify(() -> SslUtils.createSslClientSocket(anyInt(), anyString(), anyString()), never());
+            // Mock the dependencies
+            keystoreUtilsMock.when(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()))
+                    .thenReturn(mockPrivateKey);
+            signUtilsMock.when(() -> SignUtils.signData(anyString(), any(PrivateKey.class)))
+                    .thenReturn("mockedSignature");
+
+            sslUtilsMock.when(() -> SslUtils.createSslClientSocket(anyInt(), anyString(), anyString()))
+                    .thenReturn(mockSslSocket);
+
+            when(mockSslSocket.getOutputStream()).thenReturn(outputStream);
+            when(mockSslSocket.getInputStream()).thenReturn(inputStream);
+
+            dataUtilsMock.when(() -> DataUtils.parseData(anyString())).thenReturn(parsedResponse);
+
+            keystoreUtilsMock.when(() -> KeystoreUtils.getCertificate(anyString(), anyString(), anyString()))
+                    .thenReturn(mockCertificate);
+            when(mockCertificate.getPublicKey()).thenReturn(mockPublicKey);
+
+            signUtilsMock.when(() -> SignUtils.verifySignature(anyString(), anyString(), any(PublicKey.class)))
+                    .thenReturn(true);
+
+            // Act
+            String result = cardService.initiateCardVerification(paymentRequest, client, paymentAttemptId);
+
+            // Assert
+            assertEquals("123456", result);
+            verify(mockSslSocket).getOutputStream();
+            verify(mockSslSocket).getInputStream();
+        }
     }
 
-    /**
-     * Tests scenario where signing the data fails
-     * Expected: Returns null without attempting SSL connection
-     */
     @Test
-    void initiateCardVerification_SignDataFails_ReturnsNull() throws Exception {
-        // Arrange - Set up required mock data
-        when(mockClient.getEmail()).thenReturn("client@test.com");
-        when(mockPaymentRequest.getCardNumber()).thenReturn(DUMMY_CARD_NUMBER);
-        when(mockPaymentRequest.getExpirationDate()).thenReturn(DUMMY_EXP_DATE);
-        when(mockPaymentRequest.getAmount()).thenReturn(DUMMY_AMOUNT);
-        when(mockPaymentRequest.getMerchantName()).thenReturn(DUMMY_MERCHANT);
+    void initiateCardVerification_InvalidAcsResponse() throws Exception {
+        // Arrange
+        PrivateKey mockPrivateKey = mock(PrivateKey.class);
+        SSLSocket mockSslSocket = mock(SSLSocket.class);
 
-        // KeystoreUtils returns a valid key but SignUtils fails
-        keystoreUtilsMockedStatic.when(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()))
-                .thenReturn(mockPrivateKey);
-        signUtilsMockedStatic.when(() -> SignUtils.signData(anyString(), eq(mockPrivateKey)))
-                .thenThrow(new RuntimeException("Signing error"));
+        // Set up input/output streams for the socket
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintWriter writer = new PrintWriter(outputStream, true);
+        String mockResponse = "source=unknown&data=123456&signature=validSignature";
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(mockResponse.getBytes());
 
-        // Act
-        String resultOtp = cardService.initiateCardVerification(mockPaymentRequest, mockClient, DUMMY_PAYMENT_ID);
+        // Setup parsed response
+        Map<String, String> parsedResponse = new HashMap<>();
+        parsedResponse.put("source", "unknown"); // Invalid source
+        parsedResponse.put("data", "123456");
+        parsedResponse.put("signature", "validSignature");
 
-        // Assert
-        assertNull(resultOtp);
+        try (MockedStatic<KeystoreUtils> keystoreUtilsMock = mockStatic(KeystoreUtils.class);
+             MockedStatic<SignUtils> signUtilsMock = mockStatic(SignUtils.class);
+             MockedStatic<SslUtils> sslUtilsMock = mockStatic(SslUtils.class);
+             MockedStatic<DataUtils> dataUtilsMock = mockStatic(DataUtils.class)) {
 
-        // Verify - Ensure SSL connection was not attempted
-        sslUtilsMockedStatic.verify(() -> SslUtils.createSslClientSocket(anyInt(), anyString(), anyString()), never());
+            // Mock the dependencies
+            keystoreUtilsMock.when(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()))
+                    .thenReturn(mockPrivateKey);
+            signUtilsMock.when(() -> SignUtils.signData(anyString(), any(PrivateKey.class)))
+                    .thenReturn("mockedSignature");
+
+            sslUtilsMock.when(() -> SslUtils.createSslClientSocket(anyInt(), anyString(), anyString()))
+                    .thenReturn(mockSslSocket);
+
+            when(mockSslSocket.getOutputStream()).thenReturn(outputStream);
+            when(mockSslSocket.getInputStream()).thenReturn(inputStream);
+
+            dataUtilsMock.when(() -> DataUtils.parseData(anyString())).thenReturn(parsedResponse);
+
+            // Act
+            String result = cardService.initiateCardVerification(paymentRequest, client, paymentAttemptId);
+
+            // Assert
+            assertNull(result);
+        }
     }
 
-    /**
-     * Tests scenario where establishing SSL connection to ACS server fails
-     * Expected: Returns null after attempting SSL connection
-     */
     @Test
-    void initiateCardVerification_SendToAcsFails_ReturnsNull() throws Exception {
-        // Arrange - Set up required mock data
-        when(mockClient.getEmail()).thenReturn("client@test.com");
-        when(mockPaymentRequest.getCardNumber()).thenReturn(DUMMY_CARD_NUMBER);
-        when(mockPaymentRequest.getExpirationDate()).thenReturn(DUMMY_EXP_DATE);
-        when(mockPaymentRequest.getAmount()).thenReturn(DUMMY_AMOUNT);
-        when(mockPaymentRequest.getMerchantName()).thenReturn(DUMMY_MERCHANT);
+    void initiateCardVerification_InvalidSignature() throws Exception {
+        // Arrange
+        PrivateKey mockPrivateKey = mock(PrivateKey.class);
+        Certificate mockCertificate = mock(Certificate.class);
+        PublicKey mockPublicKey = mock(PublicKey.class);
+        SSLSocket mockSslSocket = mock(SSLSocket.class);
 
-        // Configure successful key retrieval and signing
-        keystoreUtilsMockedStatic.when(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()))
-                .thenReturn(mockPrivateKey);
-        signUtilsMockedStatic.when(() -> SignUtils.signData(anyString(), eq(mockPrivateKey)))
-                .thenReturn(DUMMY_CLIENT_SIGNATURE);
+        // Set up input/output streams for the socket
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintWriter writer = new PrintWriter(outputStream, true);
+        String mockResponse = "source=acs&data=123456&signature=invalidSignature";
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(mockResponse.getBytes());
 
-        // Configure SSL connection failure
-        sslUtilsMockedStatic.when(() -> SslUtils.createSslClientSocket(anyInt(), anyString(), anyString()))
-                .thenThrow(new IOException("Connection refused"));
+        // Setup parsed response
+        Map<String, String> parsedResponse = new HashMap<>();
+        parsedResponse.put("source", "acs");
+        parsedResponse.put("data", "123456");
+        parsedResponse.put("signature", "invalidSignature");
 
-        // Act
-        String resultOtp = cardService.initiateCardVerification(mockPaymentRequest, mockClient, DUMMY_PAYMENT_ID);
+        try (MockedStatic<KeystoreUtils> keystoreUtilsMock = mockStatic(KeystoreUtils.class);
+             MockedStatic<SignUtils> signUtilsMock = mockStatic(SignUtils.class);
+             MockedStatic<SslUtils> sslUtilsMock = mockStatic(SslUtils.class);
+             MockedStatic<DataUtils> dataUtilsMock = mockStatic(DataUtils.class)) {
 
-        // Assert
-        assertNull(resultOtp);
+            // Mock the dependencies
+            keystoreUtilsMock.when(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()))
+                    .thenReturn(mockPrivateKey);
+            signUtilsMock.when(() -> SignUtils.signData(anyString(), any(PrivateKey.class)))
+                    .thenReturn("mockedSignature");
 
-        // Verify - Ensure SSL socket creation was attempted
-        sslUtilsMockedStatic.verify(() -> SslUtils.createSslClientSocket(anyInt(), anyString(), anyString()), times(1));
+            sslUtilsMock.when(() -> SslUtils.createSslClientSocket(anyInt(), anyString(), anyString()))
+                    .thenReturn(mockSslSocket);
+
+            when(mockSslSocket.getOutputStream()).thenReturn(outputStream);
+            when(mockSslSocket.getInputStream()).thenReturn(inputStream);
+
+            dataUtilsMock.when(() -> DataUtils.parseData(anyString())).thenReturn(parsedResponse);
+
+            keystoreUtilsMock.when(() -> KeystoreUtils.getCertificate(anyString(), anyString(), anyString()))
+                    .thenReturn(mockCertificate);
+            when(mockCertificate.getPublicKey()).thenReturn(mockPublicKey);
+
+            signUtilsMock.when(() -> SignUtils.verifySignature(anyString(), anyString(), any(PublicKey.class)))
+                    .thenReturn(false); // Invalid signature
+
+            // Act
+            String result = cardService.initiateCardVerification(paymentRequest, client, paymentAttemptId);
+
+            // Assert
+            assertNull(result);
+        }
+    }
+
+    @Test
+    void initiateCardVerification_ErrorResponse() throws Exception {
+        // Arrange
+        PrivateKey mockPrivateKey = mock(PrivateKey.class);
+        SSLSocket mockSslSocket = mock(SSLSocket.class);
+
+        // Set up input/output streams for the socket with an error response
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintWriter writer = new PrintWriter(outputStream, true);
+        String mockResponse = "ERROR:Some error message";
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(mockResponse.getBytes());
+
+        try (MockedStatic<KeystoreUtils> keystoreUtilsMock = mockStatic(KeystoreUtils.class);
+             MockedStatic<SignUtils> signUtilsMock = mockStatic(SignUtils.class);
+             MockedStatic<SslUtils> sslUtilsMock = mockStatic(SslUtils.class)) {
+
+            // Mock the dependencies
+            keystoreUtilsMock.when(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()))
+                    .thenReturn(mockPrivateKey);
+            signUtilsMock.when(() -> SignUtils.signData(anyString(), any(PrivateKey.class)))
+                    .thenReturn("mockedSignature");
+
+            sslUtilsMock.when(() -> SslUtils.createSslClientSocket(anyInt(), anyString(), anyString()))
+                    .thenReturn(mockSslSocket);
+
+            when(mockSslSocket.getOutputStream()).thenReturn(outputStream);
+            when(mockSslSocket.getInputStream()).thenReturn(inputStream);
+
+            // Act
+            String result = cardService.initiateCardVerification(paymentRequest, client, paymentAttemptId);
+
+            // Assert
+            assertNull(result);
+        }
+    }
+
+    @Test
+    void initiateCardVerification_CommunicationException() throws Exception {
+        // Arrange
+        PrivateKey mockPrivateKey = mock(PrivateKey.class);
+
+        try (MockedStatic<KeystoreUtils> keystoreUtilsMock = mockStatic(KeystoreUtils.class);
+             MockedStatic<SignUtils> signUtilsMock = mockStatic(SignUtils.class);
+             MockedStatic<SslUtils> sslUtilsMock = mockStatic(SslUtils.class)) {
+
+            // Mock the dependencies
+            keystoreUtilsMock.when(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()))
+                    .thenReturn(mockPrivateKey);
+            signUtilsMock.when(() -> SignUtils.signData(anyString(), any(PrivateKey.class)))
+                    .thenReturn("mockedSignature");
+
+            // Simulate SSL connection failure
+            sslUtilsMock.when(() -> SslUtils.createSslClientSocket(anyInt(), anyString(), anyString()))
+                    .thenThrow(new RuntimeException("Connection failed"));
+
+            // Act
+            String result = cardService.initiateCardVerification(paymentRequest, client, paymentAttemptId);
+
+            // Assert
+            assertNull(result);
+        }
     }
 }

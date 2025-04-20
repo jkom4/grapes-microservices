@@ -1,3 +1,4 @@
+// --- File: src/services/AuthService.js ---
 // src/services/AuthService.js
 import axios from 'axios';
 import { AUTH_API_URL } from './apiConfig'; // Import the specific URL
@@ -7,23 +8,23 @@ export class AuthService {
     // Authenticates user with email and password
     static async login(user) {
         try {
-            // Use the imported URL
+            // Use the imported URL and correct path
             console.log(`Sending authentication request to ${AUTH_API_URL}/login`);
             const response = await axios.post(`${AUTH_API_URL}/login`, {
-                email: user.login,
+                email: user.login, // Backend expects 'email'
                 password: user.password
             }, {
                 withCredentials: true // Important for session management
             });
 
-            if (response.status === 200 && response.data) { // Check response data as well
+            if (response.status === 200 && response.data && response.data.status === 'success') { // Check response data status
                 console.log('Authentication successful:', response.data);
-                // Assuming backend sends token and userId upon successful login
+                // Assuming backend sends token (session ID) and userId upon successful login
                 localStorage.setItem('sessionToken', response.data.token); // Store token if provided
                 localStorage.setItem('userId', response.data.userId);     // Store userId if provided
                 return {
                     success: true,
-                    redirectUrl: '/payment', // Or determine redirect based on response/context
+                    redirectUrl: '/payment', // Redirect to payment page after login
                     userId: response.data.userId
                 };
             } else {
@@ -60,13 +61,14 @@ export class AuthService {
     // Checks if user is potentially authenticated (presence of token)
     static isLoggedIn() {
         // Basic check; real validation might involve checking token expiry or calling a backend endpoint
-        return localStorage.getItem('sessionToken') !== null;
+        return localStorage.getItem('sessionToken') !== null && localStorage.getItem('userId') !== null;
     }
 
     // Logs out user and clears session artifacts
     static logout() {
         localStorage.removeItem('sessionToken');
         localStorage.removeItem('userId');
+        sessionStorage.removeItem('pendingTransactionId'); // Also clear pending transaction context
         // Redirect to login page. Using window.location forces a full page reload, clearing React state.
         // If inside a component, consider using useNavigate() from react-router-dom for smoother SPA navigation.
         window.location.href = '/login';

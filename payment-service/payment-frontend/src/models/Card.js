@@ -1,11 +1,12 @@
+// --- File: src/models/Card.js ---
 // src/models/Card.js
 export class Card {
-    constructor(cardPart1, cardPart2, cardPart3, cardPart4, expiry, cvc, cardholderName = '') {
+    constructor(cardPart1, cardPart2, cardPart3, cardPart4, expiryYYYY, cvc, cardholderName = '') {
         this.cardPart1 = cardPart1;
         this.cardPart2 = cardPart2;
         this.cardPart3 = cardPart3;
         this.cardPart4 = cardPart4;
-        this.expiry = expiry;
+        this.expiry = expiryYYYY; // Expecting MM/YYYY format passed in
         this.cvc = cvc;
         this.cardholderName = cardholderName;
     }
@@ -20,13 +21,9 @@ export class Card {
         return `${this.cardPart1} ${this.cardPart2} ${this.cardPart3} ${this.cardPart4}`;
     }
 
-    // Get formatted expiration date (MM/YYYY)
+    // Get expiration date in MM/YYYY format (property already holds this format)
     getFormattedExpiryDate() {
-        if (!this.expiry || !this.expiry.includes('/')) {
-            return '';
-        }
-        const [month, year] = this.expiry.split('/');
-        return `${month}/20${year}`;
+        return this.expiry;
     }
 
     // Get masked card number for display (only last 4 digits visible)

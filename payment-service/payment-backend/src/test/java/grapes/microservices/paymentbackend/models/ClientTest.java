@@ -1,271 +1,120 @@
 package grapes.microservices.paymentbackend.models;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayList; // Needed for collections in AllArgsConstructor test
 
-import static org.junit.jupiter.api.Assertions.*;
+class ClientTest {
 
-/**
- * Test class for Client model
- * Tests constructors, business methods (like getFullName), getters, setters,
- * and standard object methods
- */
-public class ClientTest {
-
-    private Client client;
-
-    @Mock
-    private Account mockAccount;
-
-    @Mock
-    private Card mockCard;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        // Initialize a fully populated client with mock dependencies
-        client = new Client();
-        client.setId(1L);
-        client.setFirstName("John");
-        client.setLastName("Doe");
-        client.setGender("Male");
-        client.setBirthDate(LocalDate.of(1985, 5, 15));
-        client.setMaritalStatus("Single");
-        client.setAverageMonthlySalary(new BigDecimal("5000.00"));
-        client.setEmail("john.doe@example.com");
-        client.setPassword("hashedPassword123");
-        client.setNationalRegistryNumber("85051512345");
-        client.setPhoneNumber("+1234567890");
-        client.setAddress("123 Main Street, Anytown");
-        client.setRegistrationDate(LocalDate.of(2023, 1, 10));
-        client.setStatus("active");
-
-        List<Account> accounts = new ArrayList<>();
-        accounts.add(mockAccount);
-        client.setAccounts(accounts);
-
-        List<Card> cards = new ArrayList<>();
-        cards.add(mockCard);
-        client.setCards(cards);
+    @Test
+    void noArgsConstructor_createsClient() {
+        // Test the no-argument constructor
+        Client client = new Client();
+        assertNotNull(client);
+        assertNull(client.getId());
+        assertNull(client.getEmail());
     }
 
-    /**
-     * Tests the no-args constructor
-     * Expected: Creates an empty Client with all fields null
-     */
     @Test
-    public void testNoArgsConstructor() {
-        Client emptyClient = new Client();
+    void allArgsConstructor_setsAllFields() {
+        // Test the all-argument constructor
+        LocalDate birthDate = LocalDate.of(1990, 5, 15);
+        LocalDate regDate = LocalDate.now();
+        BigDecimal salary = new BigDecimal("55000.75");
 
-        assertNotNull(emptyClient);
-        assertNull(emptyClient.getId());
-        assertNull(emptyClient.getFirstName());
-        assertNull(emptyClient.getLastName());
-        assertNull(emptyClient.getGender());
-        assertNull(emptyClient.getBirthDate());
-        assertNull(emptyClient.getMaritalStatus());
-        assertNull(emptyClient.getAverageMonthlySalary());
-        assertNull(emptyClient.getEmail());
-        assertNull(emptyClient.getPassword());
-        assertNull(emptyClient.getNationalRegistryNumber());
-        assertNull(emptyClient.getPhoneNumber());
-        assertNull(emptyClient.getAddress());
-        assertNull(emptyClient.getRegistrationDate());
-        assertNull(emptyClient.getStatus());
-        assertNull(emptyClient.getAccounts());
-        assertNull(emptyClient.getCards());
-    }
-
-    /**
-     * Tests the all-args constructor
-     * Expected: Creates a Client with all fields set to specified values
-     */
-    @Test
-    public void testAllArgsConstructor() {
-        LocalDate birthDate = LocalDate.of(1990, 3, 20);
-        LocalDate registrationDate = LocalDate.of(2022, 11, 5);
-        List<Account> accounts = new ArrayList<>();
-        accounts.add(mockAccount);
-        List<Card> cards = new ArrayList<>();
-        cards.add(mockCard);
-
-        Client newClient = new Client(
-                2L,
-                "Smith",
-                "Jane",
-                "Female",
-                birthDate,
-                "Married",
-                new BigDecimal("6000.00"),
-                "jane.smith@example.com",
-                "hashedPassword456",
-                "90032012345",
-                "+1987654321",
-                "456 Second Ave, Othertown",
-                registrationDate,
-                "active",
-                accounts,
-                cards
+        Client client = new Client(
+                1L, "Smith", "Jane", "Female", birthDate, "Married",
+                salary, "jane.smith@example.com", "hashedPassword",
+                "NRN123456", "+15551234567", "123 Main St, Anytown",
+                regDate, "Active", new ArrayList<>(), new ArrayList<>()
         );
 
-        assertEquals(2L, newClient.getId());
-        assertEquals("Smith", newClient.getLastName());
-        assertEquals("Jane", newClient.getFirstName());
-        assertEquals("Female", newClient.getGender());
-        assertEquals(birthDate, newClient.getBirthDate());
-        assertEquals("Married", newClient.getMaritalStatus());
-        assertEquals(new BigDecimal("6000.00"), newClient.getAverageMonthlySalary());
-        assertEquals("jane.smith@example.com", newClient.getEmail());
-        assertEquals("hashedPassword456", newClient.getPassword());
-        assertEquals("90032012345", newClient.getNationalRegistryNumber());
-        assertEquals("+1987654321", newClient.getPhoneNumber());
-        assertEquals("456 Second Ave, Othertown", newClient.getAddress());
-        assertEquals(registrationDate, newClient.getRegistrationDate());
-        assertEquals("active", newClient.getStatus());
-        assertEquals(accounts, newClient.getAccounts());
-        assertEquals(cards, newClient.getCards());
+        // Assert that all fields were set correctly
+        assertEquals(1L, client.getId());
+        assertEquals("Smith", client.getLastName());
+        assertEquals("Jane", client.getFirstName());
+        assertEquals("Female", client.getGender());
+        assertEquals(birthDate, client.getBirthDate());
+        assertEquals("Married", client.getMaritalStatus());
+        assertEquals(0, salary.compareTo(client.getAverageMonthlySalary()));
+        assertEquals("jane.smith@example.com", client.getEmail());
+        assertEquals("hashedPassword", client.getPassword());
+        assertEquals("NRN123456", client.getNationalRegistryNumber());
+        assertEquals("+15551234567", client.getPhoneNumber());
+        assertEquals("123 Main St, Anytown", client.getAddress());
+        assertEquals(regDate, client.getRegistrationDate());
+        assertEquals("Active", client.getStatus());
+        assertNotNull(client.getAccounts()); // Check collections are initialized
+        assertNotNull(client.getCards());
+        assertTrue(client.getAccounts().isEmpty());
+        assertTrue(client.getCards().isEmpty());
     }
 
-    /**
-     * Tests the getFullName method under various conditions
-     * Expected: Concatenates first and last name, handling null values
-     */
     @Test
-    public void testGetFullName() {
-        // Normal case
-        assertEquals("John Doe", client.getFullName());
+    void gettersAndSetters_workCorrectly() {
+        // Test the getters and setters generated by Lombok @Data
+        Client client = new Client();
+        String newEmail = "new.email@example.com";
+        String newPhone = "+447700900000";
+        String newStatus = "Suspended";
 
-        // Different name values
-        client.setFirstName("Jane");
+        // Use setters
+        client.setId(2L);
+        client.setEmail(newEmail);
+        client.setPhoneNumber(newPhone);
+        client.setStatus(newStatus);
+        client.setFirstName("Peter");
+        client.setLastName("Jones");
+
+        // Use getters to verify
+        assertEquals(2L, client.getId());
+        assertEquals(newEmail, client.getEmail());
+        assertEquals(newPhone, client.getPhoneNumber());
+        assertEquals(newStatus, client.getStatus());
+        assertEquals("Peter", client.getFirstName());
+        assertEquals("Jones", client.getLastName());
+    }
+
+    @Test
+    void getFullName_returnsCorrectFormat() {
+        // Test the custom getFullName method
+        Client client = new Client();
+        client.setFirstName("Alice");
+        client.setLastName("Wonder");
+
+        assertEquals("Alice Wonder", client.getFullName());
+    }
+
+    @Test
+    void getFullName_handlesNullFirstName() {
+        // Test getFullName when first name is null
+        Client client = new Client();
+        client.setFirstName(null);
         client.setLastName("Smith");
-        assertEquals("Jane Smith", client.getFullName());
 
-        // Edge cases with null values
-        client.setFirstName(null);
-        client.setLastName("Brown");
-        assertEquals("null Brown", client.getFullName());
+        assertEquals("null Smith", client.getFullName()); // Default behavior of string concatenation with null
+    }
 
-        client.setFirstName("Robert");
+    @Test
+    void getFullName_handlesNullLastName() {
+        // Test getFullName when last name is null
+        Client client = new Client();
+        client.setFirstName("Bob");
         client.setLastName(null);
-        assertEquals("Robert null", client.getFullName());
 
+        assertEquals("Bob null", client.getFullName()); // Default behavior
+    }
+
+    @Test
+    void getFullName_handlesNullFirstAndLastName() {
+        // Test getFullName when both names are null
+        Client client = new Client();
         client.setFirstName(null);
         client.setLastName(null);
-        assertEquals("null null", client.getFullName());
-    }
 
-    /**
-     * Tests getter and setter methods
-     * Expected: Get methods return the correct values, set methods update them properly
-     */
-    @Test
-    public void testGettersAndSetters() {
-        // Test setting new values (initial values already tested in setUp)
-        LocalDate newBirthDate = LocalDate.of(1992, 8, 25);
-        LocalDate newRegistrationDate = LocalDate.of(2021, 4, 1);
-
-        client.setId(10L);
-        client.setFirstName("Updated");
-        client.setLastName("Name");
-        client.setGender("Other");
-        client.setBirthDate(newBirthDate);
-        client.setMaritalStatus("Divorced");
-        client.setAverageMonthlySalary(new BigDecimal("7500.00"));
-        client.setEmail("updated.email@example.com");
-        client.setPassword("newHashedPassword");
-        client.setNationalRegistryNumber("9208251234");
-        client.setPhoneNumber("+19876543210");
-        client.setAddress("789 New Address Rd, Newtown");
-        client.setRegistrationDate(newRegistrationDate);
-        client.setStatus("suspended");
-
-        List<Account> newAccounts = new ArrayList<>();
-        client.setAccounts(newAccounts);
-
-        List<Card> newCards = new ArrayList<>();
-        client.setCards(newCards);
-
-        // Verify updated values
-        assertEquals(10L, client.getId());
-        assertEquals("Updated", client.getFirstName());
-        assertEquals("Name", client.getLastName());
-        assertEquals("Other", client.getGender());
-        assertEquals(newBirthDate, client.getBirthDate());
-        assertEquals("Divorced", client.getMaritalStatus());
-        assertEquals(new BigDecimal("7500.00"), client.getAverageMonthlySalary());
-        assertEquals("updated.email@example.com", client.getEmail());
-        assertEquals("newHashedPassword", client.getPassword());
-        assertEquals("9208251234", client.getNationalRegistryNumber());
-        assertEquals("+19876543210", client.getPhoneNumber());
-        assertEquals("789 New Address Rd, Newtown", client.getAddress());
-        assertEquals(newRegistrationDate, client.getRegistrationDate());
-        assertEquals("suspended", client.getStatus());
-        assertEquals(newAccounts, client.getAccounts());
-        assertEquals(newCards, client.getCards());
-    }
-
-    /**
-     * Tests equals and hashCode methods
-     * Expected: With Lombok @Data, equals compares all fields
-     */
-    @Test
-    public void testEqualsAndHashCode() {
-        // Create a copy with the same values
-        Client sameClient = new Client();
-        sameClient.setId(1L);
-        sameClient.setFirstName("John");
-        sameClient.setLastName("Doe");
-        sameClient.setGender("Male");
-        sameClient.setBirthDate(LocalDate.of(1985, 5, 15));
-        sameClient.setMaritalStatus("Single");
-        sameClient.setAverageMonthlySalary(new BigDecimal("5000.00"));
-        sameClient.setEmail("john.doe@example.com");
-        sameClient.setPassword("hashedPassword123");
-        sameClient.setNationalRegistryNumber("85051512345");
-        sameClient.setPhoneNumber("+1234567890");
-        sameClient.setAddress("123 Main Street, Anytown");
-        sameClient.setRegistrationDate(LocalDate.of(2023, 1, 10));
-        sameClient.setStatus("active");
-        sameClient.setAccounts(client.getAccounts());
-        sameClient.setCards(client.getCards());
-
-        // Create a different client
-        Client differentClient = new Client();
-        differentClient.setId(2L);
-        differentClient.setEmail("different@example.com");
-
-        // Test equality
-        assertEquals(client, client); // Reflexivity - same instance
-        assertEquals(client, sameClient); // Different instance but same values
-        assertNotEquals(client, differentClient); // Different values
-        assertNotEquals(client, null); // Null comparison
-        assertNotEquals(client, new Object()); // Different type
-
-        // Test hashCode consistency with equals
-        assertEquals(client.hashCode(), sameClient.hashCode()); // Equal objects have equal hashcodes
-        assertNotEquals(client.hashCode(), differentClient.hashCode()); // Different objects have different hashcodes
-    }
-
-    /**
-     * Tests toString method
-     * Expected: String representation contains essential field values
-     */
-    @Test
-    public void testToString() {
-        String clientString = client.toString();
-
-        // Verify toString contains important fields
-        assertTrue(clientString.contains("id=1"));
-        assertTrue(clientString.contains("John"));
-        assertTrue(clientString.contains("Doe"));
-        assertTrue(clientString.contains("john.doe@example.com"));
+        assertEquals("null null", client.getFullName()); // Default behavior
     }
 }

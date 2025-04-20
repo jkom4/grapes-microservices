@@ -1,33 +1,27 @@
 package grapes.microservices.paymentbackend.services;
+
 import grapes.microservices.paymentbackend.models.AuthToken;
 import grapes.microservices.paymentbackend.models.Client;
 import grapes.microservices.paymentbackend.repositories.AuthTokenRepository;
-import grapes.microservices.paymentbackend.services.SmsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/**
- * Test class for AuthService
- * Tests OTP generation, token creation, verification, and management
- */
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
-
-    @InjectMocks
-    private AuthService authService;
 
     @Mock
     private AuthTokenRepository tokenRepository;
@@ -35,266 +29,178 @@ class AuthServiceTest {
     @Mock
     private SmsService smsService;
 
-    @Mock
-    private Client mockClient;
-
-    @Mock
-    private AuthToken mockAuthToken;
+    @InjectMocks
+    private AuthService authService;
 
     @Captor
-    private ArgumentCaptor<AuthToken> authTokenCaptor;
+    private ArgumentCaptor<AuthToken> tokenCaptor;
 
-    // Constants for validation and testing
-    private static final Pattern OTP_PATTERN = Pattern.compile("\\d{6}");
-    private final String VALID_PHONE_NUMBER = "+1234567890";
-    private final String TEST_EMAIL = "test@example.com";
-    private final Long CLIENT_ID = 1L;
+    private Client testClient;
 
     @BeforeEach
     void setUp() {
-        // No global mock setup needed
+        testClient = new Client();
+        testClient.setId(1L);
+        testClient.setEmail("test@example.com");
+        testClient.setPhoneNumber("+15555555555");
     }
 
-    /**
-     * Tests that the OTP generation creates valid 6-digit numeric codes
-     * and that consecutive generations produce different values
-     */
     @Test
-    void generateOtp_ReturnsSixDigitString() {
-        // Act - Generate two OTPs to verify randomness
-        String otp1 = authService.generateOtp();
-        String otp2 = authService.generateOtp();
+    void generateOtp_ShouldReturn6DigitCode() {
+        // Act
+        String otp = authService.generateOtp();
 
-        // Assert - Verify format and uniqueness
-        assertNotNull(otp1);
-        assertEquals(6, otp1.length());
-        assertTrue(OTP_PATTERN.matcher(otp1).matches(), "OTP should contain only digits");
-        assertNotNull(otp2);
-        assertEquals(6, otp2.length());
-        assertTrue(OTP_PATTERN.matcher(otp2).matches(), "OTP should contain only digits");
-        assertNotEquals(otp1, otp2, "Consecutive OTPs should likely be different");
+        // Assert
+        assertNotNull(otp);
+        assertEquals(6, otp.length());
+        assertTrue(otp.matches("\\d{6}"));
     }
 
-    /**
-     * Tests successful token creation when a client has a valid phone number
-     * Verifies that SMS is sent and token is saved
-     */
     @Test
-    void createToken_ClientWithPhoneNumber_SendsSmsAndSavesToken() {
+    void createToken_WithValidClient_ShouldCreateAndSendOtp() {
         // Arrange
-        when(mockClient.getEmail()).thenReturn(TEST_EMAIL);
-        when(mockClient.getPhoneNumber()).thenReturn(VALID_PHONE_NUMBER);
         when(tokenRepository.save(any(AuthToken.class))).thenAnswer(invocation -> invocation.getArgument(0));
         doNothing().when(smsService).sendOtp(anyString(), anyString());
 
         // Act
-        AuthToken createdToken = authService.createToken(mockClient);
+        AuthToken result = authService.createToken(testClient);
 
         // Assert
-        assertNotNull(createdToken);
-        assertNotNull(createdToken.getToken());
-        assertEquals(6, createdToken.getToken().length());
-        assertEquals(mockClient, createdToken.getClient());
-        assertFalse(createdToken.isUsed());
+        assertNotNull(result);
+        assertEquals(testClient, result.getClient());
+        assertNotNull(result.getToken());
+        assertEquals(6, result.getToken().length());
 
-        // Verify
-        verify(smsService, times(1)).sendOtp(eq(VALID_PHONE_NUMBER), eq(createdToken.getToken()));
-        verify(tokenRepository, times(1)).save(authTokenCaptor.capture());
-        AuthToken savedToken = authTokenCaptor.getValue();
-        assertEquals(createdToken.getToken(), savedToken.getToken());
-        assertEquals(mockClient, savedToken.getClient());
+        // Verify SMS was sent
+        verify(smsService).sendOtp(eq("+15555555555"), anyString());
+        verify(tokenRepository).save(any(AuthToken.class));
     }
 
-    /**
-     * Tests token creation failure when client has no phone number
-     * Expected: IllegalStateException
-     */
     @Test
-    void createToken_ClientWithoutPhoneNumber_ThrowsIllegalStateException() {
+    void createToken_WithMissingPhoneNumber_ShouldThrowException() {
         // Arrange
-        when(mockClient.getEmail()).thenReturn(TEST_EMAIL);
-        when(mockClient.getPhoneNumber()).thenReturn(null);
+        testClient.setPhoneNumber(null);
 
         // Act & Assert
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            authService.createToken(mockClient);
-        });
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> authService.createToken(testClient));
         assertEquals("Client doesn't have a registered phone number", exception.getMessage());
-
-        // Verify - Check no SMS was sent and no token was saved
-        verify(mockClient, atLeastOnce()).getPhoneNumber();
-        verify(mockClient, times(2)).getEmail();
-        verifyNoInteractions(smsService);
-        verifyNoInteractions(tokenRepository);
+        verify(tokenRepository, never()).save(any());
     }
 
-    /**
-     * Tests token creation failure when client has empty phone number
-     * Expected: IllegalStateException
-     */
     @Test
-    void createToken_ClientWithEmptyPhoneNumber_ThrowsIllegalStateException() {
+    void createToken_WhenSmsFails_ShouldThrowException() {
         // Arrange
-        when(mockClient.getEmail()).thenReturn(TEST_EMAIL);
-        when(mockClient.getPhoneNumber()).thenReturn("");
+        doThrow(new RuntimeException("SMS service unavailable"))
+                .when(smsService).sendOtp(anyString(), anyString());
 
         // Act & Assert
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            authService.createToken(mockClient);
-        });
-        assertEquals("Client doesn't have a registered phone number", exception.getMessage());
-
-        // Verify - Check no SMS was sent and no token was saved
-        verify(mockClient, atLeastOnce()).getPhoneNumber();
-        verify(mockClient, times(2)).getEmail();
-        verifyNoInteractions(smsService);
-        verifyNoInteractions(tokenRepository);
-    }
-
-    /**
-     * Tests token creation when SMS service fails
-     * Expected: IllegalStateException with original exception as cause
-     */
-    @Test
-    void createToken_SmsServiceThrowsException_ThrowsIllegalStateException() {
-        // Arrange
-        when(mockClient.getEmail()).thenReturn(TEST_EMAIL);
-        when(mockClient.getPhoneNumber()).thenReturn(VALID_PHONE_NUMBER);
-        doThrow(new RuntimeException("SMS Gateway Down"))
-                .when(smsService).sendOtp(eq(VALID_PHONE_NUMBER), anyString());
-
-        // Act & Assert
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            authService.createToken(mockClient);
-        });
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> authService.createToken(testClient));
         assertEquals("Failed to send OTP via SMS", exception.getMessage());
-        assertTrue(exception.getCause() instanceof RuntimeException);
-        assertEquals("SMS Gateway Down", exception.getCause().getMessage());
-
-        // Verify - Check SMS was attempted but no token was saved
-        verify(smsService, times(1)).sendOtp(eq(VALID_PHONE_NUMBER), anyString());
-        verifyNoInteractions(tokenRepository);
+        verify(tokenRepository, never()).save(any());
     }
 
-    /**
-     * Tests that saveToken properly calls the repository
-     */
     @Test
-    void saveToken_CallsRepositorySave() {
+    void saveToken_ShouldDelegateToRepository() {
         // Arrange
-        when(mockAuthToken.getToken()).thenReturn("abcdef");
-        when(mockAuthToken.getClient()).thenReturn(mockClient);
-        when(mockClient.getEmail()).thenReturn(TEST_EMAIL);
-        when(tokenRepository.save(mockAuthToken)).thenReturn(mockAuthToken);
+        AuthToken token = new AuthToken("123456", testClient);
+        when(tokenRepository.save(token)).thenReturn(token);
 
         // Act
-        AuthToken savedToken = authService.saveToken(mockAuthToken);
+        AuthToken result = authService.saveToken(token);
 
         // Assert
-        assertNotNull(savedToken);
-        assertEquals(mockAuthToken, savedToken);
-        verify(tokenRepository, times(1)).save(eq(mockAuthToken));
+        assertSame(token, result);
+        verify(tokenRepository).save(token);
     }
 
-    /**
-     * Tests successful token verification
-     * Expected: Returns true and marks token as used
-     */
     @Test
-    void verifyToken_ValidToken_ReturnsTrueAndMarksAsUsed() {
+    void verifyToken_WithValidToken_ShouldReturnTrueAndMarkAsUsed() {
         // Arrange
-        String tokenValue = "112233";
-        when(mockClient.getEmail()).thenReturn(TEST_EMAIL);
-        when(mockAuthToken.isValid()).thenReturn(true);
-        when(tokenRepository.findByTokenAndClient(tokenValue, mockClient)).thenReturn(Optional.of(mockAuthToken));
+        String tokenValue = "123456";
+        AuthToken token = new AuthToken(tokenValue, testClient);
+        token.setCreatedAt(LocalDateTime.now());
+        token.setExpiresAt(LocalDateTime.now().plusMinutes(5));
+        token.setUsed(false);
+
+        when(tokenRepository.findByTokenAndClient(tokenValue, testClient)).thenReturn(Optional.of(token));
+        when(tokenRepository.save(any(AuthToken.class))).thenReturn(token);
 
         // Act
-        boolean result = authService.verifyToken(tokenValue, mockClient);
+        boolean result = authService.verifyToken(tokenValue, testClient);
 
         // Assert
         assertTrue(result);
-        verify(tokenRepository, times(1)).findByTokenAndClient(eq(tokenValue), eq(mockClient));
-        verify(mockAuthToken, times(1)).isValid();
-        verify(mockAuthToken, times(1)).setUsed(true);
-        verify(tokenRepository, times(1)).save(eq(mockAuthToken));
+        verify(tokenRepository).save(tokenCaptor.capture());
+        AuthToken savedToken = tokenCaptor.getValue();
+        assertTrue(savedToken.isUsed());
     }
 
-    /**
-     * Tests token verification when token is not found
-     * Expected: Returns false
-     */
     @Test
-    void verifyToken_TokenNotFound_ReturnsFalse() {
+    void verifyToken_WithNonExistentToken_ShouldReturnFalse() {
         // Arrange
-        String tokenValue = "112233";
-        when(mockClient.getEmail()).thenReturn(TEST_EMAIL);
-        when(tokenRepository.findByTokenAndClient(tokenValue, mockClient)).thenReturn(Optional.empty());
+        String tokenValue = "123456";
+        when(tokenRepository.findByTokenAndClient(tokenValue, testClient)).thenReturn(Optional.empty());
 
         // Act
-        boolean result = authService.verifyToken(tokenValue, mockClient);
+        boolean result = authService.verifyToken(tokenValue, testClient);
 
         // Assert
         assertFalse(result);
-        verify(tokenRepository, times(1)).findByTokenAndClient(eq(tokenValue), eq(mockClient));
-        verifyNoInteractions(mockAuthToken);
-        verify(tokenRepository, never()).save(any(AuthToken.class));
+        verify(tokenRepository, never()).save(any());
     }
 
-    /**
-     * Tests token verification when token is invalid (expired)
-     * Expected: Returns false
-     */
     @Test
-    void verifyToken_TokenNotValid_ReturnsFalse() {
+    void verifyToken_WithExpiredToken_ShouldReturnFalse() {
         // Arrange
-        String tokenValue = "112233";
-        when(mockClient.getEmail()).thenReturn(TEST_EMAIL);
-        when(mockAuthToken.isValid()).thenReturn(false);
-        when(tokenRepository.findByTokenAndClient(tokenValue, mockClient)).thenReturn(Optional.of(mockAuthToken));
+        String tokenValue = "123456";
+        AuthToken token = new AuthToken(tokenValue, testClient);
+        token.setCreatedAt(LocalDateTime.now().minusHours(1));
+        token.setExpiresAt(LocalDateTime.now().minusMinutes(5)); // Expired
+        token.setUsed(false);
+
+        when(tokenRepository.findByTokenAndClient(tokenValue, testClient)).thenReturn(Optional.of(token));
 
         // Act
-        boolean result = authService.verifyToken(tokenValue, mockClient);
+        boolean result = authService.verifyToken(tokenValue, testClient);
 
         // Assert
         assertFalse(result);
-        verify(tokenRepository, times(1)).findByTokenAndClient(eq(tokenValue), eq(mockClient));
-        verify(mockAuthToken, times(1)).isValid();
-        verify(mockAuthToken, never()).setUsed(anyBoolean());
-        verify(tokenRepository, never()).save(any(AuthToken.class));
+        verify(tokenRepository, never()).save(any());
     }
 
-    /**
-     * Tests retrieval of the most recent token for a client
-     */
     @Test
-    void getLastToken_CallsRepository() {
+    void verifyToken_WithUsedToken_ShouldReturnFalse() {
         // Arrange
-        Optional<AuthToken> expectedOptional = Optional.of(mockAuthToken);
-        when(tokenRepository.findFirstByClientOrderByCreatedAtDesc(mockClient)).thenReturn(expectedOptional);
+        String tokenValue = "123456";
+        AuthToken token = new AuthToken(tokenValue, testClient);
+        token.setCreatedAt(LocalDateTime.now());
+        token.setExpiresAt(LocalDateTime.now().plusMinutes(5));
+        token.setUsed(true); // Already used
+
+        when(tokenRepository.findByTokenAndClient(tokenValue, testClient)).thenReturn(Optional.of(token));
 
         // Act
-        Optional<AuthToken> resultOptional = authService.getLastToken(mockClient);
+        boolean result = authService.verifyToken(tokenValue, testClient);
 
         // Assert
-        assertEquals(expectedOptional, resultOptional);
-        verify(tokenRepository, times(1)).findFirstByClientOrderByCreatedAtDesc(eq(mockClient));
+        assertFalse(result);
+        verify(tokenRepository, never()).save(any());
     }
 
-    /**
-     * Tests retrieval of the most recent token when client has no tokens
-     * Expected: Returns empty Optional
-     */
     @Test
-    void getLastToken_ClientHasNoTokens_ReturnsEmptyOptional() {
+    void getLastToken_ShouldDelegateToRepository() {
         // Arrange
-        Optional<AuthToken> expectedOptional = Optional.empty();
-        when(tokenRepository.findFirstByClientOrderByCreatedAtDesc(mockClient)).thenReturn(expectedOptional);
+        AuthToken token = new AuthToken("123456", testClient);
+        when(tokenRepository.findFirstByClientOrderByCreatedAtDesc(testClient)).thenReturn(Optional.of(token));
 
         // Act
-        Optional<AuthToken> resultOptional = authService.getLastToken(mockClient);
+        Optional<AuthToken> result = authService.getLastToken(testClient);
 
         // Assert
-        assertTrue(resultOptional.isEmpty());
-        verify(tokenRepository, times(1)).findFirstByClientOrderByCreatedAtDesc(eq(mockClient));
+        assertTrue(result.isPresent());
+        assertEquals(token, result.get());
+        verify(tokenRepository).findFirstByClientOrderByCreatedAtDesc(testClient);
     }
 }

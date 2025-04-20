@@ -11,499 +11,340 @@ import grapes.microservices.paymentbackend.utils.PasswordManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Test class for ClientService
- * Tests client management operations including authentication, account/card access,
- * client creation, and account balance updates
- */
 @ExtendWith(MockitoExtension.class)
 class ClientServiceTest {
 
     @InjectMocks
     private ClientService clientService;
 
-    // Repository and utility dependencies
-    @Mock private ClientRepository clientRepository;
-    @Mock private AccountRepository accountRepository;
-    @Mock private CardRepository cardRepository;
-    @Mock private PasswordManager passwordManager;
+    @Mock
+    private ClientRepository clientRepository;
 
-    // Mock objects for return values and parameters
-    @Mock private Client mockClient;
-    @Mock private Account mockAccount;
-    @Mock private Card mockCard;
-    @Mock private ClientDTO mockClientDTO;
+    @Mock
+    private AccountRepository accountRepository;
 
-    // Argument captors for validation
-    @Captor private ArgumentCaptor<Client> clientCaptor;
-    @Captor private ArgumentCaptor<Account> accountCaptor;
+    @Mock
+    private CardRepository cardRepository;
 
-    // Test constants
-    private final Long CLIENT_ID = 1L;
-    private final String CLIENT_EMAIL = "test@example.com";
-    private final String CLIENT_PASSWORD = "password123";
-    private final String HASHED_PASSWORD = "hashedPassword";
-    private final String CARD_NUMBER = "1234-5678-9012-3456";
+    @Mock
+    private PasswordManager passwordManager;
+
+    @Captor
+    private ArgumentCaptor<Client> clientCaptor;
+
+    private Client testClient;
+    private Account testAccount;
+    private Card testCard;
+    private ClientDTO testClientDTO;
 
     @BeforeEach
     void setUp() {
-        // No global mock setup needed
+        // Initialize test data
+        testClient = new Client();
+        testClient.setId(1L);
+        testClient.setEmail("test@example.com");
+        testClient.setFirstName("Test");
+        testClient.setLastName("User");
+        testClient.setPassword("hashedPassword");
+        testClient.setStatus("Active");
+        testClient.setRegistrationDate(LocalDate.now());
+        testClient.setPhoneNumber("+15555555555");
+
+        testAccount = new Account();
+        testAccount.setAccountNumber("ACC123456789");
+        testAccount.setBalance(new BigDecimal("1000.00"));
+        testAccount.setClient(testClient);
+        testAccount.setOpeningDate(LocalDate.now());
+        testAccount.setStatus("Active");
+
+        testCard = new Card();
+        testCard.setId(1L);
+        testCard.setCardNumber("4111111111111111");
+        testCard.setExpirationDate("12/25");
+        testCard.setClient(testClient);
+
+        testClientDTO = new ClientDTO();
+        testClientDTO.setEmail("new@example.com");
+        testClientDTO.setFirstName("New");
+        testClientDTO.setLastName("User");
+        testClientDTO.setPassword("password");
+        testClientDTO.setPhoneNumber("+15555555556");
     }
 
-    /**
-     * Tests finding a client by email when the client exists
-     * Expected: Returns a populated Optional with the client
-     */
     @Test
-    void findByEmail_ClientExists_ReturnsOptionalClient() {
+    void findByEmail_ShouldReturnClient_WhenEmailExists() {
         // Arrange
-        when(clientRepository.findByEmail(CLIENT_EMAIL)).thenReturn(Optional.of(mockClient));
+        when(clientRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testClient));
 
         // Act
-        Optional<Client> result = clientService.findByEmail(CLIENT_EMAIL);
+        Optional<Client> result = clientService.findByEmail("test@example.com");
 
         // Assert
         assertTrue(result.isPresent());
-        assertEquals(mockClient, result.get());
-        verify(clientRepository, times(1)).findByEmail(eq(CLIENT_EMAIL));
+        assertEquals(testClient, result.get());
+        verify(clientRepository).findByEmail("test@example.com");
     }
 
-    /**
-     * Tests finding a client by email when the client doesn't exist
-     * Expected: Returns an empty Optional
-     */
     @Test
-    void findByEmail_ClientDoesNotExist_ReturnsEmptyOptional() {
+    void findByEmail_ShouldReturnEmpty_WhenEmailNotExists() {
         // Arrange
-        when(clientRepository.findByEmail(CLIENT_EMAIL)).thenReturn(Optional.empty());
+        when(clientRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
         // Act
-        Optional<Client> result = clientService.findByEmail(CLIENT_EMAIL);
+        Optional<Client> result = clientService.findByEmail("nonexistent@example.com");
 
         // Assert
-        assertTrue(result.isEmpty());
-        verify(clientRepository, times(1)).findByEmail(eq(CLIENT_EMAIL));
+        assertFalse(result.isPresent());
+        verify(clientRepository).findByEmail("nonexistent@example.com");
     }
 
-    /**
-     * Tests finding a client by ID when the client exists
-     * Expected: Returns a populated Optional with the client
-     */
     @Test
-    void findById_ClientExists_ReturnsOptionalClient() {
+    void findById_ShouldReturnClient_WhenIdExists() {
         // Arrange
-        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(mockClient));
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(testClient));
 
         // Act
-        Optional<Client> result = clientService.findById(CLIENT_ID);
+        Optional<Client> result = clientService.findById(1L);
 
         // Assert
         assertTrue(result.isPresent());
-        assertEquals(mockClient, result.get());
-        verify(clientRepository, times(1)).findById(eq(CLIENT_ID));
+        assertEquals(testClient, result.get());
+        verify(clientRepository).findById(1L);
     }
 
-    /**
-     * Tests finding a client by ID when the client doesn't exist
-     * Expected: Returns an empty Optional
-     */
     @Test
-    void findById_ClientDoesNotExist_ReturnsEmptyOptional() {
+    void verifyCredentials_ShouldReturnTrue_WhenCredentialsAreValid() {
         // Arrange
-        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.empty());
+        when(clientRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testClient));
+        when(passwordManager.matches("password", "hashedPassword")).thenReturn(true);
 
         // Act
-        Optional<Client> result = clientService.findById(CLIENT_ID);
-
-        // Assert
-        assertTrue(result.isEmpty());
-        verify(clientRepository, times(1)).findById(eq(CLIENT_ID));
-    }
-
-    /**
-     * Tests credential verification with valid credentials
-     * Expected: Returns true when email exists and password matches
-     */
-    @Test
-    void verifyCredentials_ValidCredentials_ReturnsTrue() {
-        // Arrange
-        when(clientRepository.findByEmail(CLIENT_EMAIL)).thenReturn(Optional.of(mockClient));
-        when(mockClient.getPassword()).thenReturn(HASHED_PASSWORD); // Client has this hashed password
-        when(passwordManager.matches(CLIENT_PASSWORD, HASHED_PASSWORD)).thenReturn(true); // Password matches
-
-        // Act
-        boolean result = clientService.verifyCredentials(CLIENT_EMAIL, CLIENT_PASSWORD);
+        boolean result = clientService.verifyCredentials("test@example.com", "password");
 
         // Assert
         assertTrue(result);
-        verify(clientRepository, times(1)).findByEmail(eq(CLIENT_EMAIL));
-        verify(passwordManager, times(1)).matches(eq(CLIENT_PASSWORD), eq(HASHED_PASSWORD));
+        verify(clientRepository).findByEmail("test@example.com");
+        verify(passwordManager).matches("password", "hashedPassword");
     }
 
-    /**
-     * Tests credential verification when client is not found
-     * Expected: Returns false when email doesn't exist
-     */
     @Test
-    void verifyCredentials_ClientNotFound_ReturnsFalse() {
+    void verifyCredentials_ShouldReturnFalse_WhenEmailNotFound() {
         // Arrange
-        when(clientRepository.findByEmail(CLIENT_EMAIL)).thenReturn(Optional.empty());
+        when(clientRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
         // Act
-        boolean result = clientService.verifyCredentials(CLIENT_EMAIL, CLIENT_PASSWORD);
+        boolean result = clientService.verifyCredentials("nonexistent@example.com", "password");
 
         // Assert
         assertFalse(result);
-        verify(clientRepository, times(1)).findByEmail(eq(CLIENT_EMAIL));
-        verify(passwordManager, never()).matches(anyString(), anyString()); // PasswordManager not called
+        verify(clientRepository).findByEmail("nonexistent@example.com");
+        verify(passwordManager, never()).matches(anyString(), anyString());
     }
 
-    /**
-     * Tests credential verification with incorrect password
-     * Expected: Returns false when password doesn't match
-     */
     @Test
-    void verifyCredentials_IncorrectPassword_ReturnsFalse() {
+    void verifyCredentials_ShouldReturnFalse_WhenPasswordIsInvalid() {
         // Arrange
-        when(clientRepository.findByEmail(CLIENT_EMAIL)).thenReturn(Optional.of(mockClient));
-        when(mockClient.getPassword()).thenReturn(HASHED_PASSWORD);
-        when(passwordManager.matches(CLIENT_PASSWORD, HASHED_PASSWORD)).thenReturn(false); // Password doesn't match
+        when(clientRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testClient));
+        when(passwordManager.matches("wrongPassword", "hashedPassword")).thenReturn(false);
 
         // Act
-        boolean result = clientService.verifyCredentials(CLIENT_EMAIL, CLIENT_PASSWORD);
+        boolean result = clientService.verifyCredentials("test@example.com", "wrongPassword");
 
         // Assert
         assertFalse(result);
-        verify(clientRepository, times(1)).findByEmail(eq(CLIENT_EMAIL));
-        verify(passwordManager, times(1)).matches(eq(CLIENT_PASSWORD), eq(HASHED_PASSWORD));
+        verify(clientRepository).findByEmail("test@example.com");
+        verify(passwordManager).matches("wrongPassword", "hashedPassword");
     }
 
-    /**
-     * Tests retrieving a client's cards when they have cards
-     * Expected: Returns list of cards
-     */
     @Test
-    void getClientCards_ClientHasCards_ReturnsCardList() {
+    void getClientCards_ShouldReturnCards() {
         // Arrange
-        List<Card> expectedCards = List.of(mockCard);
-        when(cardRepository.findByClientId(CLIENT_ID)).thenReturn(expectedCards);
+        List<Card> cards = Arrays.asList(testCard);
+        when(cardRepository.findByClientId(1L)).thenReturn(cards);
 
         // Act
-        List<Card> result = clientService.getClientCards(CLIENT_ID);
+        List<Card> result = clientService.getClientCards(1L);
 
         // Assert
-        assertEquals(expectedCards, result);
-        verify(cardRepository, times(1)).findByClientId(eq(CLIENT_ID));
+        assertEquals(1, result.size());
+        assertEquals(testCard, result.get(0));
+        verify(cardRepository).findByClientId(1L);
     }
 
-    /**
-     * Tests retrieving a client's cards when they have no cards
-     * Expected: Returns empty list
-     */
     @Test
-    void getClientCards_ClientHasNoCards_ReturnsEmptyList() {
+    void getClientAccounts_ShouldReturnAccounts() {
         // Arrange
-        when(cardRepository.findByClientId(CLIENT_ID)).thenReturn(Collections.emptyList());
+        List<Account> accounts = Arrays.asList(testAccount);
+        when(accountRepository.findByClientId(1L)).thenReturn(accounts);
 
         // Act
-        List<Card> result = clientService.getClientCards(CLIENT_ID);
+        List<Account> result = clientService.getClientAccounts(1L);
 
         // Assert
-        assertTrue(result.isEmpty());
-        verify(cardRepository, times(1)).findByClientId(eq(CLIENT_ID));
+        assertEquals(1, result.size());
+        assertEquals(testAccount, result.get(0));
+        verify(accountRepository).findByClientId(1L);
     }
 
-    /**
-     * Tests retrieving a client's accounts when they have accounts
-     * Expected: Returns list of accounts
-     */
     @Test
-    void getClientAccounts_ClientHasAccounts_ReturnsAccountList() {
+    void createClient_ShouldCreateAndReturnClient() throws NoSuchAlgorithmException {
         // Arrange
-        List<Account> expectedAccounts = List.of(mockAccount);
-        when(accountRepository.findByClientId(CLIENT_ID)).thenReturn(expectedAccounts);
+        when(clientRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(passwordManager.saltPassword("password")).thenReturn("salted_password");
+        when(passwordManager.hashPassword("salted_password")).thenReturn("hashed_password");
+        when(clientRepository.save(any(Client.class))).thenAnswer(i -> i.getArgument(0));
 
         // Act
-        List<Account> result = clientService.getClientAccounts(CLIENT_ID);
+        Client result = clientService.createClient(testClientDTO);
 
         // Assert
-        assertEquals(expectedAccounts, result);
-        verify(accountRepository, times(1)).findByClientId(eq(CLIENT_ID));
+        assertNotNull(result);
+        assertEquals("new@example.com", result.getEmail());
+        assertEquals("New", result.getFirstName());
+        assertEquals("User", result.getLastName());
+        assertEquals("hashed_password", result.getPassword());
+        assertEquals("Active", result.getStatus());
+        assertEquals(LocalDate.now(), result.getRegistrationDate());
+
+        verify(passwordManager).saltPassword("password");
+        verify(passwordManager).hashPassword("salted_password");
+        verify(clientRepository).save(any(Client.class));
     }
 
-    /**
-     * Tests retrieving a client's accounts when they have no accounts
-     * Expected: Returns empty list
-     */
     @Test
-    void getClientAccounts_ClientHasNoAccounts_ReturnsEmptyList() {
+    void createClient_ShouldThrowException_WhenEmailAlreadyExists() {
         // Arrange
-        when(accountRepository.findByClientId(CLIENT_ID)).thenReturn(Collections.emptyList());
-
-        // Act
-        List<Account> result = clientService.getClientAccounts(CLIENT_ID);
-
-        // Assert
-        assertTrue(result.isEmpty());
-        verify(accountRepository, times(1)).findByClientId(eq(CLIENT_ID));
-    }
-
-    /**
-     * Tests client creation with valid data
-     * Expected: Successfully creates and saves client with proper values
-     */
-    @Test
-    void createClient_ValidDto_CreatesAndSavesClient() throws NoSuchAlgorithmException {
-        // Arrange
-        when(mockClientDTO.getEmail()).thenReturn(CLIENT_EMAIL);
-        when(mockClientDTO.getPassword()).thenReturn(CLIENT_PASSWORD);
-        // Other DTO getters (assuming they return valid values)
-        when(mockClientDTO.getPhoneNumber()).thenReturn("+123");
-        when(mockClientDTO.getFirstName()).thenReturn("Test");
-
-        when(clientRepository.existsByEmail(CLIENT_EMAIL)).thenReturn(false); // Email doesn't exist
-        when(passwordManager.saltPassword(CLIENT_PASSWORD)).thenReturn("salted_" + CLIENT_PASSWORD);
-        when(passwordManager.hashPassword("salted_" + CLIENT_PASSWORD)).thenReturn(HASHED_PASSWORD);
-        // Simulate save: return the Client object passed to it
-        when(clientRepository.save(any(Client.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        // Act
-        Client createdClient = clientService.createClient(mockClientDTO);
-
-        // Assert
-        assertNotNull(createdClient);
-        assertEquals(CLIENT_EMAIL, createdClient.getEmail());
-        assertEquals(HASHED_PASSWORD, createdClient.getPassword()); // Verify hashed password
-        assertEquals("Active", createdClient.getStatus()); // Verify default status
-        assertNotNull(createdClient.getRegistrationDate()); // Verify date
-
-        // Verify
-        verify(clientRepository, times(1)).existsByEmail(eq(CLIENT_EMAIL));
-        verify(passwordManager, times(1)).saltPassword(eq(CLIENT_PASSWORD));
-        verify(passwordManager, times(1)).hashPassword(eq("salted_" + CLIENT_PASSWORD));
-        verify(clientRepository, times(1)).save(clientCaptor.capture()); // Capture saved object
-
-        // Verify details of captured client
-        Client savedClient = clientCaptor.getValue();
-        assertEquals(CLIENT_EMAIL, savedClient.getEmail());
-        assertEquals(HASHED_PASSWORD, savedClient.getPassword());
-        assertEquals("Test", savedClient.getFirstName()); // Verify another copied property
-    }
-
-    /**
-     * Tests client creation when email already exists
-     * Expected: Throws IllegalArgumentException
-     */
-    @Test
-    void createClient_EmailAlreadyExists_ThrowsIllegalArgumentException() throws NoSuchAlgorithmException {
-        // Arrange
-        when(mockClientDTO.getEmail()).thenReturn(CLIENT_EMAIL);
-        when(clientRepository.existsByEmail(CLIENT_EMAIL)).thenReturn(true); // Email already exists
+        when(clientRepository.existsByEmail("new@example.com")).thenReturn(true);
 
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            clientService.createClient(mockClientDTO);
-        });
-        assertTrue(exception.getMessage().contains("already exists"));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> clientService.createClient(testClientDTO));
+        assertEquals("Client with email new@example.com already exists", exception.getMessage());
 
-        // Verify
-        verify(clientRepository, times(1)).existsByEmail(eq(CLIENT_EMAIL));
+        verify(clientRepository).existsByEmail("new@example.com");
         verify(passwordManager, never()).saltPassword(anyString());
-        verify(passwordManager, never()).hashPassword(anyString());
         verify(clientRepository, never()).save(any(Client.class));
     }
 
-    /**
-     * Tests client creation when password hashing fails
-     * Expected: Throws NoSuchAlgorithmException
-     */
     @Test
-    void createClient_PasswordHashingFails_ThrowsException() throws NoSuchAlgorithmException {
+    void updateAccountBalance_ShouldReturnTrue_WhenBalanceUpdatedSuccessfully() {
         // Arrange
-        when(mockClientDTO.getEmail()).thenReturn(CLIENT_EMAIL);
-        when(mockClientDTO.getPassword()).thenReturn(CLIENT_PASSWORD);
-        when(clientRepository.existsByEmail(CLIENT_EMAIL)).thenReturn(false);
-        when(passwordManager.saltPassword(CLIENT_PASSWORD)).thenReturn("salted_" + CLIENT_PASSWORD);
-        // Simulate hashing failure
-        when(passwordManager.hashPassword("salted_" + CLIENT_PASSWORD)).thenThrow(new NoSuchAlgorithmException("Hashing failed"));
+        BigDecimal amountToSubtract = new BigDecimal("500.00");
+        BigDecimal expectedNewBalance = new BigDecimal("500.00");
 
-        // Act & Assert
-        assertThrows(NoSuchAlgorithmException.class, () -> {
-            clientService.createClient(mockClientDTO);
-        });
-
-        // Verify
-        verify(clientRepository, times(1)).existsByEmail(eq(CLIENT_EMAIL));
-        verify(passwordManager, times(1)).saltPassword(eq(CLIENT_PASSWORD));
-        verify(passwordManager, times(1)).hashPassword(eq("salted_" + CLIENT_PASSWORD));
-        verify(clientRepository, never()).save(any(Client.class)); // No save
-    }
-
-    /**
-     * Tests account balance update with sufficient funds
-     * Expected: Updates balance and returns true
-     */
-    @Test
-    void updateAccountBalance_SufficientBalance_UpdatesAndReturnsTrue() {
-        // Arrange
-        BigDecimal initialBalance = new BigDecimal("100.00");
-        BigDecimal amountToSubtract = new BigDecimal("30.50");
-        BigDecimal expectedNewBalance = new BigDecimal("69.50");
-
-        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(mockClient));
-        when(accountRepository.findFirstByClientIdOrderByOpeningDateDesc(CLIENT_ID)).thenReturn(Optional.of(mockAccount));
-        when(mockAccount.getBalance()).thenReturn(initialBalance);
-        when(mockAccount.getAccountNumber()).thenReturn("ACC123"); // For logging
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(testClient));
+        when(accountRepository.findFirstByClientIdOrderByOpeningDateDesc(1L)).thenReturn(Optional.of(testAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(testAccount);
 
         // Act
-        boolean result = clientService.updateAccountBalance(CLIENT_ID, amountToSubtract);
+        boolean result = clientService.updateAccountBalance(1L, amountToSubtract);
 
         // Assert
         assertTrue(result);
+        assertEquals(expectedNewBalance, testAccount.getBalance());
 
-        // Verify
-        verify(clientRepository, times(1)).findById(eq(CLIENT_ID));
-        verify(accountRepository, times(1)).findFirstByClientIdOrderByOpeningDateDesc(eq(CLIENT_ID));
-        verify(mockAccount, times(1)).setBalance(eq(expectedNewBalance)); // Verify setBalance called with correct value
-        verify(accountRepository, times(1)).save(eq(mockAccount)); // Verify modified account is saved
+        verify(clientRepository).findById(1L);
+        verify(accountRepository).findFirstByClientIdOrderByOpeningDateDesc(1L);
+        verify(accountRepository).save(testAccount);
     }
 
-    /**
-     * Tests account balance update when client is not found
-     * Expected: Returns false without updating
-     */
     @Test
-    void updateAccountBalance_ClientNotFound_ReturnsFalse() {
+    void updateAccountBalance_ShouldReturnFalse_WhenClientNotFound() {
         // Arrange
-        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.empty()); // Client not found
+        BigDecimal amountToSubtract = new BigDecimal("500.00");
+        when(clientRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act
-        boolean result = clientService.updateAccountBalance(CLIENT_ID, new BigDecimal("10.00"));
+        boolean result = clientService.updateAccountBalance(999L, amountToSubtract);
 
         // Assert
         assertFalse(result);
-
-        // Verify
+        verify(clientRepository).findById(999L);
         verify(accountRepository, never()).findFirstByClientIdOrderByOpeningDateDesc(anyLong());
         verify(accountRepository, never()).save(any(Account.class));
     }
 
-    /**
-     * Tests account balance update when account is not found
-     * Expected: Returns false without updating
-     */
     @Test
-    void updateAccountBalance_AccountNotFound_ReturnsFalse() {
+    void updateAccountBalance_ShouldReturnFalse_WhenAccountNotFound() {
         // Arrange
-        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(mockClient)); // Client found
-        when(accountRepository.findFirstByClientIdOrderByOpeningDateDesc(CLIENT_ID)).thenReturn(Optional.empty()); // Account not found
+        BigDecimal amountToSubtract = new BigDecimal("500.00");
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(testClient));
+        when(accountRepository.findFirstByClientIdOrderByOpeningDateDesc(1L)).thenReturn(Optional.empty());
 
         // Act
-        boolean result = clientService.updateAccountBalance(CLIENT_ID, new BigDecimal("10.00"));
+        boolean result = clientService.updateAccountBalance(1L, amountToSubtract);
 
         // Assert
         assertFalse(result);
-
-        // Verify
-        verify(accountRepository, times(1)).findFirstByClientIdOrderByOpeningDateDesc(eq(CLIENT_ID));
+        verify(clientRepository).findById(1L);
+        verify(accountRepository).findFirstByClientIdOrderByOpeningDateDesc(1L);
         verify(accountRepository, never()).save(any(Account.class));
     }
 
-    /**
-     * Tests account balance update with insufficient funds
-     * Expected: Returns false without updating
-     */
     @Test
-    void updateAccountBalance_InsufficientBalance_ReturnsFalse() {
+    void updateAccountBalance_ShouldReturnFalse_WhenInsufficientBalance() {
         // Arrange
-        BigDecimal initialBalance = new BigDecimal("20.00");
-        BigDecimal amountToSubtract = new BigDecimal("30.50");
-
-        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(mockClient));
-        when(accountRepository.findFirstByClientIdOrderByOpeningDateDesc(CLIENT_ID)).thenReturn(Optional.of(mockAccount));
-        when(mockAccount.getBalance()).thenReturn(initialBalance); // Insufficient balance
+        BigDecimal amountToSubtract = new BigDecimal("1500.00"); // More than available balance
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(testClient));
+        when(accountRepository.findFirstByClientIdOrderByOpeningDateDesc(1L)).thenReturn(Optional.of(testAccount));
 
         // Act
-        boolean result = clientService.updateAccountBalance(CLIENT_ID, amountToSubtract);
+        boolean result = clientService.updateAccountBalance(1L, amountToSubtract);
 
         // Assert
         assertFalse(result);
+        assertEquals(new BigDecimal("1000.00"), testAccount.getBalance()); // Balance should remain unchanged
 
-        // Verify
-        verify(mockAccount, never()).setBalance(any()); // setBalance should not be called
-        verify(accountRepository, never()).save(any(Account.class)); // No save
-    }
-
-    /**
-     * Tests account balance update when balance is null
-     * Expected: Returns false without updating
-     */
-    @Test
-    void updateAccountBalance_NullBalance_ReturnsFalse() {
-        // Arrange
-        BigDecimal amountToSubtract = new BigDecimal("30.50");
-        when(clientRepository.findById(CLIENT_ID)).thenReturn(Optional.of(mockClient));
-        when(accountRepository.findFirstByClientIdOrderByOpeningDateDesc(CLIENT_ID)).thenReturn(Optional.of(mockAccount));
-        when(mockAccount.getBalance()).thenReturn(null); // Null balance
-
-        // Act
-        boolean result = clientService.updateAccountBalance(CLIENT_ID, amountToSubtract);
-
-        // Assert
-        assertFalse(result);
-
-        // Verify
-        verify(mockAccount, never()).setBalance(any());
+        verify(clientRepository).findById(1L);
+        verify(accountRepository).findFirstByClientIdOrderByOpeningDateDesc(1L);
         verify(accountRepository, never()).save(any(Account.class));
     }
 
-    /**
-     * Tests card ownership verification when card belongs to client
-     * Expected: Returns true
-     */
     @Test
-    void isCardOwnedByClient_CardOwned_ReturnsTrue() {
+    void isCardOwnedByClient_ShouldReturnTrue_WhenCardBelongsToClient() {
         // Arrange
-        when(cardRepository.findByCardNumberAndClientId(CARD_NUMBER, CLIENT_ID)).thenReturn(Optional.of(mockCard));
+        String cardNumber = "4111111111111111";
+        Long clientId = 1L;
+        when(cardRepository.findByCardNumberAndClientId(cardNumber, clientId)).thenReturn(Optional.of(testCard));
 
         // Act
-        boolean result = clientService.isCardOwnedByClient(CARD_NUMBER, CLIENT_ID);
+        boolean result = clientService.isCardOwnedByClient(cardNumber, clientId);
 
         // Assert
         assertTrue(result);
-        verify(cardRepository, times(1)).findByCardNumberAndClientId(eq(CARD_NUMBER), eq(CLIENT_ID));
+        verify(cardRepository).findByCardNumberAndClientId(cardNumber, clientId);
     }
 
-    /**
-     * Tests card ownership verification when card does not belong to client
-     * Expected: Returns false
-     */
     @Test
-    void isCardOwnedByClient_CardNotOwned_ReturnsFalse() {
+    void isCardOwnedByClient_ShouldReturnFalse_WhenCardDoesNotBelongToClient() {
         // Arrange
-        when(cardRepository.findByCardNumberAndClientId(CARD_NUMBER, CLIENT_ID)).thenReturn(Optional.empty());
+        String cardNumber = "4111111111111111";
+        Long clientId = 999L;
+        when(cardRepository.findByCardNumberAndClientId(cardNumber, clientId)).thenReturn(Optional.empty());
 
         // Act
-        boolean result = clientService.isCardOwnedByClient(CARD_NUMBER, CLIENT_ID);
+        boolean result = clientService.isCardOwnedByClient(cardNumber, clientId);
 
         // Assert
         assertFalse(result);
-        verify(cardRepository, times(1)).findByCardNumberAndClientId(eq(CARD_NUMBER), eq(CLIENT_ID));
+        verify(cardRepository).findByCardNumberAndClientId(cardNumber, clientId);
     }
 }

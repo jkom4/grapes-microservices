@@ -22,12 +22,6 @@ import java.util.Random;
 public class TransactionEntity {
 
 
-    @Value("${app.grapes.account.number}")
-    private String GRAPES_ACCOUNT;
-
-    @Value("${app.grapes.account.name}")
-    private String GRAPES_BANK;
-
     @Id
     @Column(name = "transaction_id")
     private Long id;  // Manually generated ID
@@ -104,10 +98,8 @@ public class TransactionEntity {
         this.authenticationType3DS = "OTP";
         this.status3DS = "Pending";
         this.status = "Initiated";
-
-        // Default values for creditor (Bank of Grapes)
-        this.creditorAccount = GRAPES_ACCOUNT;
-        this.creditorBank = GRAPES_BANK;
+        this.creditorAccount = "BE15203672485394";
+        this.creditorBank = "Grapes's bank";
 
     }
 

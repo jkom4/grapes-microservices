@@ -1,182 +1,236 @@
 package grapes.microservices.paymentbackend.services;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import grapes.microservices.paymentbackend.models.Card;
 import grapes.microservices.paymentbackend.models.Client;
 import grapes.microservices.paymentbackend.models.TransactionEntity;
+import grapes.microservices.paymentbackend.utils.DataUtils;
 import grapes.microservices.paymentbackend.utils.KeystoreUtils;
 import grapes.microservices.paymentbackend.utils.SignUtils;
+import grapes.microservices.paymentbackend.utils.SslUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import javax.net.ssl.SSLSocket;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Test class for AcsService
- * Focuses on testing the payment processing functionality with various client and card states
- */
 @ExtendWith(MockitoExtension.class)
 class AcsServiceTest {
 
     @InjectMocks
     private AcsService acsService;
 
-    // Mock dependencies
-    @Mock private TransactionEntity mockTransaction;
-    @Mock private Client mockClient;
-    @Mock private Card mockCard;
-    @Mock private PrivateKey mockPrivateKey;
+    @Mock
+    private SSLSocket mockSslSocket;
 
-    // Static mocks declaration
-    private static MockedStatic<KeystoreUtils> keystoreUtilsMockedStatic;
-    private static MockedStatic<SignUtils> signUtilsMockedStatic;
+    @Mock
+    private PrivateKey mockPrivateKey;
 
-    // Test constants
-    private final String DUMMY_CARD_NUMBER = "1234567890123456";
-    private final String DUMMY_EXP_DATE = "12/2025";
-    private final BigDecimal DUMMY_AMOUNT = new BigDecimal("99.99");
-    private final String DUMMY_MERCHANT = "TestMerchant";
-    private final String DUMMY_SIGNATURE = "fakeSignature";
+    @Mock
+    private Certificate mockCertificate;
+
+    @Mock
+    private PublicKey mockPublicKey;
 
     @BeforeEach
     void setUp() {
-        // Close any potentially existing static mocks
-        closeStaticMocks();
-
-        // Initialize static mocks without any 'when' conditions here
-        keystoreUtilsMockedStatic = mockStatic(KeystoreUtils.class);
-        signUtilsMockedStatic = mockStatic(SignUtils.class);
-
-        // Inject @Value properties required by AcsService
-        ReflectionTestUtils.setField(acsService, "clientKeystorePath", "dummy/path.jks");
-        ReflectionTestUtils.setField(acsService, "clientKeystorePassword", "dummy");
-        ReflectionTestUtils.setField(acsService, "clientKeystoreAlias", "dummy");
-        ReflectionTestUtils.setField(acsService, "clientKeyPassword", "dummy");
-        ReflectionTestUtils.setField(acsService, "acsPort", 8081);
-        ReflectionTestUtils.setField(acsService, "clientTruststorePathForAcs", "dummy/trust.jks");
-        ReflectionTestUtils.setField(acsService, "clientTruststorePasswordForAcs", "dummy");
-        ReflectionTestUtils.setField(acsService, "acsTrustedAlias", "dummy_acs");
+        // Set values for the properties through reflection
+        ReflectionTestUtils.setField(acsService, "acsPort", 8443);
+        ReflectionTestUtils.setField(acsService, "clientKeystorePath", "client.keystore");
+        ReflectionTestUtils.setField(acsService, "clientKeystorePassword", "password");
+        ReflectionTestUtils.setField(acsService, "clientKeystoreAlias", "client");
+        ReflectionTestUtils.setField(acsService, "clientKeyPassword", "keypassword");
+        ReflectionTestUtils.setField(acsService, "clientTruststorePathForAcs", "client.truststore");
+        ReflectionTestUtils.setField(acsService, "clientTruststorePasswordForAcs", "trustpass");
+        ReflectionTestUtils.setField(acsService, "acsTrustedAlias", "acs_trusted");
     }
 
-    @AfterEach
-    void tearDown() {
-        closeStaticMocks();
-    }
-
-    /**
-     * Helper method to safely close static mocks
-     */
-    private void closeStaticMocks() {
-        if (keystoreUtilsMockedStatic != null && !keystoreUtilsMockedStatic.isClosed()) keystoreUtilsMockedStatic.close();
-        if (signUtilsMockedStatic != null && !signUtilsMockedStatic.isClosed()) signUtilsMockedStatic.close();
-    }
-
-    // --- Simplified Tests (with local stubbing) ---
-
-    /**
-     * Tests the scenario where keystore access fails during payment processing
-     * Expected: The method should return false when unable to access the keystore
-     */
     @Test
-    void processPayment_ClientHasCard_FailsOnKeystoreAccessAndReturnsFalse() throws Exception {
-        // Arrange - Set up all necessary behaviors HERE
-        when(mockClient.getCards()).thenReturn(List.of(mockCard));
-        when(mockCard.getCardNumber()).thenReturn(DUMMY_CARD_NUMBER);
-        when(mockCard.getExpirationDate()).thenReturn(DUMMY_EXP_DATE);
-        when(mockTransaction.getTransferAmount()).thenReturn(DUMMY_AMOUNT); // Required for dataToSign
-        when(mockTransaction.getMerchantName()).thenReturn(DUMMY_MERCHANT); // Required for dataToSign
+    void processPayment_Success() throws Exception {
+        // Arrange
+        TransactionEntity transaction = new TransactionEntity();
+        transaction.setTransferAmount(BigDecimal.valueOf(100.0));
+        transaction.setMerchantName("TestMerchant");
 
-        // KeystoreUtils behavior for this test (expected failure)
-        keystoreUtilsMockedStatic.when(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()))
-                .thenThrow(new java.io.FileNotFoundException("dummy/path.jks (simulated)")); // Simulate the exact error seen in logs
+        Card card = new Card();
+        card.setCardNumber("4111111111111111");
+        card.setExpirationDate("12/25");
+
+        Client client = new Client();
+        client.setEmail("test@example.com");
+        client.setCards(Collections.singletonList(card));
+
+        // Mock the SSL socket creation
+        try (MockedStatic<SslUtils> sslUtilsMock = mockStatic(SslUtils.class);
+             MockedStatic<KeystoreUtils> keystoreUtilsMock = mockStatic(KeystoreUtils.class);
+             MockedStatic<SignUtils> signUtilsMock = mockStatic(SignUtils.class);
+             MockedStatic<DataUtils> dataUtilsMock = mockStatic(DataUtils.class)) {
+
+            // Setup mocks
+            sslUtilsMock.when(() -> SslUtils.createSslClientSocket(anyInt(), anyString(), anyString()))
+                    .thenReturn(mockSslSocket);
+
+            keystoreUtilsMock.when(() -> KeystoreUtils.getPrivateKey(
+                            anyString(), anyString(), anyString(), anyString()))
+                    .thenReturn(mockPrivateKey);
+
+            keystoreUtilsMock.when(() -> KeystoreUtils.getCertificate(
+                            anyString(), anyString(), anyString()))
+                    .thenReturn(mockCertificate);
+
+            when(mockCertificate.getPublicKey()).thenReturn(mockPublicKey);
+
+            signUtilsMock.when(() -> SignUtils.signData(anyString(), any(PrivateKey.class)))
+                    .thenReturn("mockedSignature");
+
+            signUtilsMock.when(() -> SignUtils.verifySignature(anyString(), anyString(), any(PublicKey.class)))
+                    .thenReturn(true);
+
+            // Mock SSL socket I/O
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PrintWriter writer = new PrintWriter(outputStream, true);
+            when(mockSslSocket.getOutputStream()).thenReturn(outputStream);
+
+            String mockResponse = "source=acs&data=123456&signature=validSignature";
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(mockResponse.getBytes());
+            when(mockSslSocket.getInputStream()).thenReturn(inputStream);
+
+            // Mock data parsing
+            Map<String, String> parsedResponse = new HashMap<>();
+            parsedResponse.put("source", "acs");
+            parsedResponse.put("data", "123456");
+            parsedResponse.put("signature", "validSignature");
+            dataUtilsMock.when(() -> DataUtils.parseData(anyString())).thenReturn(parsedResponse);
+
+            // Act
+            boolean result = acsService.processPayment(transaction, client);
+
+            // Assert
+            assertTrue(result);
+            verify(mockSslSocket).getOutputStream();
+            verify(mockSslSocket).getInputStream();
+        }
+    }
+
+    @Test
+    void processPayment_MissingCardDetails() {
+        // Arrange
+        TransactionEntity transaction = new TransactionEntity();
+        transaction.setTransferAmount(BigDecimal.valueOf(100.0));
+        transaction.setMerchantName("TestMerchant");
+
+        Client client = new Client();
+        client.setEmail("test@example.com");
+        // No cards set
 
         // Act
-        boolean result = acsService.processPayment(mockTransaction, mockClient);
+        boolean result = acsService.processPayment(transaction, client);
 
         // Assert
-        assertFalse(result, "processPayment should return false when KeystoreUtils call fails");
-
-        // Verify
-        verify(mockClient, times(1)).getCards();
-        verify(mockCard, times(1)).getCardNumber();
-        verify(mockCard, times(1)).getExpirationDate();
-        // Verify attempt to call getPrivateKey
-        keystoreUtilsMockedStatic.verify(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()), times(1));
-        // Verify signature was NOT attempted because previous step failed
-        signUtilsMockedStatic.verify(() -> SignUtils.signData(anyString(), any()), never());
+        assertFalse(result);
     }
 
-    /**
-     * Tests the scenario where the client has no payment cards
-     * Expected: The method should return false early without attempting keystore access
-     */
     @Test
-    void processPayment_ClientHasNoCards_ReturnsFalseEarly() {
-        // Arrange - Set specific behavior
-        when(mockClient.getCards()).thenReturn(Collections.emptyList());
+    void processAcsResponse_ValidResponse() throws Exception {
+        // Arrange
+        String validAcsResponse = "source=acs&data=123456&signature=validSignature";
 
-        // Act
-        boolean result = acsService.processPayment(mockTransaction, mockClient);
+        try (MockedStatic<DataUtils> dataUtilsMock = mockStatic(DataUtils.class);
+             MockedStatic<KeystoreUtils> keystoreUtilsMock = mockStatic(KeystoreUtils.class)) {
 
-        // Assert
-        assertFalse(result, "processPayment should return false early if client has no cards");
+            Map<String, String> parsedResponse = new HashMap<>();
+            parsedResponse.put("source", "acs");
+            parsedResponse.put("data", "123456");
+            parsedResponse.put("signature", "validSignature");
+            dataUtilsMock.when(() -> DataUtils.parseData(validAcsResponse)).thenReturn(parsedResponse);
 
-        // Verify (No calls to Keystore/Sign utilities)
-        keystoreUtilsMockedStatic.verify(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()), never());
-        signUtilsMockedStatic.verify(() -> SignUtils.signData(anyString(), any()), never());
+            keystoreUtilsMock.when(() -> KeystoreUtils.getCertificate(
+                            anyString(), anyString(), anyString()))
+                    .thenReturn(mockCertificate);
+
+            when(mockCertificate.getPublicKey()).thenReturn(mockPublicKey);
+
+            try (MockedStatic<SignUtils> signUtilsMock = mockStatic(SignUtils.class)) {
+                signUtilsMock.when(() -> SignUtils.verifySignature("123456", "validSignature", mockPublicKey))
+                        .thenReturn(true);
+
+                // Act
+                boolean result = acsService.processAcsResponse(validAcsResponse);
+
+                // Assert
+                assertTrue(result);
+            }
+        }
     }
 
-    /**
-     * Tests the scenario where the client's card list is null
-     * Expected: The method should return false early without attempting keystore access
-     */
     @Test
-    void processPayment_ClientCardsIsNull_ReturnsFalseEarly() {
-        // Arrange - Set specific behavior
-        when(mockClient.getCards()).thenReturn(null);
+    void processAcsResponse_InvalidResponse() throws Exception {
+        // Arrange
+        String invalidAcsResponse = "source=unknown&data=123456&signature=validSignature";
 
-        // Act
-        boolean result = acsService.processPayment(mockTransaction, mockClient);
+        try (MockedStatic<DataUtils> dataUtilsMock = mockStatic(DataUtils.class)) {
+            Map<String, String> parsedResponse = new HashMap<>();
+            parsedResponse.put("source", "unknown"); // Invalid source
+            parsedResponse.put("data", "123456");
+            parsedResponse.put("signature", "validSignature");
+            dataUtilsMock.when(() -> DataUtils.parseData(invalidAcsResponse)).thenReturn(parsedResponse);
 
-        // Assert
-        assertFalse(result, "processPayment should return false early if client card list is null");
+            // Act
+            boolean result = acsService.processAcsResponse(invalidAcsResponse);
 
-        // Verify
-        keystoreUtilsMockedStatic.verify(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()), never());
-        signUtilsMockedStatic.verify(() -> SignUtils.signData(anyString(), any()), never());
+            // Assert
+            assertFalse(result);
+        }
     }
 
-    /**
-     * Tests the scenario where card details are missing
-     * Expected: The method should return false early without attempting keystore access
-     */
     @Test
-    void processPayment_CardDetailsMissing_ReturnsFalseEarly() {
-        // Arrange - Set specific behavior
-        // Client has a list of cards (configured in mockClient)
-        when(mockClient.getCards()).thenReturn(List.of(mockCard));
-        when(mockCard.getCardNumber()).thenReturn(null); // But the card has no number
+    void processAcsResponse_InvalidSignature() throws Exception {
+        // Arrange
+        String validAcsResponse = "source=acs&data=123456&signature=invalidSignature";
 
-        // Act
-        boolean result = acsService.processPayment(mockTransaction, mockClient);
+        try (MockedStatic<DataUtils> dataUtilsMock = mockStatic(DataUtils.class);
+             MockedStatic<KeystoreUtils> keystoreUtilsMock = mockStatic(KeystoreUtils.class)) {
 
-        // Assert
-        assertFalse(result, "processPayment should return false early if card number is null");
+            Map<String, String> parsedResponse = new HashMap<>();
+            parsedResponse.put("source", "acs");
+            parsedResponse.put("data", "123456");
+            parsedResponse.put("signature", "invalidSignature");
+            dataUtilsMock.when(() -> DataUtils.parseData(validAcsResponse)).thenReturn(parsedResponse);
 
-        // Verify
-        keystoreUtilsMockedStatic.verify(() -> KeystoreUtils.getPrivateKey(anyString(), anyString(), anyString(), anyString()), never());
-        signUtilsMockedStatic.verify(() -> SignUtils.signData(anyString(), any()), never());
+            keystoreUtilsMock.when(() -> KeystoreUtils.getCertificate(
+                            anyString(), anyString(), anyString()))
+                    .thenReturn(mockCertificate);
+
+            when(mockCertificate.getPublicKey()).thenReturn(mockPublicKey);
+
+            try (MockedStatic<SignUtils> signUtilsMock = mockStatic(SignUtils.class)) {
+                signUtilsMock.when(() -> SignUtils.verifySignature("123456", "invalidSignature", mockPublicKey))
+                        .thenReturn(false);
+
+                // Act
+                boolean result = acsService.processAcsResponse(validAcsResponse);
+
+                // Assert
+                assertFalse(result);
+            }
+        }
     }
 }

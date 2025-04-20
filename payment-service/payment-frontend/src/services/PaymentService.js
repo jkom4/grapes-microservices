@@ -23,10 +23,10 @@ export const PaymentService = {
             // The endpoint path ('/payment/initiate') is appended to the baseURL defined in apiClient
             const response = await apiClient.post('/payment/initiate', {
                 cardNumber: payment.cardNumber,
-                expirationDate: payment.expirationDate,
+                expirationDate: payment.expirationDate, // Should be MM/YYYY
                 cvv: payment.cvv,
-                amount: payment.amount,
-                merchantName: "Grapes" // Consider making this configurable or dynamic if necessary
+                amount: payment.amount, // Now included in the request
+                merchantName: payment.merchantName // Include merchant name if available
             });
 
             if (response.data && response.data.success) {

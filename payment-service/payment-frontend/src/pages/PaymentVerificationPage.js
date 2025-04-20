@@ -84,7 +84,7 @@ const PaymentVerificationPage = () => {
     // Clear error on OTP input change
     useEffect(() => {
         if (paymentToken !== '') {
-            if (showError && errorMessage.includes("Verification failed")) {
+            if (showError && (errorMessage.includes("Verification failed") || errorMessage.includes("check the code"))) {
                 setShowError(false);
                 setErrorMessage('');
             }
@@ -95,23 +95,39 @@ const PaymentVerificationPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (detailsLoading) {
-            setShowError(true); setErrorMessage("Payment details still loading."); return;
+            setShowError(true);
+            setErrorMessage("Payment details still loading.");
+            return;
         }
-        if (errorMessage && !showError && !errorMessage.includes("Verification failed")) {
-            setShowError(true); return;
+
+        // Only check for general errors that would prevent submission
+        if (errorMessage && !showError &&
+            !errorMessage.includes("Verification failed") &&
+            !errorMessage.includes("check the code")) {
+            setShowError(true);
+            return;
         }
+
         if (!paymentToken || paymentToken.length !== 6) {
-            setShowError(true); setErrorMessage("Please enter the 6-digit verification code."); return;
+            setShowError(true);
+            setErrorMessage("Please enter the 6-digit verification code.");
+            return;
         }
+
         if (remainingTime === 0 && !successMessage) {
-            setShowError(true); setErrorMessage('Verification time expired. Please restart the payment.'); return;
+            setShowError(true);
+            setErrorMessage('Verification time expired. Please restart the payment.');
+            return;
         }
+
         setIsLoading(true);
         setShowError(false);
         setErrorMessage('');
+
         try {
             const verification = new PaymentVerification(paymentToken);
             const result = await VerificationService.verifyPayment(verification);
+
             if (result.success) {
                 setShowError(false);
                 setSuccessMessage(result.message || 'Payment successful! Redirecting...');
@@ -121,12 +137,12 @@ const PaymentVerificationPage = () => {
             } else {
                 setShowError(true);
                 setErrorMessage(result.message || 'Verification failed. Please check the code and try again.');
-                setPaymentToken('');
+                setPaymentToken(''); // Only clear the input field to allow retry
             }
         } catch (error) {
             setShowError(true);
             setErrorMessage('An error occurred while contacting the server. Please try again.');
-            setPaymentToken('');
+            setPaymentToken(''); // Only clear the input field to allow retry
         } finally {
             if (!successMessage) {
                 setIsLoading(false);
@@ -134,8 +150,14 @@ const PaymentVerificationPage = () => {
         }
     };
 
-    // Disable form during loading, timeout, success, or initial error
-    const isFormDisabled = isLoading || detailsLoading || (remainingTime === 0 && !successMessage) || successMessage !== null || (errorMessage && !showError && !errorMessage.includes("Verification failed"));
+    // Modified: allow retries when verification fails
+    const isFormDisabled = isLoading ||
+        detailsLoading ||
+        (remainingTime === 0 && !successMessage) ||
+        successMessage !== null ||
+        (errorMessage && !showError &&
+            !errorMessage.includes("Verification failed") &&
+            !errorMessage.includes("check the code"));
 
     // Render OTP form and payment details
     return (
@@ -146,7 +168,9 @@ const PaymentVerificationPage = () => {
                 </div>
                 {detailsLoading ? (
                     <p>Loading payment details...</p>
-                ) : errorMessage && !showError && !errorMessage.includes("Verification failed") ? (
+                ) : errorMessage && !showError &&
+                !errorMessage.includes("Verification failed") &&
+                !errorMessage.includes("check the code") ? (
                     <p className="error-message">{errorMessage}</p>
                 ) : (
                     <>
