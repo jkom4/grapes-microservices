@@ -10,6 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 /**
  * Singleton object to provide a configured Retrofit instance for API calls.
@@ -81,5 +82,17 @@ object RetrofitClient {
          */
         @PATCH("trips/orders/{orderItemId}/scan")
         suspend fun scanOrder(@Path("orderItemId") orderItemId: String)
+
+        /**
+         * Updates the status of a delivery for a given order ID.
+         *
+         * @param orderId The ID of the order to update.
+         * @param newStatus The new status to set (e.g., "In Progress").
+         */
+        @PATCH("deliveries/update-status/{orderId}")
+        suspend fun updateDeliveryStatus(
+            @Path("orderId") orderId: String,
+            @Query("newStatus") newStatus: String
+        )
     }
 }

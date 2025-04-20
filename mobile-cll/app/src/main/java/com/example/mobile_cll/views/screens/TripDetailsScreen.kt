@@ -13,9 +13,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.mobile_cll.models.entities.Trip
+import com.example.mobile_cll.network.RetrofitClient
 import com.example.mobile_cll.views.components.*
 import com.example.mobile_cll.viewmodels.TripDetailsViewModel
 import com.example.mobile_cll.viewmodels.TripDetailsViewModelFactory
+import kotlinx.coroutines.launch
+import android.util.Log
+import retrofit2.HttpException
 
 /**
  * Composable function that displays the details of a trip, including trip information,
@@ -44,6 +48,8 @@ fun TripDetailsScreen(
     val orders by viewModel.orders
     val deliveryRequestCount by viewModel.deliveryRequestCount
     val isLoading by viewModel.isLoading
+    val coroutineScope = rememberCoroutineScope()
+    val apiService = RetrofitClient.getService(RetrofitClient.ApiService::class.java)
 
     var showAlertDialog by remember { mutableStateOf(false) }
     val areAllOrdersScanned by remember { derivedStateOf { orders.all { it.scanned } } }
@@ -98,6 +104,7 @@ fun TripDetailsScreen(
                             OrderCard(
                                 order = order,
                                 onScanClick = {
+                                    Log.d("TripDetailsScreen", "Navigating to scan with orderId: ${order.orderItemId}, tripId: $tripId")
                                     navController.navigate("scan/${order.orderItemId}/$tripId")
                                 }
                             )
@@ -109,9 +116,28 @@ fun TripDetailsScreen(
                             Button(
                                 onClick = {
                                     if (areAllOrdersScanned) {
-                                        navController.navigate(
-                                            "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
-                                        )
+                                        coroutineScope.launch {
+                                            Log.d("TripDetailsScreen", "Confirm button clicked. Orders: ${orders.map { it.orderItemId }}")
+                                            orders.forEach { order ->
+                                                val orderId = order.orderItemId.toString()
+                                                Log.d("TripDetailsScreen", "Calling PATCH: http://10.0.2.2:8092/cll/deliveries/update-status/$orderId?newStatus=In%20Progress")
+                                                try {
+                                                    apiService.updateDeliveryStatus(
+                                                        orderId = tripId,
+                                                        newStatus = "In Progress"
+                                                    )
+                                                    Log.d("TripDetailsScreen", "Successfully updated status for order ID: $orderId to In Progress")
+                                                } catch (e: HttpException) {
+                                                    Log.e("TripDetailsScreen", "Failed to update status for order ID: $orderId, HTTP ${e.code()}: ${e.response()?.errorBody()?.string()}", e)
+                                                } catch (e: Exception) {
+                                                    Log.e("TripDetailsScreen", "Failed to update status for order ID: $orderId, error: ${e.message}", e)
+                                                }
+                                            }
+                                            Log.d("TripDetailsScreen", "Navigating to EmailSentScreen with tripId: $tripId, tripName: $tripName, tripAddress: $tripAddress")
+                                            navController.navigate(
+                                                "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
+                                            )
+                                        }
                                     } else {
                                         showAlertDialog = true
                                     }
@@ -153,10 +179,29 @@ fun TripDetailsScreen(
             dismissButton = {
                 Button(
                     onClick = {
-                        showAlertDialog = false
-                        navController.navigate(
-                            "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
-                        )
+                        coroutineScope.launch {
+                            Log.d("TripDetailsScreen", "Continue Anyway clicked. Orders: ${orders.map { it.orderItemId }}")
+                            orders.forEach { order ->
+                                val orderId = order.orderItemId.toString()
+                                Log.d("TripDetailsScreen", "Calling PATCH: http://10.0.2.2:8092/cll/deliveries/update-status/$orderId?newStatus=In%20Progress")
+                                try {
+                                    apiService.updateDeliveryStatus(
+                                        orderId = orderId,
+                                        newStatus = "In Progress" // Essayez "IN_PROGRESS" si l'erreur persiste
+                                    )
+                                    Log.d("TripDetailsScreen", "Successfully updated status for order ID: $orderId to In Progress")
+                                } catch (e: HttpException) {
+                                    Log.e("TripDetailsScreen", "Failed to update status for order ID: $orderId, HTTP ${e.code()}: ${e.response()?.errorBody()?.string()}", e)
+                                } catch (e: Exception) {
+                                    Log.e("TripDetailsScreen", "Failed to update status for order ID: $orderId, error: ${e.message}", e)
+                                }
+                            }
+                            Log.d("TripDetailsScreen", "Navigating to EmailSentScreen with tripId: $tripId, tripName: $tripName, tripAddress: $tripAddress")
+                            showAlertDialog = false
+                            navController.navigate(
+                                "emailsent?tripId=${tripId}&tripName=${tripName}&tripAddress=${tripAddress}"
+                            )
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
