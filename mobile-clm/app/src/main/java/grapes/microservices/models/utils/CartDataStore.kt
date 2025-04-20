@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
-// Définir le DataStore comme une extension de Context
+// Define Datastore as a Context extension
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "cart_prefs")
 
 class CartDataStore(private val context: Context) {

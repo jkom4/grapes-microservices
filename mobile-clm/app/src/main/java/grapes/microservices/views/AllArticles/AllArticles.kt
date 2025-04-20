@@ -30,14 +30,12 @@ import grapes.microservices.views.components.MySearchBar
 
 @Composable
 fun AllArticlesScreen(navController: NavHostController) {
-    // Obtenir le Context pour initialiser CartManager
+    // Obtain context to load CartManager
     val context = LocalContext.current
 
-    // Initialiser les dépendances
     val repository = remember { ArticleRepository(RetrofitClient.articleApiService) }
     val apiService = remember { RetrofitClient.articleApiService }
 
-    // Créer la factory avec CartManager
     val viewModelFactory = remember {
         ArticleViewModelFactory.createFactory(
             context = context,
@@ -46,7 +44,7 @@ fun AllArticlesScreen(navController: NavHostController) {
         )
     }
 
-    // Initialiser le ViewModel
+    // Init viewModel
     val viewModel: ArticleViewModel = viewModel(factory = viewModelFactory)
 
     val space = 16.dp

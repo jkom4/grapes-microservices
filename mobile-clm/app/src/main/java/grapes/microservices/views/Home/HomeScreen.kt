@@ -84,7 +84,7 @@ fun HomeScreen(navController: NavHostController) {
                     },
                     onSearchStarted = {
                         isSearching = true
-                        searchResults = null // Optional: reset results during search
+                        searchResults = null
                     },
                     onResults = { results ->
                         searchResults = results

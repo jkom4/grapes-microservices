@@ -2,8 +2,8 @@ package grapes.microservices.models.utils
 
 import android.content.Context
 import android.util.Log
+import grapes.microservices.models.data.InitCartRequest
 import grapes.microservices.models.network.ArticleApiService
-import grapes.microservices.models.network.InitCartRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +20,7 @@ class CartManager private constructor(
     val orderId: StateFlow<Int?> = _orderId
 
     init {
-        // Charger l'orderId depuis DataStore au démarrage
+        // Load orderId from the Datastore
         CoroutineScope(Dispatchers.IO).launch {
             val storedOrderId = cartDataStore.getOrderId()
             _orderId.value = storedOrderId

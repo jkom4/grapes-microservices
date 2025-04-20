@@ -4,15 +4,16 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import grapes.microservices.models.data.AddToCartRequest
 import grapes.microservices.models.data.Article
 import grapes.microservices.models.data.Cart
-import grapes.microservices.models.network.AddToCartRequest
+import grapes.microservices.models.data.PayCartRequest
 import grapes.microservices.models.network.ArticleApiService
-import grapes.microservices.models.network.PayCartRequest
 import grapes.microservices.models.repository.ArticleRepository
 import grapes.microservices.models.utils.CartManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 sealed class ArticleState {
@@ -74,6 +75,9 @@ class ArticleViewModel(
 
     private var currentPage = 0
 
+    private val _isFavorite = MutableStateFlow(false)
+    val isFavorite: StateFlow<Boolean> = _isFavorite.asStateFlow()
+
     init {
         loadArticles()
     }
@@ -106,18 +110,6 @@ class ArticleViewModel(
         }
     }
 
-    fun nextPage() {
-        currentPage++
-        loadArticles()
-    }
-
-    fun previousPage() {
-        if (currentPage > 0) {
-            currentPage--
-            loadArticles()
-        }
-    }
-
     fun addToCart(articleId: Int, quantityKg: Float, quantityUnit: Int) {
         viewModelScope.launch {
             _cartState.value = CartState.Loading
@@ -134,14 +126,14 @@ class ArticleViewModel(
                         orderId = orderId,
                         articleId = articleId,
                         quantityKg = quantityKg,
-                        quantity = quantityUnit.toFloat() // Convertir en Float pour l'API
+                        quantity = quantityUnit.toFloat()
                     )
                 )
                 if (addResponse.isSuccessful) {
                     _cartState.value = CartState.Success
-                    fetchCart() // Rafraîchir le panier après ajout
+                    fetchCart() // Refresh cart after an item added
                 } else {
-                    _cartState.value = CartState.Error("Error adding to cart")
+                    _cartState.value = CartState.Error("This product is out of stock")
                 }
             } catch (e: Exception) {
                 _cartState.value = CartState.Error(e.message ?: "Network error")
@@ -165,7 +157,7 @@ class ArticleViewModel(
                     Log.d(TAG, "Item: ${item.articleName}, quantityKg: ${item.quantityKg}, quantity: ${item.quantity}, price: ${item.price}, itemTotal: ${if (item.quantityKg > 0) item.quantityKg * item.price else item.quantity * item.price}")
                 }
                 Log.d(TAG, "API totalPrice: ${cart.totalPrice}")
-                // Recalculer totalPrice
+                // Calculate totalPrice
                 val calculatedTotalPrice = cart.items.sumOf { item ->
                     if (item.quantityKg > 0) {
                         (item.quantityKg * item.price).toDouble()
@@ -174,7 +166,7 @@ class ArticleViewModel(
                     }
                 }.toFloat()
                 Log.d(TAG, "Calculated totalPrice: $calculatedTotalPrice")
-                // Créer un nouvel objet Cart avec le totalPrice corrigé
+                // Create a new oject Cart with the totalPrice
                 val correctedCart = cart.copy(totalPrice = calculatedTotalPrice)
                 _cartScreenState.value = CartScreenState.Success(correctedCart)
             } catch (e: Exception) {
@@ -253,5 +245,9 @@ class ArticleViewModel(
 
     fun resetPaymentState() {
         _paymentState.value = PaymentState.Idle
+    }
+
+    fun toggleFavorite() {
+        _isFavorite.value = !_isFavorite.value
     }
 }

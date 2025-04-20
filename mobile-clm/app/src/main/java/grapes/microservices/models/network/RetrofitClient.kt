@@ -1,9 +1,12 @@
 package grapes.microservices.models.network
 
+import grapes.microservices.models.data.AddToCartRequest
 import grapes.microservices.models.data.Article
 import grapes.microservices.models.data.Cart
 import grapes.microservices.models.data.CartResponse
+import grapes.microservices.models.data.InitCartRequest
 import grapes.microservices.models.data.Order
+import grapes.microservices.models.data.PayCartRequest
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -82,21 +85,3 @@ interface OrderApiService {
         @Query("date") date: String? = null
     ): List<Order>
 }
-
-data class InitCartRequest(val userId: Int)
-
-data class AddToCartRequest(
-    val orderId: Int,
-    val articleId: Int,
-    val quantityKg: Float,
-    val quantity: Float
-)
-
-data class PayCartRequest(
-    val orderId: Int,
-    val customerName: String,
-    val phoneNumber: String,
-    val address: String,
-    val country: String,
-    val postalCode: String
-)
