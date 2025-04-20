@@ -138,7 +138,7 @@ class CompletedOrderViewModel(
                 var allSuccess = true
                 orders.forEach { order ->
                     val delivery = Delivery(
-                        orderId = order.id,
+                        orderId = _commentState.value,
                         userId = userId,
                         deliveryStatusId = deliveryStatusId,
                         deliveryDate = formattedDateTime,
@@ -149,10 +149,8 @@ class CompletedOrderViewModel(
                         photo = photoByteArray
                     )
 
-                    Log.d("CompletedOrderViewModel", "Saving data for orderId: ${order.id}")
                     val rowId = dbOperations.insertDelivery(delivery)
                     if (rowId == -1L) {
-                        Log.e("CompletedOrderViewModel", "Failed to insert for orderId: ${order.id}")
                         allSuccess = false
                     }
                 }

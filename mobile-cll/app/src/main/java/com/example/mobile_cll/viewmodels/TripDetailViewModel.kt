@@ -12,11 +12,12 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel responsible for managing trip details, including trip data, associated orders,
- * and loading states. It interacts with the OrderRepository to fetch order data.
+ * and loading states. It interacts with the OrderRepository to fetch order data from the API.
  *
  * @param orderRepository The repository used to fetch orders for a given trip.
  */
 class TripDetailsViewModel(private val orderRepository: OrderRepository) : ViewModel() {
+    private val TAG = "TripDetailsViewModel"
 
     private val _tripId = mutableStateOf("")
     val tripId: State<String> = _tripId
@@ -42,18 +43,23 @@ class TripDetailsViewModel(private val orderRepository: OrderRepository) : ViewM
      */
     fun loadId(trip: Trip, forceRefresh: Boolean = false) {
         if (_trip.value != trip || forceRefresh) {
-            Log.d("TripDetailsViewModel", "loadId called with trip: $trip, forceRefresh: $forceRefresh")
+            Log.d(TAG, "loadId called with trip: $trip, forceRefresh: $forceRefresh")
             viewModelScope.launch {
                 _isLoading.value = true
                 _trip.value = trip
                 _tripId.value = trip.id
-                _orders.value = orderRepository.getOrdersForTrip(trip.id)
-                _deliveryRequestCount.value = _orders.value.size // Update the count of delivery requests
-                Log.d("TripDetailsViewModel", "Orders loaded: ${_orders.value.map { "Order(id=${it.id}, isScanned=${it.isScanned})" }}")
+                try {
+                    _orders.value = orderRepository.getOrdersForTrip(trip.id)
+                    Log.d(TAG, "Orders loaded: ${_orders.value.map { "Order(orderItemId=${it.orderItemId}, scanned=${it.scanned})" }}")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error loading orders: ${e.message}", e)
+                    _orders.value = emptyList()
+                }
+                _deliveryRequestCount.value = _orders.value.size
                 _isLoading.value = false
             }
         } else {
-            Log.d("TripDetailsViewModel", "No update needed, trip is unchanged: $trip")
+            Log.d(TAG, "No update needed, trip is unchanged: $trip")
         }
     }
 
@@ -69,9 +75,9 @@ class TripDetailsViewModel(private val orderRepository: OrderRepository) : ViewM
     /**
      * Placeholder function for handling order scan clicks. Currently not implemented.
      *
-     * @param orderId The ID of the order that was scanned.
+     * @param orderItemId The ID of the order that was scanned.
      */
-    fun onScanClick(orderId: String) {
+    fun onScanClick(orderItemId: String) {
         // Can be used for additional actions if needed
     }
 }

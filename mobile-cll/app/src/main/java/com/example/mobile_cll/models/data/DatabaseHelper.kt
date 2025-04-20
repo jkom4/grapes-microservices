@@ -169,7 +169,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
      */
     private fun insertInitialData(db: SQLiteDatabase) {
         TripSeeder.seed(db)
-        OrderSeeder.seed(db)
         DeliveryDriverSeeder.seed(db)
         DeliverySeeder.seed(db)
     }

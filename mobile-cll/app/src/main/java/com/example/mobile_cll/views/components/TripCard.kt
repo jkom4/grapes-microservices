@@ -12,24 +12,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import com.example.mobile_cll.models.entities.Order
+import androidx.navigation.NavHostController
 import com.example.mobile_cll.models.entities.Trip
 
 /**
  * Composable displaying a trip card with:
  * - Trip details
- * - Total quantity of items in the trip
  * - Navigation to the trip details screen
  *
  * @param trip The trip object containing details like name, address, and distance.
- * @param orders The list of orders associated with trips, used to calculate the total quantity.
  * @param navController The navigation controller to navigate to the trip details screen.
  */
 @Composable
-fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
-    val orderSize = orders.size
-
+fun TripCard(trip: Trip, navController: NavHostController) {
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
@@ -51,14 +46,6 @@ fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(text = trip.address, fontSize = 14.sp, color = MaterialTheme.colorScheme.tertiary)
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "Qty: $orderSize",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
             Spacer(modifier = Modifier.height(8.dp))
 
             Box(
@@ -72,4 +59,3 @@ fun TripCard(trip: Trip, orders: List<Order>, navController: NavController) {
         }
     }
 }
-

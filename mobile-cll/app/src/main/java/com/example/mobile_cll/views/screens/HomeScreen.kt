@@ -13,11 +13,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.navigation.NavController
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.example.mobile_cll.views.components.BottomNavigationBar
 import com.example.mobile_cll.views.components.TopSection
 import com.example.mobile_cll.views.components.TripCard
@@ -28,7 +28,7 @@ import com.example.mobile_cll.viewmodels.TripViewModelFactory
  * Composable displaying the HomeScreen with:
  * - A top section showing the number of trips and their status.
  * - A tab bar to switch between "Current" and "Completed" trips.
- * - A list of trips shown using a LazyColumn with different details.
+ * - A list of trips shown using a LazyColumn.
  * - A bottom navigation bar for navigation between screens.
  *
  * @param navController The navigation controller that allows navigation between screens.
@@ -36,12 +36,10 @@ import com.example.mobile_cll.viewmodels.TripViewModelFactory
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navController: NavController,
+    navController: NavHostController,
     viewModel: TripViewModel = viewModel(factory = TripViewModelFactory(LocalContext.current))
 ) {
-    val context = LocalContext.current
     val trips by viewModel.trips.observeAsState(initial = emptyList())
-    val ordersForTrips by viewModel.ordersForTrips.observeAsState(initial = emptyMap())
 
     // State for the currently selected tab index (0 = Current, 1 = Completed)
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -57,13 +55,6 @@ fun HomeScreen(
             else -> true
         }
         matchesSearch && matchesTab
-    }
-
-    // Load orders for each displayed trip
-    filteredTrips.forEach { trip ->
-        if (!ordersForTrips.containsKey(trip.id)) {
-            viewModel.getOrdersForTrip(trip.id)
-        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -124,11 +115,10 @@ fun HomeScreen(
 
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(filteredTrips) { trip ->
-                val orders = ordersForTrips[trip.id] ?: emptyList()
-                TripCard(trip = trip, orders = orders, navController = navController)
+                TripCard(trip = trip, navController = navController)
             }
         }
 
-        BottomNavigationBar(navController, context)
+        BottomNavigationBar(navController = navController)
     }
 }

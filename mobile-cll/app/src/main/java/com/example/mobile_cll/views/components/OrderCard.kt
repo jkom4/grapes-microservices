@@ -15,15 +15,15 @@ import androidx.compose.material.icons.filled.QrCodeScanner
 
 /**
  * Composable displaying an order card with:
- * - ID of the order
+ * - Order item ID
  * - Product description
  * - Quantity of the product
+ * - Scan status
  * - A button that triggers the scanning action
  *
- * @param order The order object that contains the order's details such as ID, product description, and quantity.
- * @param onScanClick A lambda function that is triggered when the scan button is clicked, passing the order ID as a parameter.
+ * @param order The order object containing details such as orderItemId, productDescription, quantity, and scanned status.
+ * @param onScanClick A lambda function that is triggered when the scan button is clicked, passing the orderItemId as a String.
  */
-
 @Composable
 fun OrderCard(order: Order, onScanClick: (String) -> Unit) {
     Card(
@@ -39,15 +39,19 @@ fun OrderCard(order: Order, onScanClick: (String) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Order ID: ${order.id}",
+                    text = "Order ID: ${order.orderItemId}",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
 
                 Button(
-                    onClick = { onScanClick(order.id) },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    onClick = { onScanClick(order.orderItemId.toString()) },
+                    enabled = !order.scanned,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    ),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.padding(start = 8.dp)
                 ) {
@@ -67,8 +71,21 @@ fun OrderCard(order: Order, onScanClick: (String) -> Unit) {
                 }
             }
 
-            Text("Product: ${order.productDescription}", fontSize = 12.sp, color = MaterialTheme.colorScheme.tertiary )
-            Text("Quantity: ${order.quantity}", fontSize = 12.sp, color = MaterialTheme.colorScheme.tertiary)
+            Text(
+                text = "Product: ${order.productDescription}",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.tertiary
+            )
+            Text(
+                text = "Quantity: ${order.quantity}",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.tertiary
+            )
+            Text(
+                text = if (order.scanned) "Scanned" else "Not Scanned",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.tertiary
+            )
         }
     }
 }

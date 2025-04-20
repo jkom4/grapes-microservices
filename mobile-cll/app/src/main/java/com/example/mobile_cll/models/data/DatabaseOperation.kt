@@ -102,15 +102,7 @@ class DatabaseOperations(private val dbHelper: DatabaseHelper) {
 
         if (cursor.moveToFirst()) {
             do {
-                val order = Order(
-                    id = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ORDER_ID)),
-                    productDescription = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_PRODUCT_DESCRIPTION)),
-                    quantity = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_QUANTITY)),
-                    tripId = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_TRIP_ID)),
-                    scannedAt = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_SCANNED_AT))?.toLongOrNull(),
-                    isScanned = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_IS_SCANNED)) == 1
-                )
-                orderList.add(order)
+
             } while (cursor.moveToNext())
         }
 
@@ -207,14 +199,6 @@ fun Trip.toContentValues() = ContentValues().apply {
     put(DatabaseHelper.COLUMN_IS_FINISHED, if (isFinished) 1 else 0)
 }
 
-fun Order.toContentValues() = ContentValues().apply {
-    put(DatabaseHelper.COLUMN_ORDER_ID, id)
-    put(DatabaseHelper.COLUMN_PRODUCT_DESCRIPTION, productDescription)
-    put(DatabaseHelper.COLUMN_QUANTITY, quantity)
-    put(DatabaseHelper.COLUMN_TRIP_ID, tripId)
-    put(DatabaseHelper.COLUMN_SCANNED_AT, scannedAt)
-    put(DatabaseHelper.COLUMN_IS_SCANNED, if (isScanned) 1 else 0)
-}
 
 fun DeliveryDriver.toContentValues() = ContentValues().apply {
     put(DatabaseHelper.COLUMN_DRIVER_ID, id)

@@ -71,7 +71,7 @@ fun CompletedOrderScreen(
 
     Scaffold(
         topBar = { TopSection(navController, "Valid Order") },
-        bottomBar = { BottomNavigationBar(navController, context) }
+        bottomBar = { BottomNavigationBar(navController) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
