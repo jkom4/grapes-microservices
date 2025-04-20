@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TopicService {
 
-    private final ChatRepository    chatRepository;
+    private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
-    private final RabbitTemplate    rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
     public List<TopicDto> getAllTopics() {
         return chatRepository.findAll()
@@ -45,7 +45,7 @@ public class TopicService {
     }
 
     public MessageDto postMessage(String topicId, String userId, String content) {
-
+        // Persist locally
         Message message = Message.builder()
                 .chatId(topicId)
                 .senderId(userId)
@@ -54,7 +54,7 @@ public class TopicService {
                 .build();
         Message saved = messageRepository.save(message);
 
-
+        // Build DTO
         MessageDto dto = MessageDto.builder()
                 .userId(saved.getSenderId())
                 .content(saved.getContent())
@@ -62,12 +62,9 @@ public class TopicService {
                 .topicId(saved.getChatId())
                 .build();
 
+        // Publish to RabbitMQ topic exchange
         String routingKey = "chat.to.room." + topicId;
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE_NAME,
-                routingKey,
-                dto
-        );
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, routingKey, dto);
 
         return dto;
     }
