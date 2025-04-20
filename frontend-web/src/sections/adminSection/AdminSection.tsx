@@ -7,6 +7,7 @@ import { AdminHeader } from "../../components/admin/AdminHeader";
 import { ArticleTable } from "../../components/admin/ArticleTable";
 import { PaginationControls } from "../../components/admin/PaginationControls";
 import { ArticleModal } from "../../components/admin/ArticleModal";
+import { translationsAdmin } from "../../utils/translations-admin";
 
 const AdminSection: React.FC = () => {
     const { language } = useLanguage();
@@ -30,85 +31,6 @@ const AdminSection: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState<string>('');
 
     const pageSize = 10;
-
-    const text = {
-        en: {
-            header: "Article Management",
-            add_new_article: "Add New Article",
-            plus_sign: "+",
-            column_id: "ID",
-            column_name: "Name",
-            column_price_kg: "Price/Kg",
-            column_price_unit: "Price/Unit",
-            column_stock_kg: "Stock/Kg",
-            column_stock_unit: "Stock/Unit",
-            column_origin: "Origin",
-            column_actions: "Actions",
-            pagination_previous: "Previous",
-            pagination_next: "Next",
-            pagination_page: "Page {0} of {1}",
-            modal_add_article_title: "Add Article",
-            modal_edit_article_title: "Edit Article",
-            modal_label_name: "Name",
-            modal_label_description: "Description",
-            modal_label_category_id: "Category ID",
-            modal_label_family_id: "Family ID",
-            modal_label_price_kg: "Price/Kg",
-            modal_label_price_unit: "Price/Unit",
-            modal_label_stock_kg: "Stock/Kg",
-            modal_label_stock_unit: "Stock/Unit",
-            modal_label_origin: "Origin",
-            modal_label_picture_path: "Picture Path",
-            modal_button_cancel: "Cancel",
-            modal_button_add_article: "Add Article",
-            modal_button_update_article: "Update Article",
-            error_name_required: "Name is required",
-            error_category_id_positive: "Category ID must be a positive number",
-            error_family_id_positive: "Family ID must be a positive number",
-            error_prices_negative: "Prices cannot be negative",
-            error_stock_negative: "Stock values cannot be negative",
-            error_saving_article: "An error occurred while saving the article",
-            error_deleting_article: "An error occurred while deleting the article",
-        },
-        fr: {
-            header: "Gestion des Articles",
-            add_new_article: "Ajouter un Nouvel Article",
-            plus_sign: "+",
-            column_id: "ID",
-            column_name: "Nom",
-            column_price_kg: "Prix/Kg",
-            column_price_unit: "Prix/Unité",
-            column_stock_kg: "Stock/Kg",
-            column_stock_unit: "Stock/Unité",
-            column_origin: "Origine",
-            column_actions: "Actions",
-            pagination_previous: "Précédent",
-            pagination_next: "Suivant",
-            pagination_page: "Page {0} de {1}",
-            modal_add_article_title: "Ajouter un Article",
-            modal_edit_article_title: "Modifier l'Article",
-            modal_label_name: "Nom",
-            modal_label_description: "Description",
-            modal_label_category_id: "ID de Catégorie",
-            modal_label_family_id: "ID de Famille",
-            modal_label_price_kg: "Prix/Kg",
-            modal_label_price_unit: "Prix/Unité",
-            modal_label_stock_kg: "Stock/Kg",
-            modal_label_stock_unit: "Stock/Unité",
-            modal_label_origin: "Origine",
-            modal_label_picture_path: "Chemin de l'Image",
-            modal_button_cancel: "Annuler",
-            modal_button_add_article: "Ajouter un Article",
-            modal_button_update_article: "Mettre à Jour l'Article",
-            error_name_required: "Le nom est requis",
-            error_category_id_positive: "L'ID de catégorie doit être un nombre positif",
-            error_family_id_positive: "L'ID de famille doit être un nombre positif",
-            error_prices_negative: "Les prix ne peuvent pas être négatifs",
-            error_stock_negative: "Les valeurs de stock ne peuvent pas être négatives",
-            error_saving_article: "Une erreur s'est produite lors de l'enregistrement de l'article",
-            error_deleting_article: "Une erreur s'est produite lors de la suppression de l'article",
-        },
-    };
 
     // Fetch articles on component mount and page change
     useEffect(() => {
@@ -141,22 +63,22 @@ const AdminSection: React.FC = () => {
         try {
             // Client-side validation
             if (!formData.name?.trim()) {
-                throw new Error(text[language].error_name_required);
+            throw new Error(translationsAdmin[language].error_name_required);
             }
             // Ensure categoryId and familyId are numbers and positive
             const categoryId = formData.categoryId ?? 1;
             const familyId = formData.familyId ?? 1;
             if (categoryId <= 0) {
-                throw new Error(text[language].error_category_id_positive);
+            throw new Error(translationsAdmin[language].error_category_id_positive);
             }
             if (familyId <= 0) {
-                throw new Error(text[language].error_family_id_positive);
+            throw new Error(translationsAdmin[language].error_family_id_positive);
             }
             if (formData.priceKg && formData.priceKg < 0 || formData.priceUnit && formData.priceUnit < 0) {
-                throw new Error(text[language].error_prices_negative);
+            throw new Error(translationsAdmin[language].error_prices_negative);
             }
             if (formData.stockKg && formData.stockKg < 0 || formData.stockUnit && formData.stockUnit < 0) {
-                throw new Error(text[language].error_stock_negative);
+            throw new Error(translationsAdmin[language].error_stock_negative);
             }
 
             // Construct articleData with guaranteed numbers
@@ -190,7 +112,7 @@ const AdminSection: React.FC = () => {
             closeModal();
         } catch (error) {
             console.error('Error saving article:', error);
-            setErrorMessage(error instanceof Error ? error.message : text[language].error_saving_article);
+        setErrorMessage(error instanceof Error ? error.message : translationsAdmin[language].error_saving_article);
         }
     };
 
@@ -211,7 +133,7 @@ const AdminSection: React.FC = () => {
             }
         } catch (error) {
             console.error('Error deleting article:', error);
-            setErrorMessage(error instanceof Error ? error.message : text[language].error_deleting_article);
+        setErrorMessage(error instanceof Error ? error.message : translationsAdmin[language].error_deleting_article);
         }
     };
 
@@ -260,9 +182,9 @@ const AdminSection: React.FC = () => {
         <div className="min-h-screen bg-gray-100 p-8">
             <div className="max-w-7xl mx-auto">
                 <AdminHeader
-                    title={text[language].header}
-                    addButtonText={text[language].add_new_article}
-                    plusSign={text[language].plus_sign}
+                title={translationsAdmin[language].header}
+                addButtonText={translationsAdmin[language].add_new_article}
+                plusSign={translationsAdmin[language].plus_sign}
                     onAddClick={openAddModal}
                 />
                 <ArticleTable
@@ -270,14 +192,14 @@ const AdminSection: React.FC = () => {
                     onEdit={openEditModal}
                     onDelete={handleDelete}
                     translations={{
-                        column_id: text[language].column_id,
-                        column_name: text[language].column_name,
-                        column_price_kg: text[language].column_price_kg,
-                        column_price_unit: text[language].column_price_unit,
-                        column_stock_kg: text[language].column_stock_kg,
-                        column_stock_unit: text[language].column_stock_unit,
-                        column_origin: text[language].column_origin,
-                        column_actions: text[language].column_actions,
+                    column_id: translationsAdmin[language].column_id,
+                    column_name: translationsAdmin[language].column_name,
+                    column_price_kg: translationsAdmin[language].column_price_kg,
+                    column_price_unit: translationsAdmin[language].column_price_unit,
+                    column_stock_kg: translationsAdmin[language].column_stock_kg,
+                    column_stock_unit: translationsAdmin[language].column_stock_unit,
+                    column_origin: translationsAdmin[language].column_origin,
+                    column_actions: translationsAdmin[language].column_actions,
                     }}
                 />
                 <PaginationControls
@@ -286,9 +208,9 @@ const AdminSection: React.FC = () => {
                     onPrevious={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
                     onNext={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
                     translations={{
-                        pagination_previous: text[language].pagination_previous,
-                        pagination_next: text[language].pagination_next,
-                        pagination_page: text[language].pagination_page,
+                    pagination_previous: translationsAdmin[language].pagination_previous,
+                    pagination_next: translationsAdmin[language].pagination_next,
+                    pagination_page: translationsAdmin[language].pagination_page,
                     }}
                 />
                 <ArticleModal
@@ -300,21 +222,21 @@ const AdminSection: React.FC = () => {
                     onSubmit={handleSubmit}
                     onInputChange={handleInputChange}
                     translations={{
-                        modal_add_article_title: text[language].modal_add_article_title,
-                        modal_edit_article_title: text[language].modal_edit_article_title,
-                        modal_label_name: text[language].modal_label_name,
-                        modal_label_description: text[language].modal_label_description,
-                        modal_label_category_id: text[language].modal_label_category_id,
-                        modal_label_family_id: text[language].modal_label_family_id,
-                        modal_label_price_kg: text[language].modal_label_price_kg,
-                        modal_label_price_unit: text[language].modal_label_price_unit,
-                        modal_label_stock_kg: text[language].modal_label_stock_kg,
-                        modal_label_stock_unit: text[language].modal_label_stock_unit,
-                        modal_label_origin: text[language].modal_label_origin,
-                        modal_label_picture_path: text[language].modal_label_picture_path,
-                        modal_button_cancel: text[language].modal_button_cancel,
-                        modal_button_add_article: text[language].modal_button_add_article,
-                        modal_button_update_article: text[language].modal_button_update_article,
+                    modal_add_article_title: translationsAdmin[language].modal_add_article_title,
+                    modal_edit_article_title: translationsAdmin[language].modal_edit_article_title,
+                    modal_label_name: translationsAdmin[language].modal_label_name,
+                    modal_label_description: translationsAdmin[language].modal_label_description,
+                    modal_label_category_id: translationsAdmin[language].modal_label_category_id,
+                    modal_label_family_id: translationsAdmin[language].modal_label_family_id,
+                    modal_label_price_kg: translationsAdmin[language].modal_label_price_kg,
+                    modal_label_price_unit: translationsAdmin[language].modal_label_price_unit,
+                    modal_label_stock_kg: translationsAdmin[language].modal_label_stock_kg,
+                    modal_label_stock_unit: translationsAdmin[language].modal_label_stock_unit,
+                    modal_label_origin: translationsAdmin[language].modal_label_origin,
+                    modal_label_picture_path: translationsAdmin[language].modal_label_picture_path,
+                    modal_button_cancel: translationsAdmin[language].modal_button_cancel,
+                    modal_button_add_article: translationsAdmin[language].modal_button_add_article,
+                    modal_button_update_article: translationsAdmin[language].modal_button_update_article,
                     }}
                 />
             </div>
