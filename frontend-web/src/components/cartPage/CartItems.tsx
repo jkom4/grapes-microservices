@@ -1,7 +1,4 @@
-import { CartResponse } from "../../services/cartService";
-import CartItemModel from "../../utils/models/CartItem";
 import { CartItemsProps } from "../../utils/models/interface/CartItemProps";
-import { Translation } from "../../utils/translations-payment";
 
 const CartItems: React.FC<CartItemsProps> = ({
                                                  cart,
