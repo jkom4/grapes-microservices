@@ -18,7 +18,6 @@ import java.util.Base64;
  * It uses PBKDF2 with HmacSHA256 for key generation and CBC mode with PKCS5Padding for encryption.
  *
  */
-
 public class AesCryptoUtils {
 
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
@@ -26,7 +25,11 @@ public class AesCryptoUtils {
     private static final int ITERATION_COUNT = 65536;
 
     /**
-     * Génère une clé AES-256 à partir d'un mot de passe et d'un salt
+     * Generates an AES-256 key from a password and a salt.
+     * @param password The password to derive the key from.
+     * @param salt The salt to use for key derivation.
+     * @return The generated SecretKey.
+     * @throws Exception If key generation fails.
      */
     private static SecretKey generateKey(String password, byte[] salt) throws Exception {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
@@ -35,26 +38,33 @@ public class AesCryptoUtils {
     }
 
     /**
-     * Chiffre un texte avec AES-256
+     * Encrypts plaintext using AES-256.
+     * The challenge is used as the salt for key generation.
+     * A random IV is generated and prepended to the ciphertext.
+     * @param plaintext The text to encrypt.
+     * @param challenge The challenge string (used as salt).
+     * @param pin The PIN or password used for key generation.
+     * @return Base64 encoded string containing IV + ciphertext.
+     * @throws Exception If encryption fails.
      */
     public static String encrypt(String plaintext, String challenge, String pin) throws Exception {
-        // Utiliser le challenge comme salt
+        // Use the challenge as salt
         byte[] salt = challenge.getBytes(StandardCharsets.UTF_8);
 
-        // Générer la clé
+        // Generate the key
         SecretKey key = generateKey(pin, salt);
 
-        // Générer un IV aléatoire
-        byte[] iv = new byte[16];
+        // Generate a random IV
+        byte[] iv = new byte[16]; // AES block size for CBC
         new SecureRandom().nextBytes(iv);
         IvParameterSpec ivspec = new IvParameterSpec(iv);
 
-        // Chiffrer
+        // Encrypt
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key, ivspec);
         byte[] ciphertext = cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8));
 
-        // Combiner IV et texte chiffré
+        // Combine IV and ciphertext: IV (16 bytes) + Ciphertext
         byte[] combined = new byte[iv.length + ciphertext.length];
         System.arraycopy(iv, 0, combined, 0, iv.length);
         System.arraycopy(ciphertext, 0, combined, iv.length, ciphertext.length);
@@ -63,22 +73,29 @@ public class AesCryptoUtils {
     }
 
     /**
-     * Déchiffre un texte avec AES-256
+     * Decrypts text using AES-256.
+     * Expects the input string to be Base64 encoded IV + ciphertext.
+     * The challenge is used as the salt for key generation.
+     * @param encryptedData Base64 encoded string (IV + ciphertext).
+     * @param challenge The challenge string (used as salt).
+     * @param pin The PIN or password used for key generation.
+     * @return The original plaintext.
+     * @throws Exception If decryption fails (e.g., bad padding, wrong key).
      */
     public static String decrypt(String encryptedData, String challenge, String pin) throws Exception {
         byte[] combined = Base64.getDecoder().decode(encryptedData);
 
-        // Extraire l'IV
+        // Extract IV (first 16 bytes)
         byte[] iv = new byte[16];
         byte[] ciphertext = new byte[combined.length - 16];
         System.arraycopy(combined, 0, iv, 0, iv.length);
         System.arraycopy(combined, iv.length, ciphertext, 0, ciphertext.length);
 
-        // Générer la clé
+        // Generate the key
         byte[] salt = challenge.getBytes(StandardCharsets.UTF_8);
         SecretKey key = generateKey(pin, salt);
 
-        // Déchiffrer
+        // Decrypt
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
 
@@ -86,21 +103,34 @@ public class AesCryptoUtils {
     }
 
     /**
-     * Génère une réponse chiffrée au challenge
+     * Generates an encrypted response to the challenge.
+     * Encrypts the challenge itself using the challenge as salt and the pin as password.
+     * @param challenge The challenge string to encrypt and use as salt.
+     * @param pin The PIN or password.
+     * @return The encrypted challenge response.
+     * @throws Exception If encryption fails.
      */
     public static String generateChallengeResponse(String challenge, String pin) throws Exception {
+        // The response encrypts the original challenge
         return encrypt(challenge, challenge, pin);
     }
 
     /**
-     * Vérifie une réponse à un challenge
+     * Verifies a response to a challenge.
+     * Decrypts the response and checks if it matches the original challenge.
+     * @param response The encrypted response received.
+     * @param challenge The original challenge string.
+     * @param pin The PIN or password.
+     * @return true if the decrypted response matches the challenge, false otherwise.
      */
     public static boolean validateChallengeResponse(String response, String challenge, String pin) {
         try {
             String decrypted = decrypt(response, challenge, pin);
             return challenge.equals(decrypted);
         } catch (Exception e) {
-            return false;
+            // It's good practice to log the exception here if possible
+            // e.g., log.warn("Challenge validation failed due to decryption error for challenge '{}'", challenge, e);
+            return false; // If decryption fails for any reason, the response is invalid.
         }
     }
 }

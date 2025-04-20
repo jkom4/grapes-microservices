@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,11 +21,12 @@ import java.util.Random;
 @AllArgsConstructor
 public class TransactionEntity {
 
-    /**
-     * Default accounts used for Grapes bank internal transfers
-     */
-    private static final String GRAPES_ACCOUNT = "BE15203672485394"; // Bank of Grapes account
-    private static final String GRAPES_BANK = "Bank of Grapes";
+
+    @Value("${app.grapes.account.number}")
+    private String GRAPES_ACCOUNT;
+
+    @Value("${app.grapes.account.name}")
+    private String GRAPES_BANK;
 
     @Id
     @Column(name = "transaction_id")
@@ -45,24 +47,15 @@ public class TransactionEntity {
     @Column(name = "client_id")
     private Long clientId;
 
-    /**
-     * Type of transaction (e.g., Payment, Transfer, Withdrawal)
-     */
     @Column(name = "transaction_type")
     private String transactionType;
 
     @Column(name = "client_account_number")
     private String clientAccountNumber;
 
-    /**
-     * Timestamp when the transaction was initiated
-     */
     @Column(name = "transaction_date_time")
     private LocalDateTime transactionDateTime;
 
-    /**
-     * Amount being transferred in the transaction
-     */
     @Column(name = "transfer_amount")
     private BigDecimal transferAmount;
 
@@ -72,33 +65,18 @@ public class TransactionEntity {
     @Column(name = "merchant_business_sector")
     private String merchantBusinessSector;
 
-    /**
-     * Type of 3D Secure authentication used (e.g., OTP, biometric)
-     */
     @Column(name = "authentication_type_3ds")
     private String authenticationType3DS;
 
-    /**
-     * Status of the 3D Secure authentication process
-     */
     @Column(name = "status_3ds")
     private String status3DS;
 
-    /**
-     * Updated balance of the debtor account after transaction
-     */
     @Column(name = "debtor_account_new_balance")
     private BigDecimal debtorAccountNewBalance;
 
-    /**
-     * Updated balance of the creditor account after transaction
-     */
     @Column(name = "creditor_account_new_balance")
     private BigDecimal creditorAccountNewBalance;
 
-    /**
-     * Overall transaction status (e.g., Initiated, Completed, Failed)
-     */
     @Column(name = "status")
     private String status;
 
@@ -109,14 +87,6 @@ public class TransactionEntity {
      * Constructor for creating a new payment transaction.
      * Sets default values for authentication and transaction status.
      * Uses the Grapes account as the default creditor.
-     *
-     * @param debtorAccount Client's account to be debited
-     * @param debtorBank Bank of the debtor account
-     * @param clientId ID of the client making the transaction
-     * @param clientAccountNumber Account number of the client
-     * @param amount Amount to be transferred
-     * @param merchantName Name of the merchant receiving payment
-     * @param merchantBusinessSector Business sector of the merchant
      */
     public TransactionEntity(String debtorAccount, String debtorBank, Long clientId,
                              String clientAccountNumber, BigDecimal amount,
@@ -139,37 +109,21 @@ public class TransactionEntity {
         this.creditorAccount = GRAPES_ACCOUNT;
         this.creditorBank = GRAPES_BANK;
 
-        // Creditor account balance will be updated in the service layer
     }
 
-    /**
-     * Updates transaction status to completed and sets the new debtor balance.
-     *
-     * @param debtorNewBalance Updated balance of the debtor account
-     */
+
     public void markAsCompleted(BigDecimal debtorNewBalance) {
         this.status3DS = "Validated";
         this.status = "Completed";
         this.debtorAccountNewBalance = debtorNewBalance;
     }
 
-    /**
-     * Updates transaction status to failed.
-     * Amount refund will be handled by the service layer.
-     *
-     * @param reason Reason for the transaction failure
-     */
+
     public void markAsFailed(String reason) {
         this.status3DS = "Failed";
         this.status = "Failed";
     }
 
-    /**
-     * Generates a unique transaction ID based on current timestamp
-     * plus a random number to avoid collisions.
-     *
-     * @return Unique transaction ID
-     */
     private Long generateTransactionId() {
         return System.currentTimeMillis() + random.nextInt(1000);
     }

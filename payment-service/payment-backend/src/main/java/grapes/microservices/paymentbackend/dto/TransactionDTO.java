@@ -7,12 +7,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/*
- * DTO for transaction information transfer between application layers.
- * Contains transaction details including account numbers, bank names,
- * client identifiers, transaction types, amounts, and status.
- * Used in payment operations and transaction management features.
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -9,10 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.math.BigDecimal;
 import java.io.Serializable;
-/**
- * DTO representing the data required for a payment request,
- * including card details and amount, with validation constraints.
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,7 +33,6 @@ public class PaymentRequestDTO implements Serializable {
     @NotNull(message = "Amount is required")
     private BigDecimal amount;
 
-    // Name of the merchant initiating the payment
     private String merchantName;
 
 

@@ -6,11 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * DTO for completing a payment request.
- * This class is used to encapsulate the data required to complete a payment.
- * It includes the payment token and the transaction ID.
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

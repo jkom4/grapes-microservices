@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * DTO for payment transaction details.
- * Contains formatted payment information for display to users and receipt generation.
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

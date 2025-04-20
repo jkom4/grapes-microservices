@@ -1,74 +1,83 @@
+// src/services/AuthService.js
 import axios from 'axios';
-
-// Base configuration
-const API_BASE_URL = 'http://localhost:8093';
+import { AUTH_API_URL } from './apiConfig'; // Import the specific URL
 
 // Handles authentication-related operations
 export class AuthService {
     // Authenticates user with email and password
     static async login(user) {
         try {
-            console.log(`Sending authentication request to ${API_BASE_URL}/api/login`);
-            const response = await axios.post(`${API_BASE_URL}/api/login`, {
+            // Use the imported URL
+            console.log(`Sending authentication request to ${AUTH_API_URL}/login`);
+            const response = await axios.post(`${AUTH_API_URL}/login`, {
                 email: user.login,
                 password: user.password
             }, {
-                withCredentials: true
+                withCredentials: true // Important for session management
             });
-            if (response.status === 200) {
+
+            if (response.status === 200 && response.data) { // Check response data as well
                 console.log('Authentication successful:', response.data);
-                localStorage.setItem('sessionToken', response.data.token);
-                localStorage.setItem('userId', response.data.userId);
+                // Assuming backend sends token and userId upon successful login
+                localStorage.setItem('sessionToken', response.data.token); // Store token if provided
+                localStorage.setItem('userId', response.data.userId);     // Store userId if provided
                 return {
                     success: true,
-                    redirectUrl: '/payment',
+                    redirectUrl: '/payment', // Or determine redirect based on response/context
                     userId: response.data.userId
                 };
             } else {
+                // Handle cases where status is 200 but backend indicates failure
                 return {
                     success: false,
-                    error: response.data.message || 'Authentication failed'
+                    error: response.data?.message || 'Authentication failed (server response)'
                 };
             }
         } catch (error) {
             console.error('Login error:', error);
             if (error.response) {
+                // Handle specific HTTP error statuses (401, 403, etc.)
                 return {
                     success: false,
-                    error: error.response.data.message || 'Authentication failed'
+                    error: error.response.data?.message || `Authentication failed (status: ${error.response.status})`
                 };
             } else if (error.request) {
+                // Error: No response received from server
                 return {
                     success: false,
-                    error: 'No response from server. Please try again later.'
+                    error: 'No response from server. Please check network or server status.'
                 };
             } else {
+                // Other errors (e.g., setup issues)
                 return {
                     success: false,
-                    error: 'Connection error. Please check your network.'
+                    error: 'Login request failed. Please check your network connection.'
                 };
             }
         }
     }
 
-    // Checks if user is authenticated
+    // Checks if user is potentially authenticated (presence of token)
     static isLoggedIn() {
+        // Basic check; real validation might involve checking token expiry or calling a backend endpoint
         return localStorage.getItem('sessionToken') !== null;
     }
 
-    // Logs out user and clears session
+    // Logs out user and clears session artifacts
     static logout() {
         localStorage.removeItem('sessionToken');
         localStorage.removeItem('userId');
+        // Redirect to login page. Using window.location forces a full page reload, clearing React state.
+        // If inside a component, consider using useNavigate() from react-router-dom for smoother SPA navigation.
         window.location.href = '/login';
     }
 
-    // Retrieves authenticated user's ID
+    // Retrieves authenticated user's ID from local storage
     static getUserId() {
         return localStorage.getItem('userId');
     }
 
-    // Retrieves session token
+    // Retrieves session token from local storage
     static getToken() {
         return localStorage.getItem('sessionToken');
     }

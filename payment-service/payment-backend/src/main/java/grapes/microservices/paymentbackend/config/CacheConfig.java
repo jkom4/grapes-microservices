@@ -10,16 +10,18 @@ import org.springframework.data.redis.serializer.RedisSerializationContext.Seria
 
 import java.time.Duration;
 
-
 /* * Cache configuration for Redis.
- * This configuration sets up a default cache with a 30-minute TTL and a specific cache
- * configuration for "pendingPayments" with a 10-minute TTL.
- *
+ * This configuration sets up a default cache and a specific cache configuration for "pendingPayments".
  * Note: Ensure that the JdkSerializationRedisSerializer is compatible with your data types.
  */
 @Configuration
-@EnableCaching // Enable caching support
+@EnableCaching
 public class CacheConfig {
+
+    // Define constants for TTL values
+    private static final Duration DEFAULT_CACHE_TTL = Duration.ofMinutes(30);
+    private static final Duration PENDING_PAYMENTS_CACHE_TTL = Duration.ofMinutes(10);
+    public static final String PENDING_PAYMENTS_CACHE_NAME = "pendingPayments";
 
     @Bean
     public RedisCacheConfiguration defaultCacheConfiguration() {
@@ -28,21 +30,19 @@ public class CacheConfig {
         JdkSerializationRedisSerializer redisSerializer = new JdkSerializationRedisSerializer(classLoader);
 
         return RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(30)) // Default TTL (can be adjusted)
-                .disableCachingNullValues() // Important: don't cache null values
+                .entryTtl(DEFAULT_CACHE_TTL)
+                .disableCachingNullValues()
                 .serializeValuesWith(SerializationPair.fromSerializer(redisSerializer));
     }
 
     @Bean
     public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
-        // Custom configuration for 'pendingPayments' cache
         ClassLoader classLoader = this.getClass().getClassLoader();
         JdkSerializationRedisSerializer redisSerializer = new JdkSerializationRedisSerializer(classLoader);
-
         return (builder) -> builder
-                .withCacheConfiguration("pendingPayments", // Exact cache name to use
+                .withCacheConfiguration(PENDING_PAYMENTS_CACHE_NAME,
                         RedisCacheConfiguration.defaultCacheConfig()
-                                .entryTtl(Duration.ofMinutes(10)) // 10-minute TTL for pending payments
+                                .entryTtl(PENDING_PAYMENTS_CACHE_TTL)
                                 .disableCachingNullValues()
                                 .serializeValuesWith(SerializationPair.fromSerializer(redisSerializer))
                 );

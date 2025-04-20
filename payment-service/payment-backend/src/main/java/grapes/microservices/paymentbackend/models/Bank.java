@@ -19,9 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Bank {
 
-    /**
-     * The bank's name serves as the primary key
-     */
+
     @Id
     @Column(name = "bank_name")
     private String bankName;
@@ -29,9 +27,6 @@ public class Bank {
     @Column(name = "bank_address")
     private String bankAddress;
 
-    /**
-     * Country where the bank is located
-     */
     @Column(name = "country")
     private String country;
 }

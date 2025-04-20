@@ -23,11 +23,7 @@ public class AuthService {
     private final AuthTokenRepository tokenRepository;
     private final SmsService smsService;
 
-    /**
-     * Generates a random 6-digit OTP (One-Time Password) code.
-     *
-     * @return A 6-digit numeric string
-     */
+
     public String generateOtp() {
         Random random = new Random();
         return String.format("%06d", random.nextInt(1000000));
@@ -67,13 +63,7 @@ public class AuthService {
         return tokenRepository.save(token);
     }
 
-    /**
-     * Saves a token to the database.
-     * Useful when token is created by another component (e.g., ACS server).
-     *
-     * @param token The token to save
-     * @return The saved token with database ID assigned
-     */
+
     @Transactional
     public AuthToken saveToken(AuthToken token) {
         log.info("Saving token {} for client {}", token.getToken(), token.getClient().getEmail());

@@ -20,8 +20,5 @@ public interface AuthTokenRepository extends JpaRepository<AuthToken, Long> {
 
     Optional<AuthToken> findFirstByClientOrderByCreatedAtDesc(Client client);
 
-    /**
-     * Finds valid tokens for a client (not used and not expired)
-     */
     List<AuthToken> findByClientIdAndIsUsedFalseAndExpiresAtAfter(Long clientId, LocalDateTime now);
 }

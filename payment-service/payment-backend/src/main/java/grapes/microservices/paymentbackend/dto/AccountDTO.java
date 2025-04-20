@@ -7,12 +7,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/**
- * DTO for account information transfer between application layers.
- * Contains bank account details including account number, balance, type,
- * and identifiers for associated client relationships.
- * Used in payment operations and account management features.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
