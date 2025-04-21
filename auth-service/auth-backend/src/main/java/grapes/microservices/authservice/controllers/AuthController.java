@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -37,7 +37,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             String token = authService.getTokenFromChallenge(loginRequest);
-            return ResponseEntity.ok(new AuthResponse(token));
+            return ResponseEntity.ok(new AuthResponse(token, ""));
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
         } catch (Exception e) {
@@ -61,7 +61,7 @@ public class AuthController {
         try {
             String token = request.getHeader("Authorization");
             String refreshedToken = authService.getRefreshToken(token);
-            return ResponseEntity.ok(new AuthResponse(refreshedToken));
+            return ResponseEntity.ok(new AuthResponse("", refreshedToken));
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
         } catch (Exception e) {

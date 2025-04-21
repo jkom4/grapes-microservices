@@ -7,11 +7,13 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import lombok.Data;
 import org.springframework.stereotype.Component;
+
 import java.util.Set;
 
 /**
  * UserValidator provides a validator for User entities.
  * This validator ensures that a user respects all constraints before processing.
+ *
  * @author Cameron
  */
 @Component
@@ -31,15 +33,9 @@ public class UserValidator {
      * @param user the user to validate
      * @throws IllegalArgumentException if a field is invalid
      */
-    public static boolean isValid(User user, boolean verifyPasswordAndPin) {
+    public static boolean isValid(User user) {
         Set<ConstraintViolation<User>> violations;
-
-        if (verifyPasswordAndPin) {
-            violations = validator.validate(user);
-        } else {
-            // ignore password and pin validation
-            violations = validator.validate(user, WithoutPassword.class);
-        }
+        violations = validator.validate(user);
 
         if (!violations.isEmpty()) {
             StringBuilder errorMessage = new StringBuilder("Validation errors: ");
