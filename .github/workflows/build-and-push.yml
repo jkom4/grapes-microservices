@@ -268,9 +268,9 @@ jobs:
             -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/chat-service:latest \
             --push ./chat-service
 
-          docker buildx build --platform linux/amd64,linux/arm64 \
-            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/data-mining-service:latest \
-            --push ./data-mining-service
+#          docker buildx build --platform linux/amd64,linux/arm64 \
+#            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/data-mining-service:latest \
+#            --push ./data-mining-service
 
       # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
       - name: 🏗️ Build & Push Frontend Services (amd64 only)
