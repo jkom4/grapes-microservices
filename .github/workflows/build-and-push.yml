@@ -167,7 +167,8 @@ jobs:
           CHALLENGE_REQUEST_INTERVAL_IN_SECONDS=3600
           CHALLENGE_VALIDITY_PERIOD_IN_SECONDS=3600
           REQUIRED_AGE=10
-  # 📦 Sales Service
+          
+          # 📦 Sales Service
           SALES_SERVICE_PORT=8092
           SALES_DB_URL=${{ secrets.SALES_DB_URL }}
           SALES_DB_USER=${{ secrets.SALES_DB_USER }}
