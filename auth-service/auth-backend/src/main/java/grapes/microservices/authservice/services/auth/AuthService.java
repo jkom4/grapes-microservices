@@ -12,11 +12,14 @@ import grapes.microservices.authservice.utils.exceptions.ChallengeSendFailedExce
 import grapes.microservices.authservice.utils.exceptions.InvalidCredentialsException;
 import grapes.microservices.authservice.utils.exceptions.UnauthorizedException;
 import grapes.microservices.authservice.utils.exceptions.UserNotActiveException;
+import grapes.microservices.authservice.dto.AuthEventPayload;
+import grapes.microservices.authservice.services.AuthEventProducer;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.time.Instant;
+import java.util.UUID;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -46,6 +49,9 @@ public class AuthService {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private final AuthEventProducer producer;
 
 
     /**
@@ -251,5 +257,50 @@ public class AuthService {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
+    }
+
+    /**
+     * Sends an authentication event to the RabbitMQ queue.
+     */
+    public void sendAuthToQueue(String userId, AuthMethod authMethod, String sourceIp, String userAgent, String status, String failureReason) {
+        AuthEventPayload payload = new AuthEventPayload(
+                userId,
+                UUID.randomUUID().toString(),
+                Instant.now().toString(),
+                authMethod.getName(),
+                status,
+                sourceIp,
+                userAgent,
+                detectApplicationType(userAgent),
+                failureReason
+        );
+        producer.sendAuthLog(payload);
+    }
+
+    /**
+     * Detects the application type based on the user agent string.
+     * @param userAgent the user agent string
+     * @return the application type (e.g., "WebApp", "MobileApp", "Unknown")
+     */
+    private String detectApplicationType(String userAgent) {
+        if (userAgent == null) return "Unknown";
+
+        String ua = userAgent.toLowerCase();
+
+        if (ua.contains("android") || ua.contains("iphone") || ua.contains("ipad")) {
+            return "MobileApp";
+        } else if (ua.contains("windows") || ua.contains("macintosh") || ua.contains("linux")) {
+            return "WebApp";
+        } else {
+            return "Unknown";
+        }
+    }
+
+    public String getUserIdFromEmail(String email) {
+        User user = userService.getUserByEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        return user.getId().toHexString();
     }
 }

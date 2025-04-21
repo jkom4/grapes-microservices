@@ -1,0 +1,29 @@
+package grapes.microservices.authservice.utils;
+
+import lombok.Data;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.core.Queue;
+
+@Data
+@Configuration
+public class RabbitMQConfig {
+
+    private final String authLogsQueue;
+
+    public RabbitMQConfig(@Value("${rabbit.mq.queue.name}") String authLogsQueue) {
+        this.authLogsQueue = authLogsQueue;
+    }
+
+    @Bean
+    public Queue authQueue() {
+        return new Queue(authLogsQueue, true);
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+}

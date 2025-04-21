@@ -34,13 +34,25 @@ public class AuthController {
     }
 
     @PostMapping(value  = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        // for rabbitMQ
+        String userId = authService.getUserIdFromEmail(loginRequest.getEmail());
+        String sourceIp = request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+        String failureReason = null;
+
         try {
+            authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Success", failureReason);
             String token = authService.getTokenFromChallenge(loginRequest);
+            // TODO : add refreshedToken
             return ResponseEntity.ok(new AuthResponse(token, ""));
         } catch (RuntimeException e) {
+            failureReason = e.getMessage();
+            authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Failed", failureReason);
             return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
         } catch (Exception e) {
+            failureReason = e.getMessage();
+            authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Failed", failureReason);
             return ResponseEntity.status(500).body(new JsonMessage(e.getMessage()));
         }
     }
