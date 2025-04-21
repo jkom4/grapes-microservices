@@ -1,6 +1,6 @@
 import {AuthMethod, User} from '../models/User';
 
-const API_BASE_URL = 'http://localhost:8090/api';
+const API_BASE_URL = 'http://89.168.47.217:8090/api';
 
 const headers = {
     'Content-Type': 'application/json',

@@ -17,9 +17,18 @@ services:
   mongodb-secondary:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mongodb-grapes:latest
     container_name: mongodb-secondary
-    command: ["--replSet", "rs0"]
+    command: --replSet rs0 --keyFile /data/keyfile --bind_ip_all
+    volumes:
+      - ./mongodb-secondary-data:/data/db
+      - ./mongodb-keyfile:/data/keyfile
     ports:
       - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_USER_RW: ${MONGO_USER_RW}
+      MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
+
 
 
   prometheus:

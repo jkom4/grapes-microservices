@@ -12,8 +12,10 @@ import org.springframework.web.cors.reactive.CorsWebFilter;
 @EnableWebFluxSecurity
 public class SecurityConfig {
     private static final String[] AUTH_PATHS = { "/api/auth/**","/api/users/**"};
-    private static final String[] SALES_PATHS = { "/api/clm/articles/**","/api/cll/**,/api/clm/**"};
-
+    private static final String[] SALES_PATHS = {
+            "/api/cll/**",
+            "/api/clm/**",
+    };
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
@@ -34,7 +36,7 @@ public class SecurityConfig {
     public CorsWebFilter corsFilter() {
         return new CorsWebFilter(exchange -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.addAllowedOrigin("http://localhost:3002");
+            config.addAllowedOrigin("http://localhost:3000");
             config.addAllowedOrigin("http://localhost:3001");
             config.addAllowedOrigin("http://localhost:3000");
             config.addAllowedOrigin("http://localhost:81");

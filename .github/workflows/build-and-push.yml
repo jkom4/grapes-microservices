@@ -248,9 +248,9 @@ jobs:
 #            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/rabbitmq-grapes:latest \
 #            --push ./docker/rabbitmq
 #
-#          docker buildx build --platform linux/amd64,linux/arm64 \
-#            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
-#            --push ./api-gateway
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
+            --push ./api-gateway
 #
 #          docker buildx build --platform linux/amd64,linux/arm64 \
 #            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/auth-service-backend:latest \
@@ -275,8 +275,10 @@ jobs:
       # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
       - name: 🏗️ Build & Push Frontend Services (amd64 only)
         run: |
-          docker compose build frontend-web frontend-auth frontend-payment shiny-app
-          docker compose push frontend-web frontend-auth frontend-payment shiny-app
+#          docker compose build frontend-web frontend-auth frontend-payment shiny-app
+#          docker compose push frontend-web frontend-auth frontend-payment shiny-app
+          docker compose build frontend-web frontend-auth 
+          docker compose push frontend-web frontend-auth
   deploy-replica-monitoring:
     name: Deploy to VM 1 - Replica + Monitoring (Manual)
     runs-on: ubuntu-latest
@@ -301,9 +303,9 @@ jobs:
             -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
             --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
             cd grapes-microservices
-            git pull origin main
-            docker compose pull 
-            docker compose down 
+            docker compose -f docker-compose-vm1.yml down 
+            docker image prune -a
+            docker compose pull
             docker compose -f docker-compose-vm1.yml up -d
 
   deploy-frontend:
@@ -330,9 +332,9 @@ jobs:
             -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
             --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
             cd grapes-microservices
-            git pull origin main
-            docker compose pull 
-            docker compose down 
+            docker compose -f docker-compose-vm2.yml down 
+            docker image prune -a
+            docker compose pull
             docker compose -f docker-compose-vm2.yml up -d
 
   deploy-bd-backend:
@@ -359,7 +361,7 @@ jobs:
               -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
               --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
               cd grapes-microservices
-              git pull origin main
-              docker compose pull 
-              docker compose down 
+              docker compose -f docker-compose-vm3.yml down 
+              docker image prune -a
+              docker compose pull
               docker compose -f docker-compose-vm3.yml up -d

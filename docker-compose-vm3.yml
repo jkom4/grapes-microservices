@@ -3,7 +3,7 @@ version: '3.9'
 services:
   mariadb:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
-    container_name: mariadb-primary
+    container_name: mariadb
     env_file: .env
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
@@ -17,9 +17,10 @@ services:
 
   mongodb:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mongodb-grapes:latest
-    container_name: mongodb-primary
+    container_name: mongodb
     env_file: .env
-    command: ["--replSet", "rs0"]
+    platform: linux/arm64
+    command: --replSet rs0 --keyFile /data/keyfile --bind_ip_all
     ports:
       - "27017:27017"
     volumes:
@@ -29,6 +30,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
       MONGO_USER_RW: ${MONGO_USER_RW}
       MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
+
 
   rabbitmq:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/rabbitmq-grapes:latest
@@ -113,3 +115,4 @@ volumes:
   mariadb_data:
   mongodb_data:
   rabbitmq_data:
+  redis_data:
