@@ -58,10 +58,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
       MONGO_USER_RW: ${MONGO_USER_RW}
       MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
+      MONGO_TARGET_DB: BD_OPER_PROC_AUTH # Pass the target DB name for permissions
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+      - ./docker/mongodb/config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     command: ["--auth"]  # To activate authentication
 
 ### Exchange
@@ -121,6 +123,39 @@ services:
     depends_on:
       - prometheus
 
+
+  data-ingestion-service:
+    build: ./data-mining-service/data_ingestion_service
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-ingestion-service:latest
+    container_name: data-ingestion-service
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # --- RabbitMQ Connection ---
+      - AMQP_HOST=rabbitmq
+      - AMQP_PORT=5672
+      - AMQP_USER=${RABBITMQ_USER}
+      - AMQP_PWD=${RABBITMQ_PASSWORD}
+      # --- DB Connection ---
+      - MYSQL_USER=root
+      - MYSQL_PWD=${DB_PASSWORD}
+      - MYSQL_HOST=mariadb
+      - MYSQL_PORT=3306
+      - MYSQL_DB_ACTIVITIES=BD_OPER_ACTIVITIES
+      - MONGO_URI=${DATA_MINING_MONGO_URI}
+      - MONGO_DB_AUTH=BD_OPER_PROC_AUTH
+      - USER=${USER:-unknown}
+
+      # --- Consumer Logic Params (Optional - Override defaults in consumer.py) ---
+
+
+      # --- Python Logging ---
+      - PYTHONUNBUFFERED=1
+
+    depends_on:
+      - rabbitmq   # Must wait for RabbitMQ to be ready (or at least started)
+      - mariadb    # Must wait for the primary MariaDB
+      - mongodb    # Must wait for MongoDB
 
 ### BACKEND
 
@@ -202,6 +237,7 @@ services:
 
   shiny-app:
     build: ./data-mining-service
+    env_file: .env
     container_name: grapes-insights-app
     restart: unless-stopped
     ports:
