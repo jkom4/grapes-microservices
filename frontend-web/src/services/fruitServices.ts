@@ -3,7 +3,7 @@ import Article from "../utils/models/Articles";
 import { getArticlesAPI } from "./httpCommon";
 
 // Fetches paginated articles from the API
-export const fetchFruits = async (
+const fetchFruits = async (
     page: number, // Current page number (0-based index)
     size: number // Number of articles per page
 ): Promise<{ content: Article[]; totalPages: number }> => {

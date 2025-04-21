@@ -15,7 +15,7 @@ const OrderHistory: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [searchCode, setSearchCode] = useState<string>('');
     const [searchDateTime, setSearchDateTime] = useState<string>('');
-    const [numPages, setNumPages] = useState<number | null>(null);
+    //const [numPages, setNumPages] = useState<number | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const ordersPerPage = 20; // Constant for number of orders per page
 

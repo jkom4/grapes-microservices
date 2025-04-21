@@ -127,14 +127,14 @@ const CartPage = () => {
         }
     };
 
-    const handleAddItem = async (articleId: number, quantityKg: number, quantity: number) => {
-        try {
-            const updatedCart = await cartService.addItemToCart(parseInt(orderId), articleId, quantityKg, quantity);
-            setCart(updatedCart);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to add item to cart");
-        }
-    };
+    // const handleAddItem = async (articleId: number, quantityKg: number, quantity: number) => {
+    //     try {
+    //         const updatedCart = await cartService.addItemToCart(parseInt(orderId), articleId, quantityKg, quantity);
+    //         setCart(updatedCart);
+    //     } catch (err) {
+    //         setError(err instanceof Error ? err.message : "Failed to add item to cart");
+    //     }
+    // };
 
     const calculateItemPrice = (item: CartItemModel) => {
         return (item.quantityKg > 0 ? item.price * item.quantityKg : item.price * item.quantity).toFixed(2);

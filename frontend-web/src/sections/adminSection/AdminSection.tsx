@@ -152,10 +152,10 @@ const AdminSection: React.FC = () => {
             if (familyId <= 0) {
                 throw new Error(text[language].error_family_id_positive);
             }
-            if (formData.priceKg && formData.priceKg < 0 || formData.priceUnit && formData.priceUnit < 0) {
+            if ((formData.priceKg && formData.priceKg < 0 )|| (formData.priceUnit && formData.priceUnit < 0)) {
                 throw new Error(text[language].error_prices_negative);
             }
-            if (formData.stockKg && formData.stockKg < 0 || formData.stockUnit && formData.stockUnit < 0) {
+            if ((formData.stockKg && formData.stockKg < 0 )|| (formData.stockUnit && formData.stockUnit < 0)) {
                 throw new Error(text[language].error_stock_negative);
             }
 

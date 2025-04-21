@@ -24,7 +24,7 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
     const [quantityUnits, setQuantityUnits] = useState<string>("1");
     const [unitType, setUnitType] = useState<"kg" | "units">("units");
 
-    const navigate = useNavigate();
+    //const navigate = useNavigate();
 
     const text = {
         en: {
