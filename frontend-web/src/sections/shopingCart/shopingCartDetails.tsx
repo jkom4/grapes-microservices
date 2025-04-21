@@ -59,7 +59,7 @@ const CartPage = () => {
                 setError(
                     err instanceof Error
                         ? err.message
-                        : "Erreur lors de la récupération du panier"
+                        : "Error to fetch cart"
                 );
             } finally {
                 setLoading(false);
@@ -88,7 +88,7 @@ const CartPage = () => {
 
     const handlePayment = async () => {
         if (orderId === null) {
-            setFormError("L'ID de la commande n'est pas disponible. Veuillez réessayer.");
+            setFormError("L'ID isn't free");
             return;
         }
 
@@ -130,7 +130,7 @@ const CartPage = () => {
                 window.location.href = "/";
             }, 10000);
         } catch (err) {
-            console.error("❌ Erreur pendant le paiement:", err);
+            console.error("❌ Error during payment:", err);
             setPaymentError(
                 err instanceof Error
                     ? err.message
@@ -143,7 +143,7 @@ const CartPage = () => {
 
     const handleStripePayment = async () => {
         if (orderId === null) {
-            setFormError("L'ID de la commande n'est pas disponible. Veuillez réessayer.");
+            setFormError("Error, retry");
             return;
         }
 
@@ -159,12 +159,12 @@ const CartPage = () => {
 
     const handleRemoveItem = async (orderId: number | null, itemId: number) => {
         if (orderId === null) {
-            setError("L'ID de la commande n'est pas disponible.");
+            setError("L'ID isn't free");
             return;
         }
         try {
             setError(null);
-            await cartService.removeItem(orderId, itemId); // orderId est déjà un number
+            await cartService.removeItem(orderId, itemId);
             const updatedCart = await cartService.fetchCart(orderId);
             setCart(updatedCart);
             if (updatedCart.items.length === 0) {
@@ -175,7 +175,7 @@ const CartPage = () => {
             setError(
                 err instanceof Error
                     ? err.message
-                    : "Erreur lors de la suppression de l'article"
+                    : "Error to delete an article"
             );
         }
     };

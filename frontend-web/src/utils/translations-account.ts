@@ -28,6 +28,13 @@ export const translationsAccount = {
         invalidInput: "Please enter a valid tracking number (numeric).",
         statusDelivery: "Delivery Status",
         noStatus: "Enter an tracking number to check the delivery status.",
+        settings: "Settings",
+        orderHistory: "Order History",
+        profile: "Profile",
+        deliveryStatus: "Delivery Status",
+        closeMenu: "Close Menu",
+        openMenu: "Open Menu",
+        logout: "Logout",
     },
     fr: {
         heading: "Historique des commandes",
@@ -57,5 +64,12 @@ export const translationsAccount = {
         invalidInput: "Veuillez entrer un numéro de suivi de commande valide (numérique).",
         statusDelivery: "État de la livraison",
         noStatus: "Entrez un numéro de suivi de commande pour vérifier l'état de la livraison.",
+        settings: "Paramètres",
+        orderHistory: "Historique des commandes",
+        profile: "Profil",
+        deliveryStatus: "État des livraisons",
+        closeMenu: "Fermer le menu",
+        openMenu: "Ouvrir le menu",
+        logout: "Déconnexion",
     }
 };
