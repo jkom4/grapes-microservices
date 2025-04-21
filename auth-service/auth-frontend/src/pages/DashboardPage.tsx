@@ -132,7 +132,7 @@ const DashboardPage = () => {
             setFormData(user);
             toast.success('User updated successfully!', { autoClose: 2000 })
         } catch (err: any) {
-            const temp : string = "Error while updating user : `{err.message}`";
+            toast.error(`Error while updating user: ${err.message}`, { autoClose: 2000 });
         }
         setLoading(false);
     };

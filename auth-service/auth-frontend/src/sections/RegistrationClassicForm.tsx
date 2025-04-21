@@ -40,13 +40,13 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                             { name: "phoneNumber", type: "text", placeholder: "Phone Number", required: true },
                             { name: "nationalId", type: "text", placeholder: "National ID", required: true },
                             { name: "pinCode", type: "password", placeholder: "PIN Code", required: true },
-                            { name: "profession", type: "text", placeholder: "Profession", required: true },
+                            { name: "profession", type: "text", placeholder: "Profession" },
                         ].map((field) => (
                             <div key={field.name} className="flex flex-col space-y-2">
                                 <input
                                     name={field.name}
                                     type={field.type}
-                                    placeholder={field.placeholder}
+                                    placeholder={field.required ? `${field.placeholder} *` : field.placeholder}
                                     required={field.required}
                                     onChange={handleChange}
                                     className="p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -80,7 +80,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                             <input
                                 key={field}
                                 name={field}
-                                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                                placeholder={`${field.charAt(0).toUpperCase() + field.slice(1)} *`}
+                                required
                                 onChange={(e) => handleAddressChange(e, "deliveryAddress")}
                                 className="p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />

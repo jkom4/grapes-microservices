@@ -202,12 +202,12 @@ export async function updateUser(user: User, token: string, reload: boolean): Pr
             body: JSON.stringify(user),
         });
         if (!res.ok) {
-            const errorText = await res.json();
-            throw new Error(errorText.message);
+            const errorJson = await res.json().catch(() => ({}));
+            const firstError = Object.values(errorJson)?.[0] ?? 'Unknown error';
+            throw new Error(firstError as string);
         }
         return res;
     } catch (error: any) {
-        handleConnectionError(error);
         console.error('[Update User] Error:', error);
         throw error;
     }
