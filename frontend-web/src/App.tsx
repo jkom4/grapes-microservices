@@ -9,10 +9,12 @@ import ArticleDetails from './pages/ArticleDetails';
 import ShoppingCart from './pages/ShoppingCart';
 import AdminPage from './pages/admin/Admin';
 import AccountPage from './pages/AccountPage';
+import { CartProvider } from './features/CartContext';
 
 const App: React.FC = () => {
     return (
         <LanguageProvider>
+            <CartProvider>
             <Router>
                 <Navbar />
                 <Routes>
@@ -24,6 +26,7 @@ const App: React.FC = () => {
                     <Route path="/admin" element={<AdminPage />} />
                 </Routes>
             </Router>
+            </CartProvider>
         </LanguageProvider>
     );
 };

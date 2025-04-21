@@ -1,3 +1,4 @@
+// src/components/PopularSection.tsx
 import { useEffect, useState } from "react";
 import Article from "../../utils/models/Articles";
 import { useLanguage } from "../../features/LanguageContext";
@@ -5,6 +6,7 @@ import { fetchFruits } from "../../services/fruitServices";
 import { useNavigate } from "react-router-dom";
 import CardComponent from "../../components/CardComponent";
 import { cartService } from "../../services/cartService";
+import { useCart } from "../../features/CartContext";
 
 function PopularSection({ limit = 3 }: { limit?: number }) {
     const { language } = useLanguage();
@@ -22,12 +24,8 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
     const [quantityKg, setQuantityKg] = useState<string>("0");
     const [quantityUnits, setQuantityUnits] = useState<string>("1");
     const [unitType, setUnitType] = useState<"kg" | "units">("units");
-    const [orderId, setOrderId] = useState<string | null>(null); // Nouvel état pour orderId
-
+    const { orderId } = useCart(); // Utiliser le contexte
     const navigate = useNavigate();
-
-    // Hardcoded userId pour initializeCart (comme dans ArticleDetailsSection)
-    const userId = 1;
 
     const text = {
         en: {
@@ -60,22 +58,10 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
         },
     };
 
-    // Initialiser le panier et charger les articles
     useEffect(() => {
-        const initializeCartAndFetchArticles = async () => {
+        const fetchArticles = async () => {
             try {
                 setLoading(true);
-
-                // Vérifier si orderId existe dans localStorage
-                let dynamicOrderId = localStorage.getItem("orderId");
-                if (!dynamicOrderId) {
-                    const initResponse = await cartService.initializeCart(userId);
-                    dynamicOrderId = initResponse.id.toString();
-                    localStorage.setItem("orderId", dynamicOrderId);
-                }
-                setOrderId(dynamicOrderId);
-
-                // Charger les articles
                 const { content } = await fetchFruits(0, limit);
                 setArticles(content);
             } catch (err) {
@@ -85,10 +71,9 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
             }
         };
 
-        initializeCartAndFetchArticles();
-    }, [limit, userId]);
+        fetchArticles();
+    }, [limit]);
 
-    // Auto-dismiss toast après 3 secondes
     useEffect(() => {
         if (toast) {
             const timer = setTimeout(() => setToast(null), 3000);
@@ -99,7 +84,6 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
     const handleOpenModal = (article: Article, event: React.MouseEvent<HTMLButtonElement>) => {
         setSelectedArticle(article);
         setModalOpen(true);
-        // Déclencher l'animation
         const button = event.currentTarget;
         const rect = button.getBoundingClientRect();
         setCartAnimation({
@@ -128,7 +112,6 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
         const quantityKgValue = unitType === "kg" ? parseFloat(quantityKg) || 0 : 0;
         const quantityUnitsValue = unitType === "units" ? parseInt(quantityUnits) || 1 : 0;
 
-        // Valider le stock
         if (unitType === "kg" && quantityKgValue > selectedArticle.stockKg) {
             setToast({ message: text[language].stockError, type: "error" });
             return;
@@ -145,14 +128,13 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
 
         try {
             await cartService.addItemToCart(
-                parseInt(orderId), // Utiliser orderId dynamique
+                orderId,
                 articleId,
                 quantityKgValue,
                 quantityUnitsValue
             );
             setToast({ message: text[language].addToCartSuccess, type: "success" });
 
-            // Réinitialiser l'animation après un délai
             setTimeout(() => {
                 setCartAnimation({ id: null, x: 0, y: 0 });
             }, 1000);
@@ -175,7 +157,6 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
 
     return (
         <section className="relative">
-            {/* Section header */}
             <section className="hero flex justify-center items-center bg-primary py-8">
                 <div className="hero-content max-w-screen-lg flex justify-between items-center w-full px-4">
                     <h2 className="text-2xl font-semibold text-black border-b-4 border-accent pb-2 inline-block">
@@ -185,10 +166,8 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
             </section>
 
             <section className="relative bg-primary">
-                {/* Background */}
                 <section className="bg-popular absolute left-1/2 transform -translate-x-1/2 w-full max-w-[1268px] h-[330px] bg-secondary rounded-[64px] z-0 top-[100px]"></section>
 
-                {/* Grid layout */}
                 <section className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 max-w-screen-lg mx-auto relative z-10">
                     {articles.map((article: Article) => (
                         <CardComponent
@@ -199,7 +178,6 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
                     ))}
                 </section>
 
-                {/* Modal */}
                 {modalOpen && selectedArticle && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -258,7 +236,7 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
                                 </button>
                                 <button
                                     onClick={handleAddToCart}
-                                    disabled={!orderId} // Désactiver le bouton si orderId n'est pas défini
+                                    disabled={!orderId}
                                     className={`px-4 py-2 text-white rounded-lg ${orderId ? "bg-secondary hover:bg-accent" : "bg-gray-400 cursor-not-allowed"}`}
                                 >
                                     {text[language].addButton}
@@ -268,7 +246,6 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
                     </div>
                 )}
 
-                {/* Cart Animation */}
                 {cartAnimation.id && (
                     <div
                         className="cart-animation fixed z-50"
@@ -291,7 +268,6 @@ function PopularSection({ limit = 3 }: { limit?: number }) {
                     </div>
                 )}
 
-                {/* Toast Notification */}
                 {toast && (
                     <div
                         className={`fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white ${

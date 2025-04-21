@@ -17,24 +17,38 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, sortConfig, handleSort,
                 <tr>
                     <th
                         className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer"
+                        onClick={() => handleSort("id")}
+                    >
+                        {translations.trackingNumber}{" "}
+                        {sortConfig.key === "id" && (sortConfig.direction === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th
+                        className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer"
                         onClick={() => handleSort("code")}
                     >
-                        {translations.orderCode} {sortConfig.key === "code" && (sortConfig.direction === "asc" ? "↑" : "↓")}
+                        {translations.orderCode}{" "}
+                        {sortConfig.key === "code" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                     </th>
                     <th
                         className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer"
                         onClick={() => handleSort("createdAt")}
                     >
-                        {translations.date} {sortConfig.key === "createdAt" && (sortConfig.direction === "asc" ? "↑" : "↓")}
+                        {translations.date}{" "}
+                        {sortConfig.key === "createdAt" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                     </th>
                     <th
                         className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer"
                         onClick={() => handleSort("totalPrice")}
                     >
-                        {translations.total} {sortConfig.key === "totalPrice" && (sortConfig.direction === "asc" ? "↑" : "↓")}
+                        {translations.total}{" "}
+                        {sortConfig.key === "totalPrice" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">{translations.status}</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">{translations.invoice}</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
+                        {translations.status}
+                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
+                        {translations.invoice}
+                    </th>
                 </tr>
                 </thead>
                 <tbody>

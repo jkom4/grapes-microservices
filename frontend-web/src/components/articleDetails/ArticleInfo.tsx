@@ -12,7 +12,7 @@ interface ArticleInfoProps {
     onQuantityChange: (delta: number) => void;
     onQuantityInput: (value: number) => void;
     onAddToCart: (event: React.MouseEvent<HTMLButtonElement>) => void;
-    orderId: string | null;
+    orderId: number | null;
     translations: Translation;
 }
 

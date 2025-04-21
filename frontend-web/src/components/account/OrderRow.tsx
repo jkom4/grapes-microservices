@@ -19,6 +19,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, translations }) => {
 
     return (
         <tr className="border-b hover:bg-gray-50">
+            <td className="px-6 py-4 text-gray-700">{order.id}</td>
             <td className="px-6 py-4 text-gray-700">{order.code}</td>
             <td className="px-6 py-4 text-gray-700">{formatDate(order.createdAt)}</td>
             <td className="px-6 py-4 text-gray-700">

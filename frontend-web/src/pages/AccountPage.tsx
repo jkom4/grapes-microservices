@@ -2,41 +2,44 @@ import React, { useState } from "react";
 import OrderHistory from "../sections/accountSection/AccountSection";
 import { useLanguage } from "../features/LanguageContext";
 import ProfileSection from "../sections/profileSection/ProfileSection";
+import DeliveryStatus from "../sections/deliveryStatus/DeliveryStatus"; // New component
 
 // AccountPage Component: Displays a settings page with a collapsible sidebar and main content
 const AccountPage: React.FC = () => {
-    const { language } = useLanguage(); // State to manage language toggle
-    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false); // State to toggle sidebar
-    const [activeSection, setActiveSection] = useState<'orderHistory' | 'profile'>('orderHistory'); // State to toggle between sections
+    const { language } = useLanguage();
+    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+    const [activeSection, setActiveSection] = useState<
+        "orderHistory" | "profile" | "deliveryStatus"
+    >("orderHistory");
 
-    // Text content in both languages (English and French)
     const text = {
         en: {
             settings: "Settings",
             orderHistory: "Order History",
             profile: "Profile",
+            deliveryStatus: "Delivery Status",
             closeMenu: "Close Menu",
             openMenu: "Open Menu",
-            logout: "Logout"
+            logout: "Logout",
         },
         fr: {
             settings: "Paramètres",
             orderHistory: "Historique des commandes",
             profile: "Profil",
+            deliveryStatus: "État des livraisons",
             closeMenu: "Fermer le menu",
             openMenu: "Ouvrir le menu",
-            logout: "Déconnexion"
-        }
+            logout: "Déconnexion",
+        },
     };
 
-    // Toggle sidebar visibility
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
     const handleLogout = () => {
         localStorage.removeItem("authToken");
-        alert("You're logout !");
+        alert("You're logged out!");
     };
 
     return (
@@ -71,7 +74,18 @@ const AccountPage: React.FC = () => {
                             <button
                                 className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary hover:text-black rounded-md transition"
                                 onClick={() => {
-                                    setActiveSection('orderHistory');
+                                    setActiveSection("profile");
+                                    setIsSidebarOpen(false);
+                                }}
+                            >
+                                {text[language].profile}
+                            </button>
+                        </li>
+                        <li>
+                            <button
+                                className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary hover:text-black rounded-md transition"
+                                onClick={() => {
+                                    setActiveSection("orderHistory");
                                     setIsSidebarOpen(false);
                                 }}
                             >
@@ -82,14 +96,13 @@ const AccountPage: React.FC = () => {
                             <button
                                 className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary hover:text-black rounded-md transition"
                                 onClick={() => {
-                                    setActiveSection('profile');
+                                    setActiveSection("deliveryStatus");
                                     setIsSidebarOpen(false);
                                 }}
                             >
-                                {text[language].profile}
+                                {text[language].deliveryStatus}
                             </button>
                         </li>
-                        {/* Logout Button */}
                         <li>
                             <button
                                 onClick={handleLogout}
@@ -104,7 +117,6 @@ const AccountPage: React.FC = () => {
 
             {/* Main Content */}
             <div className="flex-1 p-6">
-                {/* Toggle button for mobile */}
                 <button
                     onClick={toggleSidebar}
                     className="md:hidden mb-4 p-2 bg-primary text-white rounded-md hover:bg-accent"
@@ -121,12 +133,11 @@ const AccountPage: React.FC = () => {
                     )}
                 </button>
 
-                {/* Content */}
-                {activeSection === 'orderHistory' && <OrderHistory />}
-                {activeSection === 'profile' && <ProfileSection />}
+                {activeSection === "orderHistory" && <OrderHistory />}
+                {activeSection === "profile" && <ProfileSection />}
+                {activeSection === "deliveryStatus" && <DeliveryStatus />}
             </div>
 
-            {/* Overlay for mobile when sidebar is open */}
             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"

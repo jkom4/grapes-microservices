@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+// src/components/DisplayProductSection.tsx
+import { useEffect, useState } from "react";
 import Article from "../../utils/models/Articles";
 import { useLanguage } from "../../features/LanguageContext";
 import { fetchFruits } from "../../services/fruitServices";
-import { cartService } from "../../services/cartService";
 import CardComponent from "../../components/CardComponent";
+import { cartService } from "../../services/cartService";
+import { useCart } from "../../features/CartContext";
 
 function DisplayProductSection({ limit = 6 }: { limit?: number }) {
     const [articles, setArticles] = useState<Article[]>([]);
@@ -21,10 +23,7 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
     const [quantityKg, setQuantityKg] = useState<string>("0");
     const [quantityUnits, setQuantityUnits] = useState<string>("1");
     const [unitType, setUnitType] = useState<"kg" | "units">("units");
-    const [orderId, setOrderId] = useState<string | null>(null); // Nouvel état pour orderId
-
-    // Hardcoded userId pour initializeCart (comme dans les autres composants)
-    const userId = 1;
+    const { orderId } = useCart();
 
     const text = {
         en: {
@@ -53,22 +52,10 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
         },
     };
 
-    // Initialiser le panier et charger les articles
     useEffect(() => {
-        const initializeCartAndFetchArticles = async () => {
+        const fetchArticles = async () => {
             try {
                 setLoading(true);
-
-                // Vérifier si orderId existe dans localStorage
-                let dynamicOrderId = localStorage.getItem("orderId");
-                if (!dynamicOrderId) {
-                    const initResponse = await cartService.initializeCart(userId);
-                    dynamicOrderId = initResponse.id.toString();
-                    localStorage.setItem("orderId", dynamicOrderId);
-                }
-                setOrderId(dynamicOrderId);
-
-                // Charger les articles
                 const { content } = await fetchFruits(0, limit);
                 setArticles(content);
             } catch (err) {
@@ -78,10 +65,9 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
             }
         };
 
-        initializeCartAndFetchArticles();
-    }, [limit, userId]);
+        fetchArticles();
+    }, [limit]);
 
-    // Auto-dismiss toast après 3 secondes
     useEffect(() => {
         if (toast) {
             const timer = setTimeout(() => setToast(null), 3000);
@@ -92,7 +78,6 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
     const handleOpenModal = (article: Article, event: React.MouseEvent<HTMLButtonElement>) => {
         setSelectedArticle(article);
         setModalOpen(true);
-        // Déclencher l'animation
         const button = event.currentTarget;
         const rect = button.getBoundingClientRect();
         setCartAnimation({
@@ -121,7 +106,6 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
         const quantityKgValue = unitType === "kg" ? parseFloat(quantityKg) || 0 : 0;
         const quantityUnitsValue = unitType === "units" ? parseInt(quantityUnits) || 1 : 0;
 
-        // Valider le stock
         if (unitType === "kg" && quantityKgValue > selectedArticle.stockKg) {
             setToast({ message: text[language].stockError, type: "error" });
             return;
@@ -138,14 +122,13 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
 
         try {
             await cartService.addItemToCart(
-                parseInt(orderId), // Utiliser orderId dynamique
+                orderId,
                 articleId,
                 quantityKgValue,
                 quantityUnitsValue
             );
             setToast({ message: text[language].addToCartSuccess, type: "success" });
 
-            // Réinitialiser l'animation après un délai
             setTimeout(() => {
                 setCartAnimation({ id: null, x: 0, y: 0 });
             }, 1000);
@@ -186,7 +169,6 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
                 ))}
             </section>
 
-            {/* Modal */}
             {modalOpen && selectedArticle && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -245,7 +227,7 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
                             </button>
                             <button
                                 onClick={handleAddToCart}
-                                disabled={!orderId} // Désactiver le bouton si orderId n'est pas défini
+                                disabled={!orderId}
                                 className={`px-4 py-2 text-white rounded-lg ${orderId ? "bg-secondary hover:bg-accent" : "bg-gray-400 cursor-not-allowed"}`}
                             >
                                 {text[language].addButton}
@@ -255,7 +237,6 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
                 </div>
             )}
 
-            {/* Cart Animation */}
             {cartAnimation.id && (
                 <div
                     className="cart-animation fixed z-50"
@@ -278,7 +259,6 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
                 </div>
             )}
 
-            {/* Toast Notification */}
             {toast && (
                 <div
                     className={`fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white ${

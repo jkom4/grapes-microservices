@@ -1,3 +1,4 @@
+// src/services/cartService.ts
 import { cartAPI } from "./httpCommon"; // Adjust path if needed
 import CartItemModel from "../utils/models/CartItem";
 
@@ -61,7 +62,7 @@ export const cartService = {
     },
 
     // Fetch cart by order ID
-    async fetchCart(orderId: string): Promise<CartResponse> {
+    async fetchCart(orderId: number): Promise<CartResponse> {
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.get(orderId)}`);
         if (!response.ok) {
             const errorDetails = await response.text();
@@ -72,22 +73,28 @@ export const cartService = {
 
     // Process payment for the cart
     async processPayment(
-        orderId: string,
+        orderId: number,
         address: string,
         phoneNumber: string,
-        customerName: string,
+        customerName: string
     ): Promise<void> {
-        const response = await fetch(`${cartAPI.baseURL}/clm/cart/pay`, {
+        const url = `${cartAPI.baseURL}${cartAPI.endpoints.pay}`;
+        const body = {
+            orderId, // Pas besoin de Number(orderId), car c'est déjà un number
+            address,
+            phoneNumber,
+            customerName,
+        };
+
+        console.log("📤 Sending payment request to:", url);
+        console.log("📦 Payload:", JSON.stringify(body, null, 2));
+
+        const response = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                orderId,
-                address,
-                phoneNumber,
-                customerName,
-            }),
+            body: JSON.stringify(body),
         });
 
         if (!response.ok) {
@@ -97,7 +104,7 @@ export const cartService = {
     },
 
     // Remove an item from the cart
-    async removeItem(orderId: number | string, itemId: number): Promise<void> {
+    async removeItem(orderId: number, itemId: number): Promise<void> {
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.remove(orderId, itemId)}`, {
             method: "DELETE",
             headers: {
@@ -111,7 +118,7 @@ export const cartService = {
     },
 
     // Clear the cart
-    async clearCart(orderId: string): Promise<void> {
+    async clearCart(orderId: number): Promise<void> {
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.clear(orderId)}`, {
             method: "DELETE",
             headers: {

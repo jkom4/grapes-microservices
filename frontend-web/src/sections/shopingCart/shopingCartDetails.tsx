@@ -1,4 +1,3 @@
-// components/CartPage/CartPage.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../features/LanguageContext";
@@ -12,13 +11,13 @@ import CartHeader from "../../components/cartPage/CartHeader";
 import CheckoutForm from "../../components/cartPage/CheckoutForm";
 import CartItems from "../../components/cartPage/CartItems";
 import CartSummary from "../../components/cartPage/CartSummary";
-
+import { useCart } from "../../features/CartContext";
 
 const CartPage = () => {
     const { language } = useLanguage();
     const navigate = useNavigate();
+    const { orderId, setOrderId } = useCart();
     const [cart, setCart] = useState<CartResponse | null>(null);
-    const [orderId, setOrderId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -39,46 +38,40 @@ const CartPage = () => {
     const [isPaying, setIsPaying] = useState(false);
     const [paymentError, setPaymentError] = useState<string | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
-
-    // Hardcoded userId for cart initialization
-    const userId = 1;
+    const [paymentCompleted, setPaymentCompleted] = useState(false);
 
     useEffect(() => {
-        const initializeAndFetchCart = async () => {
+        const fetchCart = async () => {
             try {
                 setLoading(true);
-                let dynamicOrderId = localStorage.getItem("orderId");
+                if (orderId !== null) {
+                    const data = await cartService.fetchCart(orderId);
+                    setCart(data);
 
-                // If no orderId exists, initialize a new cart
-                if (!dynamicOrderId) {
-                    const initResponse = await cartService.initializeCart(userId);
-                    dynamicOrderId = initResponse.id.toString();
-                    localStorage.setItem("orderId", dynamicOrderId);
-                }
-                setOrderId(dynamicOrderId);
-
-                // Fetch cart with dynamic orderId
-                const data = await cartService.fetchCart(dynamicOrderId);
-                setCart(data);
-
-                // Clear localStorage if cart is empty
-                if (data.items.length === 0) {
-                    localStorage.removeItem("orderId");
-                    setOrderId(null);
+                    if (data.items.length === 0) {
+                        localStorage.removeItem("orderId");
+                        setOrderId(null);
+                    }
+                } else {
+                    setCart(null);
                 }
             } catch (err) {
                 setError(
                     err instanceof Error
                         ? err.message
-                        : "An unknown error occurred while initializing or fetching the cart"
+                        : "Erreur lors de la récupération du panier"
                 );
             } finally {
                 setLoading(false);
             }
         };
 
-        initializeAndFetchCart();
-    }, []);
+        fetchCart();
+
+        return () => {
+            setPaymentCompleted(false);
+        };
+    }, [orderId, paymentCompleted, setOrderId]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
@@ -94,8 +87,8 @@ const CartPage = () => {
     };
 
     const handlePayment = async () => {
-        if (!orderId) {
-            setFormError("Order ID is not available. Please try again.");
+        if (orderId === null) {
+            setFormError("L'ID de la commande n'est pas disponible. Veuillez réessayer.");
             return;
         }
 
@@ -109,27 +102,35 @@ const CartPage = () => {
 
         setIsPaying(true);
         try {
-            await cartService.processPayment(
+            const paymentData = {
                 orderId,
-                formData.address,
-                formData.phone,
-                formData.fullName
+                address: formData.address,
+                phoneNumber: formData.phone,
+                customerName: formData.fullName,
+            };
+
+            await cartService.processPayment(
+                paymentData.orderId,
+                paymentData.address,
+                paymentData.phoneNumber,
+                paymentData.customerName
             );
+
             setShowSuccess(true);
+            setPaymentCompleted(true);
 
             setTimeout(async () => {
                 try {
-                    await cartService.clearCart(orderId);
                     setCart(null);
                     setOrderId(null);
-                    localStorage.clear();
+                    localStorage.removeItem("orderId");
                 } catch (err) {
-                    // Handle error silently to avoid interrupting user flow
                 }
                 setShowSuccess(false);
-                navigate("/");
-            }, 5000);
+                window.location.href = "/";
+            }, 10000);
         } catch (err) {
+            console.error("❌ Erreur pendant le paiement:", err);
             setPaymentError(
                 err instanceof Error
                     ? err.message
@@ -141,8 +142,8 @@ const CartPage = () => {
     };
 
     const handleStripePayment = async () => {
-        if (!orderId) {
-            setFormError("Order ID is not available. Please try again.");
+        if (orderId === null) {
+            setFormError("L'ID de la commande n'est pas disponible. Veuillez réessayer.");
             return;
         }
 
@@ -156,14 +157,14 @@ const CartPage = () => {
         window.location.href = "https://buy.stripe.com/test_fZe3cr0INeIK50c6oo";
     };
 
-    const handleRemoveItem = async (orderId: string | null, itemId: number) => {
-        if (!orderId) {
-            setError("Order ID is not available.");
+    const handleRemoveItem = async (orderId: number | null, itemId: number) => {
+        if (orderId === null) {
+            setError("L'ID de la commande n'est pas disponible.");
             return;
         }
         try {
             setError(null);
-            await cartService.removeItem(Number(orderId), itemId);
+            await cartService.removeItem(orderId, itemId); // orderId est déjà un number
             const updatedCart = await cartService.fetchCart(orderId);
             setCart(updatedCart);
             if (updatedCart.items.length === 0) {
@@ -174,7 +175,7 @@ const CartPage = () => {
             setError(
                 err instanceof Error
                     ? err.message
-                    : "An unknown error occurred while removing the item"
+                    : "Erreur lors de la suppression de l'article"
             );
         }
     };

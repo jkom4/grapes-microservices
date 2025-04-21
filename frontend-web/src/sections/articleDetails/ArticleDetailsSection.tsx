@@ -18,7 +18,7 @@ function ArticleDetailsSection() {
     const navigate = useNavigate();
     const { language } = useLanguage();
     const userId = 1; // Hardcoded userId for cart initialization
-    const { article, orderId, error, setError } = useArticleDetails(id, userId);
+    const { article, orderId, error, setError } = useArticleDetails(id);
 
     // State for quantity, measurement type, and UI interactions
     const [isFavorite, setIsFavorite] = useState(false);
@@ -75,7 +75,7 @@ function ArticleDetailsSection() {
 
         try {
             // Add item to cart
-            await cartService.addItemToCart(parseInt(orderId), articleId, quantityKg, selectedQuantity);
+            await cartService.addItemToCart(orderId, articleId, quantityKg, selectedQuantity);
             setToast({ message: translationsArticleDetails[language].addToCartSuccess, type: "success" });
 
             // Reset animation after a delay

@@ -3,7 +3,6 @@ import Article from "../../utils/models/Articles";
 import { useLanguage } from "../../features/LanguageContext";
 import { cartService } from "../../services/cartService";
 import { translationsAllArticles } from "../../utils/translations-all-articles";
-import useArticles from "../../hooks/useArticle";
 import ArticleGrid from "../../components/allArticles/ArticleGrid";
 import SearchBar from "../../components/allArticles/SearchBar";
 import LoadingSpinner from "../../utils/models/interface/LoadSpinner";
@@ -12,6 +11,8 @@ import ArticleModal from "../../components/allArticles/ArticleModal";
 import CartAnimation from "../../components/allArticles/CartAnimation";
 import ToastNotification from "../../components/ToastNotifications";
 import Pagination from "../../components/allArticles/Pagination";
+import { useCart } from "../../features/CartContext";
+import useArticles from "../../hooks/useArticle";
 
 function AllArticlesSection({ limit = 0 }: { limit?: number }) {
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -27,40 +28,12 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
     const [quantityKg, setQuantityKg] = useState<string>("0");
     const [quantityUnits, setQuantityUnits] = useState<string>("1");
     const [unitType, setUnitType] = useState<"kg" | "units">("units");
-    const [orderId, setOrderId] = useState<string | null>(null);
+    const { orderId } = useCart(); // Utiliser le contexte
     const { language } = useLanguage();
     const articlesPerPage = 27;
-    const userId = 1;
 
-    // Custom hook for fetching articles
     const { articles, loading, error, totalPages } = useArticles(currentPage, searchQuery, articlesPerPage, limit);
 
-    // Initialize cart
-    useEffect(() => {
-        const initializeCart = async () => {
-            try {
-                // Check if orderId exists in localStorage
-                let dynamicOrderId = localStorage.getItem("orderId");
-                if (!dynamicOrderId) {
-                    // Initialize cart and retrieve orderId
-                    const initResponse = await cartService.initializeCart(userId);
-                    dynamicOrderId = initResponse.id.toString();
-                    localStorage.setItem("orderId", dynamicOrderId);
-                }
-                setOrderId(dynamicOrderId);
-            } catch (err) {
-                console.error("Error initializing cart:", err);
-                setToast({
-                    message: translationsAllArticles[language].addToCartError,
-                    type: "error",
-                });
-            }
-        };
-
-        initializeCart();
-    }, [userId, language]);
-
-    // Sync component state with URL parameters
     const syncStateWithURL = () => {
         const params = new URLSearchParams(window.location.search);
         const query = params.get("search") || "";
@@ -78,7 +51,6 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
         return () => window.removeEventListener("popstate", syncStateWithURL);
     }, []);
 
-    // Handle opening the modal and triggering animation
     const handleOpenModal = (article: Article, event: React.MouseEvent<HTMLButtonElement>) => {
         setSelectedArticle(article);
         setModalOpen(true);
@@ -91,7 +63,6 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
         });
     };
 
-    // Handle closing the modal
     const handleCloseModal = () => {
         setModalOpen(false);
         setSelectedArticle(null);
@@ -101,7 +72,6 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
         setCartAnimation({ id: null, x: 0, y: 0 });
     };
 
-    // Handle adding an item to the cart
     const handleAddToCart = async () => {
         if (!selectedArticle || !orderId) {
             setToast({ message: translationsAllArticles[language].addToCartError, type: "error" });
@@ -112,7 +82,6 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
         const quantityKgValue = unitType === "kg" ? parseFloat(quantityKg) || 0 : 0;
         const quantityUnitsValue = unitType === "units" ? parseInt(quantityUnits) || 1 : 0;
 
-        // Validate stock
         if (unitType === "kg" && quantityKgValue > selectedArticle.stockKg) {
             setToast({ message: translationsAllArticles[language].stockError, type: "error" });
             return;
@@ -127,10 +96,9 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
         }
 
         try {
-            await cartService.addItemToCart(parseInt(orderId), articleId, quantityKgValue, quantityUnitsValue);
+            await cartService.addItemToCart(orderId, articleId, quantityKgValue, quantityUnitsValue);
             setToast({ message: translationsAllArticles[language].addToCartSuccess, type: "success" });
 
-            // Reset animation after a delay
             setTimeout(() => {
                 setCartAnimation({ id: null, x: 0, y: 0 });
             }, 1000);
@@ -143,7 +111,6 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
         }
     };
 
-    // Handle page change
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
@@ -155,7 +122,6 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
         }
     };
 
-    // Handle search input change
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newQuery = e.target.value;
         setSearchQuery(newQuery);
@@ -163,7 +129,6 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
         window.history.pushState({}, "", newQuery === "" ? `?page=1` : `?search=${encodeURIComponent(newQuery)}&page=1`);
     };
 
-    // Auto-dismiss toast after 3 seconds
     useEffect(() => {
         if (toast) {
             const timer = setTimeout(() => setToast(null), 3000);
@@ -171,7 +136,6 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
         }
     }, [toast]);
 
-    // Memoize article grid to optimize rendering
     const articleGrid = useMemo(
         () => (
             <ArticleGrid

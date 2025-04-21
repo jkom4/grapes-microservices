@@ -20,6 +20,14 @@ export const translationsAccount = {
         searchDateTimePlaceholder: "Search by date or time",
         pdfPreview: "Invoice Preview",
         pagination: "Page {currentPage} of {totalPages}",
+        trackingNumber: "Tracking Number",
+        title: "Check Delivery Status",
+        placeholder: "Enter your tracking number",
+        submit: "Track Delivery",
+        errorDelivery: "Failed to fetch delivery status. Please check the tracking number and try again.",
+        invalidInput: "Please enter a valid tracking number (numeric).",
+        statusDelivery: "Delivery Status",
+        noStatus: "Enter an tracking number to check the delivery status.",
     },
     fr: {
         heading: "Historique des commandes",
@@ -41,5 +49,13 @@ export const translationsAccount = {
         searchDateTimePlaceholder: "Rechercher par date ou heure",
         pdfPreview: "Aperçu de la facture",
         pagination: "Page {currentPage} sur {totalPages}",
+        trackingNumber: "Numéro de suivi",
+        title: "Vérifier l'état de la livraison",
+        placeholder: "Entrez le numéro de suivi de la commande",
+        submit: "Suivre la livraison",
+        errorDelivery: "Échec de la récupération de l'état de la livraison. Veuillez vérifier le numéro de suivi de la commande et réessayer.",
+        invalidInput: "Veuillez entrer un numéro de suivi de commande valide (numérique).",
+        statusDelivery: "État de la livraison",
+        noStatus: "Entrez un numéro de suivi de commande pour vérifier l'état de la livraison.",
     }
 };
