@@ -16,4 +16,6 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
 
     boolean existsByPhoneNumber(@NotNull String phone);
     boolean existsById(@NotNull ObjectId id);
+    Optional<User> findByNationalId(@NotNull String nationalId);
+
 }

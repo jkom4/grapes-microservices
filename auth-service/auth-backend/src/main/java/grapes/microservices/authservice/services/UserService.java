@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 import static grapes.microservices.authservice.validators.UserValidator.isValid;
 
 /**
@@ -150,6 +152,7 @@ public class UserService {
      * @param idStr The ID of the user to reactivate.
      * @throws IllegalArgumentException if no user is found with the provided ID.
      */
+
     @Transactional
     public User enableUser(String idStr) throws IllegalArgumentException {
         if (idStr == null) {
@@ -164,5 +167,18 @@ public class UserService {
         user.setActive(true);
         logger.info("User with ID: {} enabled successfully", idStr);
         return userRepository.save(user);
+    }
+    /**
+     * Retrieve a user by their national ID.
+     *
+     * @param nationalId The national ID of the user.
+     * @return An Optional containing the user if found.
+     */
+    public Optional<User> getUserByNationalId(String nationalId) {
+        if (nationalId == null) {
+            logger.error("User retrieval failed: National ID cannot be null");
+            throw new IllegalArgumentException("National ID cannot be null");
+        }
+        return userRepository.findByNationalId(nationalId);
     }
 }
