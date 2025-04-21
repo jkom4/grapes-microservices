@@ -5,7 +5,7 @@ import {useAuth} from "../context/AuthContext";
 import {toast} from "react-toastify";
 import AlreadyAuthenticated from "../components/AlreadyAuthenticated";
 import LoginForm from "../sections/LoginForm";
-import {handleGetChallenge, handleLogin} from "../services/authService";
+import {getChallenge, login} from "../services/authService";
 
 const LoginPage = () => {
     const { method } = useParams<{ method: AuthMethod }>();
@@ -63,8 +63,9 @@ const LoginPage = () => {
         }
 
         try {
-            const { message } = await handleGetChallenge(email, password, method as AuthMethod);
-            toast.success(message, {autoClose: 2000});
+            const res = await getChallenge(email, password, method as AuthMethod);
+            const json = await res.json();
+            toast.success(json.message, {autoClose: 2000});
             triggerChallenge();
         } catch (err: any) {
             toast.error(err.message, {autoClose: 2000});
@@ -83,21 +84,22 @@ const LoginPage = () => {
 
         try {
             setLoading(true);
-            const token = await handleLogin(
+            const res = await login(
                 challenge.join(''),
                 pinCode.join(''),
                 email,
                 method
             );
-
-            localStorage.setItem('jwt', token);
+            console.log(res);
+            const json = await res.json();
+            localStorage.setItem('jwt', json.accessToken);
             toast.success('Login successful.', { autoClose: 2000 });
 
             window.location.href =
                 new URLSearchParams(window.location.search).get('redirectUrl') || '/';
 
         } catch (err: any) {
-            toast.error(err, { autoClose: 2000 });
+            toast.error(err.message || "An unexpected error occurred", { autoClose: 2000 });
         } finally {
             setLoading(false);
             setChallenge(Array(6).fill(''));

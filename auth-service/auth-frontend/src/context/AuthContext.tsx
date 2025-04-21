@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { checkSessionStatus } from "../services/authService";
+import { checkSession } from "../services/authService";
 
 /**
  * Decodes a JWT token and returns its payload.
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const decoded = token ? parseJwt(token) : null;
         return decoded?.role || null;
     });
-    const [id] = useState<string | null>(() => {
+    const [id, setId] = useState<string | null>(() => {
         const decoded = token ? parseJwt(token) : null;
         return decoded?.sub || null;
     });
@@ -60,11 +60,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (newToken) {
             const decoded = parseJwt(newToken);
             setRole(decoded?.role || null);
-            const valid = await checkSessionStatus(newToken);
-            setIsAuthenticated(valid);
+            setId(decoded?.sub || null);
+            try {
+                const valid = await checkSession(newToken);
+                setIsAuthenticated(valid.ok);
+            } catch {
+                setIsAuthenticated(false);
+            }
         } else {
             setIsAuthenticated(false);
             setRole(null);
+            setId(null);
         }
     };
 
@@ -80,15 +86,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
 
             if (storedToken) {
-                const valid = await checkSessionStatus(storedToken);
-                if (!valid) {
+                try {
+                    const valid = await checkSession(storedToken);
+                    if (!valid.ok) {
+                        await setToken(null);
+                        navigate("/");
+                    }
+                } catch {
                     await setToken(null);
                     navigate("/");
                 }
             }
         };
 
-        const interval = setInterval(refreshSession, 20 * 1000);
+        const interval = setInterval(refreshSession, 5 * 1000);
         return () => clearInterval(interval);
     }, [navigate, location]);
 
