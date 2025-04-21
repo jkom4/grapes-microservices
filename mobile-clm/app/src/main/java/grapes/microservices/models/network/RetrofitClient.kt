@@ -11,6 +11,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -25,6 +26,7 @@ object RetrofitClient {
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .client(OkHttpClient.Builder().build())
+        .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -84,4 +86,7 @@ interface OrderApiService {
         @Query("code") code: Int? = null,
         @Query("date") date: String? = null
     ): List<Order>
+
+    @GET("cll/deliveries/status/{orderId}")
+    suspend fun getDeliveryStatus(@Path("orderId") orderId: Int): String
 }

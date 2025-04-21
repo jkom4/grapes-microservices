@@ -18,6 +18,7 @@ import grapes.microservices.views.AllArticles.AllArticlesScreen
 import grapes.microservices.views.CartScreen.CartScreen
 import grapes.microservices.views.Home.HomeScreen
 import grapes.microservices.views.OrderHistory.OrderHistoryScreen
+import grapes.microservices.views.Settings.DeliveryTrackingScreen
 import grapes.microservices.views.Settings.SettingsScreen
 
 @Composable
@@ -60,6 +61,9 @@ fun MyNavigation() {
             }
             composable("order_history") {
                 OrderHistoryScreen(navController = navController)
+            }
+            composable("delivery_tracking") {
+                DeliveryTrackingScreen(navController = navController)
             }
         }
     }

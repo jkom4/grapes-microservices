@@ -71,7 +71,7 @@
     <string name="next_page">Next</string>
     <string name="page_number">Page %d</string>
     <string name="order_history_title">Your Orders</string>
-    <string name="order_id">Order #%d</string>
+    <string name="order_id">Tracking number #%d</string>
     <string name="order_code">Code: %d</string>
     <string name="order_date">Date: %s</string>
     <string name="status_finished">Finished</string>
@@ -80,4 +80,13 @@
     <string name="no_orders">No orders found</string>
     <string name="error_message">Error: %s</string>
     <string name="settings_logout">Logout</string>
+    <string name="settings_delivery_tracking">Delivery Tracking</string>
+    <string name="settings_track_delivery">Track your delivery</string>
+    <string name="delivery_tracking_title">Track Delivery</string>
+    <string name="delivery_tracking_order_id_hint">Enter your tracking number</string>
+    <string name="delivery_tracking_search">Search</string>
+    <string name="delivery_tracking_status">Delivery Status: %s</string>
+    <string name="delivery_tracking_error">Error: %s</string>
+    <string name="delivery_tracking_loading">Loading...</string>
+    <string name="delivery_tracking_invalid_order_id">Please enter a valid tracking number</string>
 </resources>
