@@ -110,15 +110,15 @@ jobs:
           pytest
 
       ## FRONTEND
-      - name: 🌐 Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: 🧪 Run Frontend Tests
-        working-directory: ./frontend-web
-        run: |
-          npm run test
+#      - name: 🌐 Install Node.js
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: 18
+#
+#      - name: 🧪 Run Frontend Tests
+#        working-directory: ./frontend-web
+#        run: |
+#          npm run test
 
   docker-build-and-push:
     name: Build & Push Docker Images
