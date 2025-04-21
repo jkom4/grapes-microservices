@@ -32,7 +32,7 @@ class CartManager private constructor(
         CoroutineScope(Dispatchers.IO).launch {
             if (_orderId.value == null) {
                 try {
-                    val response = apiService.initCart(InitCartRequest(userId = 1))
+                    val response = apiService.initCart(InitCartRequest(userId = userId)) // Use provided userId
                     if (response.isSuccessful) {
                         val newOrderId = response.body()?.id
                         if (newOrderId != null) {
@@ -54,11 +54,38 @@ class CartManager private constructor(
         }
     }
 
+    fun resetAndInitializeCart(userId: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Clear the current orderId
+                _orderId.value = null
+                cartDataStore.clearOrderId()
+                Log.d(TAG, "Cleared existing orderId")
+
+                // Initialize a new cart
+                val response = apiService.initCart(InitCartRequest(userId = userId))
+                if (response.isSuccessful) {
+                    val newOrderId = response.body()?.id
+                    if (newOrderId != null) {
+                        _orderId.value = newOrderId
+                        cartDataStore.saveOrderId(newOrderId)
+                        Log.d(TAG, "Initialized new orderId from API: $newOrderId")
+                    } else {
+                        Log.e(TAG, "Failed to initialize cart: response body has no id")
+                    }
+                } else {
+                    Log.e(TAG, "Failed to initialize cart: HTTP ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error resetting and initializing cart: ${e.message}")
+            }
+        }
+    }
+
     fun clearCart() {
         CoroutineScope(Dispatchers.IO).launch {
             _orderId.value?.let { orderId ->
                 try {
-                    apiService.clearCart(orderId)
                     _orderId.value = null
                     cartDataStore.clearOrderId()
                     Log.d(TAG, "Cleared cart with orderId: $orderId")

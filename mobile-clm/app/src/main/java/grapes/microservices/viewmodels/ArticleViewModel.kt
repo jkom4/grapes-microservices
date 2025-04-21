@@ -114,7 +114,6 @@ class ArticleViewModel(
         viewModelScope.launch {
             _cartState.value = CartState.Loading
             try {
-                cartManager.initializeCart(DEFAULT_USER_ID)
                 val orderId = cartManager.orderId.value
                 if (orderId == null) {
                     _cartState.value = CartState.Error("Cart not initialized")
