@@ -1,5 +1,5 @@
 // src/api/apiConfig.ts
-const BASE_URL = "http://localhost:8092";
+const BASE_URL = "http://localhost:8090/api";
 
 const getArticlesAPI = {
     baseURL: BASE_URL,

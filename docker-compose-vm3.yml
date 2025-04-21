@@ -40,11 +40,17 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  redis-master:
-    image: redis:7
-    container_name: redis-master
+  redis:
+    image: redis:7.2-alpine
+    env_file: .env
+    container_name: grapes-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    entrypoint: [ "sh", "-c", "redis-server --requirepass \"$REDIS_PASSWORD\"" ]
 
   # Backends & Gateway
   api-gateway:

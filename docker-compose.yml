@@ -190,10 +190,10 @@ services:
     ports:
       - "8092:8092"
     environment:
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USER: grapes
-      RABBITMQ_PASSWORD: grapes
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
     depends_on:
       - mariadb
       - rabbitmq
@@ -269,7 +269,7 @@ services:
     #image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-frontend:latest
     container_name: auth-frontend
     ports:
-      - "81:81"
+      - "81:80"
     depends_on:
       - api-gateway
 
@@ -277,7 +277,7 @@ services:
     build: ./payment-service/payment-frontend
     #image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-frontend:latest
     ports:
-      - "82:82"
+      - "82:80"
     depends_on:
       - api-gateway
 

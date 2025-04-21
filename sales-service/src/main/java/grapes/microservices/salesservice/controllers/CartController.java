@@ -21,7 +21,6 @@ import java.io.FileNotFoundException;
  * confirming payment, and retrieving orders.
  */
 @RestController
-@CrossOrigin
 @RequestMapping("/clm/cart")
 public class CartController {
 
