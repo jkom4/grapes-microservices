@@ -31,18 +31,18 @@ import grapes.microservices.ui.theme.White
 @Composable
 fun MyTopBar(
     modifier: Modifier = Modifier,
-    navController: NavController // Ajout du NavController
+    navController: NavController
 ) {
-    // horizontale Bar
+
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Partie gauche : logo + texte
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
-                painter = painterResource(id = R.drawable.logo_grapes), // Ton logo
+                painter = painterResource(id = R.drawable.logo_grapes),
                 contentDescription = "Grapes Logo",
                 modifier = Modifier.size(40.dp)
             )
@@ -55,23 +55,17 @@ fun MyTopBar(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             MyIcon(
-                imageVector = Icons.Default.Notifications,
-                description = "Notifications"
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            MyIcon(
                 imageVector = Icons.Default.ShoppingCart,
                 description = "Shopping cart",
-                onClick = { navController.navigate("cart") } // Navigation vers CartScreen
+                onClick = { navController.navigate("cart") }
             )
 
             Spacer(modifier = Modifier.width(8.dp))
 
             MyIcon(
                 imageVector = Icons.Default.AccountBox,
-                description = "Account"
+                description = "Account",
+                onClick = { navController.navigate("profile") }
             )
         }
     }

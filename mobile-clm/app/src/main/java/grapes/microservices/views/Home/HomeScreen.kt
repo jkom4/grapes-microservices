@@ -95,7 +95,7 @@ fun HomeScreen(navController: NavHostController) {
 
             // Promo banner
             item {
-                PromoBox()
+                PromoBox(navController)
             }
 
             // Show UI based on search state

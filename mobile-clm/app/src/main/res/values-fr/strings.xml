@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Mobile-CLM</string>
-
     <string name="promo_title">Savourez vos fruits avant votre activité</string>
     <string name="promo_subtitle">Boostez votre productivité et améliorez votre humeur</string>
     <string name="promo_button">Acheter maintenant</string>
@@ -58,4 +58,25 @@
     <string name="settings_personnal">Informations personelles</string>
     <string name="settings_update">Modifier mes informations personnelles</string>
     <string name="error_required_fields">Veuillez remplir tous les champs requis.</string>
+    <string name="settings_order_history">Historique des commandes</string>
+    <string name="settings_view_history">Voir l\'historique des commandes</string>
+    <string name="back_button">Retour</string>
+    <string name="filter_button">Filtrer</string>
+    <string name="filter_title">Filtrer les commandes</string>
+    <string name="filter_code">Code de commande</string>
+    <string name="filter_date">Date (aaaa-MM-jj)</string>
+    <string name="apply_button">Appliquer</string>
+    <string name="cancel_button">Annuler</string>
+    <string name="previous_page">Précédent</string>
+    <string name="next_page">Suivant</string>
+    <string name="page_number">Page %d</string>
+    <string name="order_history_title">Vos commandes</string>
+    <string name="order_id">Commande #%d</string>
+    <string name="order_code">Code : %d</string>
+    <string name="order_date">Date : %s</string>
+    <string name="status_finished">Terminé</string>
+    <string name="status_paid">Payé</string>
+    <string name="status_pending">En attente</string>
+    <string name="no_orders">Aucune commande trouvée</string>
+    <string name="error_message">Erreur : %s</string>
 </resources>

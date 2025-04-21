@@ -104,5 +104,37 @@ fun SettingsScreen(context: Context, navController: NavController) {
                     )
                 }
             }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Card for order history
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            text = stringResource(R.string.settings_order_history),
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.settings_view_history),
+                            style = TextStyle(
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .clickable {
+                                    navController.navigate("order_history")
+                                }
+                        )
+                }
+            }
         }
     }

@@ -58,4 +58,25 @@
     <string name="settings_personnal">Personal Information</string>
     <string name="settings_update">Update Personal Information</string>
     <string name="error_required_fields">Please fill in all required fields.</string>
+    <string name="settings_order_history">Order History</string>
+    <string name="settings_view_history">View Order History</string>
+    <string name="back_button">Back</string>
+    <string name="filter_button">Filter</string>
+    <string name="filter_title">Filter Orders</string>
+    <string name="filter_code">Order Code</string>
+    <string name="filter_date">Date (yyyy-MM-dd)</string>
+    <string name="apply_button">Apply</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="previous_page">Previous</string>
+    <string name="next_page">Next</string>
+    <string name="page_number">Page %d</string>
+    <string name="order_history_title">Your Orders</string>
+    <string name="order_id">Order #%d</string>
+    <string name="order_code">Code: %d</string>
+    <string name="order_date">Date: %s</string>
+    <string name="status_finished">Finished</string>
+    <string name="status_paid">Paid</string>
+    <string name="status_pending">Pending</string>
+    <string name="no_orders">No orders found</string>
+    <string name="error_message">Error: %s</string>
 </resources>
