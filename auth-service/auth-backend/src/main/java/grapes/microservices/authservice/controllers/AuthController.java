@@ -37,13 +37,13 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         // for rabbitMQ
         String userId = authService.getUserIdFromEmail(loginRequest.getEmail());
-        String sourceIp = request.getRemoteAddr();
+        String sourceIp = getClientIp(request);
         String userAgent = request.getHeader("User-Agent");
         String failureReason = null;
 
         try {
-            authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Success", failureReason);
             String token = authService.getTokenFromChallenge(loginRequest);
+            authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Success", failureReason);
             // TODO : add refreshedToken
             return ResponseEntity.ok(new AuthResponse(token, ""));
         } catch (RuntimeException e) {
@@ -94,4 +94,19 @@ public class AuthController {
             return ResponseEntity.status(401).body(e.getMessage());
         }
     }
+
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+            return ip.split(",")[0].trim();
+        }
+
+        ip = request.getHeader("X-Real-IP");
+        if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+            return ip;
+        }
+
+        return request.getRemoteAddr(); // fallback
+    }
+
 }

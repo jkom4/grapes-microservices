@@ -14,11 +14,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 
+
+/**
+ * Service responsible for sending authentication logs to a RabbitMQ queue.
+ * This service produces authentication event messages and sends them to a configured RabbitMQ exchange/queue.
+ */
 @Service
 public class AuthEventProducer {
 
-    private final RabbitTemplate rabbitTemplate;
-    private final ObjectMapper objectMapper;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
@@ -28,11 +36,12 @@ public class AuthEventProducer {
     @Value("${spring.application.name}")
     private String sourceSystem;
 
-    public AuthEventProducer(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-        this.objectMapper = new ObjectMapper();
-    }
-
+    /**
+     * Sends an authentication log message to the RabbitMQ queue.
+     * It creates an AuthEvent object and serializes it to JSON before sending it to the queue.
+     *
+     * @param payload the AuthEventPayload object containing the details of the authentication attempt.
+     */
     public void sendAuthLog(AuthEventPayload payload) {
         logger.info(" Message sent to RabbitMQ: " + payload);
         AuthEvent event = new AuthEvent(
@@ -45,7 +54,10 @@ public class AuthEventProducer {
         );
 
         try {
+            // Convert the event to a JSON string
             String json = objectMapper.writeValueAsString(event);
+
+            // Send the JSON message to the RabbitMQ queue
             rabbitTemplate.convertAndSend(rabbitMQConfig.getAuthLogsQueue(), json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
