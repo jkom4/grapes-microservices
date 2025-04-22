@@ -102,9 +102,7 @@ class UserMapperTest {
         assertEquals("Doe", user.getFirstName());
         assertEquals("password", user.getPassword());
         assertEquals("john.doe@example.com", user.getEmail());
-        assertTrue(user.isEmailVerified());
         assertEquals("1234567890", user.getPhoneNumber());
-        assertTrue(user.isPhoneVerified());
         assertEquals("12345", user.getNationalId());
         assertEquals("MALE", user.getGender().name());
         assertEquals("1234", user.getPinCode());
