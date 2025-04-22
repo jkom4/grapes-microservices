@@ -35,6 +35,13 @@ function Navbar() {
                 <Link to="/shopping-cart" className="text-black hover:text-accent">
                     <span>🛒</span>
                 </Link>
+                <a
+                    href="http://localhost:3001"
+                    target="_blank"
+                    className="text-white text-lg bg-accent px-4 py-1 rounded hover:bg-secondary"
+                >
+                    {language === 'en' ? 'Login' : 'Se connecter'}
+                </a>
                 {/* user?.role === 'admin' && ( */}
                 <Link
                     to="/admin"
