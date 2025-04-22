@@ -18,11 +18,19 @@ function Newsletter() {
             header: "Subscribe to Our Newsletter",
             placeholder: "Enter your email",
             button: "Submit",
+            toast_valid_mail: "Please enter a valid email address!",
+            toast_already_subscribe: "You are already subscribed to the newsletter.",
+            toast_subscribe: "You are subscribed to the newsletter!",
+            toast_error_mail: "Error adding email to Brevo.",
         },
         fr: {
             header: "Abonnez-vous à notre Newsletter",
             placeholder: "Entrez votre email",
             button: "Envoyer",
+            toast_valid_mail: "Entrez une addresse mail valide.",
+            toast_already_subscribe: "Vous êtes déjà abonné à la newsletter",
+            toast_subscribe: "Vous êtes désormais abonné à la newsletter",
+            toast_error_mail: "Erreur d'ajout de votre mail à Brevo",
         }
     };
 
@@ -31,7 +39,7 @@ function Newsletter() {
 
         // Check if the email is valid
         if (!email) {
-            toast.error("Please enter a valid email address!");
+            toast.error(text[language].toast_valid_mail);
             return;
         }
 
@@ -40,7 +48,7 @@ function Newsletter() {
 
         // If the email is already in localStorage, show a message; otherwise, add it to localStorage
         if (subscribers.includes(email)) {
-            toast.info("You are already subscribed to the newsletter.");
+            toast.info(text[language].toast_already_subscribe);
         } else {
             // Add email to localStorage
             subscribers.push(email);
@@ -65,12 +73,12 @@ function Newsletter() {
 
             // Check if the response is successful (status 201)
             if (response.status === 201) {
-                toast.success("You are subscribed to the newsletter!");
+                toast.success(text[language].toast_subscribe);
             } else {
-                toast.error(`Failed to add email to Brevo: ${response.statusText}`);
+                toast.error(`${response.statusText}`);
             }
         } catch (error) {
-            toast.error("Error adding email to Brevo.");
+            toast.error(text[language].toast_error_mail);
         }
 
         // Reset the input field
