@@ -80,7 +80,6 @@ function Newsletter() {
         } catch (error) {
             toast.error(text[language].toast_error_mail);
         }
-
         // Reset the input field
         setEmail("");
     };
