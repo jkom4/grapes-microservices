@@ -1,5 +1,6 @@
 package grapes.microservices.chatservice.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Exchange;
@@ -16,13 +17,19 @@ import org.springframework.context.annotation.Configuration;
 @EnableRabbit
 public class RabbitMQConfig {
 
-    public static final String EXCHANGE_NAME = "chat-exchange";
-    public static final String QUEUE_PREFIX = "chat.queue.";
-    public static final String ROUTING_KEY_PREFIX = "chat.to.room.";
+    @Value("${spring.rabbitmq.exchange.name}")
+    private String exchangeName;
+
+    @Value("${spring.rabbitmq.queue.prefix}")
+    private String queuePrefix;
+
+    @Value("${spring.rabbitmq.routing.key.prefix}")
+    private String routingKeyPrefix;
+
 
     @Bean
     public Exchange chatExchange() {
-        return ExchangeBuilder.topicExchange(EXCHANGE_NAME)
+        return ExchangeBuilder.topicExchange(exchangeName)
                 .durable(true)
                 .build();
     }
@@ -37,20 +44,20 @@ public class RabbitMQConfig {
                                          Jackson2JsonMessageConverter converter) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(converter);
-        template.setExchange(EXCHANGE_NAME);
+        template.setExchange(exchangeName);
         return template;
     }
 
     @Bean
     public Queue chatQueue() {
-        return new Queue(QUEUE_PREFIX + "default", true);
+        return new Queue(queuePrefix + "default", true);
     }
 
     @Bean
     public Binding bindingTopic(Queue chatQueue, Exchange chatExchange) {
         return BindingBuilder.bind(chatQueue)
                 .to(chatExchange)
-                .with(ROUTING_KEY_PREFIX + "*")
+                .with(routingKeyPrefix + "*")
                 .noargs();
     }
 }

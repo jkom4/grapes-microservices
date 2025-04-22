@@ -7,8 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageListener {
 
-    @RabbitListener(queues = "chat.queue.default")
+    @RabbitListener(queues = "#{@chatQueue.name}")
     public void receiveMessage(MessageDto message) {
-        System.out.println("Message reçu : " + message);
+        System.out.println("🟢 Reçu du broker : " + message);
     }
 }
+

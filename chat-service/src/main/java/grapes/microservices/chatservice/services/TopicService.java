@@ -1,12 +1,12 @@
 package grapes.microservices.chatservice.services;
 
-import grapes.microservices.chatservice.config.RabbitMQConfig;
 import grapes.microservices.chatservice.dto.MessageDto;
 import grapes.microservices.chatservice.dto.TopicDto;
 import grapes.microservices.chatservice.models.Message;
 import grapes.microservices.chatservice.repositories.ChatRepository;
 import grapes.microservices.chatservice.repositories.MessageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +21,11 @@ public class TopicService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
     private final RabbitTemplate rabbitTemplate;
+    @Value("${spring.rabbitmq.exchange.name}")
+    private String exchangeName;
+
+    @Value("${spring.rabbitmq.routing.key.prefix}")
+    private String routingKeyPrefix;
 
     public List<TopicDto> getAllTopics() {
         return chatRepository.findAll()
@@ -63,8 +68,7 @@ public class TopicService {
                 .build();
 
         // Publish to RabbitMQ topic exchange
-        String routingKey = "chat.to.room." + topicId;
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, routingKey, dto);
+        rabbitTemplate.convertAndSend(exchangeName, routingKeyPrefix, dto);
 
         return dto;
     }
