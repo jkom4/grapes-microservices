@@ -1,5 +1,6 @@
 import {AuthMethod, User} from '../models/User';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
+import {toast} from "react-toastify";
 
 const API_BASE_URL = 'http://localhost:8091';
 
@@ -28,12 +29,12 @@ export async function getChallenge(email: string, password: string, method: Auth
         return res;
     } catch (error: any) {
         handleConnectionError(error);
-        console.error('[Login] Error:', error);
+        console.error('[Get challenge] Error:', error);
         throw error;
     }
 }
 
-export async function login(challenge: string, pin: string, email: string, method: string): Promise<Response> {
+export async function login(challenge: string, pin: string, email: string, method: string): Promise<{ accessToken: string, refreshToken: string }> {
     try {
         const digest = await computeDigest(challenge, pin);
         const res = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -45,7 +46,7 @@ export async function login(challenge: string, pin: string, email: string, metho
             const errorText = await res.json();
             throw new Error(errorText.message);
         }
-        return res;
+        return await res.json();
     } catch (error: any) {
         handleConnectionError(error);
         console.error('[Login] Error:', error);
@@ -79,6 +80,28 @@ export async function logout(token: string): Promise<Response> {
     } catch (error: any) {
         handleConnectionError(error);
         console.error('[Logout] Error:', error);
+        throw error;
+    }
+}
+
+export async function refresh(refreshToken: string): Promise<{ accessToken: string, refreshToken: string }> {
+    try {
+        const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+            method: 'POST',
+            headers: {
+                ...headers,
+            },
+            body: JSON.stringify({ refreshToken }),
+        });
+
+        if (!res.ok) {
+            const errorText = await res.json();
+            throw new Error(errorText.message);
+        }
+
+        return await res.json();
+    } catch (error: any) {
+        console.error('[Refresh] Error:', error);
         throw error;
     }
 }
@@ -191,7 +214,7 @@ export async function editPin(currentPin: string, updatedPin: string, token: str
     }
 }
 
-export async function updateUser(user: User, token: string, reload: boolean): Promise<Response> {
+export async function updateUser(user: User, token: string): Promise<Response> {
     try {
         const res = await fetch(`${API_BASE_URL}/users/${user.id}`, {
             method: 'PUT',
@@ -275,3 +298,27 @@ export async function getAllUsers(token: string): Promise<User[]> {
         throw error;
     }
 }
+
+export async function returnTokenToTierceApp(data: object, redirectUrl: string, navigate: (path: string) => void): Promise<void> {
+    try {
+        const response = await fetch(redirectUrl, {
+            method: 'POST',
+            headers: {
+                ...headers,
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            navigate("/");
+            throw new Error(`HTTP error: ${response.status} - ${response.statusText}`);
+        }
+
+        const jsonData = await response.json();
+        console.log('Success:', jsonData);
+
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+

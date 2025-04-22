@@ -1,16 +1,12 @@
 package grapes.microservices.authservice.controllers;
 
-import grapes.microservices.authservice.dto.AuthResponse;
-import grapes.microservices.authservice.dto.JsonMessage;
-import grapes.microservices.authservice.dto.ChallengeRequest;
-import grapes.microservices.authservice.dto.LoginRequest;
+import grapes.microservices.authservice.dto.*;
 import grapes.microservices.authservice.services.auth.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 
 @CrossOrigin
@@ -42,10 +38,9 @@ public class AuthController {
         String failureReason = null;
 
         try {
-            String token = authService.getTokenFromChallenge(loginRequest);
+            String[] tokens = authService.getTokensFromChallenge(loginRequest);
             authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Success", failureReason);
-            // TODO : add refreshedToken
-            return ResponseEntity.ok(new AuthResponse(token, ""));
+            return ResponseEntity.ok(new AuthResponse(tokens[0], tokens[1]));
         } catch (RuntimeException e) {
             failureReason = e.getMessage();
             authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Failed", failureReason);
@@ -69,11 +64,15 @@ public class AuthController {
     }
 
     @PostMapping(value = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshRequest refreshRequest) {
+        String refreshToken = refreshRequest.getRefreshToken();
+        if (refreshToken.isEmpty()) {
+            return ResponseEntity.status(400).body(new JsonMessage("Required token 'refreshToken' is not present"));
+        }
         try {
-            String token = request.getHeader("Authorization");
-            String refreshedToken = authService.getRefreshToken(token);
-            return ResponseEntity.ok(new AuthResponse("", refreshedToken));
+            System.out.println("Refresh token: " + refreshToken);
+            String[] tokens = authService.refreshTokens(refreshToken);
+            return ResponseEntity.ok(new AuthResponse(tokens[0], tokens[1]));
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
         } catch (Exception e) {

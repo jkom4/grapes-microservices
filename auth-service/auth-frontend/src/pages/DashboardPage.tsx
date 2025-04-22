@@ -123,7 +123,7 @@ const DashboardPage = () => {
         }
 
         try {
-            const res = await updateUser( { ...formData } , token!, true);
+            const res = await updateUser( { ...formData } , token!);
             if (!res?.ok) {
                 toast.error('User updated failed!', { autoClose: 2000 });
             }
@@ -142,7 +142,7 @@ const DashboardPage = () => {
      */
     const handleDisableAccount = async () => {
         setLoading(true);
-        const token = localStorage.getItem('jwt');
+        const token = localStorage.getItem('accessToken');
         if (!token || !user) return;
 
         try {
@@ -150,7 +150,7 @@ const DashboardPage = () => {
             toast.success('Your account has been disabled.', { autoClose: 2000 });
             if (response.ok) {
                 setToken(null);
-                localStorage.removeItem('jwt');
+                localStorage.removeItem('accessToken');
                 navigate('/');
             } else {
                 const errorData = await response.json();

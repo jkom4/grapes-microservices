@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { logout } from "../services/authService";
+import {logout, refresh} from "../services/authService";
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import Loader from "./Loader";
@@ -12,6 +12,7 @@ const Header = () => {
     const { isAuthenticated, role, token, setToken } = useAuth();
 
     const onLogoutClick = async () => {
+        setLoading(true);
         try {
             if (!token) {
                 toast.warning("No active session found.", {autoClose: 2000});
@@ -26,6 +27,8 @@ const Header = () => {
             navigate("/");
         } catch (error: any) {
             toast.error(error.message || "Logout failed.", {autoClose: 2000});
+        } finally {
+            setLoading(false);
         }
     };
 

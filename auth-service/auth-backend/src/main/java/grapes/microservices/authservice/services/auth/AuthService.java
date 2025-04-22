@@ -86,7 +86,7 @@ public class AuthService {
      *
      * @param loginRequest the request containing the email, submitted challenge, and auth method
      */
-    public String getTokenFromChallenge(LoginRequest loginRequest) throws Exception {
+    public String[] getTokensFromChallenge(LoginRequest loginRequest) throws Exception {
         User user = userService.getUserByEmail(loginRequest.getEmail());
         AbstractAuthProvider authProvider = authMethodService.getAuthProvider(loginRequest.getAuthMethod());
 
@@ -96,21 +96,22 @@ public class AuthService {
         }
         // delete the challenge
         authProvider.deleteChallenge(user);
-        // reset session
-        sessionService.resetSession(user.getId().toHexString());
 
         //new session
         String userId = user.getId().toHexString();
         String name = user.getFullName();
-        String token =  tokenService.generateToken(userId, name, user.getRole());
-        sessionService.saveSession(user.getId().toHexString(), token);
+        String accessToken =  tokenService.generateToken(userId, name, user.getRole());
+        String refreshToken = tokenService.generateRefreshToken();
+
+        sessionService.saveSession(user.getId().toHexString(), accessToken, refreshToken);
 
         verifyEmailOrPhoneNumber(user, loginRequest.getAuthMethod());
         updateAuthMeans(user, loginRequest.getAuthMethod());
 
         // update user with verified email or phone and auth means
         userService.updateUser(user.getId().toHexString(), user);
-        return token;
+
+        return new String[] { accessToken, refreshToken };
     }
 
     /**
@@ -126,21 +127,20 @@ public class AuthService {
 
     /**
      * Generates a new access token using the refresh token.
-     * @param token the refresh token to be used
+     * @param refreshToken the refresh token to be used
      */
-    public String getRefreshToken(String token) {
-        // TODO : finish refresh token
-        token = formatRawToken(token);
-        String userId = tokenService.extractUserId(token);
+    public String[] refreshTokens(String refreshToken) {
+        String userId = sessionService.getUserIdByRefresh(refreshToken);
         User user = userService.getUserById(userId, false);
         String name = user.getFirstName() + " " + user.getName();
 
-        // To change
-        String storedRefreshToken = tokenService.getRefreshToken(userId);
-        if (storedRefreshToken == null || !storedRefreshToken.equals(token)) {
-            throw new IllegalArgumentException("Invalid refresh token");
-        }
-        return tokenService.generateToken(userId, name, user.getRole());
+        String accessToken =  tokenService.generateToken(userId, name, user.getRole());
+        refreshToken = tokenService.generateRefreshToken();
+
+        //delete old session and create a new one
+        sessionService.saveSession(user.getId().toHexString(), accessToken, refreshToken);
+
+        return new String[] { accessToken, refreshToken };
     }
 
     /**

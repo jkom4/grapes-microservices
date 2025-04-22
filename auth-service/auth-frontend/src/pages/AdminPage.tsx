@@ -79,7 +79,7 @@ const AdminPage = () => {
     const handleUpdate = async (user: User) => {
         setLoading(true);
         try {
-            await updateUser(user, token!, true);
+            await updateUser(user, token!);
             if (user.id === id) {
                 kickCurrentUser();
                 return;
