@@ -6,10 +6,10 @@ import os
 import random
 
 # Use the same connection details as the consumer might use
-AMQP_HOST = os.getenv("AMQP_HOST", "localhost") # Connect to localhost since script runs on host
-AMQP_PORT = int(os.getenv("AMQP_PORT_HOST", 5672)) # Use the HOST port mapped in compose
-AMQP_USER = os.getenv("RABBITMQ_USER", "grapes") # Use user from .env
-AMQP_PWD = os.getenv("RABBITMQ_PASSWORD", "grapes") # Use password from .env
+AMQP_HOST = os.getenv("RABBITMQ_HOST") # Connect to localhost since script runs on host
+AMQP_PORT = int(os.getenv("RABBITMQ_PORT")) # Use the HOST port mapped in compose
+AMQP_USER = os.getenv("RABBITMQ_USER") # Use user from .env
+AMQP_PWD = os.getenv("RABBITMQ_PASSWORD") # Use password from .env
 AMQP_VHOST = os.getenv("AMQP_VHOST", "/")
 
 TRANSACTIONS_QUEUE = os.getenv("TRANSACTIONS_QUEUE", "q.transactions")

@@ -10,7 +10,7 @@ import sys
 from collections import deque # Using deque for potentially slightly more efficient appends
 
 # --- Database Imports ---
-import pymongo # Official MongoDB Driver
+import pymongo
 import mysql.connector # Official MySQL Driver
 from sqlalchemy import create_engine # Using SQLAlchemy for easier Pandas -> MySQL insertion
 import pandas as pd
@@ -24,10 +24,10 @@ logging.basicConfig(level=logging.INFO,
 logging.info("Loading configuration from environment variables...")
 
 # RabbitMQ Configuration
-AMQP_HOST = os.getenv("AMQP_HOST", "localhost")
-AMQP_PORT = int(os.getenv("AMQP_PORT", 5672))
-AMQP_USER = os.getenv("AMQP_USER", "guest") # Use the user set in your Dockerfile/docker-compose
-AMQP_PWD = os.getenv("AMQP_PWD", "guest")   # Use the password set in your Dockerfile/docker-compose
+AMQP_HOST = os.getenv("RABBITMQ_HOST")
+AMQP_PORT = int(os.getenv("RABBITMQ_PORT"))
+AMQP_USER = os.getenv("RABBITMQ_USER")
+AMQP_PWD = os.getenv("RABBITMQ_PASSWORD")
 AMQP_VHOST = os.getenv("AMQP_VHOST", "/")
 
 # Queues to listen to (Producers must send to these)
@@ -59,6 +59,7 @@ MAX_HOLD_TIME_SECONDS = int(os.getenv("MAX_HOLD_TIME_SECONDS", 600)) # e.g. 10 m
 # Ensure the correct driver is specified if not mysqlconnector (e.g., pymysql)
 # Syntax: dialect+driver://username:password@host:port/database
 SQLALCHEMY_DATABASE_URI = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB_ACTIVITIES}"
+POOL_RECYCLE = os.getenv("POOL_RECYCLE")
 
 # --- 2. Global Variables & Accumulators ---
 logging.info("Initializing accumulators...")
@@ -73,7 +74,7 @@ first_message_time_auth = None
 def create_sqlalchemy_engine():
     """Creates a SQLAlchemy engine."""
     try:
-        engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_recycle=3600) # Recycle connections hourly
+        engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_recycle=POOL_RECYCLE) # Recycle connections hourly
         # Test connection - this will raise an error if connection fails
         with engine.connect() as connection:
             logging.info("SQLAlchemy engine created and connection tested successfully.")
