@@ -88,7 +88,7 @@ const CartPage = () => {
 
     const handlePayment = async () => {
         if (orderId === null) {
-            setFormError("L'ID isn't free");
+            setFormError("ID isn't free");
             return;
         }
 
@@ -159,7 +159,7 @@ const CartPage = () => {
 
     const handleRemoveItem = async (orderId: number | null, itemId: number) => {
         if (orderId === null) {
-            setError("L'ID isn't free");
+            setError("ID isn't free");
             return;
         }
         try {

@@ -1,5 +1,4 @@
-// src/services/cartService.ts
-import { cartAPI } from "./httpCommon"; // Adjust path if needed
+import { cartAPI } from "./httpCommon";
 import CartItemModel from "../utils/models/CartItem";
 
 interface InitCartResponse {
@@ -80,14 +79,11 @@ export const cartService = {
     ): Promise<void> {
         const url = `${cartAPI.baseURL}${cartAPI.endpoints.pay}`;
         const body = {
-            orderId, // Pas besoin de Number(orderId), car c'est déjà un number
+            orderId,
             address,
             phoneNumber,
             customerName,
         };
-
-        console.log("📤 Sending payment request to:", url);
-        console.log("📦 Payload:", JSON.stringify(body, null, 2));
 
         const response = await fetch(url, {
             method: "POST",
