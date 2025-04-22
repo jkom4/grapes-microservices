@@ -9,7 +9,7 @@ public class MessageListener {
 
     @RabbitListener(queues = "#{@chatQueue.name}")
     public void receiveMessage(MessageDto message) {
-        System.out.println("🟢 Reçu du broker : " + message);
+        System.out.println("Received from the broker : " + message);
     }
 }
 
