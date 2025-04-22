@@ -76,24 +76,18 @@ class CompletedOrderViewModel(
     fun confirmDelivery(tripId: String) {
         viewModelScope.launch {
             try {
-                Log.d("CompletedOrderViewModel", "Début de confirmDelivery pour tripId: $tripId")
                 val orderId = tripId.toIntOrNull() ?: throw IllegalArgumentException("Invalid tripId: $tripId")
 
-                // Préparer la signature
                 val signatureBase64 = if (_isDoorstepDelivery.value) {
                     _signatureBitmap.value?.let { bitmap ->
-                        Log.d("CompletedOrderViewModel", "Conversion de la signature en Base64")
                         val stream = ByteArrayOutputStream()
                         bitmap.compress(Bitmap.CompressFormat.PNG, 80, stream)
                         val bytes = stream.toByteArray()
-                        Base64.encodeToString(bytes, Base64.NO_WRAP) // Encoder en Base64
+                        Base64.encodeToString(bytes, Base64.NO_WRAP)
                     }
                 } else {
-                    null // Pas de signature si doorstep est false
+                    null
                 }
-
-                // Log pour afficher la structure de la signature
-                Log.d("CompletedOrderViewModel", "Signature Base64: $signatureBase64")
 
                 // 1. PATCH /cll/deliveries/feedback/{orderId}
                 val feedback = RetrofitClient.DeliveryFeedback(
@@ -103,45 +97,33 @@ class CompletedOrderViewModel(
                     signature = signatureBase64,
                     deliveryStatusId = 2
                 )
-                Log.d("CompletedOrderViewModel", "Mise à jour du feedback: $feedback")
                 try {
                     apiService.updateDeliveryFeedback(orderId, feedback)
-                    Log.d("CompletedOrderViewModel", "Feedback mis à jour avec succès pour orderId: $orderId")
                 } catch (e: Exception) {
-                    Log.e("CompletedOrderViewModel", "Erreur lors de la mise à jour du feedback: ${e.message}", e)
                     throw e
                 }
 
                 // 2. PATCH /cll/deliveries/update-status/{orderId}
-                Log.d("CompletedOrderViewModel", "Mise à jour du statut à Delivered pour orderId: $orderId")
                 try {
                     apiService.updateDeliveryStatus(orderId.toString(), "Delivered")
-                    Log.d("CompletedOrderViewModel", "Statut mis à jour à Delivered avec succès")
                 } catch (e: Exception) {
-                    Log.e("CompletedOrderViewModel", "Erreur lors de la mise à jour du statut: ${e.message}", e)
                     throw e
                 }
 
                 // 3. PATCH /cll/trips/{tripId}/finish
-                Log.d("CompletedOrderViewModel", "Finalisation du trip: $tripId")
                 try {
                     apiService.finishTrip(tripId)
-                    Log.d("CompletedOrderViewModel", "Trip terminé avec succès: $tripId")
                 } catch (e: Exception) {
-                    Log.e("CompletedOrderViewModel", "Erreur lors de la finalisation du trip: ${e.message}", e)
                     throw e
                 }
 
-                // Réinitialiser l'état
                 _saveStatus.value = "Success"
-                Log.d("CompletedOrderViewModel", "saveStatus défini à Success")
                 _commentState.value = ""
                 _imageUris.value = emptyList()
                 _isDoorstepDelivery.value = false
                 _signatureBitmap.value = null
                 _showSignatureDialog.value = false
 
-                Log.d("CompletedOrderViewModel", "Navigation vers MainActivity")
                 val intent = Intent(context, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
@@ -149,7 +131,6 @@ class CompletedOrderViewModel(
                 (context as? Activity)?.finish()
 
             } catch (e: Exception) {
-                Log.e("CompletedOrderViewModel", "Erreur lors de la confirmation de la livraison: ${e.message}", e)
                 _saveStatus.value = "Erreur: ${e.message}"
             }
         }

@@ -32,7 +32,6 @@ fun CompletedOrderScreen(
     tripId: String,
     viewModel: CompletedOrderViewModel = viewModel(factory = CompletedOrderViewModelFactory(LocalContext.current))
 ) {
-    Log.d("CompletedOrderScreen", "tripId reçu au démarrage: $tripId")
     val context = LocalContext.current
 
     val commentState by viewModel.commentState.collectAsState()
@@ -48,10 +47,8 @@ fun CompletedOrderScreen(
 
     LaunchedEffect(saveStatus) {
         saveStatus?.let { status ->
-            Log.d("CompletedOrderScreen", "saveStatus modifié: $status")
-            if (status.startsWith("Erreur")) {
-                Log.e("CompletedOrderScreen", "Erreur de soumission: $status")
-                Toast.makeText(context, "Erreur: $status", Toast.LENGTH_LONG).show()
+            if (status.startsWith("Error")) {
+                Toast.makeText(context, "Error: $status", Toast.LENGTH_LONG).show()
                 viewModel.resetSaveStatus()
             }
         }
@@ -70,7 +67,7 @@ fun CompletedOrderScreen(
             Text("CompletedOrder", fontSize = 22.sp, color = Color.Black)
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Ajouter un commentaire", fontSize = 16.sp, color = Color.Gray)
+            Text("Add a comment", fontSize = 16.sp, color = Color.Gray)
             TextField(
                 value = commentState,
                 onValueChange = { viewModel.updateComment(it) },
@@ -78,11 +75,11 @@ fun CompletedOrderScreen(
                     .fillMaxWidth()
                     .height(150.dp)
                     .padding(8.dp),
-                placeholder = { Text("Entrez un commentaire...", color = Color.Gray) }
+                placeholder = { Text("Add comment...", color = Color.Gray) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Prendre des photos du produit", fontSize = 16.sp, color = Color.Gray)
+            Text("Take pictures of the product", fontSize = 16.sp, color = Color.Gray)
 
             LazyRow {
                 items(imageUris) { uri ->
@@ -103,7 +100,7 @@ fun CompletedOrderScreen(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E))
             ) {
-                Text("Ajouter des photos", color = Color.White)
+                Text("Add pictures", color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -114,26 +111,19 @@ fun CompletedOrderScreen(
                     onCheckedChange = { viewModel.toggleDoorstepDelivery(it) }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Livraison à domicile", fontSize = 16.sp)
+                Text("Home delivery", fontSize = 16.sp)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
-                    Log.d("CompletedOrderScreen", "Soumission des données:")
-                    Log.d("CompletedOrderScreen", "tripId: $tripId")
-                    Log.d("CompletedOrderScreen", "commentaire: $commentState")
-                    Log.d("CompletedOrderScreen", "imageUris: $imageUris")
-                    Log.d("CompletedOrderScreen", "isDoorstepDelivery: $isDoorstepDelivery")
-                    Log.d("CompletedOrderScreen", "signatureBitmap: ${signatureBitmap != null}")
-
                     viewModel.confirmDelivery(tripId)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAD7E))
             ) {
-                Text("Soumettre", color = Color.White)
+                Text("Submit", color = Color.White)
             }
         }
 
@@ -146,13 +136,13 @@ fun CompletedOrderScreen(
                             onClick = { viewModel.clearSignature() },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.7f))
                         ) {
-                            Text("Effacer")
+                            Text("Delete")
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
                             onClick = { viewModel.confirmDelivery(tripId) }
                         ) {
-                            Text("Confirmer")
+                            Text("Confirm")
                         }
                     }
                 },
