@@ -1,4 +1,3 @@
-// src/components/AdminSection.tsx
 import { useLanguage } from "../../features/LanguageContext";
 import Article from "../../utils/models/Articles";
 import { useEffect, useState } from "react";
@@ -7,6 +6,8 @@ import { AdminHeader } from "../../components/admin/AdminHeader";
 import { ArticleTable } from "../../components/admin/ArticleTable";
 import { PaginationControls } from "../../components/admin/PaginationControls";
 import { ArticleModal } from "../../components/admin/ArticleModal";
+import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
 const AdminSection: React.FC = () => {
     const { language } = useLanguage();
@@ -69,6 +70,9 @@ const AdminSection: React.FC = () => {
             error_stock_negative: "Stock values cannot be negative",
             error_saving_article: "An error occurred while saving the article",
             error_deleting_article: "An error occurred while deleting the article",
+            article_save_success: "Article has been saved successfully.",
+            article_toast_delete: "Article successfully deleted.",
+            article_toast_error: "Error, this item is not delete",
         },
         fr: {
             header: "Gestion des Articles",
@@ -107,6 +111,9 @@ const AdminSection: React.FC = () => {
             error_stock_negative: "Les valeurs de stock ne peuvent pas être négatives",
             error_saving_article: "Une erreur s'est produite lors de l'enregistrement de l'article",
             error_deleting_article: "Une erreur s'est produite lors de la suppression de l'article",
+            article_save_success: "L'article a bien été enregistré",
+            article_toast_delete: "L'article a bien été supprimé",
+            article_toast_error: "Erreur, cet article n'est pas supprimé",
         },
     };
 
@@ -137,6 +144,7 @@ const AdminSection: React.FC = () => {
     // Handle form submission for adding/updating article
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        toast.success(text[language].article_save_success);
         setErrorMessage('');
         try {
             // Client-side validation
@@ -205,13 +213,14 @@ const AdminSection: React.FC = () => {
             const { content, totalPages } = await fetchFruits(currentPage, pageSize);
             setArticles(content);
             setTotalPages(totalPages);
+            toast.success(text[language].article_save_success);
             // If the current page is empty after deletion, go to the previous page
             if (content.length === 0 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
             }
         } catch (error) {
-            console.error('Error deleting article:', error);
             setErrorMessage(error instanceof Error ? error.message : text[language].error_deleting_article);
+            toast.error(text[language].article_toast_error);
         }
     };
 

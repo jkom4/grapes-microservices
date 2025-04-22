@@ -84,3 +84,30 @@ src/
 │-- App.tsx               # Main application component
 │-- index.tsx             # Entry point of the React application
 ```
+
+# Newsletter Subscription Setup
+
+This guide will help you set up the Brevo integration for the newsletter subscription form in your React app.
+
+## 1. Create the `.env` File
+
+In your `frontend-web` directory, create a `.env` file and add the following:
+```bash
+REACT_APP_BREVO_API_KEY=your_brevo_api_key_here 
+REACT_APP_BREVO_LIST_ID=your_brevo_list_id_here
+```
+
+
+## 2. Get Your Brevo API Key
+
+1. Log in to [Brevo](https://app.brevo.com/accounts/login).
+2. Go to **SMTP & API** > **API Keys**.
+3. Create a new API key and copy it.
+4. Paste the API key into the `.env` file as `REACT_APP_BREVO_API_KEY`.
+
+## 3. Get Your Brevo List ID
+
+1. Go to **Contacts** in Brevo.
+2. Create or select a list.
+3. Copy the List ID and paste it into the `.env` file as `REACT_APP_BREVO_LIST_ID`.
+
