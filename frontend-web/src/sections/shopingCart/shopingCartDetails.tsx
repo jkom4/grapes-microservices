@@ -130,7 +130,6 @@ const CartPage = () => {
                 window.location.href = "/";
             }, 10000);
         } catch (err) {
-            console.error("❌ Error during payment:", err);
             setPaymentError(
                 err instanceof Error
                     ? err.message
