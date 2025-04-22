@@ -36,28 +36,5 @@ public class UserMapper {
         return client;
     }
 
-    /**
-     * Converts a Client entity to ClientDTO.
-     * Sensitive fields like password and nationalRegistryNumber are not mapped.
-     *
-     * @param client The client entity to convert
-     * @return The corresponding DTO
-     */
-    public static ClientDTO toDto(Client client) {
-        if (client == null) return null;
 
-        ClientDTO dto = new ClientDTO();
-        dto.setId(client.getId());
-        dto.setFirstName(client.getFirstName());
-        dto.setLastName(client.getLastName());
-        dto.setEmail(client.getEmail());
-        dto.setPhoneNumber(client.getPhoneNumber());
-        dto.setBirthDate(client.getBirthDate());
-        dto.setAddress(client.getAddress());
-        dto.setGender(client.getGender());
-        dto.setMaritalStatus(client.getMaritalStatus());
-        dto.setAverageMonthlySalary(client.getAverageMonthlySalary());
-
-        return dto;
-    }
 }
