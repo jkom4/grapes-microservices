@@ -34,9 +34,6 @@ fun BottomNavigationBar(navController: NavController) {
             }) {
                 Icon(Icons.Filled.LocationOn, contentDescription = "Map", tint = MaterialTheme.colorScheme.onPrimary)
             }
-            IconButton(onClick = { navController.navigate("") }) {
-                Icon(Icons.Filled.AccountCircle, contentDescription = "Account", tint = MaterialTheme.colorScheme.onPrimary)
-            }
         }
     }
 }
