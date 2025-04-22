@@ -22,7 +22,7 @@ function Navbar() {
                 </div>
             </Link>
             <nav className="flex gap-8 flex-grow justify-center items-center">
-                <Link to="/" className="text-blackhover:text-accent">
+                <Link to="/" className="text-black hover:text-accent">
                     {language === 'en' ? 'Home' : 'Accueil'}
                 </Link>
                 {/* Use Link to navigate to AllArticles page */}

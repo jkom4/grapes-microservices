@@ -11,6 +11,7 @@ import AdminPage from './pages/admin/Admin';
 import AccountPage from './pages/AccountPage';
 import { CartProvider } from './features/CartContext';
 
+
 const App: React.FC = () => {
     return (
         <LanguageProvider>
@@ -25,6 +26,16 @@ const App: React.FC = () => {
                     <Route path="/account" element={<AccountPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                 </Routes>
+                <ToastContainer
+                    position="top-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop
+                    closeOnClick
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                />
             </Router>
             </CartProvider>
         </LanguageProvider>

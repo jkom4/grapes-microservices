@@ -1,4 +1,3 @@
-// src/components/AdminSection.tsx
 import { useLanguage } from "../../features/LanguageContext";
 import Article from "../../utils/models/Articles";
 import { useEffect, useState } from "react";
@@ -8,6 +7,9 @@ import { ArticleTable } from "../../components/admin/ArticleTable";
 import { PaginationControls } from "../../components/admin/PaginationControls";
 import { ArticleModal } from "../../components/admin/ArticleModal";
 import { translationsAdmin } from "../../utils/translations-admin";
+import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
+
 
 const AdminSection: React.FC = () => {
     const { language } = useLanguage();
@@ -59,6 +61,7 @@ const AdminSection: React.FC = () => {
     // Handle form submission for adding/updating article
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        toast.success(text[language].article_save_success);
         setErrorMessage('');
         try {
             // Client-side validation
@@ -127,6 +130,7 @@ const AdminSection: React.FC = () => {
             const { content, totalPages } = await fetchFruits(currentPage, pageSize);
             setArticles(content);
             setTotalPages(totalPages);
+            toast.success(text[language].article_save_success);
             // If the current page is empty after deletion, go to the previous page
             if (content.length === 0 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);
