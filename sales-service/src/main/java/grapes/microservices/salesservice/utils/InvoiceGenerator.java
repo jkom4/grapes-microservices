@@ -158,7 +158,7 @@ public class InvoiceGenerator {
         String cleanedFilename = filename.trim().replaceAll(" ", "");
 
         publicUrl = publicUrl.trim().replaceAll(" ", "").replace("\\", "/");
-        System.out.println(" Facture générée et accessible à : " + publicUrl);
+        System.out.println(" Invoice generated  : " + publicUrl);
         return publicUrl;
 
     }
