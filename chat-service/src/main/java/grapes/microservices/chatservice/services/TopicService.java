@@ -68,8 +68,11 @@ public class TopicService {
                 .build();
 
         // Publish to RabbitMQ topic exchange
-        rabbitTemplate.convertAndSend(exchangeName, routingKeyPrefix, dto);
-
+        rabbitTemplate.convertAndSend(
+                exchangeName,
+                routingKeyPrefix + topicId,
+                dto
+        );
         return dto;
     }
 }
