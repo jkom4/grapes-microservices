@@ -14,6 +14,4 @@ public class DeliveryMessage implements Serializable {
     private String address;
     private String phoneNumber;
     private String customerName;
-    private String country;
-    private String postalCode;
 }
