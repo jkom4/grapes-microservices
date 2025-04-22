@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.compose.rememberNavController
 import com.example.mobile_cll.ui.theme.MobileCLLTheme
-import com.example.mobile_cll.views.components.MyNavigation
+import com.example.mobile_cll.views.components.various.MyNavigation
 
 
 /**

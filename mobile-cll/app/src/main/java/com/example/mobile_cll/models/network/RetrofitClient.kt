@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
 object RetrofitClient {
-    private const val BASE_URL = "http://192.168.129.10:8092/cll/"
+    private const val BASE_URL = "http://172.20.10.2:8092/cll/"
     private const val TAG = "RetrofitClient"
 
     private val okHttpClient: OkHttpClient by lazy {
