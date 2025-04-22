@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/cll/trips")
@@ -29,16 +31,27 @@ public class TripController {
     }
 
     @PatchMapping("/orders/{orderItemId}/scan")
-    public ResponseEntity<Void> scanOrderItem(@PathVariable Integer orderItemId) {
+    public ResponseEntity<Map<String, Integer>> scanOrderItem(@PathVariable Integer orderItemId) {
         tripService.updateScanStatus(orderItemId);
-        return ResponseEntity.noContent().build();
+
+        Map<String, Integer> response = new HashMap<>();
+        response.put("scannedOrderItemId", orderItemId);
+
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{tripId}/finish")
-    public ResponseEntity<Void> finishTrip(@PathVariable Integer tripId) {
-        tripService.finishTrip(tripId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> finishTrip(@PathVariable Integer tripId) {
+        try {
+            tripService.finishTrip(tripId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
+
+
+
 
 }
 

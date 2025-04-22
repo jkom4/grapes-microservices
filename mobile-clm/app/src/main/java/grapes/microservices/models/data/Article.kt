@@ -1,37 +1,30 @@
 package grapes.microservices.models.data
 
-class Article(
-    var id: String,
-    var name: String,
-    var category: String,
-    var family: String,
-    var description: String,
-    var metric: ArticleMetric,
-    var rating: Float? = null,
-    var picture: String = "https://pngimg.com/uploads/pear/pear_PNG3463.png"
+import com.google.gson.annotations.SerializedName
+
+data class Article(
+    @SerializedName("id") val id: Int,
+    @SerializedName("categoryId") val categoryId: Int,
+    @SerializedName("familyId") val familyId: Int,
+    @SerializedName("name") val name: String,
+    @SerializedName("description") val description: String,
+    @SerializedName("priceKg") val priceKg: Double,
+    @SerializedName("priceUnit") val priceUnit: Double,
+    @SerializedName("stockKg") val stockKg: Int,
+    @SerializedName("stockUnit") val stockUnit: Int,
+    @SerializedName("origin") val origin: String,
+    @SerializedName("picturePath") val picture: String,
 )
 
-abstract class ArticleMetric(
-    open var price: Double,
-    open var stock: Double
+data class ArticleMetric(
+    @SerializedName("price") val price: Double,
+    @SerializedName("stock") val stock: Double,
+    @SerializedName("unit") val unit: String? = "unit"
 ) {
-    abstract fun priceToString(): String
-}
-
-class ArticleMetricByKg(
-    override var price: Double,
-    override var stock: Double
-) : ArticleMetric(price, stock) {
-    override fun priceToString(): String {
-        return "$price € / kg"
-    }
-}
-
-class ArticleMetricByUnit(
-    override var price: Double,
-    override var stock: Double
-) : ArticleMetric(price, stock) {
-    override fun priceToString(): String {
-        return "$price € / pc"
+    fun priceToString(): String {
+        return when (unit) {
+            "kg" -> "$price € / kg"
+            else -> "$price € / pc"
+        }
     }
 }

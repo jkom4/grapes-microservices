@@ -1,0 +1,11 @@
+# /usr/local/lib/R/etc/Rprofile.site
+
+if (!requireNamespace("FactoMineR", quietly = TRUE)) {
+  message("Installing FactoMineR...")
+  install.packages("FactoMineR", repos = "https://cloud.r-project.org/")
+}
+
+if (!requireNamespace("factoextra", quietly = TRUE)) {
+  message("Installing factoextra...")
+  install.packages("factoextra", repos = "https://cloud.r-project.org/")
+}
