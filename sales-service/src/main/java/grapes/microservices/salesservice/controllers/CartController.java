@@ -3,6 +3,7 @@ package grapes.microservices.salesservice.controllers;
 import grapes.microservices.salesservice.dto.CartRequestDTO;
 import grapes.microservices.salesservice.dto.CartResponseDTO;
 import grapes.microservices.salesservice.dto.CreateOrderRequestDTO;
+import grapes.microservices.salesservice.dto.PaymentRequestDTO;
 import grapes.microservices.salesservice.models.Order;
 import grapes.microservices.salesservice.models.OrderItem;
 import grapes.microservices.salesservice.services.CartService;
@@ -20,6 +21,7 @@ import java.io.FileNotFoundException;
  * confirming payment, and retrieving orders.
  */
 @RestController
+@CrossOrigin
 @RequestMapping("/clm/cart")
 public class CartController {
 
@@ -86,11 +88,13 @@ public class CartController {
     /**
      * Removes a specific item from the cart.
      */
-    @DeleteMapping("/remove/{itemId}")
+    @DeleteMapping("/remove/{orderId}/{itemId}")
     @Transactional
-    public ResponseEntity<?> removeItemFromCart(@PathVariable Integer itemId) {
+    public ResponseEntity<?> removeItemFromCart(
+            @PathVariable Integer orderId,
+            @PathVariable Integer itemId) {
         try {
-            cartService.removeFromCart(itemId);
+            cartService.removeFromCart(orderId, itemId);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -99,6 +103,7 @@ public class CartController {
         }
     }
 
+
     /**
      * Clears all items from a cart by order ID.
      */
@@ -106,8 +111,8 @@ public class CartController {
     @Transactional
     public ResponseEntity<?> clearCart(@PathVariable Integer orderId) {
         try {
-            cartService.clearCart(orderId);
-            return ResponseEntity.noContent().build();
+            String message = cartService.clearCart(orderId);
+            return ResponseEntity.ok(message);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -115,15 +120,24 @@ public class CartController {
         }
     }
 
+
+
     /**
      * Finalizes the payment: verifies stock, updates quantities,
      * generates invoice, and clears cart.
      */
-    @PostMapping("/pay/{orderId}")
+    @PostMapping("/pay")
     @Transactional
-    public ResponseEntity<?> simulatePayment(@PathVariable Integer orderId) {
+
+    public ResponseEntity<?> simulatePayment(@RequestBody PaymentRequestDTO request) {
         try {
-            orderService.finalizePaymentAndClearCart(orderId);
+            orderService.finalizePaymentAndClearCart(
+                    request.getOrderId(),
+                    request.getAddress(),
+                    request.getPhoneNumber(),
+                    request.getCustomerName()
+            );
+
             return ResponseEntity.ok("Payment confirmed, stock updated and cart cleared.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -133,5 +147,8 @@ public class CartController {
             return ResponseEntity.internalServerError().body("Unexpected error: " + e.getMessage());
         }
     }
+
+
+
 
 }
