@@ -62,9 +62,6 @@ public class TransactionEntity {
     @Column(name = "authentication_type_3ds")
     private String authenticationType3DS;
 
-    @Column(name = "status_3ds")
-    private String status3DS;
-
     @Column(name = "debtor_account_new_balance")
     private BigDecimal debtorAccountNewBalance;
 
@@ -96,7 +93,6 @@ public class TransactionEntity {
         this.merchantName = merchantName;
         this.merchantBusinessSector = merchantBusinessSector;
         this.authenticationType3DS = "OTP";
-        this.status3DS = "Pending";
         this.status = "Initiated";
         this.creditorAccount = "BE15203672485394";
         this.creditorBank = "Grapes's bank";
@@ -105,14 +101,12 @@ public class TransactionEntity {
 
 
     public void markAsCompleted(BigDecimal debtorNewBalance) {
-        this.status3DS = "Validated";
         this.status = "Completed";
         this.debtorAccountNewBalance = debtorNewBalance;
     }
 
 
     public void markAsFailed(String reason) {
-        this.status3DS = "Failed";
         this.status = "Failed";
     }
 

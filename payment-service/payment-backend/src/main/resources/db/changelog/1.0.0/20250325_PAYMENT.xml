@@ -197,4 +197,11 @@
                 constraintName="fk_cards_client"/>
     </changeSet>
 
+    <changeSet id="14" author="grapes_en">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="transaction" columnName="status_3ds"/>
+        </preConditions>
+        <dropColumn tableName="transaction" columnName="status_3ds"/>
+    </changeSet>
+
 </databaseChangeLog>

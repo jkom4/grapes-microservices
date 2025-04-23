@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
+import org.springframework.beans.factory.annotation.Value;
 /**
  * Service handling login related operations and payment initiations.
  */
@@ -25,6 +26,8 @@ import java.util.UUID;
 public class LoginService {
 
     private final ClientService clientService;
+    @Value("${app.grapes.front.url}")
+    private String redirectUrl;
 
     private static final String SESSION_INIT_AMOUNT_KEY = "initialPaymentAmount";
     private static final String SESSION_INIT_MERCHANT_KEY = "initialMerchantName";
@@ -62,7 +65,6 @@ public class LoginService {
         log.info("[LoginService] Stored initial payment details in session ID: {}", session.getId());
 
 
-        String redirectUrl = "http://localhost:3000/login";
         Map<String, Object> response = new HashMap<>();
         response.put("status", "success");
         response.put("message", "Payment context created. Redirecting to login page.");

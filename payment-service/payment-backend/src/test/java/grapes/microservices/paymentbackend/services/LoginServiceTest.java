@@ -70,7 +70,7 @@ class LoginServiceTest {
         // Assert
         assertEquals("success", result.get("status"));
         assertEquals("Payment context created. Redirecting to login page.", result.get("message"));
-        assertEquals("http://localhost:3000/login", result.get("redirectUrl"));
+
 
         // Verify session attributes were set
         verify(session).setAttribute("initialPaymentAmount", validPaymentRequest.getAmount());

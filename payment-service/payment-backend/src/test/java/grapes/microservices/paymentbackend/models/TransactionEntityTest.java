@@ -29,7 +29,7 @@ class TransactionEntityTest {
         TransactionEntity transaction = new TransactionEntity(
                 id, "DEBTOR_ACC", "CREDITOR_ACC", "DEBTOR_BANK", "CREDITOR_BANK",
                 1L, "Payment", "CLIENT_ACC", now, amount, "Merchant A", "Retail",
-                "OTP", "Validated", debtorBalance, creditorBalance, "Completed"
+                "OTP", debtorBalance, creditorBalance, "Completed"
         );
 
         // Assert that all fields were set correctly
@@ -46,7 +46,6 @@ class TransactionEntityTest {
         assertEquals("Merchant A", transaction.getMerchantName());
         assertEquals("Retail", transaction.getMerchantBusinessSector());
         assertEquals("OTP", transaction.getAuthenticationType3DS());
-        assertEquals("Validated", transaction.getStatus3DS());
         assertEquals(0, debtorBalance.compareTo(transaction.getDebtorAccountNewBalance()));
         assertEquals(0, creditorBalance.compareTo(transaction.getCreditorAccountNewBalance()));
         assertEquals("Completed", transaction.getStatus());
@@ -71,7 +70,6 @@ class TransactionEntityTest {
         assertNotNull(transaction.getTransactionDateTime(), "Transaction date/time should be set");
         assertEquals("Payment", transaction.getTransactionType());
         assertEquals("OTP", transaction.getAuthenticationType3DS());
-        assertEquals("Pending", transaction.getStatus3DS());
         assertEquals("Initiated", transaction.getStatus());
         assertEquals("BE15203672485394", transaction.getCreditorAccount()); // Check default creditor
         assertEquals("Grapes's bank", transaction.getCreditorBank());      // Check default creditor bank
@@ -97,7 +95,6 @@ class TransactionEntityTest {
                 "ACC1", "Bank1", 1L, "ACC1", new BigDecimal("10.0"), "M1", "S1");
         // Initial state check (set by constructor)
         assertEquals("Initiated", transaction.getStatus());
-        assertEquals("Pending", transaction.getStatus3DS());
         assertNull(transaction.getDebtorAccountNewBalance());
 
         BigDecimal newDebtorBalance = new BigDecimal("990.00");
@@ -105,7 +102,6 @@ class TransactionEntityTest {
 
         // Assert updated state
         assertEquals("Completed", transaction.getStatus());
-        assertEquals("Validated", transaction.getStatus3DS());
         assertEquals(0, newDebtorBalance.compareTo(transaction.getDebtorAccountNewBalance()));
     }
 
@@ -116,13 +112,11 @@ class TransactionEntityTest {
                 "ACC2", "Bank2", 2L, "ACC2", new BigDecimal("20.0"), "M2", "S2");
         // Initial state check
         assertEquals("Initiated", transaction.getStatus());
-        assertEquals("Pending", transaction.getStatus3DS());
 
         transaction.markAsFailed("Insufficient funds");
 
         // Assert updated state
         assertEquals("Failed", transaction.getStatus());
-        assertEquals("Failed", transaction.getStatus3DS());
         // Balances should ideally remain null or unchanged upon failure in this logic
         assertNull(transaction.getDebtorAccountNewBalance());
     }

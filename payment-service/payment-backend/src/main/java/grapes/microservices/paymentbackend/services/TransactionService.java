@@ -12,6 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+import grapes.microservices.paymentbackend.config.RabbitMQConfig;
+import grapes.microservices.paymentbackend.dto.PaymentValidatedMessageDTO;
+import grapes.microservices.paymentbackend.repositories.ClientRepository;
+import grapes.microservices.paymentbackend.repositories.CardRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
  * Service responsible for managing payment transaction records in the system.
@@ -25,6 +33,10 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final MerchantRepository merchantRepository;
+
+    private final ClientRepository clientRepository;
+    private final CardRepository cardRepository;
+    private final RabbitTemplate rabbitTemplate;
 
 
     @Value("${app.grapes.account.number}")
@@ -112,8 +124,49 @@ public class TransactionService {
 
         updateTransactionStatus(transaction, clientAccount.getBalance(), grapesAccount.getBalance());
 
+        try {
+
+            Account debtorAccount = accountRepository.findByAccountNumber(transaction.getClientAccountNumber()).orElse(null);
+
+            List<Card> clientCards = cardRepository.findByClientId(client.getId());
+            String cardType = null;
+            if (clientCards != null && !clientCards.isEmpty()) {
+                cardType = clientCards.get(0).getCardType();
+            }
+
+
+            Integer age = null;
+            if (client.getBirthDate() != null) {
+                age = Period.between(client.getBirthDate(), LocalDate.now()).getYears();
+            }
+
+            PaymentValidatedMessageDTO messageDTO = new PaymentValidatedMessageDTO(
+                    client.getFullName(),
+                    client.getId(),
+                    debtorAccount != null ? debtorAccount.getAccountNumber() : transaction.getClientAccountNumber(),
+                    cardType,
+                    client.getGender(),
+                    client.getBirthDate(),
+                    age,
+                    client.getMaritalStatus(),
+                    client.getAverageMonthlySalary(),
+                    transaction.getId(),
+                    transaction.getTransactionDateTime(),
+                    debtorAccount != null && debtorAccount.getBank() != null ? debtorAccount.getBank().getBankName() : transaction.getDebtorBank(),
+                    transaction.getTransferAmount()
+            );
+
+            rabbitTemplate.convertAndSend(RabbitMQConfig.PAYMENT_VALIDATED_QUEUE, messageDTO);
+            log.info("Sent payment validation message to queue '{}' for transaction ID {}", RabbitMQConfig.PAYMENT_VALIDATED_QUEUE, transaction.getId());
+
+        } catch (Exception e) {
+            log.error("Failed to send payment validation message to RabbitMQ for transaction ID {}: {}", transactionId, e.getMessage(), e);
+        }
+
         return transaction;
     }
+
+
 
     /**
      * Validates if a transaction can be completed

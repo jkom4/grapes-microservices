@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const PaymentPage = lazy(() => import('./pages/PaymentPage'));
 const PaymentVerificationPage = lazy(() => import('./pages/PaymentVerificationPage'));
+const PaymentSuccessPage  = lazy(() => import('./pages/PaymentSuccessPage'));
 
 function App() {
     return (
@@ -15,6 +16,7 @@ function App() {
                     <Route path="/login" element={<LoginPage />} /> {/*Default route*/}
                     <Route path="/payment" element={<PaymentPage />} /> {/* Payment flow*/}
                     <Route path="/verification" element={<PaymentVerificationPage />} />  {/*Verification process*/}
+                    <Route path="/payment-success" element={<PaymentSuccessPage />} /> {/*Success page*/}
                 </Routes>
             </Suspense>
         </Router>

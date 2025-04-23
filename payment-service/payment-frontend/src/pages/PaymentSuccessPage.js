@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { AuthService } from '../services/AuthService';
 import SPMB from '../images/SMPB.png';
 
@@ -12,10 +13,6 @@ const PaymentSuccessPage = () => {
         }
     }, []);
 
-    // Handle navigation back to store
-    const handleReturnToStore = () => {
-        window.location.href = '/';
-    };
 
     // Render success message and payment details
     return (
@@ -36,14 +33,10 @@ const PaymentSuccessPage = () => {
                         <label>Date:</label>
                         <input type="text" value={new Date().toLocaleDateString()} disabled />
                     </div>
-                    <div className="form-group">
-                        <label>Time:</label>
-                        <input type="text" value={new Date().toLocaleTimeString()} disabled />
-                    </div>
                 </div>
-                <button onClick={handleReturnToStore}>
-                    Return to Store
-                </button>
+                <Link to="/">
+                    <button>Return to Store</button>
+                </Link>
             </div>
         </div>
     );

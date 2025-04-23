@@ -22,7 +22,6 @@ public class ClientDTO {
     private String gender;
     private String maritalStatus;
     private BigDecimal averageMonthlySalary;
-
     private String password;
     private String nationalRegistryNumber;
 }

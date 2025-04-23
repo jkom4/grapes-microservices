@@ -4,6 +4,7 @@ import grapes.microservices.paymentbackend.dto.CompletePaymentRequestDTO;
 import grapes.microservices.paymentbackend.dto.PaymentRequestDTO;
 import grapes.microservices.paymentbackend.services.PaymentProcessingService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ public class PaymentController {
      * @param session The HTTP session to retrieve client ID
      * @return ResponseEntity with success status, transactionId, or appropriate error message
      */
+    @Transactional
     @PostMapping("/initiate")
     public ResponseEntity<?> initiatePayment(@Valid @RequestBody PaymentRequestDTO paymentRequest, HttpSession session) {
         try {
@@ -47,6 +49,7 @@ public class PaymentController {
      * @param session The HTTP session to retrieve client ID
      * @return ResponseEntity with payment result or appropriate error message
      */
+    @Transactional
     @PostMapping("/complete")
     public ResponseEntity<?> completePayment(@Valid @RequestBody CompletePaymentRequestDTO completeRequest, HttpSession session) {
         try {

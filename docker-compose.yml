@@ -175,9 +175,15 @@ services:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-backend:latest
     container_name: payment-backend
     ports:
-      - "8094:8094"
+      - "8093:8093"
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: grapes
+      RABBITMQ_PASSWORD: grapes
     depends_on:
       - mariadb
+      - rabbitmq
 
   chat-service:
     build: ./chat-service

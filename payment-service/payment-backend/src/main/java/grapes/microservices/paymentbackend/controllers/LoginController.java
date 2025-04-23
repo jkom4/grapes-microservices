@@ -5,6 +5,7 @@ import grapes.microservices.paymentbackend.dto.LoginResponse;
 import grapes.microservices.paymentbackend.dto.PaymentInitiateRequest;
 import grapes.microservices.paymentbackend.services.LoginService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,7 @@ public class LoginController {
      * @param request The HTTP request to access and modify the session
      * @return ResponseEntity containing success/error status and redirect URL
      */
+    @Transactional
     @PostMapping("/payment-initiate")
     @ResponseBody
     public ResponseEntity<?> initiatePayment(@RequestBody PaymentInitiateRequest paymentRequest, HttpServletRequest request) {
@@ -55,6 +57,7 @@ public class LoginController {
      * @param request The HTTP request to access and modify the session
      * @return ResponseEntity with login response details including authentication status
      */
+    @Transactional
     @PostMapping("")
     @ResponseBody
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
