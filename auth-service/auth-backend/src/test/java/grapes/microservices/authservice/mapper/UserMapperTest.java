@@ -84,7 +84,6 @@ class UserMapperTest {
     void toEntity_withValidDTO() {
         // Given a valid UserDTO
         UserDTO dto = new UserDTO();
-        dto.setBankId("bank123");
         dto.setName("John");
         dto.setFirstName("Doe");
         dto.setPassword("password");
@@ -95,14 +94,12 @@ class UserMapperTest {
         dto.setNationalId("12345");
         dto.setBirthDate(new Date(1000000000000L));  // Sample birthdate (example timestamp)
         dto.setGender(Gender.MALE);
-        dto.setCardNumber("1111-2222-3333-4444");
         dto.setPinCode("1234");
         dto.setRole(Role.valueOf("USER"));
         dto.setProfession("Engineer");
 
         User user = userMapper.toEntity(dto);
 
-        assertEquals("bank123", user.getBankId());
         assertEquals("John", user.getName());
         assertEquals("Doe", user.getFirstName());
         assertEquals("password", user.getPassword());
@@ -112,7 +109,6 @@ class UserMapperTest {
         assertTrue(user.isPhoneVerified());
         assertEquals("12345", user.getNationalId());
         assertEquals("MALE", user.getGender().name());
-        assertEquals("1111-2222-3333-4444", user.getCardNumber());
         assertEquals("1234", user.getPinCode());
         assertEquals(Role.valueOf("USER"), user.getRole());
         assertEquals("Engineer", user.getProfession());

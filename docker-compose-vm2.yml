@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  frontend-web:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/grapes-frontend:latest
+    container_name: frontend-web
+    ports:
+      - "80:80"
+
+  frontend-auth:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-frontend:latest
+    container_name: frontend-auth
+    ports:
+      - "81:81"
+
+  frontend-payment:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-frontend:latest
+    container_name: frontend-payment
+    ports:
+      - "82:82"
