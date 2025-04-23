@@ -102,12 +102,20 @@ jobs:
           python-version: "3.10"
 
       - name: Run Tests for Data-Mining Service
-        working-directory: ./data-mining-service
+        working-directory: ./data-mining-service # Run commands FROM this directory
         run: |
+          # Create a temporary .env for the test runner if needed
           echo "RABBITMQ_PORT=5672" >> .env
           echo "RABBITMQ_HOST=localhost" >> .env
+          # Add other required ENV VARS for the test script here!
+          echo "RABBITMQ_USER=grapes" >> .env
+          echo "RABBITMQ_PASSWORD=grapes" >> .env
+          echo "ACTIVITY_LOGS_QUEUE=q_activity_logs" >> .env
+          echo "AUTH_LOGS_QUEUE=q.auth_logs" >> .env
+
           pip install -r requirements.txt
-          python -m pytest ./data_ingestion_service/tests/
+          # Try letting pytest discover tests from the working directory
+          python -m pytest
 
       # ⚠️ Final status report
       - name: Determine overall status
