@@ -104,6 +104,8 @@ jobs:
       - name: Run Tests for Data-Mining Service
         working-directory: ./data-mining-service
         run: |
+          echo "RABBITMQ_PORT=5672" >> .env
+          echo "RABBITMQ_HOST=localhost" >> .env
           pip install -r requirements.txt
           pytest
           python -m pytest data-mining-service/data_ingestion_service/tests/
