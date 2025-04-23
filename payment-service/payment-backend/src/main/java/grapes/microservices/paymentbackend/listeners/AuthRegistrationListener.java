@@ -158,16 +158,63 @@ public class AuthRegistrationListener {
         } while (accountRepository.existsById(accountNumber));
         return accountNumber;
     }
+
+    /**
+     * Generates a unique and valid card number according to the Luhn algorithm.
+     * Always produces a 16-digit card number (standard format).
+     *
+     * @return A valid and unique card number
+     */
     private String generateUniqueCardNumber() {
         String cardNumber;
         do {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < 16; i++) {
+            // Start with 4 (Visa prefix) for simplicity
+            StringBuilder sb = new StringBuilder("4");
+
+            // Generate 14 random digits (the 16th will be the check digit)
+            for (int i = 0; i < 14; i++) {
                 sb.append(random.nextInt(10));
             }
+
+            // Calculate and add the check digit for the Luhn algorithm
+            String partialNumber = sb.toString();
+            int checkDigit = calculateLuhnCheckDigit(partialNumber);
+            sb.append(checkDigit);
+
             cardNumber = sb.toString();
         } while (cardRepository.findByCardNumber(cardNumber).isPresent());
+
         return cardNumber;
+    }
+
+    /**
+     * Calculates the check digit that would make a card number valid according to the Luhn algorithm.
+     *
+     * @param partialNumber The card number without the last check digit
+     * @return The check digit that would make the number valid
+     */
+    private int calculateLuhnCheckDigit(String partialNumber) {
+        int sum = 0;
+        boolean alternate = false;
+
+        // Process from right to left
+        for (int i = partialNumber.length() - 1; i >= 0; i--) {
+            int digit = Character.getNumericValue(partialNumber.charAt(i));
+
+            if (alternate) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit -= 9;
+                }
+            }
+
+            sum += digit;
+            alternate = !alternate;
+        }
+
+        // The check digit is what we need to add to make the sum divisible by 10
+        int remainder = sum % 10;
+        return remainder == 0 ? 0 : 10 - remainder;
     }
     private String generateFutureExpirationDate() {
         YearMonth current = YearMonth.now();
