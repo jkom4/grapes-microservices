@@ -7,18 +7,16 @@ import io.github.cdimascio.dotenv.Dotenv;
  * Loads settings from a .env file at the root of the project.
  * Provides static accessors for configuration values.
  */
-
 public enum AppEnv { // final modifier not needed for enums as they're implicitly final
     CHAT_SERVICE_URL("CHAT_SERVICE_URL"),
     CHAT_SERVICE_PORT("CHAT_SERVICE_PORT"),
-    AUTH_SERVICE_URL("AUTH_SERVICE_URL"),
-    AUTH_SERVICE_PORT("AUTH_SERVICE_PORT");
+    AUTH_SERVICE_URL("AUTH_SERVICE_URL");
 
     private static final Dotenv dotenv;
 
     static {
         dotenv = Dotenv.configure()
-                .directory("../") // Adjust path relative to the working directory
+//                .directory("../") // Adjust path relative to the working directory
                 .load();
     }
 

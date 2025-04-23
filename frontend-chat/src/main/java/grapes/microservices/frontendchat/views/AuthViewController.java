@@ -30,6 +30,7 @@ public class AuthViewController implements Initializable {
     @FXML Button authButton;
     @FXML WebView authWebView;
     @FXML VBox authContainer;
+    @FXML VBox authContainerRoot;
     @FXML ImageView successImage;
     @FXML ImageView errorImage;
 
@@ -46,7 +47,7 @@ public class AuthViewController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        authWebView.getEngine().load(AppEnv.AUTH_SERVICE_URL.get());
+        authWebView.prefHeightProperty().bind(authContainerRoot.heightProperty());
     }
 
     /**
@@ -85,14 +86,15 @@ public class AuthViewController implements Initializable {
            } catch (OnAuth e) {
                show(authWebView);
                hide(authContainer);
+               FxUtils.wait(100, event -> {
+                   authWebView.getEngine().load(AppEnv.AUTH_SERVICE_URL.get());
+               });
            } catch (OnLoading e) {
                show(loadingFx);
            } catch (OnSuccess e) {
-               // refresh the website to erase the previous session
-               authWebView.getEngine().load(AppEnv.AUTH_SERVICE_URL.get());
-
                show(successImage);
-               FxUtils.wait(1, event -> {
+               hide(authButton);
+               FxUtils.wait(1000, event -> {
                    sceneController.switchToScene(SceneController.SCENE.CHAT);
                    stateObserver.set(new OnReset());
                });
@@ -102,7 +104,6 @@ public class AuthViewController implements Initializable {
                show(errorMessageFx);
                show(errorImage);
                errorMessageFx.setText(e.getMessage());
-               authWebView.getEngine().load(AppEnv.AUTH_SERVICE_URL.get());
            }
         });
 
@@ -115,6 +116,13 @@ public class AuthViewController implements Initializable {
                 UserSession.setToken(token);
                 viewModel.getUser();
             }
+        });
+
+        // Manage the WebView error if it cannot display the website
+        authWebView.getEngine().getLoadWorker().exceptionProperty().addListener((obs, oldErr, newErr) -> {
+            // Check if the new URL contains the token or required value
+            if (newErr == null) return;
+            stateObserver.set(new OnFail(newErr.getMessage()));
         });
     }
 
@@ -131,6 +139,7 @@ public class AuthViewController implements Initializable {
     private void resetState() {
         hide(authWebView);
         show(authContainer);
+        show(authButton);
         hide(errorMessageFx);
         hide(successImage);
         hide(errorImage);

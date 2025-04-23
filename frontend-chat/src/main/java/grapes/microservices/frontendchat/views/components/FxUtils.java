@@ -33,8 +33,8 @@ public class FxUtils {
         timeline.play();
     }
 
-    public static void wait(int duration, EventHandler<ActionEvent> event) {
-        PauseTransition pause = new PauseTransition(Duration.seconds(duration)); // Wait for 3 seconds
+    public static void wait(int milliseconds, EventHandler<ActionEvent> event) {
+        PauseTransition pause = new PauseTransition(Duration.millis(milliseconds)); // Wait for 3 seconds
         pause.setOnFinished(event);
         pause.play();
     }

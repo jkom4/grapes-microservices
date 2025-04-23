@@ -13,7 +13,7 @@ public class UserSession {
 
     @Getter
     @Setter
-    private static String token = "";
+    private static String token;
 
     @Getter
     private static final UserSession INSTANCE = new UserSession();
