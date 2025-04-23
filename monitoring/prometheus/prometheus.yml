@@ -1,25 +1,54 @@
 global:
   scrape_interval: 15s
-  evaluation_interval: 15s
 
 scrape_configs:
-  # Métriques VM3 (ARM - Backends & Bases de Données)
-  - job_name: 'vm3-backends'
-    metrics_path: '/actuator/metrics'  # Chemin spécifique à Spring Boot
+  # 🔧 Microservices Spring Boot (Actuator + micrometer)
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ '172.20.10.3:8090', '172.20.10.3:8092','172.20.10.3:8091' ]
+      - targets: [ '192.168.1.43:8090' ]
 
-  # Métriques VM1 (x86 - Monitoring & Replicas)
-  - job_name: 'vm1-monitoring'
+  - job_name: 'auth-service'
+    metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets:
-          - '79.76.110.161:9090'   # Prometheus (auto-surveillance)
-          - 'vm1:9100'   # Node Exporter
-          - 'vm1:3000'   # Grafana (métriques internes)
+      - targets: ['192.168.1.43:8091']
 
-  # Métriques VM2 (x86 - Frontends)
-  - job_name: 'vm2-frontends'
+  - job_name: 'sales-service'
+    metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets:
-          - 'vm2:9100'   # Node Exporter (si déployé)
-          - 'vm2:3838'   # Shiny App (si exposé)
+      - targets: ['192.168.1.43:8092']
+
+  - job_name: 'payment-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['192.168.1.43:8093']
+
+  - job_name: 'chat-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['192.168.1.43:8094']
+
+  - job_name: 'data-mining-service'
+    static_configs:
+      - targets: ['192.168.1.43:8095']
+
+
+  # 🛢️ MariaDB
+  - job_name: 'mariadb'
+    static_configs:
+      - targets: ['mariadb-exporter:9104']
+
+  # 🍃 MongoDB
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+
+  # 🧠 Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # 🐰 RabbitMQ
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq:15692']
