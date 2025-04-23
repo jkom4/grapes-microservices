@@ -409,6 +409,22 @@
         </insert>
     </changeSet>
 
+    <changeSet author="nassim" id="22" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="delivery" columnName="name"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="delivery">
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="postal_code" type="VARCHAR(20)"/>
+            <column name="country" type="VARCHAR(50)"/>
+            <column name="phone_number" type="VARCHAR(20)"/>
+        </addColumn>
+    </changeSet>
+
 
     <!-- 18. Foreign key: review -> user -->
 <!--    <changeSet author="kilane dounia" id="18">-->

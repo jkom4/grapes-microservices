@@ -24,24 +24,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import grapes.microservices.R
 import grapes.microservices.ui.theme.White
 
 @Composable
 fun MyTopBar(
-    modifier: Modifier
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
-    // horizontale Bar
+
     Row(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Partie gauche : logo + texte
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
-                painter = painterResource(id = R.drawable.logo_grapes), // Ton logo
+                painter = painterResource(id = R.drawable.logo_grapes),
                 contentDescription = "Grapes Logo",
                 modifier = Modifier.size(40.dp)
             )
@@ -52,36 +53,32 @@ fun MyTopBar(
             )
         }
 
-        // Partie droite : cloche, panier, avatar
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Icône de notification (cloche)
-            MyIcon(Icons.Default.Notifications, "Notifications")
+            MyIcon(
+                imageVector = Icons.Default.ShoppingCart,
+                description = "Shopping cart",
+                onClick = { navController.navigate("cart") }
+            )
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Icône de panier
-            MyIcon(Icons.Default.ShoppingCart, "Shopping cart")
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Avatar (image de profil)
-            MyIcon(Icons.Default.AccountBox, "Account")
-
-//            // TODO Remplacez par une image de profil réelle
-//            Image(
-//                painter = painterResource(id = R.drawable.ic_avatar), // Ton image de profil
-//                contentDescription = "User Avatar",
-//                modifier = Modifier
-//                    .size(36.dp)
-//                    .clip(CircleShape)
-//            )
+            MyIcon(
+                imageVector = Icons.Default.AccountBox,
+                description = "Account",
+                onClick = { navController.navigate("profile") }
+            )
         }
     }
 }
 
 @Composable
-fun MyIcon(imageVector: ImageVector, description : String) {
-    IconButton(onClick = { },
+fun MyIcon(
+    imageVector: ImageVector,
+    description: String,
+    onClick: () -> Unit = {}
+) {
+    IconButton(
+        onClick = onClick,
         modifier = Modifier
             .clip(CircleShape)
             .background(color = MaterialTheme.colorScheme.primary)

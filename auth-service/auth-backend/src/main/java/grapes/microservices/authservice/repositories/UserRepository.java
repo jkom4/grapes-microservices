@@ -15,6 +15,8 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
     boolean existsByEmail(@NotNull String email);
 
     boolean existsByPhoneNumber(@NotNull String phone);
+
+    boolean existsByNationalId(@NotNull String nationalId);
     boolean existsById(@NotNull ObjectId id);
 
     /**
