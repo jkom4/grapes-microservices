@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class MessageDTO {
+    private String id;
     private String topicId;
     private String userId;
     private String username;

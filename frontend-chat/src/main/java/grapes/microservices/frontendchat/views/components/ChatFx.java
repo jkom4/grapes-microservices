@@ -39,7 +39,6 @@ public class ChatFx extends VBox {
     private ObservableList<Message> loadedMessages;
     private ObjectProperty<User> userObserver;
     private SimpleBooleanProperty loadingStatus;
-    @Getter
     private SimpleStringProperty currentPostedMessage;
 
     public ChatFx() {
