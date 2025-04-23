@@ -1,5 +1,6 @@
 # consumer.py
 # RabbitMQ Consumer for SNS Data Ingestion
+# Corrected version
 
 import pika
 import os
@@ -7,108 +8,138 @@ import time
 import json
 import logging
 import sys
-from collections import deque # Using deque for potentially slightly more efficient appends
+from collections import deque
 
 # --- Database Imports ---
 import pymongo
-import mysql.connector # Official MySQL Driver
-from sqlalchemy import create_engine # Using SQLAlchemy for easier Pandas -> MySQL insertion
+import mysql.connector
+from sqlalchemy import create_engine
 import pandas as pd
 
 # --- Setup Logging ---
-logging.basicConfig(level=logging.INFO,
+log_level_str = os.getenv("LOG_LEVEL", "info").upper()
+log_level = getattr(logging, log_level_str, logging.INFO)
+logging.basicConfig(level=log_level,
                     format='%(asctime)s - %(levelname)s - %(message)s',
-                    stream=sys.stdout) # Log to standard output
+                    stream=sys.stdout)
 
-# --- 1. Configuration ---
-logging.info("Loading configuration from environment variables...")
+# --- 1. Configuration from Environment Variables ---
+logging.info("Loading configuration from environment variables set by Docker Compose...")
 
 # RabbitMQ Configuration
-AMQP_HOST = os.getenv("RABBITMQ_HOST")
-AMQP_PORT = int(os.getenv("RABBITMQ_PORT"))
+AMQP_HOST = os.getenv("RABBITMQ_HOST", "rabbitmq")
+AMQP_PORT = int(os.getenv("RABBITMQ_PORT", 5672))
 AMQP_USER = os.getenv("RABBITMQ_USER")
 AMQP_PWD = os.getenv("RABBITMQ_PASSWORD")
 AMQP_VHOST = os.getenv("AMQP_VHOST", "/")
 
-# Queues to listen to (Producers must send to these)
-TRANSACTIONS_QUEUE = os.getenv("TRANSACTIONS_QUEUE", "q.transactions")
-AUTH_LOGS_QUEUE = os.getenv("AUTH_LOGS_QUEUE", "q.auth_logs")
+if not AMQP_USER or not AMQP_PWD:
+    logging.warning("RabbitMQ user or password environment variables not set!")
 
-# Database Configuration
+# Queue Names
+ACTIVITY_LOGS_QUEUE = os.getenv("ACTIVITY_LOGS_QUEUE", "q_activity_logs")
+AUTH_LOGS_QUEUE = os.getenv("AUTH_LOGS_QUEUE", "q.auth_logs")
+logging.info(f"Listening on Activity Queue: {ACTIVITY_LOGS_QUEUE}")
+logging.info(f"Listening on Auth Logs Queue: {AUTH_LOGS_QUEUE}")
+
+# MySQL ROOT Database Configuration
 MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PWD = os.getenv("MYSQL_PWD")
-MYSQL_HOST = os.getenv("MYSQL_HOST") # Use the service name from docker-compose (e.g., 'db-activities')
+MYSQL_HOST = os.getenv("MYSQL_HOST", "mariadb")
+MYSQL_PORT = int(os.getenv("MYSQL_PORT", 3306))
 MYSQL_DB_ACTIVITIES = os.getenv("MYSQL_DB_ACTIVITIES")
-MYSQL_PORT = os.getenv("MYSQL_PORT")
 MYSQL_TRANSACTIONS_TABLE = os.getenv("MYSQL_TRANSACTIONS_TABLE", "transactions")
-# Add service_usage table if needed
-# MYSQL_SERVICE_USAGE_TABLE = os.getenv("MYSQL_SERVICE_USAGE_TABLE", "service_usage")
+MYSQL_SERVICE_USAGE_TABLE = os.getenv("MYSQL_SERVICE_USAGE_TABLE", "service_usage")
+logging.info(f"Target MySQL Table (Transactions): {MYSQL_TRANSACTIONS_TABLE}")
+logging.info(f"Target MySQL Table (Service Usage): {MYSQL_SERVICE_USAGE_TABLE}")
 
-MONGO_URI = os.getenv("DATA_MINING_MONGO_URI")
+if not all([MYSQL_USER, MYSQL_PWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB_ACTIVITIES]):
+    logging.error("One or more MySQL environment variables are missing!")
+logging.info(f"Target MySQL DB: {MYSQL_DB_ACTIVITIES} on {MYSQL_HOST}:{MYSQL_PORT} as user '{MYSQL_USER}'")
+
+# MongoDB ROOT Database Configuration
+MONGO_USER = os.getenv("MONGO_USER")
+MONGO_PWD = os.getenv("MONGO_PWD")
+MONGO_HOST = os.getenv("MONGO_HOST", "mongodb")
+MONGO_PORT = int(os.getenv("MONGO_PORT", 27017))
 MONGO_DB_AUTH = os.getenv("MONGO_DB_AUTH")
+MONGO_AUTH_SOURCE = os.getenv("MONGO_AUTH_SOURCE", "admin")
 MONGO_AUTH_COLLECTION = os.getenv("MONGO_AUTH_COLLECTION", "authentication_logs")
+logging.info(f"Target MongoDB Collection: {MONGO_AUTH_COLLECTION}")
+
+if not all([MONGO_USER, MONGO_PWD, MONGO_HOST, MONGO_PORT, MONGO_DB_AUTH]):
+    logging.error("One or more MongoDB environment variables are missing!")
+logging.info(f"Target MongoDB: {MONGO_DB_AUTH} on {MONGO_HOST}:{MONGO_PORT} as user '{MONGO_USER}' (authSource={MONGO_AUTH_SOURCE})")
+
+MONGO_URI_CONSTRUCTED = f"mongodb://{MONGO_USER}:{MONGO_PWD}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB_AUTH}?authSource={MONGO_AUTH_SOURCE}"
+logging.debug(f"Constructed Mongo URI: mongodb://{MONGO_USER}:***@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB_AUTH}?authSource={MONGO_AUTH_SOURCE}")
 
 # Consumer & Saving Logic Configuration
-SAVE_INTERVAL_SECONDS = int(os.getenv("SAVE_INTERVAL_SECONDS", 300)) # e.g., 5 minutes
+SAVE_INTERVAL_SECONDS = int(os.getenv("SAVE_INTERVAL_SECONDS", 120))
 MAX_BATCH_SIZE_TRANS = int(os.getenv("MAX_BATCH_SIZE_TRANS", 100))
 MAX_BATCH_SIZE_AUTH = int(os.getenv("MAX_BATCH_SIZE_AUTH", 200))
-# Add a maximum time to hold messages even if batch size isn't reached but interval also not met
-MAX_HOLD_TIME_SECONDS = int(os.getenv("MAX_HOLD_TIME_SECONDS", 600)) # e.g. 10 minutes max hold
+# Added service batch size configuration
+MAX_BATCH_SIZE_SERVICE = int(os.getenv("MAX_BATCH_SIZE_SERVICE", 100))
+MAX_HOLD_TIME_SECONDS = int(os.getenv("MAX_HOLD_TIME_SECONDS", 600))
+POOL_RECYCLE = int(os.getenv("POOL_RECYCLE", 3600))
 
-# SQLAlchemy connection string for MySQL
-# Ensure the correct driver is specified if not mysqlconnector (e.g., pymysql)
-# Syntax: dialect+driver://username:password@host:port/database
+logging.info(f"Save Interval: {SAVE_INTERVAL_SECONDS}s")
+logging.info(f"Max Batch Sizes (Trans/Auth/Service): {MAX_BATCH_SIZE_TRANS}/{MAX_BATCH_SIZE_AUTH}/{MAX_BATCH_SIZE_SERVICE}")
+logging.info(f"Max Hold Time: {MAX_HOLD_TIME_SECONDS}s")
+logging.info(f"SQLAlchemy Pool Recycle: {POOL_RECYCLE}s")
+
+# SQLAlchemy connection string
 SQLALCHEMY_DATABASE_URI = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PWD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB_ACTIVITIES}"
-POOL_RECYCLE = os.getenv("POOL_RECYCLE")
+logging.debug(f"Constructed SQLAlchemy URI: mysql+mysqlconnector://{MYSQL_USER}:***@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB_ACTIVITIES}")
 
-# --- 2. Global Variables & Accumulators ---
+# --- 2. Global Variables & Accumulators --- (Single correct block)
 logging.info("Initializing accumulators...")
 accumulated_transactions = deque()
 accumulated_auth_logs = deque()
+accumulated_service_usage = deque()
 last_save_time = time.time()
 first_message_time_trans = None
 first_message_time_auth = None
+first_message_time_service = None
 
 # --- 3. Helper Functions ---
 
 def create_sqlalchemy_engine():
-    """Creates a SQLAlchemy engine."""
+    """Creates a SQLAlchemy engine using configured URI."""
     try:
-        engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_recycle=POOL_RECYCLE) # Recycle connections hourly
-        # Test connection - this will raise an error if connection fails
+        engine = create_engine(SQLALCHEMY_DATABASE_URI, pool_recycle=POOL_RECYCLE)
         with engine.connect() as connection:
             logging.info("SQLAlchemy engine created and connection tested successfully.")
         return engine
     except Exception as e:
-        logging.error(f"Failed to create SQLAlchemy engine or test connection: {e}")
+        logging.error(f"Failed to create SQLAlchemy engine or test connection using URI '{SQLALCHEMY_DATABASE_URI}': {e}", exc_info=True)
         return None
 
 def get_mongo_client():
-    """Creates a PyMongo client."""
+    """Creates a PyMongo client using configured URI."""
     try:
-        client = pymongo.MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000) # 5 second timeout
-        # The ismaster command is cheap and does not require auth.
-        client.admin.command('ismaster')
+        client = pymongo.MongoClient(MONGO_URI_CONSTRUCTED, serverSelectionTimeoutMS=5000)
+        client.admin.command('ismaster') # Test connection
         logging.info("PyMongo client created and connection tested successfully.")
         return client
     except pymongo.errors.ConnectionFailure as e:
-        logging.error(f"Failed to connect to MongoDB: {e}")
+        logging.error(f"Failed to connect to MongoDB using URI '{MONGO_URI_CONSTRUCTED}': {e}", exc_info=True)
         return None
     except Exception as e:
-        logging.error(f"An unexpected error occurred connecting to MongoDB: {e}")
+        logging.error(f"An unexpected error occurred connecting to MongoDB using URI '{MONGO_URI_CONSTRUCTED}': {e}", exc_info=True)
         return None
 
 def parse_message(msg_body_raw):
     """Safely parses JSON message body."""
     try:
-        msg_string = msg_body_raw.decode('utf-8') # Decode bytes to string
+        msg_string = msg_body_raw.decode('utf-8')
         parsed_dict = json.loads(msg_string)
         return parsed_dict
     except json.JSONDecodeError as e:
-        logging.error(f"Error parsing JSON message: {e}. Message body (first 100 chars): '{msg_body_raw[:100]}...'")
+        logging.error(f"Error parsing JSON message: {e}. Body(100): '{msg_body_raw[:100]}...'")
         return None
     except UnicodeDecodeError as e:
-        logging.error(f"Error decoding message body (not UTF-8?): {e}. Message body (first 100 bytes): '{msg_body_raw[:100]}...'")
+        logging.error(f"Error decoding message (UTF-8): {e}. Body(100): '{msg_body_raw[:100]}...'")
         return None
     except Exception as e:
         logging.error(f"Unexpected error parsing message: {e}")
@@ -118,382 +149,433 @@ def prepare_data_for_sql(data_list, expected_cols):
     """Converts list of dicts to Pandas DataFrame, selects/adds expected cols."""
     if not data_list:
         return pd.DataFrame(columns=expected_cols)
-
     try:
-        df = pd.DataFrame.from_records(list(data_list)) # Convert deque to list first
+        # Convert deque to list if necessary before DataFrame creation
+        if isinstance(data_list, deque):
+            data_list = list(data_list)
 
-        # Add missing expected columns with None (which Pandas handles well)
+        df = pd.DataFrame.from_records(data_list)
+        # Add missing columns and ensure correct order
         for col in expected_cols:
             if col not in df.columns:
                 df[col] = None
-
-        # Select only expected columns in the correct order
         df = df[expected_cols]
 
-        # --- Crucial Type Conversions (Adjust based on our schemas) ---
-        # Example conversions:
-        if 'transaction_timestamp' in df.columns:
-            df['transaction_timestamp'] = pd.to_datetime(df['transaction_timestamp'], errors='coerce')
-        if 'client_id' in df.columns:
-            # Use Int64 (nullable integer) if NAs are possible, else float/object might result
-            df['client_id'] = pd.to_numeric(df['client_id'], errors='coerce').astype('Int64')
-        if 'product_id' in df.columns:
-            df['product_id'] = pd.to_numeric(df['product_id'], errors='coerce').astype('Int64')
-        if 'service_id' in df.columns:
-            df['service_id'] = pd.to_numeric(df['service_id'], errors='coerce').astype('Int64')
-        if 'quantity' in df.columns:
-            df['quantity'] = pd.to_numeric(df['quantity'], errors='coerce').astype('Int64')
-        if 'unit_price' in df.columns:
-            df['unit_price'] = pd.to_numeric(df['unit_price'], errors='coerce')
-        if 'total_amount' in df.columns:
-            df['total_amount'] = pd.to_numeric(df['total_amount'], errors='coerce')
-        # Add more conversions for payment_status, delivery_status etc. if needed
+        # --- Type Conversions ---
+        time_cols = ['transaction_timestamp', 'usage_timestamp']
+        for col in time_cols:
+            if col in df.columns:
+                # Use errors='coerce' to turn unparseable dates into NaT (Not a Time)
+                df[col] = pd.to_datetime(df[col], errors='coerce')
 
-        # Handle potential NaT (Not a Time) from timestamp conversion if column must not be NULL
-        # Handle potential NA from numeric conversion if column must not be NULL
+        int_cols = ['client_id', 'product_id', 'service_id', 'quantity', 'delivery_time_days', 'duration_ms']
+        for col in int_cols:
+            if col in df.columns:
+                # Use Int64 (nullable integer type)
+                df[col] = pd.to_numeric(df[col], errors='coerce').astype('Int64')
+
+        float_cols = ['unit_price', 'total_amount']
+        for col in float_cols:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+
+        # Handle JSON/Text fields if needed (example for request_details)
+        if 'request_details' in df.columns:
+            df['request_details'] = df['request_details'].apply(lambda x: json.dumps(x) if isinstance(x, (dict, list)) else x)
+
+
+        # Handle potential NaNs/NaTs in non-nullable DB columns before writing if required
+        # (e.g., replace NaNs with default values or filter rows)
 
         return df
-
     except Exception as e:
-        logging.error(f"Error preparing data for SQL: {e}")
-        # Log the first few problematic records if possible
+        logging.error(f"Error preparing data for SQL: {e}", exc_info=True)
         try:
             logging.error(f"Problematic data sample: {list(data_list)[:2]}")
-        except:
-            pass # Ignore errors during error logging
-        return pd.DataFrame(columns=expected_cols) # Return empty df on error
+        except: pass
+        return pd.DataFrame(columns=expected_cols)
 
 def prepare_data_for_mongo(data_list):
     """Prepares list of dicts for MongoDB insertion (basic type checks/conversion)."""
-    if not data_list:
-        return []
-    # MongoDB is flexible, but converting timestamps is good practice
+    if not data_list: return []
     processed_list = []
     for record in data_list:
         if isinstance(record, dict):
-            # Example: Convert timestamp string to datetime object if present
+            # Convert timestamp string to datetime object if present and a string
             if 'timestamp' in record and isinstance(record['timestamp'], str):
                 try:
-                    # Attempt to parse common formats, adjust as needed
-                    record['timestamp'] = pd.to_datetime(record['timestamp'], errors='coerce')
-                    # Convert Pandas NaT to None, leave valid datetimes
-                    if pd.isna(record['timestamp']): record['timestamp'] = None
-                except Exception:
-                    logging.warning(f"Could not parse timestamp in Mongo record: {record.get('timestamp')}")
-                    record['timestamp'] = None # Or keep original string if preferred on error
-            # Add other type checks/conversions if needed
+                    dt_obj = pd.to_datetime(record['timestamp'], errors='coerce')
+                    if not pd.isna(dt_obj):
+                        record['timestamp'] = dt_obj.to_pydatetime()
+                    else:
+                        record['timestamp'] = None
+                except Exception as e:
+                    logging.warning(f"Could not parse timestamp '{record.get('timestamp')}' in Mongo record: {e}")
+                    record['timestamp'] = None
+            # Convert client_id to int if it's a numeric string? Optional.
+            if 'client_id' in record and isinstance(record['client_id'], str) and record['client_id'].isdigit():
+                record['client_id'] = int(record['client_id'])
+
             processed_list.append(record)
         else:
-            logging.warning(f"Skipping non-dictionary item found in auth log accumulator: {record}")
-
+            logging.warning(f"Skipping non-dictionary item in auth log accumulator: {record}")
     return processed_list
 
-# --- 4. Save Function ---
 
-def save_accumulated_data(sql_engine, mongo_client):
+# --- 4. Save Function --- (Corrected version)
+
+def save_accumulated_data(sql_engine, mongo_client, mysql_trans_table, mongo_auth_collection, mysql_service_table):
     """Saves accumulated data to databases."""
-    global accumulated_transactions, accumulated_auth_logs, last_save_time
-    global first_message_time_trans, first_message_time_auth # Need to reset these
+    global accumulated_transactions, accumulated_auth_logs, accumulated_service_usage, last_save_time
+    global first_message_time_trans, first_message_time_auth, first_message_time_service
 
     logging.info("Attempting to save accumulated data...")
     data_saved_transactions = False
     data_saved_auth = False
+    data_saved_service = False
+    current_time_save_start = time.time()
 
     # --- Process and Save Transactions (MySQL) ---
     local_transactions = None
     if accumulated_transactions:
-        local_transactions = list(accumulated_transactions) # Copy deque to list
-        accumulated_transactions.clear() # Clear the deque
-        first_message_time_trans = None # Reset hold timer
-        logging.info(f"Copied {len(local_transactions)} transaction messages for saving.")
+        local_transactions = list(accumulated_transactions)
+        accumulated_transactions.clear()
+        first_message_time_trans = None
+        logging.info(f"Processing {len(local_transactions)} transaction messages for saving.")
 
     if local_transactions:
         if sql_engine is None:
-            logging.error("Cannot save transactions: SQLAlchemy engine is not available.")
-            # Decide on error handling: put back, save to file, or discard
+            logging.error("Cannot save transactions: SQLAlchemy engine is unavailable.")
             logging.warning("Discarding transaction batch due to missing DB connection.")
-            # To retry: accumulated_transactions.extend(local_transactions) # Needs care!
         else:
-            # Define expected columns based on your MySQL 'transactions' table
             expected_trans_cols = [
                 "client_id", "product_id", "service_id", "quantity",
                 "unit_price", "transaction_timestamp", "payment_method",
                 "payment_status", "delivery_status", "delivery_time_days",
-                "source_system", "total_amount" # Ensure this matches your schema exactly
+                "source_system", "total_amount" # Add/Remove cols to match your DB schema
             ]
             trans_df = prepare_data_for_sql(local_transactions, expected_trans_cols)
 
             if not trans_df.empty:
-                logging.info(f"Attempting to save {len(trans_df)} processed transaction rows to MySQL table '{MYSQL_TRANSACTIONS_TABLE}'.")
+                logging.info(f"Attempting to save {len(trans_df)} transaction rows to MySQL table '{mysql_trans_table}'.")
                 try:
-                    # Use Pandas to_sql with SQLAlchemy engine
                     trans_df.to_sql(
-                        name=MYSQL_TRANSACTIONS_TABLE,
+                        name=mysql_trans_table,
                         con=sql_engine,
-                        if_exists='append', # Append data
-                        index=False,      # Don't write pandas index
-                        chunksize=1000    # Optional: Insert in chunks for large batches
+                        if_exists='append',
+                        index=False,
+                        chunksize=500
                     )
                     data_saved_transactions = True
-                    logging.info("Successfully saved transaction data to MySQL.")
+                    logging.info(f"Successfully saved transaction data to MySQL.") # Removed duration here for overall timing
                 except Exception as e:
-                    logging.error(f"Error saving transaction data to MySQL: {e}")
-                    # Robust error handling: Save trans_df to a CSV/JSON file for later manual inspection/retry
+                    logging.error(f"Error saving transaction data to MySQL: {e}", exc_info=True)
                     try:
                         fail_time = time.strftime("%Y%m%d_%H%M%S")
                         fail_file = f"failed_transactions_{fail_time}.json"
                         with open(fail_file, 'w') as f:
-                            json.dump(local_transactions, f) # Save original list
+                            json.dump(local_transactions, f, default=str)
                         logging.info(f"Saved failed transaction batch to {fail_file}")
                     except Exception as ef:
                         logging.error(f"Could not save failed transaction batch to file: {ef}")
             else:
                 logging.warning("No valid transaction data rows to save after preparation.")
-                data_saved_transactions = True # Nothing to save, effectively "saved"
+                data_saved_transactions = True
     else:
         logging.info("No new transaction data accumulated to save.")
-        data_saved_transactions = True # Nothing to save
+        data_saved_transactions = True
+
+    # --- Process and Save Service Usage (MySQL) ---
+    local_service_usage = None
+    if accumulated_service_usage:
+        local_service_usage = list(accumulated_service_usage)
+        accumulated_service_usage.clear()
+        first_message_time_service = None
+        logging.info(f"Processing {len(local_service_usage)} service usage messages for saving.")
+
+    if local_service_usage:
+        if sql_engine is None:
+            logging.error("Cannot save service usage: SQLAlchemy engine is unavailable.")
+            logging.warning("Discarding service usage batch due to missing DB connection.")
+        else:
+            expected_service_cols = [
+                "client_id", "service_id", "usage_timestamp",
+                "request_details", "status", "duration_ms"
+                # Add "usage_log_id_source" if you have this column
+            ]
+            service_df = prepare_data_for_sql(local_service_usage, expected_service_cols)
+
+            if not service_df.empty:
+                logging.info(f"Attempting to save {len(service_df)} service usage rows to MySQL table '{mysql_service_table}'.")
+                try:
+                    service_df.to_sql(
+                        name=mysql_service_table,
+                        con=sql_engine,
+                        if_exists='append',
+                        index=False,
+                        chunksize=500
+                    )
+                    data_saved_service = True
+                    logging.info(f"Successfully saved service usage data to MySQL.")
+                except Exception as e:
+                    logging.error(f"Error saving service usage data to MySQL: {e}", exc_info=True)
+                    try:
+                        fail_time = time.strftime("%Y%m%d_%H%M%S")
+                        fail_file = f"failed_service_usage_{fail_time}.json"
+                        with open(fail_file, 'w') as f:
+                            json.dump(local_service_usage, f, default=str)
+                        logging.info(f"Saved failed service usage batch to {fail_file}")
+                    except Exception as ef:
+                        logging.error(f"Could not save failed service usage batch to file: {ef}")
+            else:
+                logging.warning("No valid service usage data rows to save after preparation.")
+                data_saved_service = True
+    else:
+        logging.info("No new service usage data accumulated to save.")
+        data_saved_service = True
 
     # --- Process and Save Auth Logs (MongoDB) ---
+    current_time_auth_save_start = time.time() # Specific timing for this part
     local_auth_logs = None
     if accumulated_auth_logs:
-        local_auth_logs = list(accumulated_auth_logs) # Copy deque to list
-        accumulated_auth_logs.clear() # Clear the deque
-        first_message_time_auth = None # Reset hold timer
-        logging.info(f"Copied {len(local_auth_logs)} auth log messages for saving.")
+        local_auth_logs = list(accumulated_auth_logs)
+        accumulated_auth_logs.clear()
+        first_message_time_auth = None
+        logging.info(f"Processing {len(local_auth_logs)} auth log messages for saving.")
 
     if local_auth_logs:
         if mongo_client is None:
-            logging.error("Cannot save auth logs: MongoDB client is not available.")
+            logging.error("Cannot save auth logs: MongoDB client is unavailable.")
             logging.warning("Discarding auth log batch due to missing DB connection.")
-            # To retry: accumulated_auth_logs.extend(local_auth_logs)
         else:
             auth_list_processed = prepare_data_for_mongo(local_auth_logs)
-
             if auth_list_processed:
-                logging.info(f"Attempting to save {len(auth_list_processed)} processed auth log documents to MongoDB collection '{MONGO_AUTH_COLLECTION}'.")
+                # *** CORRECTED USAGE OF ARGUMENT NAME ***
+                logging.info(f"Attempting to save {len(auth_list_processed)} processed auth log documents to MongoDB collection '{mongo_auth_collection}'.")
                 try:
                     db = mongo_client[MONGO_DB_AUTH]
-                    collection = db[MONGO_AUTH_COLLECTION]
-                    # Insert the list of dictionaries
-                    result = collection.insert_many(auth_list_processed, ordered=False) # ordered=False continues on error
+                    # *** CORRECTED USAGE OF ARGUMENT NAME ***
+                    collection = db[mongo_auth_collection]
+                    result = collection.insert_many(auth_list_processed, ordered=False)
                     data_saved_auth = True
-                    logging.info(f"Successfully saved {len(result.inserted_ids)} auth log documents to MongoDB.")
+                    logging.info(f"Successfully saved {len(result.inserted_ids)} auth log documents to MongoDB. Duration: {time.time() - current_time_auth_save_start:.2f}s")
                 except pymongo.errors.BulkWriteError as bwe:
                     logging.error(f"Error saving auth log data to MongoDB (BulkWriteError): {bwe.details}")
-                    # Details contain info about which documents failed
-                    data_saved_auth = False # Consider partially successful? For simplicity, mark as failed.
-                    # Save failed batch to file is recommended here too
+                    data_saved_auth = False
                 except Exception as e:
-                    logging.error(f"Error saving auth log data to MongoDB: {e}")
-                    # Save failed batch to file
-                    try:
-                        fail_time = time.strftime("%Y%m%d_%H%M%S")
-                        fail_file = f"failed_auth_{fail_time}.json"
-                        with open(fail_file, 'w') as f:
-                            json.dump(local_auth_logs, f) # Save original list
-                        logging.info(f"Saved failed auth log batch to {fail_file}")
-                    except Exception as ef:
-                        logging.error(f"Could not save failed auth log batch to file: {ef}")
+                    logging.error(f"Error saving auth log data to MongoDB: {e}", exc_info=True)
+                    data_saved_auth = False
+                    # Consider saving failed batch here too
             else:
                 logging.warning("No valid auth log documents to save after preparation.")
-                data_saved_auth = True # Nothing to save
+                data_saved_auth = True
     else:
         logging.info("No new auth log data accumulated to save.")
-        data_saved_auth = True # Nothing to save
+        data_saved_auth = True
 
-    # Update last save time only if both were successful or had nothing to save
-    if data_saved_transactions and data_saved_auth:
+    # Update last save time only if ALL operations were successful
+    if data_saved_transactions and data_saved_auth and data_saved_service:
         last_save_time = time.time()
-        logging.info(f"Data saving cycle complete. Last save time updated to {last_save_time:.0f}")
+        logging.info(f"Data saving cycle complete. Last save time updated. Total duration: {time.time() - current_time_save_start:.2f}s")
     else:
         logging.warning("Data saving cycle completed with errors. Last save time NOT updated.")
+
 
 # --- 5. RabbitMQ Callback Function ---
 
 def callback(ch, method, properties, body):
     """Processes messages received from RabbitMQ."""
-    global accumulated_transactions, accumulated_auth_logs
-    global first_message_time_trans, first_message_time_auth
+    global accumulated_transactions, accumulated_auth_logs, accumulated_service_usage
+    global first_message_time_trans, first_message_time_auth, first_message_time_service
 
     delivery_tag = method.delivery_tag
-    queue_name = method.routing_key # Assuming routing key is used as queue name, or adjust based on exchange type
-
-    # logging.info(f"Received message from queue '{queue_name}' (tag: {delivery_tag})")
+    queue_name = method.routing_key
+    logging.debug(f"Received message from queue '{queue_name}' (tag: {delivery_tag})")
 
     parsed_data = parse_message(body)
-
-    acked = False # Flag to ensure ack/nack happens
+    acked = False
 
     if parsed_data is not None:
-        try:
-            if queue_name == TRANSACTIONS_QUEUE:
-                accumulated_transactions.append(parsed_data)
-                if first_message_time_trans is None: first_message_time_trans = time.time()
-                # logging.info(f"Added to transactions queue. Size: {len(accumulated_transactions)}")
-            elif queue_name == AUTH_LOGS_QUEUE:
-                accumulated_auth_logs.append(parsed_data)
-                if first_message_time_auth is None: first_message_time_auth = time.time()
-                # logging.info(f"Added to auth logs queue. Size: {len(accumulated_auth_logs)}")
-            else:
-                logging.warning(f"Message received from unexpected queue/routing_key '{queue_name}'. Discarding.")
-                # Acknowledge to remove from queue
-                ch.basic_ack(delivery_tag=delivery_tag)
-                acked = True
-                return # Skip further processing
+        payload = parsed_data.get('payload', parsed_data)
+        event_type = parsed_data.get('eventType', None)
 
-            # Acknowledge after successfully adding to deque
-            if not acked:
-                ch.basic_ack(delivery_tag=delivery_tag)
-                acked = True
-                # logging.info(f"Acknowledged message tag {delivery_tag}")
+        try:
+            if queue_name == ACTIVITY_LOGS_QUEUE:
+                if event_type == "TransactionCompleted":
+                    accumulated_transactions.append(payload)
+                    if first_message_time_trans is None: first_message_time_trans = time.time()
+                    logging.debug(f"Added to transactions. Size: {len(accumulated_transactions)}")
+                elif event_type == "ServiceUsed":
+                    accumulated_service_usage.append(payload)
+                    if first_message_time_service is None: first_message_time_service = time.time()
+                    logging.debug(f"Added to service usage. Size: {len(accumulated_service_usage)}")
+                else:
+                    logging.warning(f"Received unknown eventType '{event_type}' on queue '{ACTIVITY_LOGS_QUEUE}'. Discarding tag {delivery_tag}.")
+
+            elif queue_name == AUTH_LOGS_QUEUE:
+                accumulated_auth_logs.append(payload)
+                if first_message_time_auth is None: first_message_time_auth = time.time()
+                logging.debug(f"Added to auth logs. Size: {len(accumulated_auth_logs)}")
+            else:
+                logging.warning(f"Message received from unexpected queue/routing_key '{queue_name}'. Discarding tag {delivery_tag}.")
+
+            # Ack only if message was handled or intentionally discarded above
+            ch.basic_ack(delivery_tag=delivery_tag)
+            acked = True
+            logging.debug(f"Acknowledged message tag {delivery_tag}")
 
         except Exception as e:
-            logging.error(f"Error processing message tag {delivery_tag} after parsing: {e}")
-            # Decide whether to Nack (requeue) or Ack (discard) based on error type
-            # For most processing errors after parsing, discard to avoid infinite loops
+            logging.error(f"Error processing message tag {delivery_tag} after parsing: {e}", exc_info=True)
             if not acked:
                 try:
-                    ch.basic_ack(delivery_tag=delivery_tag) # Discard on error
+                    ch.basic_ack(delivery_tag=delivery_tag)
                     logging.warning(f"Acknowledged message tag {delivery_tag} after processing error (discarded).")
                     acked = True
                 except Exception as ack_err:
                     logging.error(f"Failed to acknowledge message tag {delivery_tag} after processing error: {ack_err}")
     else:
-        # Parsing failed
         logging.warning(f"Discarding unparseable message tag {delivery_tag}.")
         if not acked:
             try:
-                ch.basic_ack(delivery_tag=delivery_tag) # Discard unparseable message
+                ch.basic_ack(delivery_tag=delivery_tag)
                 acked = True
             except Exception as ack_err:
                 logging.error(f"Failed to acknowledge unparseable message tag {delivery_tag}: {ack_err}")
 
-    # Final check if acknowledgement failed somehow
     if not acked:
-        logging.critical(f"Message tag {delivery_tag} was processed but acknowledgement logic failed!")
-        # This indicates a code path error, requires investigation. Message might be redelivered.
+        logging.critical(f"Message tag {delivery_tag} processed but ACK/NACK logic failed!")
 
 
 # --- 6. Main Function ---
+
 def main():
     """Main connection and consumption loop."""
-    global last_save_time, first_message_time_trans, first_message_time_auth # Allow modification
+    # Need to declare service usage timer global
+    global last_save_time, first_message_time_trans, first_message_time_auth, first_message_time_service
 
     logging.info("Starting SNS Consumer Service...")
-    sql_engine = create_sqlalchemy_engine() # Create engine once
-    mongo_client = get_mongo_client() # Create client once
+    sql_engine = create_sqlalchemy_engine()
+    mongo_client = get_mongo_client()
 
     connection = None
-    while True: # Outer loop for handling AMQP connection errors
+    while True:
         try:
-            logging.info(f"Attempting to connect to RabbitMQ at {AMQP_HOST}:{AMQP_PORT}...")
+            logging.info(f"Attempting RabbitMQ connection: {AMQP_USER}@{AMQP_HOST}:{AMQP_PORT}{AMQP_VHOST}")
             credentials = pika.PlainCredentials(AMQP_USER, AMQP_PWD)
-            parameters = pika.ConnectionParameters(host=AMQP_HOST,
-                                                   port=AMQP_PORT,
-                                                   virtual_host=AMQP_VHOST,
-                                                   credentials=credentials,
-                                                   heartbeat=600, # Increase heartbeat
-                                                   blocked_connection_timeout=300) # Timeout
+            parameters = pika.ConnectionParameters(
+                host=AMQP_HOST,
+                port=AMQP_PORT,
+                virtual_host=AMQP_VHOST,
+                credentials=credentials,
+                heartbeat=120,
+                blocked_connection_timeout=300)
             connection = pika.BlockingConnection(parameters)
             channel = connection.channel()
-            logging.info("RabbitMQ connection successful. Setting up queues and consumers.")
+            logging.info("RabbitMQ connection successful.")
 
-            # Declare queues (idempotent, durable)
-            channel.queue_declare(queue=TRANSACTIONS_QUEUE, durable=True)
-            logging.info(f"Declared queue: {TRANSACTIONS_QUEUE}")
+            channel.queue_declare(queue=ACTIVITY_LOGS_QUEUE, durable=True)
+            logging.info(f"Ensured queue exists: {ACTIVITY_LOGS_QUEUE}")
             channel.queue_declare(queue=AUTH_LOGS_QUEUE, durable=True)
-            logging.info(f"Declared queue: {AUTH_LOGS_QUEUE}")
+            logging.info(f"Ensured queue exists: {AUTH_LOGS_QUEUE}")
 
-            # Set QoS (Quality of Service) - process only N messages at a time
-            # Helps prevent overwhelming the consumer if messages pile up
-            channel.basic_qos(prefetch_count=max(MAX_BATCH_SIZE_TRANS, MAX_BATCH_SIZE_AUTH) * 2) # Example: Prefetch ~2 batches
+            qos_prefetch = max(MAX_BATCH_SIZE_TRANS, MAX_BATCH_SIZE_AUTH, MAX_BATCH_SIZE_SERVICE) * 2
+            channel.basic_qos(prefetch_count=qos_prefetch)
+            logging.info(f"QoS prefetch count set to {qos_prefetch}")
 
-            # Setup consumers
-            channel.basic_consume(queue=TRANSACTIONS_QUEUE,
-                                  on_message_callback=callback,
-                                  auto_ack=False) # Manual acknowledgement
-            channel.basic_consume(queue=AUTH_LOGS_QUEUE,
-                                  on_message_callback=callback,
-                                  auto_ack=False) # Manual acknowledgement
+            channel.basic_consume(queue=ACTIVITY_LOGS_QUEUE, on_message_callback=callback, auto_ack=False)
+            channel.basic_consume(queue=AUTH_LOGS_QUEUE, on_message_callback=callback, auto_ack=False)
 
-            logging.info("Consumers started. Waiting for messages...")
-            # Start the blocking consumer loop - this runs until connection error/closure
-            # We need a way to periodically check save conditions without blocking this loop entirely.
-            # pika's BlockingConnection isn't ideal for mixing timed tasks easily.
-            # Workaround: Use connection.process_data_events with a timeout.
+            logging.info("Consumers started. Waiting for messages and checking save conditions...")
 
-            while True: # Inner loop to process events and check save conditions
-                # Process events for a short time, then check save conditions
-                connection.process_data_events(time_limit=1) # Process events for 1 second
+            while True:
+                connection.process_data_events(time_limit=1.0)
 
-                # Check save conditions
                 current_time = time.time()
                 time_condition = (current_time - last_save_time) >= SAVE_INTERVAL_SECONDS
                 batch_condition_trans = len(accumulated_transactions) >= MAX_BATCH_SIZE_TRANS
                 batch_condition_auth = len(accumulated_auth_logs) >= MAX_BATCH_SIZE_AUTH
-                # Check max hold time
+                batch_condition_service = len(accumulated_service_usage) >= MAX_BATCH_SIZE_SERVICE
+
                 hold_time_exceeded_trans = (first_message_time_trans is not None and
                                             (current_time - first_message_time_trans) >= MAX_HOLD_TIME_SECONDS)
                 hold_time_exceeded_auth = (first_message_time_auth is not None and
                                            (current_time - first_message_time_auth) >= MAX_HOLD_TIME_SECONDS)
+                hold_time_exceeded_service = (first_message_time_service is not None and
+                                              (current_time - first_message_time_service) >= MAX_HOLD_TIME_SECONDS)
 
+                should_save = (time_condition or batch_condition_trans or batch_condition_auth or batch_condition_service
+                               or hold_time_exceeded_trans or hold_time_exceeded_auth or hold_time_exceeded_service)
 
-                if time_condition or batch_condition_trans or batch_condition_auth or hold_time_exceeded_trans or hold_time_exceeded_auth:
+                if should_save and (accumulated_transactions or accumulated_auth_logs or accumulated_service_usage):
                     log_msg = "Save triggered by: "
                     if time_condition: log_msg += "[Interval]"
                     if batch_condition_trans: log_msg += "[Trans Batch Size]"
                     if batch_condition_auth: log_msg += "[Auth Batch Size]"
+                    if batch_condition_service: log_msg += "[Service Batch Size]"
                     if hold_time_exceeded_trans: log_msg += "[Trans Max Hold]"
                     if hold_time_exceeded_auth: log_msg += "[Auth Max Hold]"
+                    if hold_time_exceeded_service: log_msg += "[Service Max Hold]"
                     logging.info(log_msg)
 
-                    # Check DB connections before saving
-                    if sql_engine is None: sql_engine = create_sqlalchemy_engine() # Recreate if missing
-                    if mongo_client is None: mongo_client = get_mongo_client() # Recreate if missing
+                    # Check DB connections
+                    if sql_engine is None:
+                        logging.warning("SQLAlchemy engine was None. Attempting to recreate.")
+                        sql_engine = create_sqlalchemy_engine()
 
-                    save_accumulated_data(sql_engine, mongo_client)
-                    # last_save_time updated inside function on success
+                    if mongo_client is None:
+                        logging.warning("Mongo client was None. Attempting to recreate.")
+                        mongo_client = get_mongo_client()
+                    else:
+                        try:
+                            mongo_client.admin.command('ismaster')
+                        except Exception as mongo_err:
+                            logging.error(f"MongoDB connection test failed: {mongo_err}. Attempting to recreate client.")
+                            try: mongo_client.close()
+                            except: pass
+                            mongo_client = get_mongo_client()
 
+                    # Call save function with all necessary arguments
+                    save_accumulated_data(sql_engine, mongo_client,
+                                          MYSQL_TRANSACTIONS_TABLE,
+                                          MONGO_AUTH_COLLECTION,
+                                          MYSQL_SERVICE_USAGE_TABLE)
 
         except pika.exceptions.AMQPConnectionError as e:
-            logging.error(f"RabbitMQ Connection Error: {e}. Retrying in 10 seconds...")
+            logging.error(f"RabbitMQ Connection Error: {e}. Retrying in 15 seconds...")
+            time.sleep(15)
         except pika.exceptions.AMQPChannelError as e:
-            logging.error(f"RabbitMQ Channel Error: {e}. Retrying connection in 10 seconds...")
+            logging.error(f"RabbitMQ Channel Error: {e}. Retrying connection in 15 seconds...")
+            time.sleep(15)
         except KeyboardInterrupt:
-            logging.info("Ctrl+C received. Shutting down consumer...")
-            break # Exit the outer while loop
+            logging.info("Ctrl+C received. Shutting down...")
+            break
         except Exception as e:
-            logging.error(f"An unexpected error occurred in the main loop: {e}", exc_info=True) # Log traceback
-            logging.error("Retrying connection in 10 seconds...")
+            logging.error(f"An unexpected error occurred in the main loop: {e}", exc_info=True)
+            logging.error("Retrying connection in 15 seconds...")
+            time.sleep(15)
         finally:
             if connection and connection.is_open:
-                try:
-                    logging.info("Closing RabbitMQ connection.")
-                    connection.close()
-                except Exception as ce:
-                    logging.error(f"Error closing RabbitMQ connection: {ce}")
-            connection = None # Ensure connection is reset for retry loop
-            # Don't close DB connections here, let them be potentially reused or recreated
-
-        time.sleep(10) # Wait before retrying connection
+                try: connection.close()
+                except Exception as ce: logging.error(f"Error closing RabbitMQ connection: {ce}")
+            connection = None
 
     logging.info("SNS Consumer Service stopped.")
-    # Clean up DB connections on final exit
     if sql_engine:
-        try:
-            sql_engine.dispose()
-            logging.info("SQLAlchemy engine disposed.")
-        except Exception as e:
-            logging.error(f"Error disposing SQLAlchemy engine: {e}")
+        try: sql_engine.dispose()
+        except Exception as e: logging.error(f"Error disposing SQLAlchemy engine: {e}")
     if mongo_client:
-        try:
-            mongo_client.close()
-            logging.info("MongoDB client closed.")
-        except Exception as e:
-            logging.error(f"Error closing MongoDB client: {e}")
-
+        try: mongo_client.close()
+        except Exception as e: logging.error(f"Error closing MongoDB client: {e}")
 
 # --- 7. Script Execution ---
 if __name__ == "__main__":
+    try:
+        from dotenv import load_dotenv
+        if load_dotenv():
+            logging.info("Loaded environment variables from .env file.")
+        else:
+            logging.info("No .env file found or it is empty.")
+    except ImportError:
+        logging.info("python-dotenv not installed, skipping .env file loading.")
+
     main()

@@ -131,31 +131,50 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      # --- RabbitMQ Connection ---
-      - AMQP_HOST=rabbitmq
-      - AMQP_PORT=5672
-      - AMQP_USER=${RABBITMQ_USER}
-      - AMQP_PWD=${RABBITMQ_PASSWORD}
-      # --- DB Connection ---
-      - MYSQL_USER=root
-      - MYSQL_PWD=${DB_PASSWORD}
-      - MYSQL_HOST=mariadb
+      - RABBITMQ_HOST=rabbitmq # Use service name
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER} # From .env via env_file
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} # From .env via env_file
+      - AMQP_VHOST=/ # Default VHost usually correct
+      - ACTIVITY_LOGS_QUEUE=q_activity_logs # Explicitly set
+      - AUTH_LOGS_QUEUE=q.auth_logs
+
+      # --- DB Connection (Using ROOT Credentials) ---
+      # MariaDB Root
+      - MYSQL_USER=root # Explicitly set to root
+      - MYSQL_PWD=${DB_PASSWORD} # Use the ROOT password defined for MariaDB (DB_PASSWORD from .env)
+      - MYSQL_HOST=mariadb # Use service name
       - MYSQL_PORT=3306
       - MYSQL_DB_ACTIVITIES=BD_OPER_ACTIVITIES
-      - MONGO_URI=${DATA_MINING_MONGO_URI}
-      - MONGO_DB_AUTH=BD_OPER_PROC_AUTH
-      - USER=${USER:-unknown}
+      - MYSQL_TRANSACTIONS_TABLE=transactions #
 
-      # --- Consumer Logic Params (Optional - Override defaults in consumer.py) ---
+      # MongoDB Root
+      - MONGO_USER=${MONGO_ROOT_USER} # Use ROOT user from .env
+      - MONGO_PWD=${MONGO_ROOT_PASSWORD} # Use ROOT password from .env
+      - MONGO_HOST=mongodb # Use service name
+      - MONGO_PORT=27017
+      - MONGO_DB_AUTH=BD_OPER_PROC_AUTH # Target DB Name for auth logs
+      - MONGO_AUTH_SOURCE=admin # Root user is usually defined in 'admin' db
+      - MONGO_AUTH_COLLECTION=authentication_logs #
 
+      # --- SQLAlchemy Pool Recycle ---
+      - POOL_RECYCLE=${POOL_RECYCLE:-3600} # Use from .env or default
+      
+#       --- Consumer Logic Params (Optional - Override defaults in consumer.py) ---
+#       - SAVE_INTERVAL_SECONDS=60
+#       - MAX_BATCH_SIZE_TRANS=50
+#       - MAX_BATCH_SIZE_AUTH=100
+#       - MAX_HOLD_TIME_SECONDS=120
+#       - LOG_LEVEL=debug
 
-      # --- Python Logging ---
-      - PYTHONUNBUFFERED=1
+      # --- Python & Other ---
+      - PYTHONUNBUFFERED=1 # Good for seeing logs immediately
+      - USER=${USER:-unknown} # Usually not needed by script
 
     depends_on:
-      - rabbitmq   # Must wait for RabbitMQ to be ready (or at least started)
-      - mariadb    # Must wait for the primary MariaDB
-      - mongodb    # Must wait for MongoDB
+        - rabbitmq
+        - mariadb
+        - mongodb
 
 ### BACKEND
 
