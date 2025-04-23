@@ -47,14 +47,9 @@ public class TopicController {
     }
 
     @GetMapping("/user")
-    public UserDto getCurrentUser(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-
-        String userId = null;
-        String username = null;
-
-        return new UserDto(userId, username);
+    public UserDto getCurrentUser(@RequestHeader("X-User-ID") String userId,
+                                  @RequestHeader("X-User-Roles") String userRole,
+                                  @RequestHeader("X-User-Name") String userName) {
+        return new UserDto(userId, userName);
     }
 }
