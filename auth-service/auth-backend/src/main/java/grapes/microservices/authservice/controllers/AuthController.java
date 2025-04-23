@@ -70,7 +70,6 @@ public class AuthController {
             return ResponseEntity.status(400).body(new JsonMessage("Required token 'refreshToken' is not present"));
         }
         try {
-            System.out.println("Refresh token: " + refreshToken);
             String[] tokens = authService.refreshTokens(refreshToken);
             return ResponseEntity.ok(new AuthResponse(tokens[0], tokens[1]));
         } catch (RuntimeException e) {

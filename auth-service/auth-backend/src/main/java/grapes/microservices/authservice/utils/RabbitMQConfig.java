@@ -13,13 +13,21 @@ public class RabbitMQConfig {
 
     private final String authLogsQueue;
 
-    public RabbitMQConfig(@Value("${rabbit.mq.queue.name}") String authLogsQueue) {
+    private final String registrationLogsQueue;
+
+    public RabbitMQConfig(@Value("${rabbit.mq.queue.name}") String authLogsQueue, @Value("${rabbit.mq.queue.registration.name}") String registrationLogsQueue) {
         this.authLogsQueue = authLogsQueue;
+        this.registrationLogsQueue = registrationLogsQueue;
     }
 
     @Bean
     public Queue authQueue() {
         return new Queue(authLogsQueue, true);
+    }
+
+    @Bean
+    public Queue registrationQueue() {
+        return new Queue(registrationLogsQueue, true);
     }
 
     @Bean

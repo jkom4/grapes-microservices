@@ -6,5 +6,5 @@ public record AuthEvent(
         String eventTimestamp,
         String sourceSystem,
         String version,
-        AuthEventPayload payload
+        EventPayload payload
 ) {}

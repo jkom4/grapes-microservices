@@ -1,6 +1,6 @@
 import {AuthMethod, User} from '../models/User';
 import {jwtDecode} from 'jwt-decode';
-import {toast} from "react-toastify";
+import http from './http-common';
 
 const API_BASE_URL = 'http://localhost:8091';
 
@@ -299,26 +299,32 @@ export async function getAllUsers(token: string): Promise<User[]> {
     }
 }
 
-export async function returnTokenToTierceApp(data: object, redirectUrl: string, navigate: (path: string) => void): Promise<void> {
+export function returnTokenToTierceApp(data: { accessToken: string, refreshToken: string }, navigate: (path: string) => void): void {
+    const rawRedirectUrl = sessionStorage.getItem('redirect_uri');
+    const state = sessionStorage.getItem('state');
+
+    if (!rawRedirectUrl) {
+        navigate('/');
+        return;
+    }
+
     try {
-        const response = await fetch(redirectUrl, {
-            method: 'POST',
-            headers: {
-                ...headers,
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (!response.ok) {
-            navigate("/");
-            throw new Error(`HTTP error: ${response.status} - ${response.statusText}`);
+        const url = new URL(rawRedirectUrl);
+        if (state) {
+            url.searchParams.set('state', state);
         }
+        url.searchParams.set('accessToken', data.accessToken);
+        url.searchParams.set('refreshToken', data.refreshToken);
 
-        const jsonData = await response.json();
-        console.log('Success:', jsonData);
+        //clean up session storage
+        sessionStorage.removeItem('redirect_uri');
+        sessionStorage.removeItem('state');
+        sessionStorage.removeItem('client_id');
 
+        window.location.href = url.toString();
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Invalid redirect URL:', error);
+        navigate('/');
     }
 }
 

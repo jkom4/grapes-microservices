@@ -82,6 +82,7 @@ public class UserController {
         try {
             User userToRegister = userMapper.toEntity(userDTO);
             User savedUser = userService.registerUser(userToRegister);
+            userService.sendRegistrationToQueue(savedUser.getId().toHexString(), savedUser.getEmail(), savedUser.getName(), savedUser.getFirstName(), savedUser.getGender(), savedUser.getBirthDate(), savedUser.getNationalId(), savedUser.getDeliveryAddress());
             return ResponseEntity.ok(userMapper.toDTO(savedUser));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new JsonMessage(e.getMessage()));

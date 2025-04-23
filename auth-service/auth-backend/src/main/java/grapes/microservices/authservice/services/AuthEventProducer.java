@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import grapes.microservices.authservice.dto.AuthEvent;
 import grapes.microservices.authservice.dto.AuthEventPayload;
+import grapes.microservices.authservice.dto.EventPayload;
+import grapes.microservices.authservice.dto.RegistrationEventPayload;
 import grapes.microservices.authservice.utils.AuthLogger;
 import grapes.microservices.authservice.utils.RabbitMQConfig;
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
+import java.util.UUID;
 
 
 /**
@@ -43,10 +46,28 @@ public class AuthEventProducer {
      * @param payload the AuthEventPayload object containing the details of the authentication attempt.
      */
     public void sendAuthLog(AuthEventPayload payload) {
+        sendMessage(payload, "AuthenticationAttempt", rabbitMQConfig.getAuthLogsQueue());
+    }
+
+    /**
+     * Sends a registration log message to the RabbitMQ queue.
+     * @param payload the RegistrationEventPayload object containing the details of the registration attempt.
+     */
+    public void sendRegistrationLog(RegistrationEventPayload payload) {
+        sendMessage(payload, "RegistrationAttempt", rabbitMQConfig.getRegistrationLogsQueue());
+    }
+
+    /**
+     * Sends a message to the RabbitMQ queue.
+     * This method is used for sending messages to the RabbitMQ queue.
+     *
+     * @param payload the message to be sent
+     */
+    private void sendMessage(EventPayload payload, String eventType, String queue) {
         logger.info(" Message sent to RabbitMQ: " + payload);
         AuthEvent event = new AuthEvent(
-                payload.auth_attempt_id(),
-                "AuthenticationAttempt",
+                UUID.randomUUID().toString(),
+                eventType,
                 Instant.now().toString(),
                 sourceSystem,
                 "1.0",
@@ -58,7 +79,7 @@ public class AuthEventProducer {
             String json = objectMapper.writeValueAsString(event);
 
             // Send the JSON message to the RabbitMQ queue
-            rabbitTemplate.convertAndSend(rabbitMQConfig.getAuthLogsQueue(), json);
+            rabbitTemplate.convertAndSend(queue, json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

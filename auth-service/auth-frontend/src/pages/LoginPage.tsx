@@ -102,9 +102,8 @@ const LoginPage = () => {
                 refreshToken: refreshToken
             };
 
-            const redirectUrl = new URLSearchParams(window.location.search).get('redirectUrl') || '/';
             try {
-                await returnTokenToTierceApp(data, redirectUrl, navigate)
+                returnTokenToTierceApp(data, navigate)
             } catch (err: any) {
                 console.log("Error while redirecting to tierce app: ", err);
             }

@@ -1,9 +1,9 @@
 package grapes.microservices.authservice.services;
 
-import grapes.microservices.authservice.models.AuthMean;
-import grapes.microservices.authservice.models.AuthMethod;
-import grapes.microservices.authservice.models.Role;
-import grapes.microservices.authservice.models.User;
+import grapes.microservices.authservice.dto.AuthEventPayload;
+import grapes.microservices.authservice.dto.EventPayload;
+import grapes.microservices.authservice.dto.RegistrationEventPayload;
+import grapes.microservices.authservice.models.*;
 import grapes.microservices.authservice.repositories.UserRepository;
 import grapes.microservices.authservice.utils.AuthLogger;
 import grapes.microservices.authservice.utils.exceptions.UnauthorizedException;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -34,6 +35,9 @@ public class UserService {
 
     @Autowired
     private final TokenService tokenService;
+
+    @Autowired
+    private final AuthEventProducer producer;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
@@ -54,6 +58,7 @@ public class UserService {
         user.encryptUser();
         logger.info("User registered successfully with email: {}", user.getEmail());
         return userRepository.save(user);
+
     }
 
     /**
@@ -159,7 +164,7 @@ public class UserService {
      *
      * @param user       the user to update
      * @param currentPin the current PIN code
-     * @param newPin     the new PIN code
+     * @param newPin the new PIN code
      */
     public User editPin(User user, String currentPin, String newPin) throws Exception {
         if (user == null) {
@@ -308,6 +313,23 @@ public class UserService {
         return user.getLoyaltyPoints();
     }
 
+    public void sendRegistrationToQueue(String userId, String email, String name, String firstName, Gender gender, Date birthDate, String nationalId, Address address) {
+        RegistrationEventPayload payload = new RegistrationEventPayload(
+                userId,
+                UUID.randomUUID().toString(),
+                Instant.now().toString(),
+                email,
+                name,
+                firstName,
+                gender,
+                birthDate,
+                nationalId,
+                address,
+                address.toString()
+        );
+        producer.sendRegistrationLog(payload);
+    }
+
     /**
      * Initializes a new user with default values.
      *
@@ -359,7 +381,7 @@ public class UserService {
      * Checks if the updated user has unique email and phone number
      *
      * @param userToUpdate the user to update
-     * @param updatedUser  the updated user
+     * @param updatedUser the updated user
      */
     private void checkAccountIsUnique(User userToUpdate, User updatedUser) {
         boolean phoneHasChanged = !userToUpdate.getPhoneNumber().equals(updatedUser.getPhoneNumber());
@@ -386,7 +408,7 @@ public class UserService {
      * Checks if the password and PIN code have changed
      *
      * @param userToUpdate the user to update
-     * @param updatedUser  the updated user
+     * @param updatedUser the updated user
      */
     private void checkPasswordAndPinHaveNotChanged(User userToUpdate, User updatedUser) {
         boolean pinHasChanged = updatedUser.getPinCode() != null && !userToUpdate.verifyUserHashedPin(updatedUser.getPinCode());

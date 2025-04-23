@@ -27,4 +27,9 @@ public class Address {
     @NotBlank(message = "Country is required")
     @Size(max = 56, message = "Country name must be at most 56 characters")
     private String country;
+
+    @Override
+    public String toString() {
+        return street + " " + number + ", " + postalCode + ", " + city + ", " + country;
+    }
 }

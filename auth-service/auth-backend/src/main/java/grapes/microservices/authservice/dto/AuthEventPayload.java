@@ -10,5 +10,5 @@ public record AuthEventPayload(
         String user_agent,
         String application_type,
         String failure_reason
-) {
+) implements EventPayload {
 }

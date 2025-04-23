@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import {logout, refresh} from "../services/authService";
+import {logout} from "../services/authService";
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import Loader from "./Loader";
