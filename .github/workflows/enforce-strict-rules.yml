@@ -107,7 +107,7 @@ jobs:
           echo "RABBITMQ_PORT=5672" >> .env
           echo "RABBITMQ_HOST=localhost" >> .env
           pip install -r requirements.txt
-          python -m pytest data-mining-service/data_ingestion_service/tests/
+          python -m pytest ./data_ingestion_service/tests/
 
       # ⚠️ Final status report
       - name: Determine overall status
