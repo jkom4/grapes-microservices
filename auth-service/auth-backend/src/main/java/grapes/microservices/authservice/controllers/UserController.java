@@ -217,11 +217,11 @@ public class UserController {
         } catch (Exception e) {
             String message = e.getMessage();
             if (message.contains("eID middleware not found")) {
-                return ResponseEntity.status(500).body("eID error: Missing middleware. Please install from https://eid.belgium.be/en/download/15/license");
+                return ResponseEntity.status(500).body(new JsonMessage("eID error: Missing middleware. Please install from https://eid.belgium.be/en/download/15/license"));
             } else if (message.contains("No card detected")) {
-                return ResponseEntity.status(400).body("eID error: No card detected in reader");
+                return ResponseEntity.status(400).body(new JsonMessage("eID error: No card detected in reader"));
             }
-            return ResponseEntity.status(500).body(" eID (register) Error : " + e.getMessage());
+            return ResponseEntity.status(500).body(new JsonMessage("eID (register) Error : " + e.getMessage()));
         }
     }
 }

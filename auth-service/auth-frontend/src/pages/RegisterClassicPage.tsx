@@ -6,6 +6,7 @@ import AlreadyAuthenticated from "../components/AlreadyAuthenticated";
 import RegistrationForm from "../sections/RegistrationClassicForm";
 import {registerUser} from "../services/authService";
 import {Role} from "../models/User";
+import {ErrorUtils} from "../utils/ErrorUtils";
 
 const RegisterClassicPage = () => {
     const navigate = useNavigate();
@@ -132,29 +133,9 @@ const RegisterClassicPage = () => {
             toast.success('Registration successful', { autoClose: 2000 });
             navigate('/');
         } catch (err: any) {
-            handleErrors(err);
+            ErrorUtils.handleErrors(err, setError);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleErrors = (err: any) => {
-        if (typeof err === 'object' && err !== null) {
-            const formattedErrors = Object.entries(err)
-                .map(([key, message]) => {
-                    if (typeof message === 'string') {
-                        toast.error(message, { autoClose: 2000 });
-                    } else {
-                        toast.error("An unknown error occurred", { autoClose: 2000 });
-                    }
-                    return '';
-                })
-                .join('\n');
-            if (formattedErrors) {
-                setError(formattedErrors);
-            }
-        } else {
-            setError("An unexpected error has occurred. Please verify the form");
         }
     };
 

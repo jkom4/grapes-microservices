@@ -33,7 +33,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
     const countdownRef = useRef<NodeJS.Timeout | null>(null);
-    const REFRESH_INTERVAL_MINUTES = 1;
+    const REFRESH_INTERVAL_MINUTES = 10;
     const timeLeftRef = useRef<number>(60 * REFRESH_INTERVAL_MINUTES);
 
     const location = useLocation();
@@ -83,11 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (storedRefresh) {
             try {
                 const accessToken = await refresh(storedRefresh);
-                if (typeof accessToken === "string") {
-                    localStorage.setItem('accessToken', accessToken);
-                } else {
-                    console.error("Invalid access token returned from refresh:", accessToken);
-                }
+                localStorage.setItem('accessToken', accessToken);
             } catch (error) {
                 console.error("Error refreshing token:", error);
             }

@@ -20,7 +20,7 @@ export async function decryptChallengeWithEid(challengeBase64: string) {
     });
 
     if (!response.ok) {
-        throw new Error("Erreur lors de la décryption avec la carte eID.");
+        throw new Error("Error during the request to the eID middleware.");
     }
 
     const responseText = await response.text();
@@ -30,8 +30,8 @@ export async function decryptChallengeWithEid(challengeBase64: string) {
     const decryptedValue = xmlDoc.getElementsByTagName("ns:Data")[0]?.textContent;
 
     if (!decryptedValue) {
-        throw new Error("Impossible de lire la réponse déchiffrée.");
+        throw new Error("Impossible to decrypt the challenge.");
     }
 
-    return decryptedValue; // déjà en Base64, tu peux faire un atob() si besoin
+    return decryptedValue;
 }

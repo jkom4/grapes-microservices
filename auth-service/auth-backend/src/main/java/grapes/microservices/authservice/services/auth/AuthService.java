@@ -50,10 +50,6 @@ public class AuthService {
     @Autowired
     private final AuthEventProducer producer;
 
-    @Autowired
-    private EIDCardService eidCardService;
-
-
     /**
      * Sends a challenge to the user for authentication.
      *
@@ -139,7 +135,7 @@ public class AuthService {
      *
      * @param refreshToken the refresh token to be used
      */
-    public String refreshTokens(String refreshToken) {
+    public String refreshToken(String refreshToken) {
         try {
             String userId = sessionService.getUserIdByRefresh(refreshToken);
             User user = userService.getUserById(userId, false);

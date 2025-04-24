@@ -74,7 +74,7 @@ public class AuthController {
             return ResponseEntity.status(400).body(new JsonMessage("Required token 'refreshToken' is not present"));
         }
         try {
-            String accessToken = authService.refreshTokens(refreshToken);
+            String accessToken = authService.refreshToken(refreshToken);
             return ResponseEntity.ok(new AuthResponse(accessToken));
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));

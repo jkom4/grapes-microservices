@@ -1,5 +1,7 @@
 import {AuthMethod, User} from '../models/User';
 import {jwtDecode} from 'jwt-decode';
+import {toast} from "react-toastify";
+import {ErrorUtils} from "../utils/ErrorUtils";
 
 const API_BASE_URL = 'http://localhost:8091';
 
@@ -171,6 +173,25 @@ export async function registerUser(user: User): Promise<Response> {
         throw error;
     }
 }
+
+export async function registerWithEid(email: string, password: string, phoneNumber: string): Promise<Response> {
+    try {
+        const res = await fetch(`${API_BASE_URL}/users/register/eid`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({email, password, phoneNumber}),
+        });
+        if (!res.ok) {
+            throw await res.json();
+        }
+        return res;
+    } catch (error: any) {
+        handleConnectionError(error);
+        console.error('[Register with EID] Error:', error);
+        throw error;
+    }
+}
+
 
 export async function getUserById(id: string, token: string): Promise<User> {
     try {
@@ -352,4 +373,3 @@ export function returnTokenToTierceApp(accessToken: string, navigate: (path: str
         navigate('/');
     }
 }
-

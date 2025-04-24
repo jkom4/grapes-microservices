@@ -53,8 +53,8 @@ public class EmailService {
      * Send an email to the recipient with the specified topic and message.
      *
      * @param recipientMail the email address of the recipient
-     * @param topic         the topic of the email
-     * @param message       the message to send
+     * @param topic the topic of the email
+     * @param message the message to send
      * @throws IOException if the email could not be sent
      */
     public void sendMail(String recipientMail, String topic, String message) throws IOException {
@@ -78,7 +78,6 @@ public class EmailService {
             Response response = sg.api(request);
             logger.info("Mail sent, status : " + response.getStatusCode());
             logger.info("Mail sent, headers : " + response.getHeaders());
-            response.getStatusCode();
         } catch (Exception e) {
             logger.error("Failed to send email to: {}", recipientMail);
             throw e;

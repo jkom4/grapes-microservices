@@ -56,7 +56,7 @@ public class SmsService {
      * Send an SMS message to the recipient with the specified message.
      *
      * @param recipientPhoneNumber the phone number of the recipient
-     * @param content              the message to send
+     * @param content the message to send
      */
     @OneCallPerMinutePerUser
     public void sendSms(String recipientPhoneNumber, String content) {
