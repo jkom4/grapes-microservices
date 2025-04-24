@@ -1,4 +1,5 @@
 const BASE_URL = "http://localhost:8092";
+const BASE_URL_AUTH = "http://localhost:8091";
 
 const getArticlesAPI = {
     baseURL: BASE_URL,
@@ -45,4 +46,17 @@ const deliveryAPI = {
     },
 };
 
-export { getArticlesAPI, searchArticlesAPI, cartAPI, orderAPI, deliveryAPI };
+const authenticationAPI = {
+    baseURL: BASE_URL_AUTH,
+    endpoints: {
+        logout: "/auth/logout",
+    },
+};
+
+const generateLoginUrl = (stateAuthentication: number | null) => {
+    const baseUrl = "http://localhost:3001";
+    const redirectUri = "http://localhost:3000";
+    return `${baseUrl}?redirect_uri=${encodeURIComponent(redirectUri)}&state=${stateAuthentication !== null ? stateAuthentication : 'default'}`;
+};
+
+export { getArticlesAPI, searchArticlesAPI, cartAPI, orderAPI, deliveryAPI, authenticationAPI, generateLoginUrl };

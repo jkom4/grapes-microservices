@@ -10,4 +10,5 @@ export interface CartSummaryProps {
     handleStripePayment: () => void;
     paymentError: string | null;
     translations: Translation;
+    isLoggedIn: boolean;
 }

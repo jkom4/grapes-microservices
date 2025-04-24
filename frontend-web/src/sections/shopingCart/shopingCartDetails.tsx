@@ -12,6 +12,7 @@ import CheckoutForm from "../../components/cartPage/CheckoutForm";
 import CartItems from "../../components/cartPage/CartItems";
 import CartSummary from "../../components/cartPage/CartSummary";
 import { useCart } from "../../features/CartContext";
+import { toast } from "react-toastify";
 
 const CartPage = () => {
     const { language } = useLanguage();
@@ -40,6 +41,9 @@ const CartPage = () => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [paymentCompleted, setPaymentCompleted] = useState(false);
 
+    // Check login status like in Navbar
+    const isLoggedIn = sessionStorage.getItem("accessToken") !== null;
+
     useEffect(() => {
         const fetchCart = async () => {
             try {
@@ -59,7 +63,7 @@ const CartPage = () => {
                 setError(
                     err instanceof Error
                         ? err.message
-                        : "Error to fetch cart"
+                        : translationsPayment[language].errorFetchingCart || "Error to fetch cart"
                 );
             } finally {
                 setLoading(false);
@@ -87,8 +91,27 @@ const CartPage = () => {
     };
 
     const handlePayment = async () => {
+        // Check if user is logged in
+        if (!isLoggedIn) {
+            toast.error(
+                translationsPayment[language].loginRequired ||
+                "You must be logged in to proceed with payment.",
+                {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "colored",
+                }
+            );
+            navigate("/login"); // Redirect to login page, similar to Navbar's login flow
+            return;
+        }
+
         if (orderId === null) {
-            setFormError("ID isn't free");
+            setFormError(translationsPayment[language].invalidOrderId || "ID isn't free");
             return;
         }
 
@@ -125,6 +148,7 @@ const CartPage = () => {
                     setOrderId(null);
                     localStorage.removeItem("orderId");
                 } catch (err) {
+                    // Handle error silently or log it
                 }
                 setShowSuccess(false);
                 window.location.href = "/";
@@ -141,8 +165,27 @@ const CartPage = () => {
     };
 
     const handleStripePayment = async () => {
+        // Check if user is logged in
+        if (!isLoggedIn) {
+            toast.error(
+                translationsPayment[language].loginRequired ||
+                "You must be logged in to proceed with payment.",
+                {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: "colored",
+                }
+            );
+            navigate("/login"); // Redirect to login page
+            return;
+        }
+
         if (orderId === null) {
-            setFormError("Error, retry");
+            setFormError(translationsPayment[language].invalidOrderId || "Error, retry");
             return;
         }
 
@@ -158,7 +201,7 @@ const CartPage = () => {
 
     const handleRemoveItem = async (orderId: number | null, itemId: number) => {
         if (orderId === null) {
-            setError("ID isn't free");
+            setError(translationsPayment[language].invalidOrderId || "ID isn't free");
             return;
         }
         try {
@@ -174,7 +217,7 @@ const CartPage = () => {
             setError(
                 err instanceof Error
                     ? err.message
-                    : "Error to delete an article"
+                    : translationsPayment[language].errorRemovingItem || "Error to delete an article"
             );
         }
     };
@@ -274,6 +317,7 @@ const CartPage = () => {
                         handleStripePayment={handleStripePayment}
                         paymentError={paymentError}
                         translations={translationsPayment[language]}
+                        isLoggedIn={isLoggedIn}
                     />
                 </div>
             </div>
