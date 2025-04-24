@@ -1,7 +1,5 @@
 import {AuthMethod, User} from '../models/User';
 import {jwtDecode} from 'jwt-decode';
-import {toast} from "react-toastify";
-import {ErrorUtils} from "../utils/ErrorUtils";
 
 const API_BASE_URL = 'http://localhost:8091';
 

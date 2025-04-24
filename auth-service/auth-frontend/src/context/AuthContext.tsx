@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import {href, useLocation, useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {checkSession, refresh} from "../services/authService";
 
 // Helper function to parse JWT token and extract its payload
