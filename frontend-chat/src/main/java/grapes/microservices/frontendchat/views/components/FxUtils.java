@@ -1,11 +1,13 @@
 package grapes.microservices.frontendchat.views.components;
 
 import javafx.animation.*;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.util.Duration;
 
-public class EffectUtils {
+public class FxUtils {
     public static void fadeIn(Node node, int duration) {
         // animations
         node.setOpacity(0);
@@ -29,5 +31,11 @@ public class EffectUtils {
 
         timeline.getKeyFrames().add(kf);
         timeline.play();
+    }
+
+    public static void wait(int milliseconds, EventHandler<ActionEvent> event) {
+        PauseTransition pause = new PauseTransition(Duration.millis(milliseconds)); // Wait for 3 seconds
+        pause.setOnFinished(event);
+        pause.play();
     }
 }

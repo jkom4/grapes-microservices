@@ -3,8 +3,13 @@ package grapes.microservices.frontendchat.viewmodels;
 
 import grapes.microservices.frontendchat.SceneController;
 import grapes.microservices.frontendchat.models.User;
+import grapes.microservices.frontendchat.models.exceptions.MyApiException;
+import grapes.microservices.frontendchat.viewmodels.states.OnFail;
+import grapes.microservices.frontendchat.viewmodels.states.OnLoading;
+import grapes.microservices.frontendchat.viewmodels.states.OnSuccess;
 import grapes.microservices.frontendchat.models.services.IGrapesApi;
 import grapes.microservices.frontendchat.models.shared.UserSession;
+import grapes.microservices.frontendchat.viewmodels.states.State;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -22,7 +27,7 @@ public class AuthViewModel {
     @Getter
     private SceneController sceneController;
     @Getter
-    private ObjectProperty<Exception> authErrorObserver = new SimpleObjectProperty<>(null);
+    private ObjectProperty<State> stateObserver = new SimpleObjectProperty<>(null);
     @Getter
     private ObjectProperty<User> authenticatedUser = UserSession.getINSTANCE().getAuthenticatedUser();
 
@@ -32,17 +37,26 @@ public class AuthViewModel {
         this.sceneController = sceneController;
     }
 
-    public void authUser(String token) {
+    public void getUser() {
+        stateObserver.set(new OnLoading());
+
         // Impossible to throw exception in a lambda, so instead, Exceptions are transported in Observables
-        this.apiService.authUser(token)
+        this.apiService.getUser()
                 .whenComplete((data, error) -> Platform.runLater(() -> {
                     if (error != null) {
-                        // Handle error case
-                        error.printStackTrace();
-                        authErrorObserver.set(new Exception(error.getMessage()));
+                        // Handle error case, as my exception is wrapped into another, I use error.getCause() to get it
+                        if (error.getCause() instanceof MyApiException) {
+                            stateObserver.set(new OnFail(error.getCause().getMessage()));
+                        } else {
+                            // Handle other error case
+                            stateObserver.set(new OnFail(error.getMessage()));
+                            error.printStackTrace();
+                        }
                     } else if (data != null) {
                         // Save user in a singleton
                         UserSession.getINSTANCE().getAuthenticatedUser().set(data);
+                        // error = null => success
+                        stateObserver.set(new OnSuccess());
                     }
                 }));
     }

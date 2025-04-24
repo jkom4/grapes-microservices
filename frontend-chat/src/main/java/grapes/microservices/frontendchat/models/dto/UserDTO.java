@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class TopicDTO{
+public class UserDTO {
     private String id;
-    private String topic;
+    private String username;
 }

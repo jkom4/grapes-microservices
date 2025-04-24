@@ -2,6 +2,8 @@ module grapes.microservices.frontendchat {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
+    requires javafx.web;
+    requires java.dotenv;
 
     // Third-party library requirements
     requires org.controlsfx.controls;
@@ -12,6 +14,7 @@ module grapes.microservices.frontendchat {
     requires java.compiler;
     requires com.google.gson;
     requires java.net.http;
+    requires java.desktop;
     opens grapes.microservices.frontendchat.models.dto to com.google.gson;
 
     // Opens the BASE package containing FrontendChat.java to necessary modules
