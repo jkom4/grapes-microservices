@@ -1,7 +1,7 @@
 import React from 'react';
 import Loader from '../components/Loader';
 import {User} from "../models/User";
-import {handleEditPassword, handleEditPin} from "../services/authService";
+import {editPassword, editPin} from "../services/authService";
 import UpdateCredentialModal from "../modals/UpdateCredentialModal";
 
 interface Address {
@@ -93,7 +93,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 onClose={() => (handleCloseModalPassword())}
                 credentialType="password"
                 handleUpdate={(current: any, updated: string, token: string) =>
-                    handleEditPassword(current, updated, token)
+                    editPassword(current, updated, token)
                 }
             />
             <UpdateCredentialModal
@@ -102,7 +102,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 onClose={() => handleCloseModalPin()}
                 credentialType="pinCode"
                 handleUpdate={(current, updated) =>
-                    handleEditPin(current, updated, token)
+                    editPin(current, updated, token)
                 }
             />
             <div className="min-h-screen bg-gray-50 px-4 py-8">

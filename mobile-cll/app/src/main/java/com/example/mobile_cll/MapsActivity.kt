@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import com.example.mobile_cll.databinding.ActivityMapsBinding
-import com.example.mobile_cll.views.screens.MapView
-import com.example.mobile_cll.viewmodels.MapsViewModel
+import com.example.mobile_cll.views.screens.map.MapView
+import com.example.mobile_cll.viewmodels.map.MapsViewModel
 import com.google.android.gms.maps.SupportMapFragment
 import android.util.Log
 

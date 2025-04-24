@@ -39,7 +39,6 @@ public class ChatFx extends VBox {
     private ObservableList<Message> loadedMessages;
     private ObjectProperty<User> userObserver;
     private SimpleBooleanProperty loadingStatus;
-    @Getter
     private SimpleStringProperty currentPostedMessage;
 
     public ChatFx() {
@@ -71,9 +70,7 @@ public class ChatFx extends VBox {
             }
         });
         // remove current topic when topic closed
-        closeTopicButton.setOnMouseClicked(event -> {
-            selectedTopic.set(null);
-        });
+        closeTopicButton.setOnMouseClicked(event -> selectedTopic.set(null));
         // refresh all messages
         refreshMessagesButton.setOnMouseClicked(event -> {
             var currentTopic = selectedTopic.get();
@@ -97,7 +94,7 @@ public class ChatFx extends VBox {
                     change.getAddedSubList().forEach(message -> {
                         var bubbleMessage = addMessageToTheList(message);
                         // Add fade in effect (index-- => reversed)
-                        EffectUtils.fadeIn(bubbleMessage, index.getAndDecrement() * 20);
+                        FxUtils.fadeIn(bubbleMessage, index.getAndDecrement() * 20);
                     });
                 } else if (change.wasRemoved()) {
                     // if messages were removed from the list, it means that it was cleared, so we empty the view
@@ -108,7 +105,7 @@ public class ChatFx extends VBox {
 
         // Scroll to the bottom observer
         messagesContainer.heightProperty().addListener((observable, oldValue, newValue) ->
-                EffectUtils.scrollToTheBottom(messagesScroller));
+                FxUtils.scrollToTheBottom(messagesScroller));
     }
 
     public void setCurrentUserObserver(ObjectProperty<User> authUserObserver) {
@@ -145,7 +142,7 @@ public class ChatFx extends VBox {
         bubbleMessage.setAuthor(message.sender().username());
         bubbleMessage.setDate(message.getDateToString());
         // if the message belongs to the user, then the message bubble is aligned to the left with another color
-        var isMyMessage = message.sender().id() == userObserver.get().id();
+        var isMyMessage = message.sender().id().equals(userObserver.get().id());
         bubbleMessage.setIsMyText(isMyMessage);
         messagesContainer.getChildren().add(bubbleMessage);
 
@@ -159,9 +156,7 @@ public class ChatFx extends VBox {
     public void setOnMessagePostObserver(SimpleStringProperty observer) {
         this.currentPostedMessage = observer;
 
-        sendMessageButton.setOnMouseClicked(event -> {
-            handleSendMessage();
-        });
+        sendMessageButton.setOnMouseClicked(event -> handleSendMessage());
         messageTextfield.setOnAction(event -> handleSendMessage());
     }
 

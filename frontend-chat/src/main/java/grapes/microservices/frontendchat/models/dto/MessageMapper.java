@@ -8,24 +8,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MessageMapper {
-    public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static DateTimeFormatter preciseFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.nnnnnnnnn");
 
     public static MessageDTO toDTO(Message msg) {
         return new MessageDTO(
-                msg.topicId(),
+                msg.id(),
+                msg.topicId() + "",
                 msg.sender().id(),
                 msg.sender().username(),
                 msg.content(),
-                LocalDateTime.now().format(formatter)
+                LocalDateTime.now().format(preciseFormat)
         );
     }
 
     public static Message toEntity(MessageDTO dto) {
         return new Message(
-                dto.getTopicId(),
+                dto.getId(),
+                Integer.parseInt(dto.getTopicId()),
                 new User(dto.getUserId(), dto.getUsername()), // Create a User instance
                 dto.getContent(),
-                LocalDateTime.parse(dto.getCreatedAt(), formatter)
+                LocalDateTime.parse(dto.getCreatedAt(), preciseFormat)
         );
     }
 

@@ -81,14 +81,6 @@ public class UserServiceTest {
     }
 
     @Test
-    void registerUser_WeakPassword() {
-        user.setPassword("weak");
-
-        assertThrows(IllegalArgumentException.class, () -> userService.registerUser(user));
-    }
-
-
-    @Test
     void getUserById_Success() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
 

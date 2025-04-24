@@ -84,7 +84,7 @@ public class TopicListFx extends VBox {
             // Add the custom component to the VBox
             topicsContainer.getChildren().add(card);
             // Add fade in effect
-            EffectUtils.fadeIn(card, index++ * 20);
+            FxUtils.fadeIn(card, index++ * 20);
         }
     }
 
