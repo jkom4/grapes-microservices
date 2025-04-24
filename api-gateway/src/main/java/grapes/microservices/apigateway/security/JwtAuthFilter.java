@@ -31,7 +31,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/api/users/**",
             "/api/clm/**",
             "/api/cll/**",
-            "/actuator/health"
+            "/actuator/*"
     );
 
     private static final String TOKEN_PREFIX = "Bearer ";

@@ -1,8 +1,54 @@
 global:
-  scrape_interval: 5s  # Intervalle de récupération des métriques
+  scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'spring-boot-apps'
+  # 🔧 Microservices Spring Boot (Actuator + micrometer)
+  - job_name: 'api-gateway'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['transactions-service:8080', 'auth-service:8081']
+      - targets: [ 'api-gateway:8090' ]
+
+  - job_name: 'auth-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['auth-backend:8091']
+
+  - job_name: 'sales-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['sales-backend:8092']
+
+  - job_name: 'payment-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['payment-backend:8093']
+
+  - job_name: 'chat-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['chat-backend:8094']
+
+  - job_name: 'data-mining-service'
+    static_configs:
+      - targets: ['data-mining-backend:8095']
+
+
+  # 🛢️ MariaDB
+  - job_name: 'mariadb'
+    static_configs:
+      - targets: ['mariadb-exporter:9104']
+
+  # 🍃 MongoDB
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+
+  # 🧠 Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # 🐰 RabbitMQ
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq:15692']
