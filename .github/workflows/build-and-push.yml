@@ -186,7 +186,7 @@ jobs:
           CHAT_MONGO_DB=db_chat
                
           # Data Mining Service  
-          DATA_MINING_MONGO_URI=mongodb://root:SparringMASI!@mongodb:27017/
+          DATA_MINING_MONGO_URI=${{ secrets.DATA_MINING_MONGO_URI }}
           
           # 📊 Database
           # MariaDB
