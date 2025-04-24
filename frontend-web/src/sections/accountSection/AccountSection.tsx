@@ -3,17 +3,18 @@ import { Order, SortConfig } from "../../utils/models/interface/Order";
 import accountService from "../../services/accountService";
 import { useLanguage } from "../../features/LanguageContext";
 import { translationsAccount } from "../../utils/translations-account";
-import {enUS, fr} from "date-fns/locale";
+import { enUS, fr } from "date-fns/locale";
 import { format } from "date-fns";
 import LoadingSpinner from "../../utils/models/interface/LoadSpinner";
 import ErrorMessage from "../../utils/models/interface/ErrorMessage";
 import SearchBar from "../../components/account/SearchBar";
 import OrderTable from "../../components/account/OrderTable";
 import Pagination from "../../components/account/Pagination";
-
+import { useAuth } from "../../features/AuthContext"; // Import useAuth
 
 const OrderHistory: React.FC = () => {
     const { language } = useLanguage();
+    const { sub } = useAuth(); // Get sub from AuthContext
     const [orders, setOrders] = useState<Order[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
     const [sortConfig, setSortConfig] = useState<SortConfig>({ key: "createdAt", direction: "desc" });
@@ -28,8 +29,10 @@ const OrderHistory: React.FC = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const userId = 1; // Replace with logic to get user ID
-                const data = await accountService.fetchOrderHistory(userId);
+                if (!sub) {
+                    throw new Error("User ID (sub) not available");
+                }
+                const data = await accountService.fetchOrderHistory(sub); // Use sub
                 setOrders(data);
                 setFilteredOrders(data);
                 setLoading(false);
@@ -43,7 +46,7 @@ const OrderHistory: React.FC = () => {
             }
         };
         fetchOrders();
-    }, [language]);
+    }, [language, sub]);
 
     // Filter orders
     useEffect(() => {

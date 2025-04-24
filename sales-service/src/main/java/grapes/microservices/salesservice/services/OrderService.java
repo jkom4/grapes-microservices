@@ -36,7 +36,7 @@ public class OrderService {
         System.out.println(" Message sent to RabbitMQ: " + message);
     }
 
-    public Order createTemporaryOrder(Integer userId) {
+    public Order createTemporaryOrder(String userId) {
         Order order = Order.builder()
                 .userId(userId)
                 .isFinished(false)
@@ -124,7 +124,7 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + id));
     }
 
-    public List<Order> getOrdersByUserId(Integer userId) {
+    public List<Order> getOrdersByUserId(String userId) {
         return orderRepository.findByUserId(userId);
     }
 

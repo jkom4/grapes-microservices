@@ -1,7 +1,7 @@
 export interface Order {
     id: number;
     code: number;
-    userId: number;
+    userId: string;
     facturePath: string | null;
     totalPrice: number | null;
     createdAt: string;
