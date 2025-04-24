@@ -62,8 +62,6 @@ public class TopicService {
         // Build DTO
         MessageDto dto = MessageDto.builder()
                 .userId(saved.getSenderId())
-                .content(saved.getContent())
-                .createdAt(saved.getCreatedAt().toString())
                 .topicId(saved.getChatId())
                 .build();
 
