@@ -39,17 +39,17 @@ public class LoginService {
         String redirectUrl = paymentRequest.getRedirectUrl();
 
         if (amount == null || merchantId == null || merchantId.isEmpty()) {
-            log.warn("[LoginService] Données manquantes dans la requête d'initiation");
+            log.warn("[LoginService] Missing data in initiation request");
             throw new IllegalArgumentException("Amount and merchantId (merchant identifier) are required");
         }
 
         if (redirectUrl == null || redirectUrl.isEmpty()) {
             redirectUrl = defaultRedirectUrl;
-            log.info("[LoginService] URL de redirection non fournie, utilisation de la valeur par défaut");
+            log.info("[LoginService] Redirect URL not provided, using default value");
         }
 
         String initialPaymentId = UUID.randomUUID().toString();
-        log.info("[LoginService] Paiement initié - ID: {}, Montant: {}, Marchand: {}, URL: {}",
+        log.info("[LoginService] Payment initiated - ID: {}, Amount: {}, Merchant: {}, URL: {}",
                 initialPaymentId, amount, merchantId, redirectUrl);
 
         HttpSession session = request.getSession(true);
@@ -57,7 +57,7 @@ public class LoginService {
         session.setAttribute(SESSION_INIT_MERCHANT_KEY, merchantId);
         session.setAttribute(SESSION_INIT_PAYMENT_ID_KEY, initialPaymentId);
         session.setAttribute(SESSION_INIT_REDIRECT_URL_KEY, redirectUrl);
-        log.info("[LoginService] Détails de paiement stockés dans la session ID: {}", session.getId());
+        log.info("[LoginService] Payment details stored in session ID: {}", session.getId());
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", "success");
@@ -74,12 +74,12 @@ public class LoginService {
         boolean clientVerified = clientService.verifyCredentials(email, password);
 
         if (!clientVerified) {
-            log.warn("[LoginService] Tentative de connexion avec identifiants invalides: {}", email);
+            log.warn("[LoginService] Login attempt with invalid credentials: {}", email);
 
             HttpSession existingSession = request.getSession(false);
             if (existingSession != null) {
                 existingSession.invalidate();
-                log.info("[LoginService] Session invalidée après échec de connexion: {}", existingSession.getId());
+                log.info("[LoginService] Session invalidated after login failure: {}", existingSession.getId());
             }
 
             throw new IllegalArgumentException("Invalid credentials");
@@ -87,7 +87,7 @@ public class LoginService {
 
         Optional<Client> clientOpt = clientService.findByEmail(email);
         if (clientOpt.isEmpty()) {
-            log.error("[LoginService] Client introuvable pour l'email: {}", email);
+            log.error("[LoginService] Client not found for email: {}", email);
             throw new IllegalStateException("Internal server error retrieving client data");
         }
 
@@ -96,12 +96,12 @@ public class LoginService {
         HttpSession session = request.getSession(true);
         session.setAttribute(SESSION_CLIENT_ID_KEY, client.getId());
         session.setAttribute(SESSION_CLIENT_EMAIL_KEY, client.getEmail());
-        log.info("[LoginService] Client ID {} et Email '{}' enregistrés dans la session {}",
+        log.info("[LoginService] Client ID {} and Email '{}' stored in session {}",
                 client.getId(), client.getEmail(), session.getId());
 
         Object initialAmount = session.getAttribute(SESSION_INIT_AMOUNT_KEY);
         if (initialAmount != null) {
-            log.info("[LoginService] Détails de paiement trouvés en session pour le client {}", email);
+            log.info("[LoginService] Payment details found in session for client {}", email);
         }
 
         return new LoginResponse(

@@ -1,4 +1,3 @@
-// src/services/PaymentService.js
 import axios from 'axios';
 import { PAYMENT_API_URL } from './apiConfig'; // Import the specific URL
 

@@ -1,16 +1,14 @@
-// src/pages/PaymentPage.js
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom'; // Used for declarative navigation
+import { Navigate } from 'react-router-dom';
 import axios from 'axios';
-import SPMB from '../images/SMPB.png'; // Assuming this local bank logo exists
+import SPMB from '../images/SMPB.png';
 import { Card } from '../models/Card';
 import { Payment } from '../models/Payment';
 import { PaymentService } from '../services/PaymentService';
 import { AuthService } from '../services/AuthService';
 import { PAYMENT_API_URL } from '../services/apiConfig';
 
-// Import local card logos - MAKE SURE YOU HAVE THESE FILES in src/images
-// You might need to adjust filenames based on what you download
+
 import mastercardLogo from '../images/MasterCardLogo.png';
 import visaLogo from '../images/VisaInclogo.png';
 

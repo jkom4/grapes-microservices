@@ -8,23 +8,23 @@ const PaymentSuccessPage = () => {
     const [redirectUrl, setRedirectUrl] = useState(null);
 
     useEffect(() => {
-        // Vérifier l'authentification
+        // Check authentication
         if (!AuthService.isLoggedIn()) {
             window.location.href = '/login';
             return;
         }
 
-        // Récupérer l'URL de redirection depuis le stockage de session
+        // Get redirect URL from session storage
         const customRedirectUrl = VerificationService.getRedirectUrl();
         if (customRedirectUrl) {
             setRedirectUrl(customRedirectUrl);
 
-            // Démarrer le compte à rebours pour la redirection
+            // Start countdown for redirection
             const timer = setInterval(() => {
                 setRedirectCountdown(prev => {
                     if (prev <= 1) {
                         clearInterval(timer);
-                        // Rediriger vers l'URL personnalisée et nettoyer
+                        // Redirect to custom URL and clean up
                         VerificationService.clearRedirectUrl();
                         window.location.href = customRedirectUrl;
                         return 0;
@@ -38,7 +38,7 @@ const PaymentSuccessPage = () => {
     }, []);
 
     const handleReturnClick = () => {
-        // Si une URL de redirection est présente, l'utiliser
+        // If a redirect URL is present, use it
         if (redirectUrl) {
             VerificationService.clearRedirectUrl();
             window.location.href = redirectUrl;
@@ -52,12 +52,12 @@ const PaymentSuccessPage = () => {
                     <img src={SPMB} alt="Bank Logo" />
                 </div>
                 <div className="success-message">
-                    <h2>Paiement réussi!</h2>
-                    <p>Votre paiement a été traité avec succès.</p>
-                    <p>Une confirmation a été envoyée à votre adresse e-mail.</p>
+                    <h2>Payment Successful!</h2>
+                    <p>Your payment has been processed successfully.</p>
+                    <p>A confirmation has been sent to your email address.</p>
                     <div className="form-group">
-                        <label>Statut:</label>
-                        <input type="text" value="Terminé" disabled />
+                        <label>Status:</label>
+                        <input type="text" value="Completed" disabled />
                     </div>
                     <div className="form-group">
                         <label>Date:</label>
@@ -66,13 +66,13 @@ const PaymentSuccessPage = () => {
 
                     {redirectUrl && (
                         <p className="redirect-notice">
-                            Redirection automatique dans {redirectCountdown} secondes...
+                            Automatic redirection in {redirectCountdown} seconds...
                         </p>
                     )}
                 </div>
 
                 <button onClick={handleReturnClick}>
-                    {redirectUrl ? 'Retourner à la boutique' : 'Terminer'}
+                    {redirectUrl ? 'Return to store' : 'Finish'}
                 </button>
             </div>
         </div>

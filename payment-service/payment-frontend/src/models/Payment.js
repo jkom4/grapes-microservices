@@ -1,4 +1,3 @@
-// src/models/Payment.js
 export class Payment {
     constructor(card, amount = null) {
         this.cardNumber = card.getFullCardNumber();

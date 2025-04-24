@@ -10,6 +10,5 @@ public class PaymentBackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(PaymentBackendApplication.class, args);
-
 	}
 }

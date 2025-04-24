@@ -1,5 +1,3 @@
-// --- File: src/services/AuthService.js ---
-// src/services/AuthService.js
 import axios from 'axios';
 import { AUTH_API_URL } from './apiConfig'; // Import the specific URL
 
@@ -69,8 +67,6 @@ export class AuthService {
         localStorage.removeItem('sessionToken');
         localStorage.removeItem('userId');
         sessionStorage.removeItem('pendingTransactionId'); // Also clear pending transaction context
-        // Redirect to login page. Using window.location forces a full page reload, clearing React state.
-        // If inside a component, consider using useNavigate() from react-router-dom for smoother SPA navigation.
         window.location.href = '/login';
     }
 

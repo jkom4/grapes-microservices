@@ -1,5 +1,3 @@
-// --- File: src/services/apiConfig.js ---
-// Example: http://localhost:8093
 const API_GATEWAY_URL = 'http://localhost:8093';
 
 // Adjust base paths to match backend controller mappings

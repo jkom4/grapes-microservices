@@ -1,5 +1,3 @@
-// --- File: src/models/Card.js ---
-// src/models/Card.js
 export class Card {
     constructor(cardPart1, cardPart2, cardPart3, cardPart4, expiryYYYY, cvc, cardholderName = '') {
         this.cardPart1 = cardPart1;

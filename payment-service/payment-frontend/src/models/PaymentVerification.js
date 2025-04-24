@@ -1,4 +1,3 @@
-// src/models/PaymentVerification.js
 export class PaymentVerification {
     constructor(paymentToken) {
         this.paymentToken = paymentToken;

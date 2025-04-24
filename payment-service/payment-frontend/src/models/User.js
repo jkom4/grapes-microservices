@@ -1,4 +1,3 @@
-// models/User.js
 
 /**
  * Model class for User

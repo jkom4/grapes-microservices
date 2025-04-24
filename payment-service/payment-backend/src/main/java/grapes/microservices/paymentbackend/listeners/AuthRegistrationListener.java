@@ -195,7 +195,7 @@ public class AuthRegistrationListener {
      */
     private int calculateLuhnCheckDigit(String partialNumber) {
         int sum = 0;
-        boolean alternate = true; // Commencer avec true pour compenser le check digit
+        boolean alternate = true;
 
         // Process from right to left
         for (int i = partialNumber.length() - 1; i >= 0; i--) {
