@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import Home from './pages/Home';
 import LoginPage from './pages/LoginPage'
@@ -15,9 +15,37 @@ import RegisterChoicePage from "./pages/RegisterPageChoice";
 import Layout from "./layouts/MainLayout";
 
 const App: React.FC = () => {
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const redirectUri = params.get('redirect_uri');
+        const clientId = params.get('client_id');
+        const state = params.get('state');
+
+        if (redirectUri) {
+            sessionStorage.setItem('redirect_uri', redirectUri);
+        }
+
+        if (clientId) {
+            sessionStorage.setItem('client_id', clientId);
+        }
+
+        if (state) {
+            sessionStorage.setItem('state', state);
+        }
+    }, []);
+
     return (
         <Router>
-            <ToastContainer />
+            <ToastContainer
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                pauseOnFocusLoss
+                draggable
+
+                  
+                pauseOnHover={false}
+            />
             <AuthProvider>
                 <Layout>
                 <Routes>

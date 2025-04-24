@@ -1,11 +1,11 @@
-import React from "react";
+import React, {useState} from "react";
 
 interface RegistrationFormProps {
     formData: any;
     setFormData: React.Dispatch<React.SetStateAction<any>>;
     handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
     handleAddressChange: (e: React.ChangeEvent<HTMLInputElement>, addressType: "deliveryAddress" | "billingAddress") => void;
-    handleSubmit: (e: React.FormEvent) => void;
+    handleSubmit: (e: React.FormEvent, formData: any) => void;
     errors: any;
     loading: boolean;
     error: string | null;
@@ -24,32 +24,99 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                                                                useSameAddress,
                                                                setUseSameAddress,
                                                            }) => {
+    const [nationalId, setNationalId] = useState("");
+    const [pinCode, setPinCode] = useState(formData.pinCode || "");
+
+    const handleNationalIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const raw = e.target.value.replace(/\D/g, "").slice(0, 11);
+        const parts = [
+            raw.slice(0, 2),
+            raw.slice(2, 4),
+            raw.slice(4, 6),
+            raw.slice(6, 9),
+            raw.slice(9, 11),
+        ];
+        const formattedValue = parts
+            .filter(Boolean)
+            .map((part, i) => (i === 3 ? "-" + part : i > 0 ? "." + part : part))
+            .join("");
+        setNationalId(formattedValue);
+        handleChange({ target: { name: "nationalId", value: raw } } as React.ChangeEvent<HTMLInputElement>);
+    };
+
+    const handlePinCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (/^\d{0,4}$/.test(value)) {
+            handleChange(e);
+        }
+    };
+
+    const handlePostalCodeChange = (e: React.ChangeEvent<HTMLInputElement>, addressType: "deliveryAddress" | "billingAddress") => {
+        const value = e.target.value;
+        if (/^\d*$/.test(value)) {
+            handleAddressChange(e, addressType);
+        }
+    };
+
+    const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (/^\+?\d*$/.test(value)) {
+            handleChange(e);
+        }
+    };
+
+    const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
+        const value = e.target.value;
+        const regex = /^[a-zA-Z\s]*$/;
+        if (regex.test(value) || value === "") {
+            handleChange(e);
+        }
+    };
+
+    const handleSubmitForm = (e: React.FormEvent) => {
+        e.preventDefault();
+        const cleanedNationalId = nationalId.replace(/[^\d]/g, "");
+
+        const updatedFormData = { ...formData, nationalId: cleanedNationalId };
+
+        handleSubmit(e, updatedFormData);
+    };
     return (
         <div>
             {loading && <div>Loading...</div>}
             <section className="max-w-6xl mx-auto p-8 bg-white shadow-xl rounded-lg my-8">
                 <h2 className="text-3xl font-semibold mb-6 text-gray-800">Register</h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmitForm} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {[
-                            { name: "firstName", type: "text", placeholder: "First Name", required: true },
+                            { name: "firstName", type: "text", placeholder: "First Name", required: true, regex: /^[a-zA-Z\s]*$/ },
                             { name: "name", type: "text", placeholder: "Last Name", required: true },
                             { name: "email", type: "email", placeholder: "Email", required: true },
                             { name: "password", type: "password", placeholder: "Password", required: true },
                             { name: "birthDate", type: "date", placeholder: "Birth Date", required: true },
                             { name: "phoneNumber", type: "text", placeholder: "Phone Number", required: true },
                             { name: "nationalId", type: "text", placeholder: "National ID", required: true },
-                            { name: "pinCode", type: "password", placeholder: "PIN Code", required: true },
-                            { name: "profession", type: "text", placeholder: "Profession", required: true },
+                            { name: "pinCode", type: "password", placeholder: "PIN Code", required: true, onChange: handlePinCodeChange, value: pinCode },
+                            { name: "profession", type: "text", placeholder: "Profession" },
                         ].map((field) => (
                             <div key={field.name} className="flex flex-col space-y-2">
                                 <input
                                     name={field.name}
                                     type={field.type}
-                                    placeholder={field.placeholder}
+                                    placeholder={field.required ? `${field.placeholder} *` : field.placeholder}
                                     required={field.required}
-                                    onChange={handleChange}
-                                    className="p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    onChange={
+                                        ["firstName", "name", "profession"].includes(field.name)
+                                            ? (e) => handleTextChange(e, field.name)
+                                            : field.name === "nationalId"
+                                                ? handleNationalIdChange
+                                                : field.name === "pinCode"
+                                                    ? handlePinCodeChange
+                                                    : field.name === "phoneNumber"
+                                                        ? handlePhoneNumberChange
+                                                        : handleChange
+                                    }
+                                    value={field.name === "nationalId" ? nationalId : formData[field.name] || ""}                                    className="p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                                 {errors[field.name] && (
                                     <span className="text-sm text-red-500">{errors[field.name]}</span>
@@ -80,9 +147,13 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                             <input
                                 key={field}
                                 name={field}
-                                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                                onChange={(e) => handleAddressChange(e, "deliveryAddress")}
-                                className="p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder={`${field.charAt(0).toUpperCase() + field.slice(1)} *`}
+                                required
+                                onChange={
+                                    field === "postalCode"
+                                        ? (e) => handlePostalCodeChange(e, "deliveryAddress")
+                                        : (e) => handleAddressChange(e, "deliveryAddress")
+                                }                                className="p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         ))}
                     </div>

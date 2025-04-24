@@ -18,8 +18,10 @@ import org.springframework.stereotype.Service;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Service for generating and validating tokens
@@ -33,8 +35,8 @@ public class TokenService {
     @Value("${auth.service.jwt.secret.key}")
     private String secretKey;
 
-    @Value("${auth.service.jwt.expiration.time}")
-    private long EXPIRATION_TIME;
+    @Value("${auth.service.access.token.expiration.time.minutes}")
+    private long ACCESS_EXPIRATION_TIME;
 
     @Autowired
     private SessionService sessionService;
@@ -94,23 +96,26 @@ public class TokenService {
                 .claim("name", name)
                 .claim("role", role.getRole())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME * 60 * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION_TIME * 60 * 1000))
                 .signWith(SECRET_KEY)
                 .compact();
     }
 
     /**
-     * Get the refresh token for the given user ID from the session service
+     * Generates a secure opaque refresh token for the specified user.
+     * Unlike access tokens, which are stateless JWTs containing user claims and signed cryptographically,
+     * refresh tokens are implemented here as opaque random UUID strings. This is a common approach in enterprise applications
+     * where refresh tokens are:
+     * <ul>
+     *     <li>Stored securely on the server (e.g., Redis or database)</li>
+     *     <li>Not parseable by the client (no embedded claims)</li>
+     *     <li>Easily revocable by deleting the entry from the server</li>
+     * </ul>
      *
-     * @param userId the user ID
-     * @return the refresh token
+     * @return the newly generated refresh token as a random UUID string
      */
-    public String getRefreshToken(String userId) {
-        String refreshToken = sessionService.getRefresh(userId);
-        if (refreshToken == null) {
-            throw new RuntimeException("Refresh token not found.");
-        }
-        return refreshToken;
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
     }
 
     /**
