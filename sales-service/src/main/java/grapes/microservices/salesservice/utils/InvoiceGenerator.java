@@ -31,7 +31,7 @@ import java.util.UUID;
 
 public class InvoiceGenerator {
 
-    public static String generateInvoice(Order order, String customerName, String address, String postalCode, String country, String phoneNumber, List<OrderItem> items, ArticleRepository articleRepository) throws FileNotFoundException {
+    public static String generateInvoice(Order order, String customerName, String address, String phoneNumber, List<OrderItem> items, ArticleRepository articleRepository) throws FileNotFoundException {
         String datePart = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
         String uuidPart = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
         String filename = String.format("Invoice%03d_%s_%s.pdf", order.getId(), datePart, uuidPart);
@@ -89,9 +89,7 @@ public class InvoiceGenerator {
         customerTable.addCell(createInfoCell("Address:"));
         customerTable.addCell(createValueCell(address));
         customerTable.addCell(createInfoCell("Postal Code:"));
-        customerTable.addCell(createValueCell(postalCode));
         customerTable.addCell(createInfoCell("Country:"));
-        customerTable.addCell(createValueCell(country));
         customerTable.addCell(createInfoCell("Phone:"));
         customerTable.addCell(createValueCell(phoneNumber));
         document.add(customerTable);

@@ -2,34 +2,25 @@ import React, { useState } from "react";
 import OrderHistory from "../sections/accountSection/AccountSection";
 import { useLanguage } from "../features/LanguageContext";
 import ProfileSection from "../sections/profileSection/ProfileSection";
+import DeliveryStatus from "../sections/deliveryStatus/DeliveryStatus";
+import {translationsAccount} from "../utils/translations-account"; // New component
 
 // AccountPage Component: Displays a settings page with a collapsible sidebar and main content
 const AccountPage: React.FC = () => {
-    const { language } = useLanguage(); // State to manage language toggle
-    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false); // State to toggle sidebar
-    const [activeSection, setActiveSection] = useState<'orderHistory' | 'profile'>('orderHistory'); // State to toggle between sections
+    const { language } = useLanguage();
+    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+    const [activeSection, setActiveSection] = useState<
+        "orderHistory" | "profile" | "deliveryStatus"
+    >("orderHistory");
 
-    // Text content in both languages (English and French)
-    const text = {
-        en: {
-            settings: "Settings",
-            orderHistory: "Order History",
-            profile: "Profile",
-            closeMenu: "Close Menu",
-            openMenu: "Open Menu"
-        },
-        fr: {
-            settings: "Paramètres",
-            orderHistory: "Historique des commandes",
-            profile: "Profil",
-            closeMenu: "Fermer le menu",
-            openMenu: "Ouvrir le menu"
-        }
-    };
 
-    // Toggle sidebar visibility
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem("authToken");
+        alert("You're logged out!");
     };
 
     return (
@@ -41,11 +32,11 @@ const AccountPage: React.FC = () => {
                 } md:relative md:translate-x-0 transition-transform duration-300 ease-in-out w-64`}
             >
                 <div className="flex items-center justify-between p-4 border-b">
-                    <h2 className="text-xl font-semibold text-gray-800">{text[language].settings}</h2>
+                    <h2 className="text-xl font-semibold text-gray-800">{translationsAccount[language].settings}</h2>
                     <button
                         onClick={toggleSidebar}
                         className="md:hidden p-2 text-gray-600 hover:text-gray-800"
-                        aria-label={isSidebarOpen ? text[language].closeMenu : text[language].openMenu}
+                        aria-label={isSidebarOpen ? translationsAccount[language].closeMenu : translationsAccount[language].openMenu}
                     >
                         {isSidebarOpen ? (
                             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,22 +55,41 @@ const AccountPage: React.FC = () => {
                             <button
                                 className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary hover:text-black rounded-md transition"
                                 onClick={() => {
-                                    setActiveSection('orderHistory');
+                                    setActiveSection("profile");
                                     setIsSidebarOpen(false);
                                 }}
                             >
-                                {text[language].orderHistory}
+                                {translationsAccount[language].profile}
                             </button>
                         </li>
                         <li>
                             <button
                                 className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary hover:text-black rounded-md transition"
                                 onClick={() => {
-                                    setActiveSection('profile');
+                                    setActiveSection("orderHistory");
                                     setIsSidebarOpen(false);
                                 }}
                             >
-                                {text[language].profile}
+                                {translationsAccount[language].orderHistory}
+                            </button>
+                        </li>
+                        <li>
+                            <button
+                                className="w-full text-left px-4 py-2 text-gray-700 hover:bg-primary hover:text-black rounded-md transition"
+                                onClick={() => {
+                                    setActiveSection("deliveryStatus");
+                                    setIsSidebarOpen(false);
+                                }}
+                            >
+                                {translationsAccount[language].deliveryStatus}
+                            </button>
+                        </li>
+                        <li>
+                            <button
+                                onClick={handleLogout}
+                                className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 rounded-md transition"
+                            >
+                                {translationsAccount[language].logout}
                             </button>
                         </li>
                     </ul>
@@ -88,11 +98,10 @@ const AccountPage: React.FC = () => {
 
             {/* Main Content */}
             <div className="flex-1 p-6">
-                {/* Toggle button for mobile */}
                 <button
                     onClick={toggleSidebar}
                     className="md:hidden mb-4 p-2 bg-primary text-white rounded-md hover:bg-accent"
-                    aria-label={isSidebarOpen ? text[language].closeMenu : text[language].openMenu}
+                    aria-label={isSidebarOpen ? translationsAccount[language].closeMenu : translationsAccount[language].openMenu}
                 >
                     {isSidebarOpen ? (
                         <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,12 +114,11 @@ const AccountPage: React.FC = () => {
                     )}
                 </button>
 
-                {/* Content */}
-                {activeSection === 'orderHistory' && <OrderHistory />}
-                {activeSection === 'profile' && <ProfileSection />}
+                {activeSection === "orderHistory" && <OrderHistory />}
+                {activeSection === "profile" && <ProfileSection />}
+                {activeSection === "deliveryStatus" && <DeliveryStatus />}
             </div>
 
-            {/* Overlay for mobile when sidebar is open */}
             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
