@@ -8,20 +8,20 @@ import grapes.microservices.models.utils.CartManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// ViewModel class for managing Home-related data (articles, cart, etc.)
+// ViewModel class for managing Home-related data (articles, filters, etc.)
 class HomeViewModel(
-    private val articleRepo: ArticleRepository, // Repository for fetching articles
-    private val cartManager: CartManager,
-    private val sub: String? // User ID (sub) passed to the ViewModel
+    private val articleRepo: ArticleRepository, // Repository for fetching articles and related data
+    private val cartManager: CartManager
 ) : ViewModel() {
 
     // StateFlow to hold the list of articles
     private val _articles = MutableStateFlow<List<Article>>(emptyList())
     val articles: StateFlow<List<Article>> = _articles.asStateFlow() // Expose articles list as StateFlow
 
-    // Initialization block to fetch articles and initialize cart when the ViewModel is created
+    // Initialization block to fetch articles as soon as the ViewModel is created
     init {
         fetchArticles()
         resetAndInitializeCart()
@@ -35,13 +35,7 @@ class HomeViewModel(
         }
     }
 
-    // Function to reset and initialize the cart
     private fun resetAndInitializeCart() {
-        if (sub == null) {
-            // Handle case where user ID is not available (e.g., user not authenticated)
-            println("User ID (sub) not available, skipping cart initialization")
-            return
-        }
-        cartManager.resetAndInitializeCart(userId = sub) // Use sub as userId
+        cartManager.resetAndInitializeCart(userId = 1) // Use appropriate userId
     }
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class MessageDTO {
     private int topicId;
-    private String userId;
+    private int userId;
     private String username;
     private String content;
     private String createdAt;
