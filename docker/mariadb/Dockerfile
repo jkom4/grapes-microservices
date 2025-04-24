@@ -1,5 +1,6 @@
 FROM mariadb:latest
 LABEL authors="jkom"
+
 COPY ./config/init-db.sql /docker-entrypoint-initdb.d/
 
 ENV MYSQL_ROOT_PASSWORD=${DB_PASSWORD}

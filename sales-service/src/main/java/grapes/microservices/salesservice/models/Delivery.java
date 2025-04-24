@@ -66,5 +66,6 @@ public class Delivery {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-
+    @Column(name = "is_finished")
+    private boolean isFinished;
 }

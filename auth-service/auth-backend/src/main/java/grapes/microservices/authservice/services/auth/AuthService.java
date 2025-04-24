@@ -12,11 +12,14 @@ import grapes.microservices.authservice.utils.exceptions.ChallengeSendFailedExce
 import grapes.microservices.authservice.utils.exceptions.InvalidCredentialsException;
 import grapes.microservices.authservice.utils.exceptions.UnauthorizedException;
 import grapes.microservices.authservice.utils.exceptions.UserNotActiveException;
+import grapes.microservices.authservice.dto.AuthEventPayload;
+import grapes.microservices.authservice.services.AuthEventProducer;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.time.Instant;
+import java.util.UUID;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -46,6 +49,9 @@ public class AuthService {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private final AuthEventProducer producer;
 
 
     /**
@@ -80,7 +86,7 @@ public class AuthService {
      *
      * @param loginRequest the request containing the email, submitted challenge, and auth method
      */
-    public String getTokenFromChallenge(LoginRequest loginRequest) throws Exception {
+    public String[] getTokensFromChallenge(LoginRequest loginRequest) throws Exception {
         User user = userService.getUserByEmail(loginRequest.getEmail());
         AbstractAuthProvider authProvider = authMethodService.getAuthProvider(loginRequest.getAuthMethod());
 
@@ -90,21 +96,22 @@ public class AuthService {
         }
         // delete the challenge
         authProvider.deleteChallenge(user);
-        // reset session
-        sessionService.resetSession(user.getId().toHexString());
 
         //new session
         String userId = user.getId().toHexString();
         String name = user.getFullName();
-        String token =  tokenService.generateToken(userId, name, user.getRole());
-        sessionService.saveSession(user.getId().toHexString(), token);
+        String accessToken =  tokenService.generateToken(userId, name, user.getRole());
+        String refreshToken = tokenService.generateRefreshToken();
+
+        sessionService.saveSession(user.getId().toHexString(), accessToken, refreshToken);
 
         verifyEmailOrPhoneNumber(user, loginRequest.getAuthMethod());
         updateAuthMeans(user, loginRequest.getAuthMethod());
 
         // update user with verified email or phone and auth means
         userService.updateUser(user.getId().toHexString(), user);
-        return token;
+
+        return new String[] { accessToken, refreshToken };
     }
 
     /**
@@ -120,21 +127,20 @@ public class AuthService {
 
     /**
      * Generates a new access token using the refresh token.
-     * @param token the refresh token to be used
+     * @param refreshToken the refresh token to be used
      */
-    public String getRefreshToken(String token) {
-        // TODO : finish refresh token
-        token = formatRawToken(token);
-        String userId = tokenService.extractUserId(token);
+    public String[] refreshTokens(String refreshToken) {
+        String userId = sessionService.getUserIdByRefresh(refreshToken);
         User user = userService.getUserById(userId, false);
         String name = user.getFirstName() + " " + user.getName();
 
-        // To change
-        String storedRefreshToken = tokenService.getRefreshToken(userId);
-        if (storedRefreshToken == null || !storedRefreshToken.equals(token)) {
-            throw new IllegalArgumentException("Invalid refresh token");
-        }
-        return tokenService.generateToken(userId, name, user.getRole());
+        String accessToken =  tokenService.generateToken(userId, name, user.getRole());
+        refreshToken = tokenService.generateRefreshToken();
+
+        //delete old session and create a new one
+        sessionService.saveSession(user.getId().toHexString(), accessToken, refreshToken);
+
+        return new String[] { accessToken, refreshToken };
     }
 
     /**
@@ -251,5 +257,50 @@ public class AuthService {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
+    }
+
+    /**
+     * Sends an authentication event to the RabbitMQ queue.
+     */
+    public void sendAuthToQueue(String userId, AuthMethod authMethod, String sourceIp, String userAgent, String status, String failureReason) {
+        AuthEventPayload payload = new AuthEventPayload(
+                userId,
+                UUID.randomUUID().toString(),
+                Instant.now().toString(),
+                authMethod.getName(),
+                status,
+                sourceIp,
+                userAgent,
+                detectApplicationType(userAgent),
+                failureReason
+        );
+        producer.sendAuthLog(payload);
+    }
+
+    /**
+     * Detects the application type based on the user agent string.
+     * @param userAgent the user agent string
+     * @return the application type (e.g., "WebApp", "MobileApp", "Unknown")
+     */
+    private String detectApplicationType(String userAgent) {
+        if (userAgent == null) return "Unknown";
+
+        String ua = userAgent.toLowerCase();
+
+        if (ua.contains("android") || ua.contains("iphone") || ua.contains("ipad")) {
+            return "MobileApp";
+        } else if (ua.contains("windows") || ua.contains("macintosh") || ua.contains("linux")) {
+            return "WebApp";
+        } else {
+            return "Unknown";
+        }
+    }
+
+    public String getUserIdFromEmail(String email) {
+        User user = userService.getUserByEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        return user.getId().toHexString();
     }
 }

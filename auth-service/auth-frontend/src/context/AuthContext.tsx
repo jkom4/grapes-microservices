@@ -1,10 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { checkSessionStatus } from "../services/authService";
+import {checkSession, refresh, returnTokenToTierceApp} from "../services/authService";
 
-/**
- * Decodes a JWT token and returns its payload.
- */
+// Helper function to parse JWT token and extract its payload
 const parseJwt = (token: string) => {
     try {
         const base64Url = token.split(".")[1];
@@ -27,32 +25,32 @@ type AuthContextType = {
     role: string | null;
     id: string | null;
     setToken: (token: string | null) => void;
+    setIsAuthenticated: (isAuthenticated: boolean) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const countdownRef = useRef<NodeJS.Timeout | null>(null);
+    const REFRESH_INTERVAL_MINUTES = 10;
+    const timeLeftRef = useRef<number>(60 * REFRESH_INTERVAL_MINUTES);
+
     const location = useLocation();
     const navigate = useNavigate();
 
-    const [token, setTokenState] = useState<string | null>(
-        localStorage.getItem("jwt")
-    );
+    const [token, setTokenState] = useState<string | null>(localStorage.getItem("accessToken"));
+    const [role, setRole] = useState<string | null>(() => parseJwt(token!)?.role || null);
+    const [id, setId] = useState<string | null>(() => parseJwt(token!)?.sub || null);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!token);
-    const [role, setRole] = useState<string | null>(() => {
-        const decoded = token ? parseJwt(token) : null;
-        return decoded?.role || null;
-    });
-    const [id] = useState<string | null>(() => {
-        const decoded = token ? parseJwt(token) : null;
-        return decoded?.sub || null;
-    });
+    const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
 
+    // Update the token and related data (role, id, session)
     const setToken = async (newToken: string | null) => {
         if (newToken) {
-            localStorage.setItem("jwt", newToken);
+            localStorage.setItem("accessToken", newToken);
         } else {
-            localStorage.removeItem("jwt");
+            localStorage.removeItem("accessToken");
         }
 
         setTokenState(newToken);
@@ -60,42 +58,106 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (newToken) {
             const decoded = parseJwt(newToken);
             setRole(decoded?.role || null);
-            const valid = await checkSessionStatus(newToken);
-            setIsAuthenticated(valid);
+            setId(decoded?.sub || null);
+
+            try {
+                const valid = await checkSession(newToken);
+                setIsAuthenticated(valid.ok);
+            } catch {
+                setIsAuthenticated(false);
+            }
         } else {
             setIsAuthenticated(false);
             setRole(null);
+            setId(null);
         }
     };
 
-    useEffect(() => {
-        const refreshSession = async () => {
-            const storedToken = localStorage.getItem("jwt");
-            const onDashboard = location.pathname === "/dashboard";
+    // Refresh the session (check token validity or refresh it)
+    const refreshSession = async () => {
+        const storedToken = localStorage.getItem("accessToken");
+        const storedRefresh = localStorage.getItem("refreshToken");
+        const protectedPaths = ["/dashboard", "/admin"];
+        const onProtectedPage = protectedPaths.includes(location.pathname);
 
-            if (onDashboard && !storedToken) {
-                setIsAuthenticated(false);
-                navigate("/");
-                return;
+        if (storedRefresh) {
+            try {
+                const { accessToken, refreshToken } = await refresh(storedRefresh);
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                const data = {
+                    accessToken: accessToken,
+                    refreshToken: refreshToken
+                };
+
+                try {
+                    returnTokenToTierceApp(data, navigate)
+                } catch (err: any) {
+                    console.log("Error while redirecting to tierce app: ", err);
+                }
+            } catch (error) {
+                console.error("Error refreshing token:", error);
             }
 
-            if (storedToken) {
-                const valid = await checkSessionStatus(storedToken);
-                if (!valid) {
+        }
+
+        if (onProtectedPage && !storedToken) {
+            if (storedRefresh) {
+                return;
+            }
+            setIsAuthenticated(false);
+            navigate("/");
+            return;
+        }
+        if (storedToken) {
+            try {
+                const valid = await checkSession(storedToken);
+                if (!valid.ok) {
                     await setToken(null);
                     navigate("/");
                 }
+            } catch {
+                await setToken(null);
+                navigate("/");
             }
-        };
+        }
+    };
 
-        const interval = setInterval(refreshSession, 20 * 1000);
-        return () => clearInterval(interval);
-    }, [navigate, location]);
+    // Reset the refresh interval and start countdown logger
+    const resetInterval = () => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        if (countdownRef.current) clearInterval(countdownRef.current);
+
+        timeLeftRef.current = 60 * REFRESH_INTERVAL_MINUTES;
+
+        intervalRef.current = setInterval(async () => {
+            await refreshSession();
+            timeLeftRef.current = 60 * REFRESH_INTERVAL_MINUTES;
+        }, REFRESH_INTERVAL_MINUTES * 60 * 1000);
+    };
+
+    useEffect(() => {
+        if (!hasCheckedSession) {
+            // Call refreshSession only once at the beginning
+            refreshSession();
+            setHasCheckedSession(true);
+        }
+
+        if (isAuthenticated) {
+            resetInterval();
+        } else {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            if (countdownRef.current) clearInterval(countdownRef.current);
+        }
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            if (countdownRef.current) clearInterval(countdownRef.current);        };
+    }, [isAuthenticated]);
+
+    (window as any).resetAuthRefreshInterval = resetInterval;
 
     return (
-        <AuthContext.Provider
-            value={{ isAuthenticated, token, role, id, setToken }}
-        >
+        <AuthContext.Provider value={{ isAuthenticated, token, role, id, setToken, setIsAuthenticated }}>
             {children}
         </AuthContext.Provider>
     );
