@@ -20,10 +20,9 @@ public class PaymentValidatedListener {
         log.info("Message Content: {}", message.toString());
 
 
-        log.info("  Client ID: {}", message.getIdClient());
-        log.info("  Client Name: {}", message.getNomClient());
-        log.info("  Account Number: {}", message.getNumeroCompte());
-        log.info("  Amount Transferred: {}", message.getSommeTransferee());
+        log.info("  Client ID: {}", message.getClientId());
+        log.info("  Client Name: {}", message.getClientName());
+        log.info("  Account Number: {}", message.getAccountNumber());
 
 
     }

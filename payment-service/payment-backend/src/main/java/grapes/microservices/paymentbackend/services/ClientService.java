@@ -33,6 +33,8 @@ public class ClientService {
     private final CardRepository cardRepository;
     private final PasswordManager passwordManager;
 
+    private final UserMapper userMapper = UserMapper.INSTANCE;
+
     public Optional<Client> findByEmail(String email) {
         return clientRepository.findByEmail(email);
     }
@@ -87,7 +89,7 @@ public class ClientService {
         String hashedPassword = passwordManager.hashPassword(saltedPassword);
 
         // Create and save client entity using mapper
-        Client client = UserMapper.toEntity(clientDTO);
+        Client client = userMapper.toEntity(clientDTO);
         client.setPassword(hashedPassword);
         client.setStatus("Active");
         client.setRegistrationDate(java.time.LocalDate.now());

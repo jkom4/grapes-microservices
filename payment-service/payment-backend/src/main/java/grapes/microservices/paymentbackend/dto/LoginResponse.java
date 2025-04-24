@@ -12,5 +12,4 @@ public class LoginResponse {
     private String status;
     private String message;
     private Long userId;
-
 }

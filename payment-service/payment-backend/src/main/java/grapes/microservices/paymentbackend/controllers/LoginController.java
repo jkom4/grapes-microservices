@@ -16,7 +16,7 @@ import java.util.Map;
  * Controller handling user authentication operations.
  */
 @RestController
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin
 @RequestMapping("/login")
 public class LoginController {
 

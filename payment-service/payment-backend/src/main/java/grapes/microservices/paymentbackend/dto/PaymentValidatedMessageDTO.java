@@ -15,20 +15,18 @@ import java.time.LocalDateTime;
 public class PaymentValidatedMessageDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    // Client Info
-    private String nomClient;
-    private Long idClient;
-    private String numeroCompte;
+    private String clientName;
+    private Long clientId;
+    private String accountNumber;
     private String cardType;
-    private String sexe;
-    private LocalDate dateNaissance;
+    private String gender;
+    private LocalDate birthDate;
     private Integer age;
-    private String statutMarital;
-    private BigDecimal salaireMensuelMoyen;
+    private String maritalStatus;
+    private BigDecimal averageMonthlySalary;
     private Long transactionId;
-    private LocalDateTime dateHeureTransaction;
-    private String nomBanqueDebiteur;
-    private BigDecimal sommeTransferee;
+    private LocalDateTime transactionDateTime;
+    private String debtorBankName;
+    private BigDecimal transferAmount;
 
 }

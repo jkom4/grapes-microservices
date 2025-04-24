@@ -1,133 +1,116 @@
 // src/services/VerificationService.js
 import axios from 'axios';
-import { PAYMENT_API_URL } from './apiConfig'; // Assuming verification uses the same base URL as payment
+import { PAYMENT_API_URL } from './apiConfig';
 
-// Axios instance configured for verification service endpoints
 const apiClient = axios.create({
-    baseURL: PAYMENT_API_URL, // Use the imported base URL
+    baseURL: PAYMENT_API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true // Essential for session/auth context
+    withCredentials: true
 });
 
-// Handles payment verification (e.g., OTP submission) and related details retrieval
 export const VerificationService = {
-    /**
-     * Verifies a payment using a verification token (e.g., OTP) and the pending transaction ID.
-     * @param {PaymentVerification} verification - Object containing the paymentToken.
-     * @returns {Promise<{success: boolean, message: string}>} - Result object.
-     */
     verifyPayment: async (verification) => {
         try {
-            // Retrieve the transaction ID stored during payment initiation
             const transactionId = sessionStorage.getItem('pendingTransactionId');
             if (!transactionId) {
-                console.error('Verification service error: Missing pendingTransactionId in sessionStorage.');
+                console.error('Erreur: pendingTransactionId manquant dans sessionStorage.');
                 return {
                     success: false,
-                    message: 'Verification context lost. Please restart the payment process.'
+                    message: 'Contexte de vérification perdu. Veuillez recommencer le processus de paiement.'
                 };
             }
 
-            console.log(`Sending completion request for transactionId: ${transactionId} with token: ${verification.paymentToken}`);
-            // Endpoint path ('/payment/complete') is appended to the baseURL
+            console.log(`Envoi de la demande de finalisation pour l'ID: ${transactionId} avec le token: ${verification.paymentToken}`);
             const response = await apiClient.post('/payment/complete', {
                 paymentToken: verification.paymentToken,
-                transactionId: Number(transactionId) // Ensure transactionId is sent as a number if required by backend
+                transactionId: Number(transactionId)
             });
 
             if (response.data && response.data.success) {
-                // Clean up the transaction ID from session storage upon successful verification only
+                // Nettoyer l'ID de transaction en cas de succès
                 sessionStorage.removeItem('pendingTransactionId');
-                console.log('Payment verification successful, pendingTransactionId removed.');
+                console.log('Vérification du paiement réussie, pendingTransactionId supprimé.');
+
+                // Stocker l'URL de redirection si elle est présente dans la réponse
+                if (response.data.redirectUrl) {
+                    sessionStorage.setItem('redirectUrl', response.data.redirectUrl);
+                    console.log(`URL de redirection stockée: ${response.data.redirectUrl}`);
+                }
+
                 return {
                     success: true,
-                    message: response.data.message || 'Payment successful!'
+                    message: response.data.message || 'Paiement réussi!',
+                    redirectUrl: response.data.redirectUrl
                 };
             } else {
-                // Handle verification failure indicated by the backend
-                // Important: DON'T remove pendingTransactionId to allow retry
                 return {
                     success: false,
-                    message: response.data?.message || 'Verification failed. Please check the code and try again.'
+                    message: response.data?.message || 'Échec de la vérification. Veuillez vérifier le code et réessayer.'
                 };
             }
         } catch (error) {
-            console.error('Verification service error during completion:', error);
-            const message = error.response?.data?.message || 'An error occurred during verification';
+            console.error('Erreur pendant la vérification:', error);
+            const message = error.response?.data?.message || 'Une erreur est survenue pendant la vérification';
             const status = error.response?.status;
 
-            // Handle specific errors like conflict (already processed) or not found/expired
-            // Only remove pendingTransactionId for specific errors where retrying won't help
-            if (status === 409) { // Conflict - potentially already completed or failed
-                sessionStorage.removeItem('pendingTransactionId'); // Clean up context
-                return { success: false, message: message + " (Transaction may already be completed or expired)." };
+            if (status === 409) {
+                sessionStorage.removeItem('pendingTransactionId');
+                return { success: false, message: message + " (La transaction peut déjà être terminée ou expirée)." };
             }
-            if (status === 404 || status === 410) { // Not Found or Gone
-                sessionStorage.removeItem('pendingTransactionId'); // Clean up context
+            if (status === 404 || status === 410) {
+                sessionStorage.removeItem('pendingTransactionId');
                 return { success: false, message: message + ` (Status: ${status})` };
             }
 
-            // For 400 Bad Request, only remove if it's explicitly about expiration
             if (status === 400 && message.includes("not found or expired")) {
-                sessionStorage.removeItem('pendingTransactionId'); // Clean up context
-                return { success: false, message: "Payment request not found or expired. Please restart the payment." };
+                sessionStorage.removeItem('pendingTransactionId');
+                return { success: false, message: "Requête de paiement introuvable ou expirée. Veuillez recommencer." };
             }
 
-            // For other errors (including network errors), DON'T remove pendingTransactionId to allow retry
             return {
                 success: false,
-                message: `Verification failed: ${message} ${status ? `(Status: ${status})` : '(Network error)'}`
+                message: `Échec de la vérification: ${message} ${status ? `(Status: ${status})` : '(Erreur réseau)'}`
             };
         }
     },
 
-    /**
-     * Fetches details (like merchant, amount, masked card number) for the pending payment verification.
-     * @returns {Promise<{success: boolean, message?: string, details?: {merchantName: string, amount: string, cardNumber: string}}>} - Result object.
-     */
     getPendingPaymentDetails: async () => {
         try {
-            // Retrieve the transaction ID to identify which payment details to fetch
             const transactionId = sessionStorage.getItem('pendingTransactionId');
             if (!transactionId) {
-                console.error('getPendingPaymentDetails error: Missing pendingTransactionId in sessionStorage.');
+                console.error('Erreur: pendingTransactionId manquant dans sessionStorage.');
                 return {
                     success: false,
-                    message: 'Payment context not found. Please initiate payment again.'
+                    message: 'Contexte de paiement non trouvé. Veuillez initialiser le paiement à nouveau.'
                 };
             }
 
-            console.log(`Fetching pending payment details for transactionId: ${transactionId}`);
-            // Endpoint path with transactionId as a query parameter
+            console.log(`Récupération des détails de paiement pour l'ID: ${transactionId}`);
             const response = await apiClient.get(`/payment/pending-details?transactionId=${transactionId}`);
 
             if (response.data && response.data.success) {
-                // Ensure the expected detail fields are present in the response
                 const details = {
                     merchantName: response.data.merchantName || 'N/A',
                     amount: response.data.amount || 'N/A',
-                    cardNumber: response.data.maskedCardNumber || 'XXXX XXXX XXXX XXXX' // Backend sends maskedCardNumber
+                    cardNumber: response.data.maskedCardNumber || 'XXXX XXXX XXXX XXXX'
                 };
                 return {
                     success: true,
                     details: details
                 };
             } else {
-                // Handle cases where details retrieval failed server-side
-                const message = response.data?.message || 'Could not retrieve payment details.';
+                const message = response.data?.message || 'Impossible de récupérer les détails du paiement.';
 
-                // Clean up context only for specific errors where retrying won't help
-                if (response.status === 410 || response.status === 404) { // Not Found or Gone
+                if (response.status === 410 || response.status === 404) {
                     sessionStorage.removeItem('pendingTransactionId');
                     return { success: false, message: message + ` (Status: ${response.status})` };
                 }
 
-                // For 400 Bad Request, only remove if it's explicitly about expiration
                 if (response.status === 400 && message.includes("not found or expired")) {
                     sessionStorage.removeItem('pendingTransactionId');
-                    return { success: false, message: "No pending payment found or it has expired." };
+                    return { success: false, message: "Aucun paiement en attente trouvé ou il a expiré." };
                 }
 
                 return {
@@ -136,27 +119,32 @@ export const VerificationService = {
                 };
             }
         } catch (error) {
-            console.error('Error fetching pending payment details:', error);
+            console.error('Erreur lors de la récupération des détails de paiement:', error);
             const status = error.response?.status;
-            const message = error.response?.data?.message || 'Server error fetching payment details.';
+            const message = error.response?.data?.message || 'Erreur serveur lors de la récupération des détails.';
 
-            // Clean up context only for specific errors where retrying won't help
             if (status === 401 || status === 403 || status === 404 || status === 410) {
                 sessionStorage.removeItem('pendingTransactionId');
-                return { success: false, message: message + ` (Status: ${status} - Session cleaned)` };
+                return { success: false, message: message + ` (Status: ${status} - Session nettoyée)` };
             }
 
-            // For 400 Bad Request, only remove if it's explicitly about expiration
             if (status === 400 && message.includes("not found or expired")) {
                 sessionStorage.removeItem('pendingTransactionId');
-                return { success: false, message: "No pending payment found or it has expired." };
+                return { success: false, message: "Aucun paiement en attente trouvé ou il a expiré." };
             }
 
-            // For other errors (including network errors), DON'T remove pendingTransactionId to allow retry
             return {
                 success: false,
-                message: message + (status ? ` (Status: ${status})` : ' (Network error)')
+                message: message + (status ? ` (Status: ${status})` : ' (Erreur réseau)')
             };
         }
     },
+
+    getRedirectUrl: () => {
+        return sessionStorage.getItem('redirectUrl');
+    },
+
+    clearRedirectUrl: () => {
+        sessionStorage.removeItem('redirectUrl');
+    }
 };
