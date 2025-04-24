@@ -22,18 +22,26 @@ function Navbar() {
                 </div>
             </Link>
             <nav className="flex gap-8 flex-grow justify-center items-center">
-                <a href="#aboutus" className="text-black  hover:text-accent">
-                    {language === 'en' ? 'About Us' : 'À propos'}
-                </a>
-                <Link to="/all-articles" className="text-black  hover:text-accent">
+                <Link to="/" className="text-black hover:text-accent">
+                    {language === 'en' ? 'Home' : 'Accueil'}
+                </Link>
+                {/* Use Link to navigate to AllArticles page */}
+                <Link to="/all-articles" className="text-black hover:text-accent">
                     {language === 'en' ? 'Our Product' : 'Nos Produits'}
                 </Link>
-                <Link to="/account" className="text-black text hover:text-accent">
+                <Link to="/account" className="text-black hover:text-accent">
                     {language === 'en' ? 'Account' : 'Mon compte'}
                 </Link>
-                <Link to="/shopping-cart" className="text-black text-xl hover:text-accent">
+                <Link to="/shopping-cart" className="text-black hover:text-accent">
                     <span>🛒</span>
                 </Link>
+                <a
+                    href="http://localhost:3001"
+                    target="_blank"
+                    className="text-white text-lg bg-accent px-4 py-1 rounded hover:bg-secondary"
+                >
+                    {language === 'en' ? 'Login' : 'Se connecter'}
+                </a>
                 {/* user?.role === 'admin' && ( */}
                 <Link
                     to="/admin"

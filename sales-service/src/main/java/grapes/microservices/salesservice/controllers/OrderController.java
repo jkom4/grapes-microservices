@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 @RestController
 @CrossOrigin
@@ -30,7 +29,7 @@ public class OrderController {
         this.orderMapper = orderMapper;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/item/{id}")
     public ResponseEntity<?> getOrder(@PathVariable Integer id) {
         try {
             Order order = orderService.getOrderById(id);

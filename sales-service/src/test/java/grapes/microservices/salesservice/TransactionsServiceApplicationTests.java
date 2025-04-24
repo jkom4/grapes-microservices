@@ -3,7 +3,6 @@ package grapes.microservices.salesservice;
 import com.jayway.jsonpath.JsonPath;
 import grapes.microservices.salesservice.models.*;
 import grapes.microservices.salesservice.repositories.*;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -294,8 +293,8 @@ class TransactionsServiceApplicationTests {
     }
 */
 
-   @Test
-   @Disabled("Ce test est ignoré")
+    @Test
+    @Disabled("Ce test est ignoré")
     void testGetArticleById() throws Exception {
         String articleJson = """
         {
@@ -331,7 +330,7 @@ class TransactionsServiceApplicationTests {
 
 
 
-   @Test
+    @Test
     @Disabled("Ce test est ignoré")
     void testEndToEndOrderPaymentAndDeliveryCreation() throws Exception {
 

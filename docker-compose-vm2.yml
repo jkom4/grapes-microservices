@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  frontend-web:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/grapes-frontend:latest
+    container_name: frontend-web
+    ports:
+      - "80:80"
+
+  frontend-auth:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-frontend:latest
+    container_name: frontend-auth
+    ports:
+      - "81:81"
+
+  frontend-payment:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-frontend:latest
+    container_name: frontend-payment
+    ports:
+      - "82:82"
+
+  shiny-app:
+    build: ./data-mining-service
+    env_file: .env
+    container_name: grapes-insights-app
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/shiny-app:latest
+    restart: unless-stopped
+    ports:
+      - "83:3838"
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PWD=${DB_PASSWORD}
+      - MYSQL_HOST=mariadb
+      - MYSQL_PORT=3306
+      - MYSQL_DB_ACTIVITIES=BD_OPER_ACTIVITIES
+      - MONGO_URI=${DATA_MINING_MONGO_URI}
+      - MONGO_DB_AUTH=BD_OPER_PROC_AUTH
+      - DECIS_MONGO_URI=${DATA_MINING_MONGO_URI}
+      - DECIS_MONGO_DB=BD_DECIS_TEMP
+      - USER=${USER:-unknown}

@@ -8,7 +8,6 @@ import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import grapes.microservices.authservice.utils.AuthLogger;
-import grapes.microservices.authservice.utils.challenge_request_limiter.OneCallPerMinutePerUser;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -57,7 +56,6 @@ public class EmailService {
      * @param message the message to send
      * @throws IOException if the email could not be sent
      */
-    @OneCallPerMinutePerUser
     public boolean sendMail(String recipientMail, String topic, String message) throws IOException {
         try {
             if ( !isValidEmail(recipientMail) || !isValidEmail( COMPANY_MAIL ) ) {

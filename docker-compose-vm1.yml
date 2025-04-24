@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  mariadb-secondary:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
+    container_name: mariadb-secondary
+    env_file: .env
+    environment:
+      MARIADB_REPLICATION_ROLE: slave
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MARIADB_MASTER_HOST: ${MARIADB_MASTER_HOST}
+      MARIADB_REPLICATION_USER: ${MARIADB_REPLICATION_USER}
+      MARIADB_REPLICATION_PASSWORD: ${MARIADB_REPLICATION_PASSWORD}
+    ports:
+      - "3307:3306"
+
+  mongodb-secondary:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mongodb-grapes:latest
+    container_name: mongodb-secondary
+    command: --replSet rs0 --keyFile /data/keyfile --bind_ip_all
+    volumes:
+      - ./mongodb-secondary-data:/data/db
+      - ./mongodb-keyfile:/data/keyfile
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_USER_RW: ${MONGO_USER_RW}
+      MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
+
+
+
+  grafana:
+    image: grafana/grafana
+    container_name: grapes-grafana
+    volumes:
+      - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana/dashboards:/etc/grafana/dashboards
+    ports:
+      - "3000:3000"
+
+volumes:
+  mariadb_data:
+  mongodb_data:

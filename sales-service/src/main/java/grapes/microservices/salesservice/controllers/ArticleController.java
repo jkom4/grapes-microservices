@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping(value = "/clm/articles", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ArticleController {
 
@@ -44,7 +43,7 @@ public class ArticleController {
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while retrieving all articles.");
+                    .body("An error occurred while retrieving all articles." + e.getMessage());
         }
     }
 
@@ -61,7 +60,7 @@ public class ArticleController {
             return ResponseEntity.ok(dtoPage);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while retrieving available articles.");
+                    .body("An error occurred while retrieving available articles." + e.getMessage() );
         }
     }
 

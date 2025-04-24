@@ -3,11 +3,9 @@ package grapes.microservices.authservice.services.auth;
 import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.SmsService;
-import grapes.microservices.authservice.services.TokenService;
 import grapes.microservices.authservice.utils.challenge_request_limiter.OneCallPerMinutePerUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**

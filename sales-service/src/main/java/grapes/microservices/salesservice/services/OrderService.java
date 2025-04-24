@@ -32,8 +32,8 @@ public class OrderService {
     private final RabbitTemplate rabbitTemplate;
 
     //  SEND a message to RabbitMQ for delivery
-    public void sendOrderToDeliveryQueue(Integer orderId, String address, String phoneNumber, String customerName, String country, String postalCode) {
-        DeliveryMessage message = new DeliveryMessage(orderId, address, phoneNumber, customerName, country, postalCode);
+    public void sendOrderToDeliveryQueue(Integer orderId, String address, String phoneNumber, String customerName) {
+        DeliveryMessage message = new DeliveryMessage(orderId, address, phoneNumber, customerName);
         rabbitTemplate.convertAndSend("order-paid-queue", message);
         System.out.println(" Message sent to RabbitMQ: " + message);
     }
@@ -52,7 +52,7 @@ public class OrderService {
 
     //  Finalize payment
     @CacheEvict(value = "articles", allEntries = true)
-    public void finalizePaymentAndClearCart(Integer orderId, String address, String phoneNumber, String customerName, String country, String postalCode) throws FileNotFoundException {
+    public void finalizePaymentAndClearCart(Integer orderId, String address, String phoneNumber, String customerName) throws FileNotFoundException {
         Order order = getOrderById(orderId);
         List<OrderItem> items = getValidOrderItems(orderId);
 
@@ -60,7 +60,7 @@ public class OrderService {
         BigDecimal total = updateStockAndComputeTotal(items);
         order.setTotalPrice(total);
 
-        String pdfPath = InvoiceGenerator.generateInvoice(order, customerName, address, postalCode, country, phoneNumber, items, articleRepository);
+        String pdfPath = InvoiceGenerator.generateInvoice(order, customerName, address, phoneNumber, items, articleRepository);
         order.setFacturePath(pdfPath);
         order.setPaid(true);
 
@@ -68,7 +68,7 @@ public class OrderService {
         sendToDataMining(order, items);
 
         //  Send to RabbitMQ to create the delivery
-        sendOrderToDeliveryQueue(order.getId(), address, phoneNumber, customerName, country, postalCode);
+        sendOrderToDeliveryQueue(order.getId(), address, phoneNumber, customerName);
     }
 
     //  Retrieve all valid items from an order

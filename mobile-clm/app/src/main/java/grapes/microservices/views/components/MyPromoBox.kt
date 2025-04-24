@@ -15,10 +15,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart // Remplace avec l'icône que tu veux utiliser
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavController
 import grapes.microservices.R
 
 @Composable
-fun PromoBox() {
+fun PromoBox(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -29,7 +30,8 @@ fun PromoBox() {
             Text(text = stringResource(R.string.promo_title), color = Color(0xFF6A1B9A), fontWeight = FontWeight.Bold)
             Text(text = stringResource(R.string.promo_subtitle), fontSize = 12.sp)
             Spacer(modifier = Modifier.height(4.dp))
-            Button(onClick = {}, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBA68C8))) {
+            Button(onClick = { navController.navigate("catalog") },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBA68C8))) {
                 Text(text = stringResource(R.string.promo_button))
             }
         }

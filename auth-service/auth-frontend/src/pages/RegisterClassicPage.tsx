@@ -4,7 +4,7 @@ import {toast} from "react-toastify";
 import {useAuth} from "../context/AuthContext";
 import AlreadyAuthenticated from "../components/AlreadyAuthenticated";
 import RegistrationForm from "../sections/RegistrationClassicForm";
-import {handleRegisterUser} from "../services/authService";
+import {registerUser} from "../services/authService";
 import {Role} from "../models/User";
 
 const RegisterClassicPage = () => {
@@ -65,7 +65,7 @@ const RegisterClassicPage = () => {
     });
 
     useEffect(() => {
-        const token = localStorage.getItem('jwt');
+        const token = localStorage.getItem('accessToken');
         if (token) {
             navigate('/dashboard');
         }
@@ -127,7 +127,7 @@ const RegisterClassicPage = () => {
         };
 
         try {
-            await handleRegisterUser(dataToSend);
+            await registerUser(dataToSend);
             setFormData(initialFormData);
             toast.success('Registration successful', { autoClose: 2000 });
             navigate('/');

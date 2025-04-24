@@ -26,6 +26,11 @@ public class RabbitMQConfig {
         return new Queue("sales-data-queue", true);
     }
 
+    @Bean
+    public Queue paymentValidatedQueue() {
+        return new Queue("payment-validated-queue", true);
+    }
+
 
     @Bean
     public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {

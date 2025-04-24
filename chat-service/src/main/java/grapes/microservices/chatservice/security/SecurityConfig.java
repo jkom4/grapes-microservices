@@ -24,7 +24,8 @@ public class SecurityConfig {
     };
     //TO REMOVE FOR PROD
     private static final String[] CHAT_PATHS = {
-            "/chat/**"
+            "/chat/**",
+            "/actuator/**"
     };
 
     // OpenAPI configuration for Swagger UI with Bearer authentication
