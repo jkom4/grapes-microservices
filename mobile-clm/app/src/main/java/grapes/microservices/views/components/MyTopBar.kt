@@ -33,7 +33,6 @@ fun MyTopBar(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
-
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,

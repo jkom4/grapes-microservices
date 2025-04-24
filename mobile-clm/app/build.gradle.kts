@@ -60,6 +60,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.preferences.core.android)
 
     // --- Testing ---
     testImplementation(libs.junit)
@@ -89,4 +91,6 @@ dependencies {
     implementation ("io.coil-kt:coil-compose:2.4.0")
     implementation ("androidx.compose.material:material-icons-extended:1.5.0")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+    implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
 }
