@@ -31,6 +31,11 @@ public class RabbitMQConfig {
         return new Queue("payment-validated-queue", true);
     }
 
+    @Bean
+    public Queue activityLogsQueue() {
+        return new Queue("q_activity_logs", true);
+    }
+
 
     @Bean
     public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
