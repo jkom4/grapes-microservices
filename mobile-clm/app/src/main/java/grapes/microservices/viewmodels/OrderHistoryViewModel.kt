@@ -1,7 +1,6 @@
 package grapes.microservices.viewmodels
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import grapes.microservices.models.data.Order
 import grapes.microservices.models.repository.OrderRepository
@@ -54,7 +53,7 @@ class OrderHistoryViewModel(
                 val fetchedOrders = orderRepo.getOrderHistory(
                     userId = 1,
                     page = 0,
-                    size = 1000 // Adjust based on your needs
+                    size = 1000
                 )
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                 _allOrders.value = fetchedOrders.sortedByDescending { order ->

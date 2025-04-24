@@ -25,6 +25,7 @@ public class EmailAuthProvider extends AbstractAuthProvider {
     private EmailService emailService;
 
     @Override
+    @OneCallPerMinutePerUser
     public boolean sendChallenge(User user) throws IOException {
         String challenge = generateChallenge();
         challengeService.saveChallengeForUser(user.getEmail(), challenge);

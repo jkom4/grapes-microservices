@@ -63,10 +63,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
       MONGO_USER_RW: ${MONGO_USER_RW}
       MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
+      MONGO_TARGET_DB: BD_OPER_PROC_AUTH # Pass the target DB name for permissions
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+      - ./docker/mongodb/config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     command: ["--auth"]  # To activate authentication
 
   mongodb-secondary:
@@ -150,6 +152,59 @@ services:
       - prometheus
 
   ### BACKEND
+  data-ingestion-service:
+    build: ./data-mining-service/data_ingestion_service
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-ingestion-service:latest
+    container_name: data-ingestion-service
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - RABBITMQ_HOST=rabbitmq # Use service name
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER} # From .env via env_file
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} # From .env via env_file
+      - AMQP_VHOST=/ # Default VHost usually correct
+      - ACTIVITY_LOGS_QUEUE=q_activity_logs # Explicitly set
+      - AUTH_LOGS_QUEUE=q.auth_logs
+
+      # --- DB Connection (Using ROOT Credentials) ---
+      # MariaDB Root
+      - MYSQL_USER=root # Explicitly set to root
+      - MYSQL_PWD=${DB_PASSWORD} # Use the ROOT password defined for MariaDB (DB_PASSWORD from .env)
+      - MYSQL_HOST=mariadb # Use service name
+      - MYSQL_PORT=3306
+      - MYSQL_DB_ACTIVITIES=BD_OPER_ACTIVITIES
+      - MYSQL_TRANSACTIONS_TABLE=transactions #
+
+      # MongoDB Root
+      - MONGO_USER=${MONGO_ROOT_USER} # Use ROOT user from .env
+      - MONGO_PWD=${MONGO_ROOT_PASSWORD} # Use ROOT password from .env
+      - MONGO_HOST=mongodb # Use service name
+      - MONGO_PORT=27017
+      - MONGO_DB_AUTH=BD_OPER_PROC_AUTH # Target DB Name for auth logs
+      - MONGO_AUTH_SOURCE=admin # Root user is usually defined in 'admin' db
+      - MONGO_AUTH_COLLECTION=authentication_logs #
+
+      # --- SQLAlchemy Pool Recycle ---
+      - POOL_RECYCLE=${POOL_RECYCLE:-3600} # Use from .env or default
+      
+#       --- Consumer Logic Params (Optional - Override defaults in consumer.py) ---
+#       - SAVE_INTERVAL_SECONDS=60
+#       - MAX_BATCH_SIZE_TRANS=50
+#       - MAX_BATCH_SIZE_AUTH=100
+#       - MAX_HOLD_TIME_SECONDS=120
+#       - LOG_LEVEL=debug
+
+      # --- Python & Other ---
+      - PYTHONUNBUFFERED=1 # Good for seeing logs immediately
+      - USER=${USER:-unknown} # Usually not needed by script
+
+    depends_on:
+        - rabbitmq
+        - mariadb
+        - mongodb
+
+
 
   api-gateway:
     build: ./api-gateway
@@ -251,7 +306,6 @@ services:
     depends_on:
       - mariadb
       - mongodb
-
 
 ### FRONTEND
 

@@ -1,7 +1,6 @@
 package grapes.microservices.views.OrderHistory
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,7 +20,6 @@ import grapes.microservices.views.components.OrderComponents.FilterDialog
 import grapes.microservices.views.components.OrderComponents.OrderHistoryContent
 import grapes.microservices.views.components.OrderComponents.OrderHistoryTopBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderHistoryScreen(navController: NavController) {
     val repository = OrderRepository(RetrofitClient.orderApiService)
@@ -35,6 +33,9 @@ fun OrderHistoryScreen(navController: NavController) {
 
     var showFilterDialog by remember { mutableStateOf(false) }
 
+    // Filter orders where paid = true
+    val paidOrders = orders.filter { it.paid }
+
     Scaffold(
         topBar = {
             OrderHistoryTopBar(
@@ -45,7 +46,7 @@ fun OrderHistoryScreen(navController: NavController) {
         modifier = Modifier.padding(16.dp)
     ) { paddingValues ->
         OrderHistoryContent(
-            orders = orders,
+            orders = paidOrders, // Use filtered orders
             isLoading = isLoading,
             error = error,
             currentPage = currentPage,
