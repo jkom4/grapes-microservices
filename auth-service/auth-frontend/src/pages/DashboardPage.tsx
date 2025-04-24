@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {User} from "../models/User";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
-import { handleDisableUser, handleFetchUserById, handleUserUpdate } from "../services/authService";
+import { disableUser, getUserById, updateUser } from "../services/authService";
 import NotAuthenticated from "../components/NotAuthenticated";
 import Dashboard from "../sections/Dashboard";
 
@@ -11,7 +11,7 @@ import Dashboard from "../sections/Dashboard";
  * DashboardPage component to display and manage user profile data.
  */
 const DashboardPage = () => {
-    const { isAuthenticated, token, setToken } = useAuth();
+    const { isAuthenticated, id, token, setToken } = useAuth();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -22,7 +22,6 @@ const DashboardPage = () => {
     const [user, setUser] = useState<User | null>(null);
     const [isFormUnchanged, setIsFormUnchanged] = useState(true);
     const [formData, setFormData] = useState<User>({
-        id: '',
         name: '',
         firstName: '',
         passwordValid: true,
@@ -60,11 +59,17 @@ const DashboardPage = () => {
         updatedAt: '',
     });
 
-    // Verify user session and fetch data on component mount
     useEffect(() => {
         const verifySession = async () => {
             if (isAuthenticated && token) {
-                await handleFetchUserById(token, setUser, setFormData, () => setShowModalPassword(true));
+                const user = await getUserById(id!, token);
+
+                setUser(user);
+                setFormData(user);
+
+                if ( !user.passwordValid ) {
+                    setShowModalPassword(true);
+                }
             }
         };
         verifySession();
@@ -76,7 +81,6 @@ const DashboardPage = () => {
         }
     }, [formData, user]);
 
-    // If the user is not authenticated, show the NotAuthenticated component
     if (!isAuthenticated) {
         return <NotAuthenticated />;
     }
@@ -96,7 +100,7 @@ const DashboardPage = () => {
      */
     const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        const [section, field] = name.split('.'); // e.g., 'deliveryAddress.street' → ['deliveryAddress', 'street']
+        const [section, field] = name.split('.');
 
         setFormData(prevData => ({
             ...prevData,
@@ -119,16 +123,16 @@ const DashboardPage = () => {
         }
 
         try {
-            const res = await handleUserUpdate({
-                updatedUser: { ...formData },
-                setUser,
-                onSuccess: () => toast.success('User updated successfully!', { autoClose: 2000 }),
-            });
+            const res = await updateUser( { ...formData } , token!);
             if (!res?.ok) {
                 toast.error('User updated failed!', { autoClose: 2000 });
             }
+            const user = await res.json();
+            setUser(user);
+            setFormData(user);
+            toast.success('User updated successfully!', { autoClose: 2000 })
         } catch (err: any) {
-            const temp : string = "Error while updating user : `{err.message}`";
+            toast.error(`Error while updating user: ${err.message}`, { autoClose: 2000 });
         }
         setLoading(false);
     };
@@ -138,15 +142,15 @@ const DashboardPage = () => {
      */
     const handleDisableAccount = async () => {
         setLoading(true);
-        const token = localStorage.getItem('jwt');
+        const token = localStorage.getItem('accessToken');
         if (!token || !user) return;
 
         try {
-            const response = await handleDisableUser(user.id, token);
+            const response = await disableUser(user.id, token);
             toast.success('Your account has been disabled.', { autoClose: 2000 });
             if (response.ok) {
                 setToken(null);
-                localStorage.removeItem('jwt');
+                localStorage.removeItem('accessToken');
                 navigate('/');
             } else {
                 const errorData = await response.json();

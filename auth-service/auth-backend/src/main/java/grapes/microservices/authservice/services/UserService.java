@@ -1,9 +1,9 @@
 package grapes.microservices.authservice.services;
 
-import grapes.microservices.authservice.models.AuthMean;
-import grapes.microservices.authservice.models.AuthMethod;
-import grapes.microservices.authservice.models.Role;
-import grapes.microservices.authservice.models.User;
+import grapes.microservices.authservice.dto.AuthEventPayload;
+import grapes.microservices.authservice.dto.EventPayload;
+import grapes.microservices.authservice.dto.RegistrationEventPayload;
+import grapes.microservices.authservice.models.*;
 import grapes.microservices.authservice.repositories.UserRepository;
 import grapes.microservices.authservice.utils.AuthLogger;
 import grapes.microservices.authservice.utils.exceptions.UnauthorizedException;
@@ -16,9 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
-
-import static grapes.microservices.authservice.utils.validators.UserValidator.isValid;
 
 /**
  * UserService provides CRUD operations for managing User entities.
@@ -37,6 +36,9 @@ public class UserService {
     @Autowired
     private final TokenService tokenService;
 
+    @Autowired
+    private final AuthEventProducer producer;
+
     private static final Logger logger = LoggerFactory.getLogger(AuthLogger.class);
 
     @Value("${auth.service.required.age}")
@@ -53,13 +55,10 @@ public class UserService {
     public User registerUser(User user) throws Exception {
         validateRegistrationCriteria(user);
         initializeDefaultUserValues(user);
-        if (isValid(user, true)) {
-            user.encryptUser();
-            logger.info("User registered successfully with email: {}", user.getEmail());
-            return userRepository.save(user);
-        }
-        logger.error("Registration failed: user is not valid for email: {}", user.getEmail());
-        throw new IllegalArgumentException("User is not valid");
+        user.encryptUser();
+        logger.info("User registered successfully with email: {}", user.getEmail());
+        return userRepository.save(user);
+
     }
 
     /**
@@ -109,6 +108,7 @@ public class UserService {
     /**
      * Edits the information of an existing user.
      * Password and PIN code cannot be changed here, use the appropriate methods for that.
+     *
      * @param updatedUser The updated user information.
      * @return The updated user.
      * @throws IllegalArgumentException if no user is found with the provided ID.
@@ -124,20 +124,16 @@ public class UserService {
         userToUpdate.setActive(true);
         userToUpdate.setUpdatedAt(new java.util.Date());
 
-        if (isValid(userToUpdate, false)) {
-            logger.info("User with ID: {} updated successfully", userToUpdate.getId());
-            return userRepository.save(userToUpdate);
-        }
-        logger.error("User update failed: User with ID: {} is not valid", userToUpdate.getId());
-        throw new IllegalArgumentException("User is not valid");
+        logger.info("User with ID: {} updated successfully", userToUpdate.getId());
+        return userRepository.save(userToUpdate);
     }
 
     /**
      * Updates the password of a user.
      *
-     * @param user the user to update
+     * @param user            the user to update
      * @param currentPassword the current password
-     * @param newPassword the new password
+     * @param newPassword     the new password
      * @return the updated user
      */
     public User editPassword(User user, String currentPassword, String newPassword) {
@@ -165,7 +161,8 @@ public class UserService {
 
     /**
      * Updates the PIN code of a user.
-     * @param user the user to update
+     *
+     * @param user       the user to update
      * @param currentPin the current PIN code
      * @param newPin the new PIN code
      */
@@ -178,7 +175,7 @@ public class UserService {
             logger.error("Pin update failed: Current PIN is incorrect.");
             throw new IllegalArgumentException("Current PIN is incorrect.");
         }
-        if  (!User.isPinFormatValid(newPin)) {
+        if (!User.isPinFormatValid(newPin)) {
             logger.error("Pin update failed: Invalid PIN format");
             throw new IllegalArgumentException("PIN should be 4 digits");
         }
@@ -316,6 +313,23 @@ public class UserService {
         return user.getLoyaltyPoints();
     }
 
+    public void sendRegistrationToQueue(String userId, String email, String name, String firstName, Gender gender, Date birthDate, String nationalId, Address address) {
+        RegistrationEventPayload payload = new RegistrationEventPayload(
+                userId,
+                UUID.randomUUID().toString(),
+                Instant.now().toString(),
+                email,
+                name,
+                firstName,
+                gender,
+                birthDate,
+                nationalId,
+                address,
+                address.toString()
+        );
+        producer.sendRegistrationLog(payload);
+    }
+
     /**
      * Initializes a new user with default values.
      *
@@ -337,6 +351,7 @@ public class UserService {
     /**
      * Validates the registration criteria for a user.
      * Checks if the email, phone number, and national ID are unique
+     *
      * @param user the user to validate
      */
     private void validateRegistrationCriteria(User user) {
@@ -364,6 +379,7 @@ public class UserService {
 
     /**
      * Checks if the updated user has unique email and phone number
+     *
      * @param userToUpdate the user to update
      * @param updatedUser the updated user
      */
@@ -390,6 +406,7 @@ public class UserService {
 
     /**
      * Checks if the password and PIN code have changed
+     *
      * @param userToUpdate the user to update
      * @param updatedUser the updated user
      */

@@ -20,5 +20,5 @@ public interface IGrapesApi {
     CompletableFuture<List<Message>> fetchMessages(int topicId);
 
     /** Authenticate the user with given token, returns user object. */
-    CompletableFuture<User> authUser(String token);
+    CompletableFuture<User> getUser();
 }

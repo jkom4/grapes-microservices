@@ -1,4 +1,3 @@
-// Fetches order history for a given user
 import {orderAPI} from "./httpCommon";
 import Order from "../utils/models/Order";
 

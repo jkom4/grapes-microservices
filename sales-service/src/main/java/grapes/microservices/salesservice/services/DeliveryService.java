@@ -1,6 +1,7 @@
 package grapes.microservices.salesservice.services;
 
 import grapes.microservices.salesservice.dto.DeliveryDTO;
+import grapes.microservices.salesservice.dto.DeliveryFeedbackDTO;
 import grapes.microservices.salesservice.models.Delivery;
 import grapes.microservices.salesservice.models.DeliveryStatus;
 import grapes.microservices.salesservice.repositories.DeliveryRepository;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,7 +20,7 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final DeliveryStatusRepository deliveryStatusRepository;
 
-    // EXISTING: View pending deliveries
+    // View pending deliveries
     public List<DeliveryDTO> getPendingDeliveries() {
         DeliveryStatus pendingStatus = deliveryStatusRepository.findByLabel("Pending")
                 .orElseThrow(() -> new IllegalArgumentException("Status 'Pending' not found"));
@@ -35,7 +37,7 @@ public class DeliveryService {
                 .collect(Collectors.toList());
     }
 
-    // NEW: Get client-facing delivery status (preparing, shipped, delivered)
+    // Get client-facing delivery status (preparing, shipped, delivered)
     public String getDeliveryStatusByOrderId(Integer orderId) {
         Delivery delivery = deliveryRepository.findAll()
                 .stream()
@@ -64,5 +66,39 @@ public class DeliveryService {
 
         delivery.setDeliveryStatusId(newStatus.getId());
         deliveryRepository.save(delivery);
+    }
+
+    public void saveDeliveryFeedback(DeliveryFeedbackDTO feedback) {
+        System.out.println("Saving feedback for orderId: " + feedback.getOrderId());
+        System.out.println("Signature length: " + (feedback.getSignature() != null ? feedback.getSignature().length : 0));
+        Delivery delivery = new Delivery();
+        delivery.setOrderId(feedback.getOrderId());
+        delivery.setComment(feedback.getComment());
+        delivery.setDoorstep(feedback.isDoorstep());
+        delivery.setSignature(feedback.getSignature());
+        delivery.setDeliveryStatusId(feedback.getDeliveryStatusId());
+        deliveryRepository.save(delivery);
+    }
+
+    public void updateDeliveryFeedback(Integer orderId, DeliveryFeedbackDTO feedback) {
+        System.out.println("Updating feedback for orderId: " + orderId);
+        System.out.println("Signature length: " + (feedback.getSignature() != null ? feedback.getSignature().length : 0));
+        if (orderId == null || orderId <= 0) {
+            throw new IllegalArgumentException("Invalid orderId: " + orderId);
+        }
+        if (feedback.isDoorstep() && feedback.getSignature() == null) {
+            throw new IllegalArgumentException("Signature required for doorstep delivery");
+        }
+        Optional<Delivery> existingDelivery = deliveryRepository.findByOrderId(orderId);
+        if (existingDelivery.isPresent()) {
+            Delivery delivery = existingDelivery.get();
+            delivery.setComment(feedback.getComment());
+            delivery.setDoorstep(feedback.isDoorstep());
+            delivery.setSignature(feedback.getSignature());
+            delivery.setDeliveryStatusId(feedback.getDeliveryStatusId());
+            deliveryRepository.save(delivery);
+        } else {
+            throw new IllegalArgumentException("No delivery found for orderId: " + orderId);
+        }
     }
 }

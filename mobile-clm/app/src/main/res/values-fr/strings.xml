@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Mobile-CLM</string>
-
     <string name="promo_title">Savourez vos fruits avant votre activité</string>
     <string name="promo_subtitle">Boostez votre productivité et améliorez votre humeur</string>
     <string name="promo_button">Acheter maintenant</string>
@@ -21,7 +21,7 @@
     <string name="field_name">Nom</string>
     <string name="field_email">Adresse e-mail</string>
     <string name="field_phone">Numéro de téléphone</string>
-    <string name="field_address">Adresse</string>
+    <string name="field_address">Adresse complète</string>
     <string name="field_country">Pays</string>
     <string name="field_city">Ville</string>
     <string name="field_state">État</string>
@@ -58,4 +58,35 @@
     <string name="settings_personnal">Informations personelles</string>
     <string name="settings_update">Modifier mes informations personnelles</string>
     <string name="error_required_fields">Veuillez remplir tous les champs requis.</string>
+    <string name="settings_order_history">Historique des commandes</string>
+    <string name="settings_view_history">Voir l\'historique des commandes</string>
+    <string name="back_button">Retour</string>
+    <string name="filter_button">Filtrer</string>
+    <string name="filter_title">Filtrer les commandes</string>
+    <string name="filter_code">Code de commande</string>
+    <string name="filter_date">Date (aaaa-MM-jj)</string>
+    <string name="apply_button">Appliquer</string>
+    <string name="cancel_button">Annuler</string>
+    <string name="previous_page">Précédent</string>
+    <string name="next_page">Suivant</string>
+    <string name="page_number">Page %d</string>
+    <string name="order_history_title">Vos commandes</string>
+    <string name="order_id">Numéro de suivi #%d</string>
+    <string name="order_code">Code : %d</string>
+    <string name="order_date">Date : %s</string>
+    <string name="status_finished">Terminé</string>
+    <string name="status_paid">Payé</string>
+    <string name="status_pending">En attente</string>
+    <string name="no_orders">Aucune commande trouvée</string>
+    <string name="error_message">Erreur : %s</string>
+    <string name="settings_logout">Déconnexion</string>
+    <string name="settings_delivery_tracking">Suivi de livraison</string>
+    <string name="settings_track_delivery">Suivez votre livraison</string>
+    <string name="delivery_tracking_title">Suivi de livraison</string>
+    <string name="delivery_tracking_order_id_hint">Entrez votre numéro de suivi</string>
+    <string name="delivery_tracking_search">Recherche</string>
+    <string name="delivery_tracking_status">Statut : %s</string>
+    <string name="delivery_tracking_error">Erreur: %s</string>
+    <string name="delivery_tracking_loading">Chargement...</string>
+    <string name="delivery_tracking_invalid_order_id">Entrez un numéro de suivi valide</string>
 </resources>

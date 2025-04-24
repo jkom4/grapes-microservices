@@ -27,7 +27,7 @@ public class OrderController {
         this.orderMapper = orderMapper;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/item/{id}")
     public ResponseEntity<?> getOrder(@PathVariable Integer id) {
         try {
             Order order = orderService.getOrderById(id);
