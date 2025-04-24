@@ -108,8 +108,8 @@ jobs:
           echo "RABBITMQ_PORT=5672" >> .env
           echo "RABBITMQ_HOST=localhost" >> .env
           # Add other required ENV VARS for the test script here!
-          echo "RABBITMQ_USER=${secrets.RABBITMQ_USER}" >> .env
-          echo "RABBITMQ_PASSWORD=${secrets.RABBITMQ_PASSWORD}" >> .env
+          echo "RABBITMQ_USER=${{secrets.RABBITMQ_USER}}" >> .env
+          echo "RABBITMQ_PASSWORD=${{secrets.RABBITMQ_PASSWORD}}" >> .env
           echo "ACTIVITY_LOGS_QUEUE=q_activity_logs" >> .env
           echo "AUTH_LOGS_QUEUE=q.auth_logs" >> .env
 
