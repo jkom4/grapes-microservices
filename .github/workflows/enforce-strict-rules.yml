@@ -114,7 +114,39 @@ jobs:
           echo "AUTH_LOGS_QUEUE=q.auth_logs" >> .env
 
           pip install -r requirements.txt
-          python -m pytest 
+          python -m pytest
+          test-r-shiny: # <-- NEW JOB FOR R TESTS -->
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: 💧 Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.2' # Or your desired R version
+
+      - name: 📦 Install R Dependencies (using renv)
+        uses: r-lib/actions/setup-renv@v2
+        with:
+          working-directory: ./data-mining-service/shiny-appv3 # <--- Adjust path to your renv.lock
+
+      # OR: Install R Dependencies (using install.packages)
+      - name: 📦 Install R Dependencies
+        working-directory: ./data-mining-service/shiny-appv3 # <--- Adjust path
+        run: |
+          options(repos = c(CRAN = "https://cloud.r-project.org/"))
+          install.packages("remotes")
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("testthat")
+        shell: Rscript {0}
+
+      - name: ✨ Run R Tests (testthat)
+        working-directory: ./data-mining-service/shiny-appv3 # <--- Adjust path
+        run: |
+          options(warn = 2) # Treat warnings as errors
+          devtools::test()
+          testthat::test_dir("tests/testthat")
+        shell: Rscript {0}
 
       # ⚠️ Final status report
       - name: Determine overall status
