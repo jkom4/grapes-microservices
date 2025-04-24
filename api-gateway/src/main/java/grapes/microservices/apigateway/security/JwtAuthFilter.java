@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -26,11 +27,11 @@ import java.util.List;
 public class JwtAuthFilter implements GlobalFilter, Ordered {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
     private static final List<String> WHITELISTED_ENDPOINTS = List.of(
-            "/api/auth/login",
+            "/api/auth/**",
             "/api/users/**",
-            "api/auth/register",
-            "/api/auth/verify-challenge",
-            "/actuator/health"
+            "/api/clm/**",
+            "/api/cll/**",
+            "/actuator/*"
     );
 
     private static final String TOKEN_PREFIX = "Bearer ";
@@ -39,6 +40,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     private final JwtUtil jwtUtil;
     private final ReactiveRedisTemplate<String, String> redisTemplate;
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Autowired
     public JwtAuthFilter(JwtUtil jwtUtil, ReactiveRedisTemplate<String, String> redisTemplate) {
@@ -109,7 +112,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     }
 
     private boolean isWhitelisted(String path) {
-        return WHITELISTED_ENDPOINTS.stream().anyMatch(path::startsWith);
+        return WHITELISTED_ENDPOINTS.stream()
+                .anyMatch(whitelist -> pathMatcher.match(whitelist, path));
     }
 
     private String extractToken(ServerHttpRequest request) {
