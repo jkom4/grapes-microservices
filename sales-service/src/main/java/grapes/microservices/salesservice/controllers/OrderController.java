@@ -44,7 +44,7 @@ public class OrderController {
 
 
     @GetMapping("/history/{userId}")
-    public ResponseEntity<List<OrderSummaryDTO>> getOrderHistory(@PathVariable Integer userId) {
+    public ResponseEntity<List<OrderSummaryDTO>> getOrderHistory(@PathVariable String userId) {
         List<Order> orders = orderService.getOrdersByUserId(userId);
         List<OrderSummaryDTO> dtos = orders.stream()
                 .map(orderMapper::toSummaryDTO)

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { cartService } from "../services/cartService";
 import { useAuth } from "../features/AuthContext";
 import { toast } from "react-toastify";
@@ -13,7 +14,9 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [orderId, setOrderId] = useState<number | null>(null);
+    const [hasInitialized, setHasInitialized] = useState(false);
     const { sub } = useAuth();
+    const location = useLocation();
 
     const initializeCart = async () => {
         try {
@@ -26,12 +29,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 return;
             }
 
-            console.log("Attempting to initialize cart with sub:", sub);
 
             let dynamicOrderId = localStorage.getItem("orderId");
             if (!dynamicOrderId) {
                 const initResponse = await cartService.initializeCart(sub);
-                console.log("Initialized cart with orderId:", initResponse.id, "userId:", initResponse.userId);
                 if (initResponse.userId !== sub) {
                     console.warn("Mismatch: Expected userId:", sub, "but received:", initResponse.userId);
                     toast.warn("Error: Returned userId does not match.", {
@@ -42,8 +43,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 dynamicOrderId = initResponse.id.toString();
                 localStorage.setItem("orderId", dynamicOrderId);
                 setOrderId(initResponse.id);
+                setHasInitialized(true);
             } else {
                 setOrderId(parseInt(dynamicOrderId, 10));
+                setHasInitialized(true);
             }
         } catch (err) {
             console.error("Error initializing cart:", err);
@@ -55,8 +58,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     useEffect(() => {
-        initializeCart();
-    }, [sub]);
+        // Initialize on homepage if not already initialized
+        if (location.pathname === "/" && !hasInitialized && sub) {
+            initializeCart();
+        }
+    }, [location.pathname, sub, hasInitialized]);
 
     return (
         <CartContext.Provider value={{ orderId, setOrderId, initializeCart }}>

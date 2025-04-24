@@ -24,7 +24,7 @@ public class Delivery {
     private Integer orderId;
 
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    private String userId;
 
     @Column(name = "delivery_status_id", nullable = false)
     private Integer deliveryStatusId;

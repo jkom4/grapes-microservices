@@ -20,8 +20,6 @@ function ArticleDetailsSection() {
     const { sub } = useAuth(); // Get sub from AuthContext
     const { article, orderId, error, setError } = useArticleDetails(id, sub); // Pass sub to useArticleDetails
 
-    // Log sub for debugging
-    console.log("User ID (sub) in ArticleDetailsSection:", sub);
 
     // State for quantity, measurement type, and UI interactions
     const [isFavorite, setIsFavorite] = useState(false);

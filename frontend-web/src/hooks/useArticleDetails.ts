@@ -2,19 +2,15 @@ import { useEffect, useState } from "react";
 import Article from "../utils/models/Articles";
 import { fetchArticleById } from "../services/fruitServices";
 import { useCart } from "../features/CartContext";
-import { cartService } from "../services/cartService";
 import { toast } from "react-toastify";
 
 export const useArticleDetails = (id: string | undefined, sub: string | null) => {
     const [article, setArticle] = useState<Article | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const { orderId, setOrderId, initializeCart } = useCart();
-
-    console.log("User ID (sub) in useArticleDetails:", sub);
-    console.log("Current orderId in useArticleDetails:", orderId);
+    const { orderId, initializeCart } = useCart();
 
     useEffect(() => {
-        const fetchArticleAndInitializeCart = async () => {
+        const fetchArticle = async () => {
             try {
                 if (!id) {
                     throw new Error("Article ID is missing");
@@ -28,26 +24,9 @@ export const useArticleDetails = (id: string | undefined, sub: string | null) =>
                 const articleData = await fetchArticleById(articleId);
                 setArticle(articleData);
 
-                // Check if cart is initialized; if not, initialize it
+                // If no orderId, trigger CartProvider's initializeCart
                 if (!orderId) {
-                    console.log("No orderId found, initializing cart with sub:", sub);
-                    let dynamicOrderId = localStorage.getItem("orderId");
-                    if (!dynamicOrderId) {
-                        const initResponse = await cartService.initializeCart(sub);
-                        console.log("Initialized cart with orderId:", initResponse.id, "userId:", initResponse.userId);
-                        if (initResponse.userId !== sub) {
-                            console.warn("Mismatch: Expected userId:", sub, "but received:", initResponse.userId);
-                            toast.warn("Error: Returned userId does not match.", {
-                                position: "top-right",
-                                autoClose: 5000,
-                            });
-                        }
-                        dynamicOrderId = initResponse.id.toString();
-                        localStorage.setItem("orderId", dynamicOrderId);
-                        setOrderId(initResponse.id);
-                    } else {
-                        setOrderId(parseInt(dynamicOrderId, 10));
-                    }
+                    await initializeCart();
                 }
             } catch (err) {
                 setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -58,8 +37,8 @@ export const useArticleDetails = (id: string | undefined, sub: string | null) =>
             }
         };
 
-        fetchArticleAndInitializeCart();
-    }, [id, sub, orderId, setOrderId]);
+        fetchArticle();
+    }, [id, sub, orderId, initializeCart]);
 
     return { article, orderId, error, setError };
 };

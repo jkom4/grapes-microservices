@@ -56,7 +56,6 @@ export const fetchArticleById = async (id: number): Promise<Article> => {
 export const addArticle = async (article: Article): Promise<void> => {
     try {
         const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.addArticle}`;
-        console.log('Payload being sent:', JSON.stringify(article, null, 2)); // Log payload
         const response = await fetch(url, {
             method: "POST",
             headers: {
