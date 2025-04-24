@@ -145,6 +145,7 @@ services:
     container_name: grapes-grafana
     volumes:
       - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana/dashboards:/etc/grafana/dashboards
     ports:
       - "3000:3000"
     depends_on:

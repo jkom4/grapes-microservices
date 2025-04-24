@@ -6,31 +6,31 @@ scrape_configs:
   - job_name: 'api-gateway'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ '192.168.1.43:8090' ]
+      - targets: [ 'api-gateway:8090' ]
 
   - job_name: 'auth-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['192.168.1.43:8091']
+      - targets: ['auth-backend:8091']
 
   - job_name: 'sales-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['192.168.1.43:8092']
+      - targets: ['sales-backend:8092']
 
   - job_name: 'payment-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['192.168.1.43:8093']
+      - targets: ['payment-backend:8093']
 
   - job_name: 'chat-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['192.168.1.43:8094']
+      - targets: ['chat-backend:8094']
 
   - job_name: 'data-mining-service'
     static_configs:
-      - targets: ['192.168.1.43:8095']
+      - targets: ['data-mining-backend:8095']
 
 
   # 🛢️ MariaDB

@@ -31,11 +31,14 @@ services:
 
 
 
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
+  grafana:
+    image: grafana/grafana
+    container_name: grapes-grafana
+    volumes:
+      - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana/dashboards:/etc/grafana/dashboards
     ports:
-      - "9090:9090"
+      - "3000:3000"
 
 volumes:
   mariadb_data:
