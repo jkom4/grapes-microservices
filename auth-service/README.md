@@ -48,8 +48,41 @@ db.find()
     ```bash
     docker-compose up -d mongodb auth-service
     ```
-4. Install dependencies and run the project:
+   
+4. For the eID authentication, you need to install the PKCS11 dependencies for maven (which are not on a public repository)
 
+WARNING: first, you need to install OpenSC
+
+On Linux
+
+```bash
+sudo apt update
+sudo apt install opensc
+```
+
+On MacOS
+
+```bash
+brew install opensc
+```
+
+On Windows
+
+
+1. Download the latest OpenSC installer from the [OpenSC releases page](https://github.com/OpenSC/OpenSC/releases)
+2. Look for a file named like `OpenSC-<version>-win64.msi`
+3. Run the installer and follow the installation steps
+
+
+Then, you can install the dependencies with the following commands:
+```bash
+cd auth-backend/libraries
+
+mvn install:install-file \\n  -Dfile=pkcs11-provider-1.9.4.jar \\n  -DgroupId=iaik \\n  -DartifactId=pkcs11-provider \\n  -Dversion=1.9.4 \\n  -Dpackaging=jar
+mvn install:install-file \\n  -Dfile=sunpkcs11-wrapper-1.4.0.jar \\n  -DgroupId=iaik \\n  -DartifactId=pkcs11-provider \\n  -Dversion=1.9.4 \\n  -Dpackaging=jar
+mvn install:install-file \\n  -Dfile=iaikPkcs11Provider.jar \\n  -DgroupId=iaik \\n  -DartifactId=pkcs11-provider \\n  -Dversion=1.9.4 \\n  -Dpackaging=jar
+```
+5. Install dependencies and run the project:
     ```bash
     mvn clean install
     mvn spring-boot:run

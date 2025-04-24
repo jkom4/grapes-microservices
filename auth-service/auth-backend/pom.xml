@@ -185,6 +185,16 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.18.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.xipki.iaik</groupId>
+            <artifactId>sunpkcs11-wrapper</artifactId>
+            <version>1.4.10</version>
+        </dependency>
+        <dependency>
+            <groupId>iaik</groupId>
+            <artifactId>pkcs11-provider</artifactId>
+            <version>1.9.4</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -211,6 +221,9 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <jvmArguments>
+                        --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED
+                    </jvmArguments>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

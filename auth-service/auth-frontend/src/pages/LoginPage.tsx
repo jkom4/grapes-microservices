@@ -5,7 +5,8 @@ import {useAuth} from "../context/AuthContext";
 import {toast} from "react-toastify";
 import AlreadyAuthenticated from "../components/AlreadyAuthenticated";
 import LoginForm from "../sections/LoginForm";
-import {getChallenge, login, returnTokenToTierceApp} from "../services/authService";
+import {getChallenge, getRefreshToken, login, returnTokenToTierceApp} from "../services/authService";
+import {decryptChallengeWithEid} from "../services/eidService";
 
 const LoginPage = () => {
     const {method} = useParams<{ method: AuthMethod }>();
@@ -66,8 +67,27 @@ const LoginPage = () => {
         try {
             const res = await getChallenge(email, password, method as AuthMethod);
             const json = await res.json();
+
+            let decryptedChallenge = null;
+            if (method === "EID") {
+                decryptedChallenge = await decryptChallengeWithEid(json.challenge);
+                setChallenge(decryptedChallenge.split(''));
+                setShowChallenge(true);
+                setChallengeCountdown(60);
+
+                if (intervalRef.current) clearInterval(intervalRef.current);
+                intervalRef.current = setInterval(() => {
+                    setChallengeCountdown(prev => {
+                        if (prev && prev > 1) return prev - 1;
+                        clearInterval(intervalRef.current!);
+                        setShowChallenge(false);
+                        return null;
+                    });
+                }, 1000);
+            } else {
+                triggerChallenge();
+            }
             toast.success(json.message, {autoClose: 2000});
-            triggerChallenge();
         } catch (err: any) {
             toast.error(err.message, {autoClose: 2000});
         } finally {
@@ -85,7 +105,7 @@ const LoginPage = () => {
 
         try {
             setLoading(true);
-            const {accessToken, refreshToken} = await login(
+            const accessToken: string = await login(
                 challenge.join(''),
                 pinCode.join(''),
                 email,
@@ -93,17 +113,12 @@ const LoginPage = () => {
             );
 
             localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', refreshToken);
             toast.success('Login successful.', {autoClose: 2000});
             setIsAuthenticated(true);
-
-            const data = {
-                accessToken: accessToken,
-                refreshToken: refreshToken
-            };
-
+            const refreshToken = await getRefreshToken(accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
             try {
-                returnTokenToTierceApp(data, navigate)
+                returnTokenToTierceApp(accessToken, navigate)
             } catch (err: any) {
                 console.log("Error while redirecting to tierce app: ", err);
             }
@@ -183,6 +198,7 @@ const LoginPage = () => {
 
     return (
         <LoginForm
+            method={method}
             loading={loading}
             email={email}
             password={password}

@@ -26,4 +26,10 @@ ENV REDIS_HOST = ${REDIS_HOST}
 ENV REDIS_PORT = ${REDIS_PORT}
 ENV REDIS_PASSWORD = ${REDIS_PASSWORD}
 EXPOSE ${AUTH_SERVICE_PORT}
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Export PKCS11 module for EID authentication
+ENTRYPOINT ["java",
+  "--add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED",
+  "-jar",
+  "app.jar"
+]

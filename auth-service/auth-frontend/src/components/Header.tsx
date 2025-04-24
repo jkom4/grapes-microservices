@@ -21,19 +21,17 @@ const Header = () => {
 
             await logout(token);
             toast.success("Successfully logged out.", {autoClose: 2000});
-
-            await setToken(null);
-
-            navigate("/");
         } catch (error: any) {
             toast.error(error.message || "Logout failed.", {autoClose: 2000});
         } finally {
             setLoading(false);
+            await setToken(null);
+            navigate("/");
         }
     };
 
     const handleNavigateToDashboard = () => {
-        navigate('/dashboard');
+        window.location.href = '/dashboard';
     };
 
     return (

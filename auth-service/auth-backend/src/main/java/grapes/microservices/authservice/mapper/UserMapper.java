@@ -1,5 +1,6 @@
 package grapes.microservices.authservice.mapper;
 
+import grapes.microservices.authservice.dto.EIDCardInfo;
 import grapes.microservices.authservice.dto.UserDTOWithPasswordAndPin;
 import grapes.microservices.authservice.dto.UserDTOWithoutPasswordAndPin;
 import grapes.microservices.authservice.models.User;
@@ -26,6 +27,21 @@ public interface UserMapper {
     @Mapping(target = "age", expression = "java(computeAge(user.getBirthDate()))")
     @Mapping(source = "id", target = "id", qualifiedByName = "objectIdToString")
     UserDTOWithoutPasswordAndPin toDTO(User user);
+
+    @Mapping(target = "name", source = "lastName")
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "nationalId", source = "nationalId")
+    @Mapping(target = "birthDate", source = "birthDate")
+    @Mapping(target = "gender", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "phoneNumber", ignore = true)
+    @Mapping(target = "pinCode", ignore = true)
+    @Mapping(target = "role", constant = "USER")
+    @Mapping(target = "profession", ignore = true)
+    @Mapping(target = "deliveryAddress", ignore = true)
+    @Mapping(target = "billingAddress", ignore = true)
+    User toEntityFromEID(EIDCardInfo info);
 
 
     @Named("stringToObjectId")

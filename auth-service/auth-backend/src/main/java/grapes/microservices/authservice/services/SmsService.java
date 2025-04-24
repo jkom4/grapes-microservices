@@ -54,11 +54,12 @@ public class SmsService {
 
     /**
      * Send an SMS message to the recipient with the specified message.
+     *
      * @param recipientPhoneNumber the phone number of the recipient
-     * @param content the message to send
+     * @param content              the message to send
      */
     @OneCallPerMinutePerUser
-    public boolean sendSms(String recipientPhoneNumber, String content) {
+    public void sendSms(String recipientPhoneNumber, String content) {
         // Check if the phone number is valid
         if (!isValidPhoneNumber(recipientPhoneNumber, "+32")) {
             logger.error("Invalid phone number: " + recipientPhoneNumber);
@@ -74,7 +75,6 @@ public class SmsService {
                     .create();
 
             logger.info("SMS sent successfully: " + message.getSid());System.out.println(message);
-            return message.getBody() != null;
         } catch (Exception e) {
             logger.error("Failed to send SMS: " + e.getMessage());
             throw new RuntimeException("Failed to send SMS: " + e.getMessage());

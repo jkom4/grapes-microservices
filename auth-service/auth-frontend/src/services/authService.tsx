@@ -1,6 +1,5 @@
 import {AuthMethod, User} from '../models/User';
 import {jwtDecode} from 'jwt-decode';
-import http from './http-common';
 
 const API_BASE_URL = 'http://localhost:8091';
 
@@ -20,7 +19,7 @@ export async function getChallenge(email: string, password: string, method: Auth
         const res = await fetch(`${API_BASE_URL}/auth/challenge`, {
             method: 'POST',
             headers,
-            body: JSON.stringify({ email, password, authMethod: method }),
+            body: JSON.stringify({email, password, authMethod: method}),
         });
         if (!res.ok) {
             const errorText = await res.json();
@@ -34,19 +33,20 @@ export async function getChallenge(email: string, password: string, method: Auth
     }
 }
 
-export async function login(challenge: string, pin: string, email: string, method: string): Promise<{ accessToken: string, refreshToken: string }> {
+export async function login(challenge: string, pin: string, email: string, method: string): Promise<string> {
     try {
         const digest = await computeDigest(challenge, pin);
         const res = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers,
-            body: JSON.stringify({ email, digest, authMethod: method }),
+            body: JSON.stringify({email, digest, authMethod: method}),
         });
         if (!res.ok) {
             const errorText = await res.json();
             throw new Error(errorText.message);
         }
-        return await res.json();
+        const json = await res.json();
+        return json.accessToken;
     } catch (error: any) {
         handleConnectionError(error);
         console.error('[Login] Error:', error);
@@ -84,14 +84,14 @@ export async function logout(token: string): Promise<Response> {
     }
 }
 
-export async function refresh(refreshToken: string): Promise<{ accessToken: string, refreshToken: string }> {
+export async function refresh(refreshToken: string): Promise<string> {
     try {
         const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
             headers: {
                 ...headers,
             },
-            body: JSON.stringify({ refreshToken }),
+            body: JSON.stringify({refreshToken}),
         });
 
         if (!res.ok) {
@@ -99,11 +99,37 @@ export async function refresh(refreshToken: string): Promise<{ accessToken: stri
             throw new Error(errorText.message);
         }
 
-        return await res.json();
+        const data = await res.json();
+        return data.accessToken;
     } catch (error: any) {
         console.error('[Refresh] Error:', error);
         throw error;
     }
+}
+
+export async function getRefreshToken(token: string): Promise<string> {
+    try {
+        const res = await fetch(`${API_BASE_URL}/auth/get-refresh`, {
+            method: 'POST',
+            headers: {
+                ...headers,
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!res.ok) {
+            const errorText = await res.json();
+            throw new Error(errorText.message);
+        }
+
+        const json = await res.json();
+        return json.refreshToken;
+    } catch (error: any) {
+        handleConnectionError(error);
+        console.error('[Get Refresh Token] Error:', error);
+        throw error;
+    }
+
 }
 
 export async function checkSession(token: string): Promise<{ ok: boolean }> {
@@ -119,12 +145,12 @@ export async function checkSession(token: string): Promise<{ ok: boolean }> {
             throw new Error(errorText.message);
         }
 
-        return { ok: true };
+        return {ok: true};
     } catch (error: any) {
         handleConnectionError(error);
         console.error('[Check Session] Error:', error);
 
-        return { ok: false };
+        return {ok: false};
     }
 }
 
@@ -175,7 +201,7 @@ export async function editPassword(currentPassword: string, updatedPassword: str
                 ...headers,
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ currentPassword, updatedPassword }),
+            body: JSON.stringify({currentPassword, updatedPassword}),
         });
         if (!res.ok) {
             const errorText = await res.json();
@@ -200,7 +226,7 @@ export async function editPin(currentPin: string, updatedPin: string, token: str
                 ...headers,
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ currentPin, updatedPin }),
+            body: JSON.stringify({currentPin, updatedPin}),
         });
         if (!res.ok) {
             const errorText = await res.json();
@@ -299,7 +325,7 @@ export async function getAllUsers(token: string): Promise<User[]> {
     }
 }
 
-export function returnTokenToTierceApp(data: { accessToken: string, refreshToken: string }, navigate: (path: string) => void): void {
+export function returnTokenToTierceApp(accessToken: string, navigate: (path: string) => void): void {
     const rawRedirectUrl = sessionStorage.getItem('redirect_uri');
     const state = sessionStorage.getItem('state');
 
@@ -313,8 +339,7 @@ export function returnTokenToTierceApp(data: { accessToken: string, refreshToken
         if (state) {
             url.searchParams.set('state', state);
         }
-        url.searchParams.set('accessToken', data.accessToken);
-        url.searchParams.set('refreshToken', data.refreshToken);
+        url.searchParams.set('accessToken', accessToken);
 
         //clean up session storage
         sessionStorage.removeItem('redirect_uri');
