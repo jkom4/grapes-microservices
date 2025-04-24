@@ -114,8 +114,7 @@ jobs:
           echo "AUTH_LOGS_QUEUE=q.auth_logs" >> .env
 
           pip install -r requirements.txt
-          # Try letting pytest discover tests from the working directory
-          python -m pytest ./data_ingestion_service/tests/
+          python -m pytest 
 
       # ⚠️ Final status report
       - name: Determine overall status
