@@ -46,8 +46,6 @@ public class DeliveryConsumerService {
                     .deliveryDate(LocalDateTime.now())
                     .name(message.getCustomerName())
                     .address(message.getAddress())
-                    .postalCode(message.getPostalCode())
-                    .country(message.getCountry())
                     .phoneNumber(message.getPhoneNumber())
                     .build();
 

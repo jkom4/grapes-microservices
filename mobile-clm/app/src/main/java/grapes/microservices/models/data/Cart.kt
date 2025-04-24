@@ -14,3 +14,21 @@ data class Cart(
     val items: List<CartItem>,
     val totalPrice: Float
 )
+
+data class InitCartRequest(val userId: Int)
+
+data class AddToCartRequest(
+    val orderId: Int,
+    val articleId: Int,
+    val quantityKg: Float,
+    val quantity: Float
+)
+
+data class PayCartRequest(
+    val orderId: Int,
+    val customerName: String,
+    val phoneNumber: String,
+    val address: String,
+    val country: String,
+    val postalCode: String
+)

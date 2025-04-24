@@ -3,7 +3,6 @@ package grapes.microservices.authservice.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import grapes.microservices.authservice.services.EncryptionService;
 import grapes.microservices.authservice.utils.AuthLogger;
-import grapes.microservices.authservice.utils.validators.WithoutPassword;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Temporal;
@@ -43,13 +42,13 @@ public class User {
     @Id
     private ObjectId id;
 
-    @NotNull(groups = WithoutPassword.class)
+    @NotNull
     private boolean isActive;
 
-    @NotNull(groups = WithoutPassword.class)
+    @NotNull
     private String name;
 
-    @NotNull(groups = WithoutPassword.class)
+    @NotNull
     private String firstName;
 
     @Pattern(regexp = PASSWORD_PATTERN, message = "Password must contain at least one uppercase letter, one digit, and one special character")
@@ -58,8 +57,8 @@ public class User {
 
     private boolean isPasswordValid;
 
-    @NotNull(message = "email cannot be null", groups = WithoutPassword.class)
-    @Email(message = "Email should be valid", groups = WithoutPassword.class)
+    @NotNull(message = "email cannot be null")
+    @Email(message = "Email should be valid")
     private String email;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -67,34 +66,32 @@ public class User {
 
     @Pattern(
             regexp = "^\\+?[0-9]{7,15}$",
-            message = "The phone number must contain between 7 and 15 digits and may start with a '+'",
-            groups = WithoutPassword.class
-    )
+            message = "The phone number must contain between 7 and 15 digits and may start with a '+'")
     private String phoneNumber;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private boolean phoneVerified;
 
-    @Size(min = 11, max = 11, message = "National ID must be 11 digits long", groups = WithoutPassword.class)
-    @NotNull(message = "nationalId cannot be null", groups = WithoutPassword.class)
-    @Pattern(regexp = "^\\d{11}$", message = "National ID must contain only digits", groups = WithoutPassword.class)
+    @Size(min = 11, max = 11, message = "National ID must be 11 digits long")
+    @NotNull(message = "nationalId cannot be null")
+    @Pattern(regexp = "^\\d{11}$", message = "National ID must contain only digits")
     private String nationalId;
 
     @NotNull
-    @Past(message = "Birth date must be in the past", groups = WithoutPassword.class)
+    @Past(message = "Birth date must be in the past")
     private Date birthDate;
 
-    @NotNull(message = "gender cannot be null", groups = WithoutPassword.class)
+    @NotNull(message = "gender cannot be null")
     private Gender gender;
 
     @Size(min = 4, max = 4, message = "Pin code must be 4 digits long")
     @Pattern(regexp = PIN_PATTERN, message = "Pin code must contain only digits")
     private String pinCode;
 
-    @NotNull(groups = WithoutPassword.class)
+    @NotNull
     private Role role;
 
-    @Min(value = 0, message = "Loyalty points cannot be negative", groups = WithoutPassword.class)
+    @Min(value = 0, message = "Loyalty points cannot be negative")
     private Integer loyaltyPoints;
 
     private String profession;

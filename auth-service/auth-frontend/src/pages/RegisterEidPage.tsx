@@ -17,7 +17,7 @@ const RegisterEidPage = () => {
     };
 
     useEffect(() => {
-        const token = localStorage.getItem('jwt');
+        const token = localStorage.getItem('accessToken');
         if (token) {
             navigate('/dashboard');
         }

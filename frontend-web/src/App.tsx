@@ -3,17 +3,19 @@ import './index.css';
 import Navbar from './layouts/Navbar';
 import MainPage from './pages/Home';
 import { LanguageProvider } from './features/LanguageContext';
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
-import AllArticles from "./pages/AllArticles";
-import ArticleDetails from "./pages/ArticleDetails";
-import ShoppingCart from "./pages/ShoppingCart";
-import AdminPage from "./pages/admin/Admin";
-import AccountPage from "./pages/AccountPage";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import AllArticles from './pages/AllArticles';
+import ArticleDetails from './pages/ArticleDetails';
+import ShoppingCart from './pages/ShoppingCart';
+import AdminPage from './pages/admin/Admin';
+import AccountPage from './pages/AccountPage';
+import { CartProvider } from './features/CartContext';
+
 
 const App: React.FC = () => {
     return (
-        /*   <AuthProvider> */
         <LanguageProvider>
+            <CartProvider>
             <Router>
                 <Navbar />
                 <Routes>
@@ -24,9 +26,19 @@ const App: React.FC = () => {
                     <Route path="/account" element={<AccountPage />} />
                     <Route path="/admin" element={<AdminPage />} />
                 </Routes>
+                <ToastContainer
+                    position="top-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop
+                    closeOnClick
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                />
             </Router>
+            </CartProvider>
         </LanguageProvider>
-        /*  <AuthProvider /> */
     );
 };
 

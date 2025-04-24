@@ -145,6 +145,7 @@
             <column name="comment" type="TEXT"/>
             <column name="doorstep" type="BOOLEAN"/>
             <column name="signature" type="BLOB"/>
+            <column name="is_finished" type="BOOLEAN" defaultValueBoolean="false" />
         </createTable>
     </changeSet>
 

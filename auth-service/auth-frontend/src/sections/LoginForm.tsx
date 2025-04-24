@@ -15,7 +15,7 @@ interface LoginFormProps {
     handleLogin: () => void;
     handleGetChallenge: () => void;
     handleChange: (e: React.ChangeEvent<HTMLInputElement>, index: number, type: 'challenge' | 'pin') => void;
-    handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, index: number, type: 'challenge' | 'pin') => void;
+    handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, index: number, type: 'challenge' | 'pin' | 'credentials') => void;
     handlePaste: (e: React.ClipboardEvent<HTMLInputElement>, type: 'challenge' | 'pin') => void;
     challengeCountdown: number | null;
 }
@@ -59,6 +59,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                                     placeholder="Email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    onKeyDown={(e) => handleKeyDown(e, -1, 'credentials')}
                                     className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required
                                 />
@@ -73,6 +74,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                                     placeholder="Password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    onKeyDown={(e) => handleKeyDown(e, -1, 'credentials')}
                                     className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required
                                 />

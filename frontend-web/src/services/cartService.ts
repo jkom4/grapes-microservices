@@ -1,9 +1,16 @@
-// src/services/cartService.ts
-import { cartAPI } from "./httpCommon"; // Adjust path if needed
+import { cartAPI } from "./httpCommon";
 import CartItemModel from "../utils/models/CartItem";
 
 interface InitCartResponse {
-    orderId: number;
+    id: number;
+    code?: number;
+    userId?: number;
+    facturePath?: string | null;
+    totalPrice?: number | null;
+    createdAt?: string;
+    orderItems?: any[] | null;
+    paid?: boolean;
+    finished?: boolean;
 }
 
 export interface CartResponse {
@@ -54,7 +61,7 @@ export const cartService = {
     },
 
     // Fetch cart by order ID
-    async fetchCart(orderId: string): Promise<CartResponse> {
+    async fetchCart(orderId: number): Promise<CartResponse> {
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.get(orderId)}`);
         if (!response.ok) {
             const errorDetails = await response.text();
@@ -65,22 +72,27 @@ export const cartService = {
 
     // Process payment for the cart
     async processPayment(
-        orderId: string,
+        orderId: number,
         address: string,
         phoneNumber: string,
-        customerName: string,
-        country: string,
-        postalCode: string
+        customerName: string
     ): Promise<void> {
-        const response = await fetch(
-            `${cartAPI.baseURL}${cartAPI.endpoints.pay(orderId, { address, phoneNumber, customerName, country, postalCode })}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        const url = `${cartAPI.baseURL}${cartAPI.endpoints.pay}`;
+        const body = {
+            orderId,
+            address,
+            phoneNumber,
+            customerName,
+        };
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+
         if (!response.ok) {
             const errorDetails = await response.text();
             throw new Error(`Payment failed. Details: ${errorDetails}`);
@@ -88,8 +100,8 @@ export const cartService = {
     },
 
     // Remove an item from the cart
-    async removeItem(itemId: number): Promise<void> {
-        const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.remove(itemId)}`, {
+    async removeItem(orderId: number, itemId: number): Promise<void> {
+        const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.remove(orderId, itemId)}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -101,24 +113,8 @@ export const cartService = {
         }
     },
 
-    // Apply a promo code to the cart
-    async applyPromoCode(orderId: string, promoCode: string): Promise<CartResponse> {
-        const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.applyPromo}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ orderId, promoCode }),
-        });
-        if (!response.ok) {
-            const errorDetails = await response.text();
-            throw new Error(`Failed to apply promo code. Details: ${errorDetails}`);
-        }
-        return response.json();
-    },
-
     // Clear the cart
-    async clearCart(orderId: string): Promise<void> {
+    async clearCart(orderId: number): Promise<void> {
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.clear(orderId)}`, {
             method: "DELETE",
             headers: {

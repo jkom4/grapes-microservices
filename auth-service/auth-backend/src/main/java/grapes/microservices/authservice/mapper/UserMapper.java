@@ -1,6 +1,7 @@
 package grapes.microservices.authservice.mapper;
 
-import grapes.microservices.authservice.dto.UserDTO;
+import grapes.microservices.authservice.dto.UserDTOWithPasswordAndPin;
+import grapes.microservices.authservice.dto.UserDTOWithoutPasswordAndPin;
 import grapes.microservices.authservice.models.User;
 import org.bson.types.ObjectId;
 import org.mapstruct.*;
@@ -16,13 +17,16 @@ import java.util.List;
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
+    User toEntity(UserDTOWithPasswordAndPin dto);
+
     @Mapping(source = "id", target = "id", qualifiedByName = "stringToObjectId")
     @Mapping(source = "loyaltyPoints", target = "loyaltyPoints")
-    User toEntity(UserDTO dto);
+    User toEntity(UserDTOWithoutPasswordAndPin dto);
 
     @Mapping(target = "age", expression = "java(computeAge(user.getBirthDate()))")
     @Mapping(source = "id", target = "id", qualifiedByName = "objectIdToString")
-    UserDTO toDTO(User user);
+    UserDTOWithoutPasswordAndPin toDTO(User user);
+
 
     @Named("stringToObjectId")
     static ObjectId stringToObjectId(String id) {
@@ -34,7 +38,7 @@ public interface UserMapper {
         return id != null ? id.toHexString() : null;
     }
 
-    List<UserDTO> toDTOList(List<User> users);
+    List<UserDTOWithoutPasswordAndPin> toDTOList(List<User> users);
 
 
     /**
