@@ -36,13 +36,6 @@ const OrderTable: React.FC<OrderTableProps> = ({ orders, sortConfig, handleSort,
                         {translations.date}{" "}
                         {sortConfig.key === "createdAt" && (sortConfig.direction === "asc" ? "↑" : "↓")}
                     </th>
-                    <th
-                        className="px-6 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer"
-                        onClick={() => handleSort("totalPrice")}
-                    >
-                        {translations.total}{" "}
-                        {sortConfig.key === "totalPrice" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-                    </th>
                     <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
                         {translations.status}
                     </th>

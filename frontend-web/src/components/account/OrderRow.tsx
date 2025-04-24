@@ -22,9 +22,6 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, translations }) => {
             <td className="px-6 py-4 text-gray-700">{order.id}</td>
             <td className="px-6 py-4 text-gray-700">{order.code}</td>
             <td className="px-6 py-4 text-gray-700">{formatDate(order.createdAt)}</td>
-            <td className="px-6 py-4 text-gray-700">
-                {order.totalPrice ? `${translations.currency}${(order.totalPrice + 5).toFixed(2)}` : "-"}
-            </td>
             <td className="px-6 py-4">
         <span
             className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${

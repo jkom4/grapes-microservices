@@ -58,13 +58,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     }, [stateAuthentication, sub, role, name]);
 
+    useEffect(() => {
+        const logoutTimer = setTimeout(() => {
+            localStorage.clear();
+            sessionStorage.clear();
+        }, 15 * 60 * 1000);
+
+        return () => clearTimeout(logoutTimer);
+    }, []);
     const generateRandomNumber = () => {
         const array = new Uint32Array(1);
         window.crypto.getRandomValues(array);
         const randomNum = array[0];
         setStateAuthentication(randomNum);
     };
-
 
     const setAuthData = (newSub: string | null, newRole: string | null, newName: string | null) => {
         setSub(newSub);
