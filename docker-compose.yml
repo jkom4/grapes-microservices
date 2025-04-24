@@ -285,7 +285,6 @@ services:
       - mongodb
       - mariadb
 
-
   shiny-app:
     build: ./data-mining-service
     container_name: grapes-insights-app
