@@ -5,6 +5,7 @@ import com.pusher.rest.data.Result;
 import grapes.microservices.chatservice.dto.MessageDto;
 import grapes.microservices.chatservice.dto.TopicDto;
 import grapes.microservices.chatservice.dto.UserDto;
+import grapes.microservices.chatservice.services.TokenService;
 import grapes.microservices.chatservice.services.TopicService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/chat")
@@ -27,12 +27,17 @@ public class TopicController {
     }
     @Autowired
     private Pusher pusher;
+    @Autowired
+    private TokenService tokenService;
 
     @GetMapping("/user")
-    public UserDto getCurrentUser(@RequestHeader("X-User-ID") String userId,
-                                  @RequestHeader("X-User-Roles") String userRole,
-                                  @RequestHeader("X-User-Name") String userName) {
-        return new UserDto(userId, userName);
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.substring(7);
+        if (!tokenService.isValidToken(token)) {
+            return ResponseEntity.status(400).body("Invalid token");
+        }
+        var user = new UserDto(tokenService.extractUserId(token), tokenService.extractUserName(token));
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/topics")
@@ -65,6 +70,4 @@ public class TopicController {
             return ResponseEntity.status(500).body("Erreur lors de l'envoi à Pusher: " + result.getMessage());
         }
     }
-
-
 }

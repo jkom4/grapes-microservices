@@ -45,16 +45,18 @@ public class GrapesApi implements IGrapesApi {
             // Send request
             var response = sendRequest(request);
 
-            // TODO reactivate for production
-//            if (response.statusCode() == 403) {
-//                throw new CompletionException(new MyApiBadRequestException("Your request is unauthorized"));
-//            }
+            if (response.statusCode() == 403) {
+                throw new CompletionException(new MyApiBadRequestException("Your request is unauthorized"));
+            }
+
+            if (response.statusCode() == 400) {
+                throw new CompletionException(new MyApiBadRequestException(response.body()));
+            }
 
             // convert response
             System.out.println("[GrapesApi] user loaded");
             UserDTO user = GSON.fromJson(response.body(), UserDTO.class);
-//            return UserMapper.toEntity(user);
-            return new User(UserSession.getToken(), UserSession.getToken());
+            return UserMapper.toEntity(user);
         }, executor);
     }
 
