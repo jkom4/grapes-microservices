@@ -5,7 +5,6 @@ import com.pusher.rest.data.Result;
 import grapes.microservices.chatservice.dto.MessageDto;
 import grapes.microservices.chatservice.dto.TopicDto;
 import grapes.microservices.chatservice.dto.UserDto;
-import grapes.microservices.chatservice.services.TokenService;
 import grapes.microservices.chatservice.services.TopicService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,16 +26,11 @@ public class TopicController {
     }
     @Autowired
     private Pusher pusher;
-    @Autowired
-    private TokenService tokenService;
 
     @GetMapping("/user")
-    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authorizationHeader) {
-        String token = authorizationHeader.substring(7);
-        if (!tokenService.isValidToken(token)) {
-            return ResponseEntity.status(400).body("Invalid token");
-        }
-        var user = new UserDto(tokenService.extractUserId(token), tokenService.extractUserName(token));
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("X-User-ID") String userId,
+                                  @RequestHeader("X-User-Name") String userName) {
+        var user = new UserDto(userId, userName);
         return ResponseEntity.ok(user);
     }
 
