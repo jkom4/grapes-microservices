@@ -106,7 +106,7 @@ class TransactionsServiceApplicationTests {
 
         Delivery delivery = Delivery.builder()
                 .orderId(8)
-                .userId(1)
+                .userId("1")
                 .deliveryStatusId(deliveryStatusRepository.findByLabel("Pending").get().getId())
                 .deliveryDate(LocalDateTime.now())
                 .build();
@@ -400,7 +400,7 @@ class TransactionsServiceApplicationTests {
         // MANUALLY simulate delivery creation (simulate RabbitMQ behavior)
         Delivery delivery = Delivery.builder()
                 .orderId(orderId)
-                .userId(2) // 🛠️ Choose an existing deliveryMan ID
+                .userId("2") // 🛠️ Choose an existing deliveryMan ID
                 .deliveryStatusId(1) // pending
                 .deliveryDate(LocalDateTime.now())
                 .build();
