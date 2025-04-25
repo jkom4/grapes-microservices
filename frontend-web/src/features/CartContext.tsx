@@ -29,8 +29,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 return;
             }
 
-
             let dynamicOrderId = localStorage.getItem("orderId");
+
             if (!dynamicOrderId) {
                 const initResponse = await cartService.initializeCart(sub);
                 if (initResponse.userId !== sub) {
@@ -58,11 +58,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     useEffect(() => {
-        // Initialize on homepage if not already initialized
-        if (location.pathname === "/" && !hasInitialized && sub) {
+        if (sub && !hasInitialized) {
             initializeCart();
         }
-    }, [location.pathname, sub, hasInitialized]);
+    }, [sub, hasInitialized]);
 
     return (
         <CartContext.Provider value={{ orderId, setOrderId, initializeCart }}>
