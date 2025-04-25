@@ -72,16 +72,44 @@ On Windows
 1. Download the latest OpenSC installer from the [OpenSC releases page](https://github.com/OpenSC/OpenSC/releases)
 2. Look for a file named like `OpenSC-<version>-win64.msi`
 3. Run the installer and follow the installation steps
+   Of course! Here's the improved README in English:
+
+---
 
 
-Then, you can install the dependencies with the following commands:
-```bash
-cd auth-backend/libraries
+## Configuring VM Options for IntelliJ IDEA
 
-mvn install:install-file \\n  -Dfile=pkcs11-provider-1.9.4.jar \\n  -DgroupId=iaik \\n  -DartifactId=pkcs11-provider \\n  -Dversion=1.9.4 \\n  -Dpackaging=jar
-mvn install:install-file \\n  -Dfile=sunpkcs11-wrapper-1.4.0.jar \\n  -DgroupId=iaik \\n  -DartifactId=pkcs11-provider \\n  -Dversion=1.9.4 \\n  -Dpackaging=jar
-mvn install:install-file \\n  -Dfile=iaikPkcs11Provider.jar \\n  -DgroupId=iaik \\n  -DartifactId=pkcs11-provider \\n  -Dversion=1.9.4 \\n  -Dpackaging=jar
+When running or debugging the application in IntelliJ IDEA, you need to add the following VM options in the configuration settings:
+
+1. Open IntelliJ IDEA and go to the Run/Debug configurations.
+2. Select the configuration for your project.
+3. In the **Configuration** tab, locate the **VM Options** field.
+4. Add the following options:
 ```
+--add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED --enable-native-access=ALL-UNNAMED
+```
+5. Save the changes and restart your application.
+
+These settings enable the application to properly access native APIs and required cryptographic modules. Make sure to include them to avoid compatibility issues.
+
+### Installing Dependencies
+
+Before running the following commands, make sure to specify **the absolute path** of the file in the `-Dfile` option. Additionally, the version must be enclosed in single quotes (`'`).
+
+```bash
+cd auth-backend
+
+mvn install:install-file -Dfile="/absolute/path/to/pkcs11-provider-1.9.4.jar" -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion='1.9.4' -Dpackaging=jar
+
+mvn install:install-file -Dfile="/absolute/path/to/sunpkcs11-wrapper-1.4.0.jar" -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion='1.9.4' -Dpackaging=jar
+
+mvn install:install-file -Dfile="/absolute/path/to/iaikPkcs11Provider.jar" -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion='1.9.4' -Dpackaging=jar
+```
+
+---
+
+This version ensures clarity regarding the absolute path requirement for `-Dfile` and correctly applies the `'1.9.4'` notation for `-Dversion`. Let me know if you need further refinements! 🚀
+
 5. Install dependencies and run the project:
     ```bash
     mvn clean install
