@@ -10,6 +10,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
                                                      handleStripePayment,
                                                      paymentError,
                                                      translations,
+                                                     isLoggedIn,
                                                  }) => {
     return (
         <div className="mt-6 space-y-4">
@@ -31,25 +32,27 @@ const CartSummary: React.FC<CartSummaryProps> = ({
             </div>
             <button
                 onClick={handlePayment}
-                disabled={isPaying || isCartEmpty}
+                disabled={isPaying || isCartEmpty || !isLoggedIn}
                 className={`w-full py-3 mt-6 rounded-lg transition-all ${
-                    isPaying || isCartEmpty
+                    isPaying || isCartEmpty || !isLoggedIn
                         ? "bg-gray-400 cursor-not-allowed"
                         : "bg-secondary hover:bg-accent"
                 } text-white font-semibold`}
+                title={!isLoggedIn ? translations.loginRequired : ""}
             >
-                {isPaying ? translations.processing : "Payer avec 3D Secure"}
+                {isPaying ? translations.processing : translations.payWith3DSecure || "Payer avec 3D Secure"}
             </button>
             <button
                 onClick={handleStripePayment}
-                disabled={isPaying || isCartEmpty}
+                disabled={isPaying || isCartEmpty || !isLoggedIn}
                 className={`w-full py-3 rounded-lg transition-all ${
-                    isPaying || isCartEmpty
+                    isPaying || isCartEmpty || !isLoggedIn
                         ? "bg-gray-400 cursor-not-allowed"
                         : "bg-blue-600 hover:bg-blue-700"
                 } text-white font-semibold`}
+                title={!isLoggedIn ? translations.loginRequired : ""}
             >
-                {isPaying ? translations.processing : "Payer avec Stripe"}
+                {isPaying ? translations.processing : translations.payWithStripe || "Payer avec Stripe"}
             </button>
             {paymentError && <div className="mt-4 text-red-600 text-sm">{paymentError}</div>}
             <div className="mt-4 text-xs text-gray-600 flex items-start space-x-2">
@@ -57,7 +60,8 @@ const CartSummary: React.FC<CartSummaryProps> = ({
                 <p>
                     <strong>{translations.secureCheckout}</strong>
                     <br />
-                    Ensuring your financial and personal details are secure during every transaction.
+                    {translations.secureCheckoutDescription ||
+                        "Ensuring your financial and personal details are secure during every transaction."}
                 </p>
             </div>
         </div>

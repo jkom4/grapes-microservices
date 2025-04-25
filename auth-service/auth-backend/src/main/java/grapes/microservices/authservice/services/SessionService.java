@@ -18,9 +18,6 @@ public class SessionService {
 
     private final StringRedisTemplate redisTemplate;
 
-    @Value("${auth.service.access.token.expiration.time.minutes}")
-    private long ACCESS_EXPIRATION_TIME; // Expiration in minutes
-
     @Value("${auth.service.refresh.token.expiration.time.days}")
     private long REFRESH_EXPIRATION_TIME; // Expiration in days
 
@@ -29,22 +26,14 @@ public class SessionService {
      * The session is stored with the key "session:userId"
      * The session token is stored with the key "refresh:userId"
      * @param userId the user id
-     * @param accessToken the access token
      * @param refreshToken the refresh token
      */
-    public void saveSession(String userId, String accessToken, String refreshToken) {
-        String sessionKey = "session:" + userId;
+    public void saveSession(String userId, String refreshToken) {
         String refreshKey = "refresh:" + userId;
 
-        redisTemplate.delete(sessionKey);
         redisTemplate.delete(refreshKey);
 
-        redisTemplate.opsForValue().set(sessionKey, accessToken, ACCESS_EXPIRATION_TIME, TimeUnit.MINUTES);
         redisTemplate.opsForValue().set(refreshKey, refreshToken, REFRESH_EXPIRATION_TIME, TimeUnit.DAYS);
-    }
-
-    public String getSession(String userId) {
-        return redisTemplate.opsForValue().get("session:" + userId);
     }
 
     /**
@@ -63,14 +52,22 @@ public class SessionService {
     }
 
     /**
+     * Finds the refresh token associated with the given userId
+     * @param userId the user id
+     * @return the refresh token if found, otherwise null
+     */
+    public String getRefreshTokenByUserId(String userId) {
+        String refreshKey = "refresh:" + userId;
+        return redisTemplate.opsForValue().get(refreshKey);
+    }
+
+    /**
      * Deletes the session for the given user ID
      * @param userId the user id
      */
     public void deleteSession(String userId) {
-        String sessionKey = "session:" + userId;
         String refreshKey = "refresh:" + userId;
 
-        redisTemplate.delete(sessionKey);
         redisTemplate.delete(refreshKey);
     }
 }

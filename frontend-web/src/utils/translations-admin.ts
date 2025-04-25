@@ -36,6 +36,7 @@ export const translationsAdmin = {
         error_stock_negative: "Stock values cannot be negative",
         error_saving_article: "An error occurred while saving the article",
         error_deleting_article: "An error occurred while deleting the article",
+        article_save_success: "Article saved successfully",
     },
     fr: {
         header: "Gestion des Articles",
@@ -74,5 +75,6 @@ export const translationsAdmin = {
         error_stock_negative: "Les valeurs de stock ne peuvent pas être négatives",
         error_saving_article: "Une erreur s'est produite lors de l'enregistrement de l'article",
         error_deleting_article: "Une erreur s'est produite lors de la suppression de l'article",
+        article_save_success: "Article sauvegardé avec succès",
     },
 };

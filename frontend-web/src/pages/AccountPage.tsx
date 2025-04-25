@@ -1,26 +1,62 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import OrderHistory from "../sections/accountSection/AccountSection";
 import { useLanguage } from "../features/LanguageContext";
 import ProfileSection from "../sections/profileSection/ProfileSection";
 import DeliveryStatus from "../sections/deliveryStatus/DeliveryStatus";
-import {translationsAccount} from "../utils/translations-account"; // New component
+import { translationsAccount } from "../utils/translations-account";
+import accountService from "../services/accountService";
+import {authenticationService} from "../services/authenticationService"; // Import accountService
 
-// AccountPage Component: Displays a settings page with a collapsible sidebar and main content
 const AccountPage: React.FC = () => {
     const { language } = useLanguage();
+    const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
     const [activeSection, setActiveSection] = useState<
         "orderHistory" | "profile" | "deliveryStatus"
     >("orderHistory");
-
+    const [logoutLoading, setLogoutLoading] = useState<boolean>(false); // Track logout loading
+    const [logoutError, setLogoutError] = useState<string | null>(null); // Track logout errors
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem("authToken");
-        alert("You're logged out!");
+    const handleLogout = async () => {
+        setLogoutLoading(true);
+        setLogoutError(null);
+
+        try {
+            const accessToken = sessionStorage.getItem("accessToken");
+            if (!accessToken) {
+                throw new Error(translationsAccount[language].noTokenError || "No authentication token found");
+            }
+
+            // Call the logout API
+            await authenticationService.logout(accessToken);
+
+            // Clear storage
+            sessionStorage.removeItem("accessToken");
+            sessionStorage.removeItem("refreshToken");
+            sessionStorage.removeItem("state");
+            localStorage.removeItem("role");
+            localStorage.removeItem("name");
+            localStorage.removeItem("orderId");
+            localStorage.removeItem("sub");
+
+            // Provide feedback (optional: replace alert with a toast or other UI feedback)
+            alert(translationsAccount[language].logoutSuccess || "You are logged out!");
+
+            // Redirect to homepage
+            window.location.href = "/";
+        } catch (err) {
+            const errorMessage =
+                err instanceof Error
+                    ? err.message
+                    : translationsAccount[language].logoutError || "Logout failed";
+            setLogoutError(errorMessage);
+            setLogoutLoading(false);
+        }
     };
 
     return (
@@ -87,9 +123,16 @@ const AccountPage: React.FC = () => {
                         <li>
                             <button
                                 onClick={handleLogout}
-                                className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100 rounded-md transition"
+                                disabled={logoutLoading}
+                                className={`w-full text-left px-4 py-2 rounded-md transition ${
+                                    logoutLoading
+                                        ? "text-gray-400 bg-gray-200 cursor-not-allowed"
+                                        : "text-red-600 hover:bg-red-100"
+                                }`}
                             >
-                                {translationsAccount[language].logout}
+                                {logoutLoading
+                                    ? translationsAccount[language].loggingOut || "Logging out..."
+                                    : translationsAccount[language].logout}
                             </button>
                         </li>
                     </ul>
@@ -98,6 +141,11 @@ const AccountPage: React.FC = () => {
 
             {/* Main Content */}
             <div className="flex-1 p-6">
+                {logoutError && (
+                    <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">
+                        {logoutError}
+                    </div>
+                )}
                 <button
                     onClick={toggleSidebar}
                     className="md:hidden mb-4 p-2 bg-primary text-white rounded-md hover:bg-accent"

@@ -24,6 +24,23 @@ export interface Translation {
     secureCheckout: string;
     kg: string;
     unit: string;
+    payWithStripe: string;
+    secureCheckoutDescription: string;
+    country: string;
+    city: string;
+    state: string;
+    zip: string;
+    termsAccepted: string;
+    termsLabel: string;
+    paymentSuccess: string;
+    thankYou: string;
+    orderDetails: string;
+    backToHome: string;
+    errorFetchingCart: string;
+    errorRemovingItem: string;
+    invalidOrderId: string;
+    loginRequired: string;
+    payWith3DSecure: string;
 }
 
 export const translationsPayment: Record<"en" | "fr", Translation> = {
@@ -53,6 +70,24 @@ export const translationsPayment: Record<"en" | "fr", Translation> = {
         secureCheckout: "Secure Checkout",
         kg: "kg",
         unit: "unit",
+        payWithStripe: "Pay with Stripe",
+        secureCheckoutDescription:
+            "Ensuring your financial and personal details are secure during every transaction.",
+        country: "Country",
+        city: "City",
+        state: "State",
+        zip: "ZIP Code",
+        termsAccepted: "I accept the terms and conditions",
+        termsLabel: "Accept Terms",
+        paymentSuccess: "Payment Successful",
+        thankYou: "Thank you for your purchase!",
+        orderDetails: "Order Details",
+        backToHome: "Back to Home",
+        errorFetchingCart: "Failed to fetch cart",
+        errorRemovingItem: "Failed to remove item from cart",
+        invalidOrderId: "Invalid order ID",
+        loginRequired: "You must be logged in to proceed with payment.",
+        payWith3DSecure: "Pay with 3D Secure"
     },
     fr: {
         checkout: "Paiement",
@@ -80,5 +115,23 @@ export const translationsPayment: Record<"en" | "fr", Translation> = {
         secureCheckout: "Paiement sécurisé",
         kg: "kg",
         unit: "unité",
+        payWithStripe: "Payer avec Stripe",
+        secureCheckoutDescription:
+            "Garantir la sécurité de vos informations financières et personnelles lors de chaque transaction.",
+        country: "Pays",
+        city: "Ville",
+        state: "État",
+        zip: "Code postal",
+        termsAccepted: "J'accepte les conditions générales",
+        termsLabel: "Accepter les conditions",
+        paymentSuccess: "Paiement réussi",
+        thankYou: "Merci pour votre achat !",
+        orderDetails: "Détails de la commande",
+        backToHome: "Retour à l'accueil",
+        errorFetchingCart: "Échec de la récupération du panier",
+        errorRemovingItem: "Échec de la suppression de l'article du panier",
+        invalidOrderId: "ID de commande invalide",
+        loginRequired: "Vous devez être connecté pour procéder au paiement.",
+        payWith3DSecure: "Payer avec 3D Secure"
     },
 };

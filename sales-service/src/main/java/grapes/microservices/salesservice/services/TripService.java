@@ -22,7 +22,7 @@ public class TripService {
     private final OrderItemRepository orderItemRepository;
 
     // 1. Get all the trips from one delivery man
-    public List<TripDTO> getTripsByDeliveryMan(Integer userId) {
+    public List<TripDTO> getTripsByDeliveryMan(String userId) {
         List<Delivery> deliveries = deliveryRepository.findByUserId(userId);
 
         return deliveries.stream()

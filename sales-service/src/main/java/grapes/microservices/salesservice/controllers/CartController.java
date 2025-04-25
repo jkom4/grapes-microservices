@@ -10,9 +10,11 @@ import grapes.microservices.salesservice.services.CartService;
 import grapes.microservices.salesservice.services.OrderService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 
 /**
@@ -147,6 +149,34 @@ public class CartController {
         }
     }
 
+    @GetMapping("/{orderId}/invoice")
+    public ResponseEntity<?> downloadInvoice(@PathVariable Integer orderId) {
+        try {
+            Order order = orderService.getOrderById(orderId);
+
+            String invoicePath = order.getFacturePath();
+            if (invoicePath == null || invoicePath.isEmpty()) {
+                return ResponseEntity.badRequest().body("No invoice found for this order.");
+            }
+
+            String filePath = "uploads" + invoicePath.replace("/invoices", "/invoices");
+            File file = new File(filePath);
+            if (!file.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            byte[] data = java.nio.file.Files.readAllBytes(file.toPath());
+            ByteArrayResource resource = new ByteArrayResource(data);
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=" + file.getName())
+                    .contentLength(file.length())
+                    .body(resource);
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to download invoice: " + e.getMessage());
+        }
+    }
 
 
 

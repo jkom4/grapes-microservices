@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class OrderSummaryDTO {
     private Integer id;
     private Integer code;
-    private Integer userId;
+    private String userId;
     private String facturePath;
     private BigDecimal totalPrice;
     private LocalDateTime createdAt;

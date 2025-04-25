@@ -32,9 +32,9 @@ public abstract class AbstractAuthProvider {
     /**
      * Sends a challenge to the user to verify their identity
      * @param user the user to send the challenge to
-     * @return true if the challenge was sent successfully, false otherwise
+     * @return the provided challenge
      */
-    public abstract boolean sendChallenge(User user) throws IOException;
+    public abstract String sendChallenge(User user) throws IOException;
 
     /**
      * Get the challenge submitted to the user

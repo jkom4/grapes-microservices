@@ -151,6 +151,7 @@ const DashboardPage = () => {
             if (response.ok) {
                 setToken(null);
                 localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
                 navigate('/');
             } else {
                 const errorData = await response.json();

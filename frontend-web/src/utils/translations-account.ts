@@ -35,6 +35,10 @@ export const translationsAccount = {
         closeMenu: "Close Menu",
         openMenu: "Open Menu",
         logout: "Logout",
+        noTokenError: "No authentication token found",
+        logoutError: "Logout failed",
+        logoutSuccess: "You are logged out!",
+        loggingOut: "Logging out...",
     },
     fr: {
         heading: "Historique des commandes",
@@ -71,5 +75,9 @@ export const translationsAccount = {
         closeMenu: "Fermer le menu",
         openMenu: "Ouvrir le menu",
         logout: "Déconnexion",
+        noTokenError: "Pas de token d'authentification trouvé",
+        logoutError: "Erreur de déconnexion",
+        logoutSuccess: "Vous êtes déconnectés !",
+        loggingOut: "Déconnexion...",
     }
 };

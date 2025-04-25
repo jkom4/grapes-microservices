@@ -61,7 +61,7 @@ const AdminSection: React.FC = () => {
     // Handle form submission for adding/updating article
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        toast.success(text[language].article_save_success);
+        toast.success(translationsAdmin[language].article_save_success);
         setErrorMessage('');
         try {
             // Client-side validation
@@ -130,7 +130,7 @@ const AdminSection: React.FC = () => {
             const { content, totalPages } = await fetchFruits(currentPage, pageSize);
             setArticles(content);
             setTotalPages(totalPages);
-            toast.success(text[language].article_save_success);
+            toast.success(translationsAdmin[language].article_save_success);
             // If the current page is empty after deletion, go to the previous page
             if (content.length === 0 && currentPage > 0) {
                 setCurrentPage(currentPage - 1);

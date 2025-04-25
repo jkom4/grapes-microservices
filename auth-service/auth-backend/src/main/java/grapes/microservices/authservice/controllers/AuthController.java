@@ -1,6 +1,7 @@
 package grapes.microservices.authservice.controllers;
 
 import grapes.microservices.authservice.dto.*;
+import grapes.microservices.authservice.models.AuthMethod;
 import grapes.microservices.authservice.services.auth.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,10 @@ public class AuthController {
     @PostMapping(value = "/challenge", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> sendChallenge(@RequestBody ChallengeRequest challengeRequest) {
         try {
-            authService.sendChallenge(challengeRequest);
+            String challenge = authService.sendChallenge(challengeRequest);
+            if (challengeRequest.getAuthMethod() == AuthMethod.EID) {
+                return ResponseEntity.ok(new ChallengeEidResponse("Challenge sent on the EID card", challenge));
+            }
             return ResponseEntity.ok(new JsonMessage("Challenge sent by : " + challengeRequest.getAuthMethod().getName()));
         } catch (IOException e) {
             return ResponseEntity.status(500).body(new JsonMessage(e.getMessage()));
@@ -38,9 +42,9 @@ public class AuthController {
         String failureReason = null;
 
         try {
-            String[] tokens = authService.getTokensFromChallenge(loginRequest);
+            String accessToken = authService.getTokenFromChallenge(loginRequest);
             authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Success", failureReason);
-            return ResponseEntity.ok(new AuthResponse(tokens[0], tokens[1]));
+            return ResponseEntity.ok(new AuthResponse(accessToken));
         } catch (RuntimeException e) {
             failureReason = e.getMessage();
             authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Failed", failureReason);
@@ -59,7 +63,7 @@ public class AuthController {
             authService.logout(token);
             return ResponseEntity.ok(new JsonMessage("Logged out successfully"));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
+            return ResponseEntity.status(400).body(new JsonMessage("No active session found"));
         }
     }
 
@@ -70,8 +74,21 @@ public class AuthController {
             return ResponseEntity.status(400).body(new JsonMessage("Required token 'refreshToken' is not present"));
         }
         try {
-            String[] tokens = authService.refreshTokens(refreshToken);
-            return ResponseEntity.ok(new AuthResponse(tokens[0], tokens[1]));
+            String accessToken = authService.refreshToken(refreshToken);
+            return ResponseEntity.ok(new AuthResponse(accessToken));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new JsonMessage(e.getMessage()));
+        }
+    }
+
+    @PostMapping(value = "/get-refresh", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getRefreshToken(HttpServletRequest request) {
+        try {
+            String token = authService.checkUserIsAuthenticated(request);
+            String refreshToken = authService.getRefreshToken(token);
+            return ResponseEntity.ok(new RefreshResponse(refreshToken));
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
         } catch (Exception e) {

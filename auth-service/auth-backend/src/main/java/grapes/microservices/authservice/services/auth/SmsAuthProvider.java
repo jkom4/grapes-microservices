@@ -21,11 +21,12 @@ public class SmsAuthProvider extends AbstractAuthProvider {
 
     @Override
     @OneCallPerMinutePerUser
-    public boolean sendChallenge(User user) {
+    public String sendChallenge(User user) {
         String challenge = generateChallenge();
         challengeService.saveChallengeForUser(user.getPhoneNumber(), challenge);
         String message = "Please use the following code to authenticate: " + challenge;
-        return smsService.sendSms(user.getPhoneNumber(), message);
+        smsService.sendSms(user.getPhoneNumber(), message);
+        return challenge;
     }
 
     @Override

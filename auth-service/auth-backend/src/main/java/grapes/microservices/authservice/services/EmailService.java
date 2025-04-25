@@ -51,12 +51,13 @@ public class EmailService {
 
     /**
      * Send an email to the recipient with the specified topic and message.
+     *
      * @param recipientMail the email address of the recipient
      * @param topic the topic of the email
      * @param message the message to send
      * @throws IOException if the email could not be sent
      */
-    public boolean sendMail(String recipientMail, String topic, String message) throws IOException {
+    public void sendMail(String recipientMail, String topic, String message) throws IOException {
         try {
             if ( !isValidEmail(recipientMail) || !isValidEmail( COMPANY_MAIL ) ) {
                 throw new IllegalArgumentException("Invalid email address : " + recipientMail + " or " + COMPANY_MAIL);
@@ -77,7 +78,6 @@ public class EmailService {
             Response response = sg.api(request);
             logger.info("Mail sent, status : " + response.getStatusCode());
             logger.info("Mail sent, headers : " + response.getHeaders());
-            return response.getStatusCode() == 202;
         } catch (Exception e) {
             logger.error("Failed to send email to: {}", recipientMail);
             throw e;

@@ -65,14 +65,16 @@ const AdminPage = () => {
     };
 
     const kickCurrentUser = async () => {
+        setLoading(true)
         try {
             await logout(token);
             toast.success("You are kicked because something changed on your account", {autoClose: 2000});
-            await setToken(null);
-
-            navigate("/");
         } catch (error: any) {
             toast.error(error.message || "Logout failed.", {autoClose: 2000});
+        } finally {
+            setLoading(false);
+            await setToken(null);
+            navigate("/");
         }
     };
 

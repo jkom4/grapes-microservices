@@ -1,5 +1,6 @@
 package grapes.microservices.salesservice.services;
 
+import grapes.microservices.salesservice.config.SalesDataMessage;
 import grapes.microservices.salesservice.dto.OrderDTO;
 import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.models.DeliveryMessage;
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class OrderService {
         System.out.println(" Message sent to RabbitMQ: " + message);
     }
 
-    public Order createTemporaryOrder(Integer userId) {
+    public Order createTemporaryOrder(String userId) {
         Order order = Order.builder()
                 .userId(userId)
                 .isFinished(false)
@@ -63,6 +65,7 @@ public class OrderService {
         order.setPaid(true);
 
         orderRepository.save(order);
+        sendToDataMining(order, items);
 
         //  Send to RabbitMQ to create the delivery
         sendOrderToDeliveryQueue(order.getId(), address, phoneNumber, customerName);
@@ -124,7 +127,7 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + id));
     }
 
-    public List<Order> getOrdersByUserId(Integer userId) {
+    public List<Order> getOrdersByUserId(String userId) {
         return orderRepository.findByUserId(userId);
     }
 
@@ -145,6 +148,28 @@ public class OrderService {
         );
         return dto;
     }
+
+    public void sendToDataMining(Order order, List<OrderItem> items) {
+        List<SalesDataMessage.ItemInfo> itemInfos = items.stream()
+                .map(item -> new SalesDataMessage.ItemInfo(
+                        item.getArticleId(),
+                        item.getPrice(),
+                        item.getQuantityKg() != null ? item.getQuantityKg() : item.getQuantity()
+                ))
+                .collect(Collectors.toList());
+
+        SalesDataMessage message = new SalesDataMessage(
+                order.getId(),
+                order.getUserId(),
+                order.getTotalPrice(),
+                order.getCreatedAt(),
+                itemInfos
+        );
+
+        rabbitTemplate.convertAndSend("sales-data-queue", message);
+        System.out.println("[Sales-Service] Sent sales data to DataMining: " + message);
+    }
+
 
 
 }

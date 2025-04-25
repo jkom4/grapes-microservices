@@ -4,6 +4,7 @@ import grapes.microservices.authservice.dto.*;
 import grapes.microservices.authservice.dto.UserDTOWithPasswordAndPin;
 import grapes.microservices.authservice.mapper.UserMapper;
 import grapes.microservices.authservice.models.User;
+import grapes.microservices.authservice.services.EIDCardService;
 import grapes.microservices.authservice.services.TokenService;
 import grapes.microservices.authservice.services.UserService;
 import grapes.microservices.authservice.services.auth.AuthService;
@@ -40,6 +41,9 @@ public class UserController {
 
     @Autowired
     private final TokenService tokenService;
+
+    @Autowired
+    private final EIDCardService eidCardService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllUsers(HttpServletRequest request) {
@@ -201,6 +205,23 @@ public class UserController {
             return ResponseEntity.ok(userPoints);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/register/eid")
+    public ResponseEntity<?> registerWithEID(@Valid @RequestBody EIDRegisterDTO additionalInfo) {
+        try {
+            User savedUser = eidCardService.registerWithEIDCard(additionalInfo);
+            userService.sendRegistrationToQueue(savedUser.getId().toHexString(), savedUser.getEmail(), savedUser.getName(), savedUser.getFirstName(), savedUser.getGender(), savedUser.getBirthDate(), savedUser.getNationalId(), savedUser.getDeliveryAddress());
+            return ResponseEntity.ok(userMapper.toDTO(savedUser));
+        } catch (Exception e) {
+            String message = e.getMessage();
+            if (message.contains("eID middleware not found")) {
+                return ResponseEntity.status(500).body(new JsonMessage("eID error: Missing middleware. Please install from https://eid.belgium.be/en/download/15/license"));
+            } else if (message.contains("No card detected")) {
+                return ResponseEntity.status(400).body(new JsonMessage("eID error: No card detected in reader"));
+            }
+            return ResponseEntity.status(500).body(new JsonMessage("eID (register) Error : " + e.getMessage()));
         }
     }
 }
