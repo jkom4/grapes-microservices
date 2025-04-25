@@ -71,18 +71,16 @@ public class ChatViewModel {
         this.areMessagesLoading.set(true);
 
         this.apiService.fetchMessages(selectedTopicId)
-                .whenComplete((data, error) -> {
-                    Platform.runLater(() -> {
-                        if (error != null) {
-                            // Handle error case
-                            throw new RuntimeException(error);
-                        } else if (data != null) {
-                            // Handle success case
-                            messageListObserver.addAll(data);
-                        }
-                        this.areMessagesLoading.set(false);
-                    });
-                });
+                .whenComplete((data, error) -> Platform.runLater(() -> {
+                    if (error != null) {
+                        // Handle error case
+                        throw new RuntimeException(error);
+                    } else if (data != null) {
+                        // Handle success case
+                        messageListObserver.addAll(data);
+                    }
+                    this.areMessagesLoading.set(false);
+                }));
     }
 
     /**
@@ -127,8 +125,7 @@ public class ChatViewModel {
             // !!! message created in local!
             var topicId = currentTopicObserver.get().id();
             var authUser = UserSession.getINSTANCE().getAuthenticatedUser().get();
-            var message = new Message(topicId, authUser, newValue, LocalDateTime.now());
-
+            var message = new Message("0", topicId, authUser, newValue, LocalDateTime.now());
             // 1. add user's own message to the list
             messageListObserver.add(message);
             // 2. multicast the message in local
@@ -176,8 +173,8 @@ public class ChatViewModel {
         // 2. /!\ CURRENTLY I MANAGE THE MESSAGE UNICITY BY THE DATE, to avoid duplicated messages (not the best way)
         // 3. As there is limited number of multicast groups (253), collisions can happen => so i check topic id
         multicastService.getMessageReveiceObserver().addListener((change, oldMessage, newMessage) -> {
-            final boolean IS_HIS_OWN_MESSAGE = newMessage.sender().id() == currentTopicObserver.get().id();
-            final boolean IS_UNIQUE = !isMessageDateInLast10(messageListObserver, newMessage.getDateToString());
+            final boolean IS_HIS_OWN_MESSAGE = newMessage.sender().id().equals(UserSession.getINSTANCE().getAuthenticatedUser().get().id());
+            final boolean IS_UNIQUE = !isMessageDateInLastX(messageListObserver, newMessage.timestamp(), 10);
             final boolean IS_MESSAGE_FROM_ANOTHER_TOPIC = newMessage.topicId() != currentTopicObserver.get().id();
 
             if (IS_HIS_OWN_MESSAGE) {
@@ -202,15 +199,15 @@ public class ChatViewModel {
         });
     }
 
-    public static boolean isMessageDateInLast10(ObservableList<Message> messageList, String date) {
+    public static boolean isMessageDateInLastX(ObservableList<Message> messageList, LocalDateTime date, int count) {
         // Check if the list has fewer than 10 messages
         int size = messageList.size();
         if (size == 0) return false;
 
-        int startIndex = Math.max(0, size - 10);
+        int startIndex = Math.max(0, size - count);
         // Iterate over the last 10 messages
         for (int i = startIndex; i < size; i++) {
-            if (messageList.get(i).getDateToString().equals(date)) {
+            if (messageList.get(i).timestamp().isEqual(date)) {
                 return true; // Message ID found
             }
         }

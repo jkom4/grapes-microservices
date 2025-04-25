@@ -10,12 +10,28 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
+import java.util.List;
+
+/**
+ * Security configuration for the payment backend application.
+ * Configures CORS policies, endpoints access rules, and Swagger security documentation.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private static final String[] SWAGGER_PATHS = {"/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/swagger-ui/**"};
+    private static final String[] SWAGGER_PATHS = {"/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/swagger-ui/**","/actuator/**"};
 
+    /**
+     * Configures the OpenAPI documentation with JWT security scheme.
+     * This allows Swagger UI to display the security requirements for protected endpoints.
+     *
+     * @return Configured OpenAPI instance
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
@@ -29,13 +45,33 @@ public class SecurityConfig {
                                 .scheme("bearer")
                                 .bearerFormat("JWT")));
     }
+
+    /**
+     * Configures security filter chain with CORS settings and endpoint access rules.
+     * Currently all endpoints are permitted without authentication for development.
+     *
+     * @param http HttpSecurity object to configure
+     * @return Configured SecurityFilterChain
+     * @throws Exception If configuration fails
+     */
     @Bean
-    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+                    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    configuration.setAllowedHeaders(List.of("*"));
+                    configuration.setAllowCredentials(true);
+                    return configuration;
+                }))
+                .authorizeHttpRequests(authz -> authz
                         .requestMatchers(SWAGGER_PATHS).permitAll()
-                        .anyRequest().authenticated());
+                        .requestMatchers("/login", "/api/auth/**").permitAll()
+                        .anyRequest().permitAll()
+                );
+
         return http.build();
     }
 }

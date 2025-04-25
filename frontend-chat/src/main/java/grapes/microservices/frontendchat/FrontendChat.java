@@ -28,8 +28,8 @@ public class FrontendChat extends Application {
     private ChatViewModel chatVM;
     private AuthViewModel authVM;
 
-    private final int MULTICAST_PORT = 8000;
-    private final String GRAPES_BASE = "http://localhost:8094/chat/";
+    private final int MULTICAST_PORT = Integer.parseInt(AppEnv.CHAT_SERVICE_PORT.get());
+    private final String GRAPES_BASE = AppEnv.CHAT_SERVICE_URL.get();
 
     @Override
     public void start(Stage stage) throws IOException {

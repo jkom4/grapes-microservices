@@ -3,7 +3,7 @@ version: '3.9'
 services:
   mariadb:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
-    container_name: mariadb-primary
+    container_name: grapes-mariadb
     env_file: .env
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
@@ -17,9 +17,10 @@ services:
 
   mongodb:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mongodb-grapes:latest
-    container_name: mongodb-primary
+    container_name: grapes-mongodb
     env_file: .env
-    command: ["--replSet", "rs0"]
+    platform: linux/arm64
+    command: --replSet rs0 --keyFile /data/keyfile --bind_ip_all
     ports:
       - "27017:27017"
     volumes:
@@ -29,6 +30,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
       MONGO_USER_RW: ${MONGO_USER_RW}
       MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
+
 
   rabbitmq:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/rabbitmq-grapes:latest
@@ -40,11 +42,72 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  redis-master:
-    image: redis:7
-    container_name: redis-master
+ #Monitoring
+  redis:
+    image: redis:7.2-alpine
+    env_file: .env
+    container_name: grapes-redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    entrypoint: [ "sh", "-c", "redis-server --requirepass \"$REDIS_PASSWORD\"" ]
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - auth-service
+      - sales-service
+      - payment-service
+      - chat-service
+      - data-mining-service
+
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: sonarqube
+    environment:
+      SONARQUBE_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonar
+      SONARQUBE_JDBC_USERNAME: ${SONARQUBE_JDBC_USERNAME}
+      SONARQUBE_JDBC_PASSWORD: ${SONARQUBE_JDBC_PASSWORD}
+    ports:
+      - "9000:9000"
+
+  sonarqube-db:
+    image: postgres:13
+    container_name: sonarqube-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+  mongodb-exporter:
+    image: bitnami/mongodb-exporter:latest
+    container_name: mongo-exporter
+    restart: always
+    environment:
+      MONGODB_URI: "mongodb://exporter:exporterpass@grapes-mongodb:27017/admin"
+    ports:
+      - "9216:9216"
+    depends_on:
+      - mongodb
+
+  redis-exporter:
+    image: oliver006/redis_exporter
+    container_name: redis-exporter
+    environment:
+      REDIS_ADDR: redis://grapes-redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - redis
+    ports:
+      - "9121:9121"
 
   # Backends & Gateway
   api-gateway:
@@ -88,3 +151,4 @@ volumes:
   mariadb_data:
   mongodb_data:
   rabbitmq_data:
+  redis_data:
