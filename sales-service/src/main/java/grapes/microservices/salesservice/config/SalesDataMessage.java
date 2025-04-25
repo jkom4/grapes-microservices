@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class SalesDataMessage {
     private Integer orderId;
-    private Integer userId;
+    private String  userId;
     private BigDecimal totalPrice;
     private LocalDateTime createdAt;
     private List<ItemInfo> items;
