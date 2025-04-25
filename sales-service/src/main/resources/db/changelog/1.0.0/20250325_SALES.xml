@@ -432,6 +432,31 @@
     </changeSet>
 
 
+    <!-- Changelog: 20250424_add_transaction_table.xml -->
+    <changeSet id="20250424-transaction-table" author="nassim">
+        <createTable tableName="transaction">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="transaction_uuid" type="CHAR(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="order_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="VARCHAR(255)"/>
+            <column name="card_type" type="VARCHAR(50)"/>
+            <column name="payment_status" type="VARCHAR(50)"/>
+            <column name="delivery_status" type="VARCHAR(50)"/>
+            <column name="delivery_time_days" type="INT"/>
+            <column name="currency" type="VARCHAR(10)"/>
+            <column name="amount" type="DECIMAL(10,2)"/>
+            <column name="transaction_date_time" type="DATETIME"/>
+            <column name="created_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+
+
     <!-- 18. Foreign key: review -> user -->
 <!--    <changeSet author="kilane dounia" id="18">-->
 <!--        <addForeignKeyConstraint-->

@@ -5,24 +5,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentValidatedMessageDTO {
-    private String clientName;
+    private Integer orderId;
+    private String clientName; // "user_JSmith_789"
     private Long clientId;
-    private String accountNumber;
-    private String cardType;
-    private String gender;
-    private LocalDate birthDate;
-    private Integer age;
-    private String maritalStatus;
-    private BigDecimal averageMonthlySalary;
     private Long transactionId;
     private LocalDateTime transactionDateTime;
-    private String debtorBankName;
+    private String cardType;         // Visa / Mastercard...
     private BigDecimal transferAmount;
+    private String currency;
+    private String paymentStatus;    // "Success"
+    private String deliveryStatus;   // "Pending"
+    private Integer deliveryTimeDays;
 }
