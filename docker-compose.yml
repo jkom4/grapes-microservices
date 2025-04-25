@@ -166,8 +166,6 @@ services:
     ports:
       - "9121:9121"
 
-
-
   ### BACKEND
   data-ingestion-service:
     build: ./data-mining-service/data_ingestion_service
@@ -301,6 +299,7 @@ services:
     depends_on:
       - mongodb
       - mariadb
+
 
   shiny-app:
     build: ./data-mining-service
