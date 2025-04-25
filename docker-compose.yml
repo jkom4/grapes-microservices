@@ -287,7 +287,8 @@ services:
     ports:
       - "8094:8094"
     depends_on:
-      - mariadb
+      - rabbitmq
+      - mongodb
 
   data-mining-service:
     build: ./data-mining-service
