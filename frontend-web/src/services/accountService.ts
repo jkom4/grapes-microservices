@@ -1,24 +1,32 @@
 import {orderAPI} from "./httpCommon";
 import Order from "../utils/models/Order";
 
- const fetchOrderHistory = async (userId: number): Promise<Order[]> => {
+
+export const fetchOrderHistory = async (sub: string): Promise<Order[]> => {
     try {
-        const url = `${orderAPI.baseURL}${orderAPI.endpoints.orderHistory(userId)}`;
+        if (!sub || !/^[a-f0-9]{24}$/.test(sub)) {
+            throw new Error("Invalid User ID (sub) format");
+        }
+
+        const url = `${orderAPI.baseURL}${orderAPI.endpoints.orderHistory(sub)}`;
+
         const response = await fetch(url, {
             headers: {
                 "Content-Type": "application/json",
-
             },
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+            const errorDetails = await response.text();
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}. Details: ${errorDetails}`);
         }
 
         const data = await response.json();
-        return data.map((item: any) => Order.parse ? Order.parse(item) : item);
+        return data.map((item: any) => (Order.parse ? Order.parse(item) : item));
     } catch (err) {
-        throw new Error(err instanceof Error ? err.message : "An error occurred while fetching order history");
+        const errorMessage = err instanceof Error ? err.message : "An error occurred while fetching order history";
+        console.error("Error fetching order history:", errorMessage);
+        throw new Error(errorMessage);
     }
 };
 

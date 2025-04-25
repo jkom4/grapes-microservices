@@ -56,7 +56,6 @@ const ArticleInfo: React.FC<ArticleInfoProps> = ({
             />
             <AddToCartButton
                 onAddToCart={onAddToCart}
-                disabled={!orderId} // Disable the button if orderId is not defined
                 translations={translations}
             />
         </div>

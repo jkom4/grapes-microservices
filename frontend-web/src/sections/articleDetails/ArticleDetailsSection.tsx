@@ -1,7 +1,7 @@
-// components/ArticleDetailsSection/ArticleDetailsSection.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../features/LanguageContext";
+import { useAuth } from "../../features/AuthContext"; // Import useAuth
 import { useArticleDetails } from "../../hooks/useArticleDetails";
 import { cartService } from "../../services/cartService";
 import { translationsArticleDetails } from "../../utils/translations-article-details";
@@ -17,8 +17,9 @@ function ArticleDetailsSection() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { language } = useLanguage();
-    const userId = 1; // Hardcoded userId for cart initialization
-    const { article, orderId, error, setError } = useArticleDetails(id);
+    const { sub } = useAuth(); // Get sub from AuthContext
+    const { article, orderId, error, setError } = useArticleDetails(id, sub); // Pass sub to useArticleDetails
+
 
     // State for quantity, measurement type, and UI interactions
     const [isFavorite, setIsFavorite] = useState(false);

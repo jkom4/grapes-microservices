@@ -1,17 +1,30 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../features/LanguageContext';
-// import { useAuth } from '../features/AuthContext'; // Import the auth hook
+import { useAuth } from '../features/AuthContext';
+import { generateLoginUrl } from '../services/httpCommon';
 import englishFlag from '../assets/images/english-flag.png';
 import frenchFlag from '../assets/images/french-flag.png';
 import logo from '../assets/images/logo.png';
 
 function Navbar() {
     const { language, setLanguage } = useLanguage();
-    // TODO : const { user } = useAuth(); // Get the user from AuthContext
+    const { stateAuthentication, generateRandomNumber, sub, role } = useAuth();
+
+    const isLoggedIn = sessionStorage.getItem('accessToken') !== null;
+    const isAdmin = role === 'ADMIN';
+    const isUser = role === 'USER';
 
     const handleLanguageChange = (lang: 'en' | 'fr') => {
         setLanguage(lang);
+    };
+
+    const handleLoginClick = () => {
+        const randomNum = Math.floor(Math.random() * 1000);
+        sessionStorage.setItem('stateAuthentication', randomNum.toString());
+        generateRandomNumber();
+        const loginUrl = generateLoginUrl(randomNum);
+        window.open(loginUrl, 'noopener,noreferrer');
     };
 
     return (
@@ -25,31 +38,33 @@ function Navbar() {
                 <Link to="/" className="text-black hover:text-accent">
                     {language === 'en' ? 'Home' : 'Accueil'}
                 </Link>
-                {/* Use Link to navigate to AllArticles page */}
                 <Link to="/all-articles" className="text-black hover:text-accent">
                     {language === 'en' ? 'Our Product' : 'Nos Produits'}
                 </Link>
+                {isLoggedIn && (
                 <Link to="/account" className="text-black hover:text-accent">
                     {language === 'en' ? 'Account' : 'Mon compte'}
                 </Link>
+                )}
                 <Link to="/shopping-cart" className="text-black hover:text-accent">
                     <span>🛒</span>
                 </Link>
-                <a
-                    href="http://localhost:3001"
-                    target="_blank"
-                    className="text-white text-lg bg-accent px-4 py-1 rounded hover:bg-secondary"
-                >
-                    {language === 'en' ? 'Login' : 'Se connecter'}
-                </a>
-                {/* user?.role === 'admin' && ( */}
-                <Link
-                    to="/admin"
-                    className="text-white text-lg bg-accent px-4 py-1 rounded hover:bg-secondary"
-                >
-                    Admin
-                </Link>
-                {/* ) */}
+                {!isLoggedIn && (
+                    <a
+                        className="text-white text-lg bg-secondary px-4 py-1 rounded hover:bg-accent cursor-pointer"
+                        onClick={handleLoginClick}
+                    >
+                        {language === 'en' ? 'Login' : 'Se connecter'}
+                    </a>
+                )}
+                {isAdmin && (
+                    <Link
+                        to="/admin"
+                        className="text-white text-lg bg-accent px-4 py-1 rounded hover:bg-secondary"
+                    >
+                        Admin
+                    </Link>
+                )}
             </nav>
             <div className="flex items-center">
                 <button onClick={() => handleLanguageChange('en')} className="ml-4">

@@ -63,7 +63,7 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="code" type="INT"/>
-            <column name="user_id" type="INT"/>
+            <column name="user_id" type="VARCHAR(255)"/>
             <column name="facture_path" type="VARCHAR(255)"/>
             <column name="total_price" type="DECIMAL(10,2)"/>
             <column name="created_at" type="DATETIME"/>
@@ -139,7 +139,7 @@
             <column name="order_id" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="user_id" type="INT"/>
+            <column name="user_id" type="VARCHAR(255)"/>
             <column name="delivery_status_id" type="INT">
                 <constraints nullable="false"/>
             </column>
