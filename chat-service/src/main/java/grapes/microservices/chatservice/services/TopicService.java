@@ -1,5 +1,6 @@
 package grapes.microservices.chatservice.services;
 
+import grapes.microservices.chatservice.dto.ActivityLogEvent;
 import grapes.microservices.chatservice.dto.MessageDto;
 import grapes.microservices.chatservice.dto.TopicDto;
 import grapes.microservices.chatservice.models.Message;
@@ -10,8 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,11 +24,6 @@ public class TopicService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
     private final RabbitTemplate rabbitTemplate;
-    @Value("${spring.rabbitmq.exchange.name}")
-    private String exchangeName;
-
-    @Value("${spring.rabbitmq.routing.key.prefix}")
-    private String routingKeyPrefix;
 
     public List<TopicDto> getAllTopics() {
         return chatRepository.findAll()
@@ -49,28 +47,30 @@ public class TopicService {
                 .collect(Collectors.toList());
     }
 
-    public MessageDto postMessage(String topicId, String userId, String content) {
-        // Persist locally
-        Message message = Message.builder()
-                .chatId(topicId)
-                .senderId(userId)
-                .content(content)
-                .createdAt(LocalDateTime.now())
-                .build();
-        Message saved = messageRepository.save(message);
-
-        // Build DTO
-        MessageDto dto = MessageDto.builder()
-                .userId(saved.getSenderId())
-                .topicId(saved.getChatId())
-                .build();
-
-        // Publish to RabbitMQ topic exchange
-        rabbitTemplate.convertAndSend(
-                exchangeName,
-                routingKeyPrefix + topicId,
-                dto
+    public void postMessage(String topicId, String userId, String content) {
+        Message saved = messageRepository.save(
+                Message.builder()
+                        .chatId(topicId)
+                        .senderId(userId)
+                        .content(content)
+                        .createdAt(LocalDateTime.now())
+                        .build()
         );
-        return dto;
+
+        ActivityLogEvent event = ActivityLogEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .eventType("ServiceUsed")
+                .eventTimestamp(Instant.now().toString())
+                .sourceSystem("ChatService")
+                .version("1.0")
+                .payload(ActivityLogEvent.Payload.builder()
+                        .sourceTransactionId(saved.getId().toString())
+                        .clientId(userId)
+                        .serviceId(topicId)
+                        .transactionTimestamp(saved.getCreatedAt().toString())
+                        .build()
+                )
+                .build();
+        rabbitTemplate.convertAndSend("q_activity_logs",event);
     }
 }
