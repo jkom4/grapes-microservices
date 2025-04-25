@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 public record Message(
         String id,
-        int topicId,
+        String topicId,
         User sender,
         String content,
         LocalDateTime timestamp

@@ -45,6 +45,7 @@ public class GrapesApi implements IGrapesApi {
             // Send request
             var response = sendRequest(request);
 
+            // TODO reactivate for production
 //            if (response.statusCode() == 403) {
 //                throw new CompletionException(new MyApiBadRequestException("Your request is unauthorized"));
 //            }
@@ -53,7 +54,7 @@ public class GrapesApi implements IGrapesApi {
             System.out.println("[GrapesApi] user loaded");
             UserDTO user = GSON.fromJson(response.body(), UserDTO.class);
 //            return UserMapper.toEntity(user);
-            return new User("2", "Jea2");
+            return new User(UserSession.getToken(), UserSession.getToken());
         }, executor);
     }
 
@@ -79,7 +80,7 @@ public class GrapesApi implements IGrapesApi {
     }
 
     @Override
-    public CompletableFuture<List<Message>> fetchMessages(int topicId) {
+    public CompletableFuture<List<Message>> fetchMessages(String topicId) {
         System.out.println("[GrapesApi] loading messages");
         return CompletableFuture.supplyAsync(() -> {
             // Build request
@@ -119,7 +120,7 @@ public class GrapesApi implements IGrapesApi {
                 HttpClient client = HttpClient.newHttpClient();
                 client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                         .thenApply(HttpResponse::body) // Process the response body
-                        .thenAccept(responseBody -> System.out.println("Response: " + responseBody))
+                        .thenAccept(responseBody -> System.out.println("[GrapesAPI] Post message response: " + responseBody))
                         .exceptionally(e -> {
                             System.err.println("Request failed: " + e.getMessage());
                             return null;

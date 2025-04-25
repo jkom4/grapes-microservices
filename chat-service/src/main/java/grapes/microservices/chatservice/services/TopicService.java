@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,6 +20,7 @@ public class TopicService {
 
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
+    public static DateTimeFormatter preciseFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     public List<TopicDto> getAllTopics() {
         return chatRepository.findAll()
@@ -33,7 +36,9 @@ public class TopicService {
         return messageRepository.findByChatId(topicId)
                 .stream()
                 .map(message -> MessageDto.builder()
+                        .id(message.getId())
                         .userId(message.getSenderId())
+                        .username(message.getUsername())
                         .content(message.getContent())
                         .createdAt(message.getCreatedAt().toString())
                         .topicId(message.getChatId())
@@ -41,21 +46,19 @@ public class TopicService {
                 .collect(Collectors.toList());
     }
 
-    public MessageDto postMessage(String topicId, String userId, String content) {
+    public MessageDto postMessage(MessageDto dto) {
         Message message = Message.builder()
-                .chatId(topicId)
-                .senderId(userId) // userId comes directly from the token
-                .content(content)
-                .createdAt(LocalDateTime.now())
+                .chatId(dto.getTopicId())
+                .senderId(dto.getUserId()) // userId comes directly from the token
+                .content(dto.getContent())
+                .username(dto.getUsername())
+                .id(UUID.randomUUID().toString())
+                .createdAt(LocalDateTime.parse(dto.getCreatedAt(), preciseFormat))
                 .build();
 
         Message savedMessage = messageRepository.save(message);
 
-        return MessageDto.builder()
-                .userId(savedMessage.getSenderId())
-                .content(savedMessage.getContent())
-                .createdAt(savedMessage.getCreatedAt().toString())
-                .topicId(savedMessage.getChatId())
-                .build();
+        dto.setId(savedMessage.getId());
+        return dto;
     }
 }
