@@ -7,15 +7,17 @@ import grapes.microservices.chatservice.models.Message;
 import grapes.microservices.chatservice.repositories.ChatRepository;
 import grapes.microservices.chatservice.repositories.MessageRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Map;
+
 
 @Service
 @RequiredArgsConstructor
@@ -56,21 +58,27 @@ public class TopicService {
                         .createdAt(LocalDateTime.now())
                         .build()
         );
-
         ActivityLogEvent event = ActivityLogEvent.builder()
-                .eventId(UUID.randomUUID().toString())
+                .eventId(UUID.randomUUID())
                 .eventType("ServiceUsed")
-                .eventTimestamp(Instant.now().toString())
+                .eventTimestamp(Instant.now())
                 .sourceSystem("ChatService")
                 .version("1.0")
                 .payload(ActivityLogEvent.Payload.builder()
-                        .sourceTransactionId(saved.getId().toString())
-                        .clientId(userId)
-                        .serviceId(topicId)
-                        .transactionTimestamp(saved.getCreatedAt().toString())
+                        .usage_log_id_source(saved.getId())
+                        .client_id(userId)
+                        .product_id(null)
+                        .service_id(topicId)
+                        .usage_timestamp(saved.getCreatedAt()
+                                .atZone(ZoneId.systemDefault())
+                                .toInstant()
+                        )
+                        .request_details(Map.of("content", content))
+                        .status("Completed")
+                        .duration_ms(null)
                         .build()
                 )
                 .build();
-        rabbitTemplate.convertAndSend("q_activity_logs",event);
+        rabbitTemplate.convertAndSend("q_activity_logs", event);
     }
 }
