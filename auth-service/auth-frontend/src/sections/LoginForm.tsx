@@ -1,7 +1,9 @@
 import React from 'react';
 import Loader from "../components/Loader";
+import {AuthMethod} from "../models/User";
 
 interface LoginFormProps {
+    method: AuthMethod;
     loading: boolean;
     email: string;
     password: string;
@@ -21,6 +23,7 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
+                                                 method,
                                                  loading,
                                                  email,
                                                  password,
@@ -92,7 +95,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
                     ) : (
                         <div className="space-y-2">
                             <p className="text-sm text-gray-500 text-center mb-1">
-                                Verify your email box to get the challenge.
+                                {method === 'EID'
+                                    ? 'Enter your PIN to continue with eID authentication.'
+                                    : `Verify your ${method} box to get the challenge.`}
                             </p>
                             {challengeCountdown !== null && (
                                 <p className="text-sm text-gray-500 text-center mt-0">
@@ -103,7 +108,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                             <div className="flex justify-center flex-col items-center">
                                 <label htmlFor="challenge" className="text-lg text-gray-700 mt-4 mb-4">Enter Challenge Code</label>
                                 <div className="flex justify-center space-x-2">
-                                    {[...Array(6)].map((_, index) => (
+                                    {method !== 'EID' && [...Array(6)].map((_, index) => (
                                         <input
                                             key={index}
                                             id={`challenge-${index}`}
@@ -145,7 +150,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       ${challenge.length !== 6 || pinCode.length !== 4 ? 'bg-gray-400 cursor-not-allowed hover:bg-gray-400' : 'hover:bg-blue-600'}`}
                                     disabled={challenge.length !== 6 || pinCode.length !== 4}
                                     onClick={() => {
-                                        if (challenge.length === 6 && pinCode.length === 4) {
+                                        if (pinCode.length === 4 && (method === 'EID' || challenge.length === 6)) {
                                             handleLogin();
                                         }
                                     }}

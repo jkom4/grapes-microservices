@@ -69,12 +69,41 @@ jobs:
         working-directory: ./api-gateway
         run: mvn -B validate test -Dspring.profiles.active=test
 
-
-
       # 🔹 Test Auth Service
+      - name: Install custom pkcs11-provider1
+        run: |
+          mvn install:install-file \
+            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \
+            -DgroupId=iaik \
+            -DartifactId=pkcs11-provider \
+            -Dversion=1.9.4 \
+            -Dpackaging=jar
+
+      - name: Install custom pkcs11-provider2
+        run: |
+          mvn install:install-file \
+            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \
+            -DgroupId=iaik \
+            -DartifactId=pkcs11-provider \
+            -Dversion=1.9.4 \
+            -Dpackaging=jar
+
+      - name: Install custom pkcs11-provider3
+        run: |
+          mvn install:install-file \
+            -Dfile=auth-service/auth-backend/libraries/pkcs11-provider-1.9.4.jar \
+            -DgroupId=iaik \
+            -DartifactId=pkcs11-provider \
+            -Dversion=1.9.4 \
+            -Dpackaging=jar
+
       - name: Run Tests for Auth Service
         working-directory: ./auth-service/auth-backend
         run: mvn -B validate test -Dspring.profiles.active=test
+        env:
+          MAVEN_OPTS: >-
+            --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED
+            --enable-native-access=ALL-UNNAMED
 
 
 

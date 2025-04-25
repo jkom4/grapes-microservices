@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import {checkSession, refresh, returnTokenToTierceApp} from "../services/authService";
+import {useLocation, useNavigate} from "react-router-dom";
+import {checkSession, refresh} from "../services/authService";
 
 // Helper function to parse JWT token and extract its payload
 const parseJwt = (token: string) => {
@@ -43,7 +43,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [role, setRole] = useState<string | null>(() => parseJwt(token!)?.role || null);
     const [id, setId] = useState<string | null>(() => parseJwt(token!)?.sub || null);
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!token);
-    const [hasCheckedSession, setHasCheckedSession] = useState<boolean>(false);
 
     // Update the token and related data (role, id, session)
     const setToken = async (newToken: string | null) => {
@@ -51,6 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             localStorage.setItem("accessToken", newToken);
         } else {
             localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
         }
 
         setTokenState(newToken);
@@ -82,19 +82,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (storedRefresh) {
             try {
-                const { accessToken, refreshToken } = await refresh(storedRefresh);
+                const accessToken = await refresh(storedRefresh);
                 localStorage.setItem('accessToken', accessToken);
-                localStorage.setItem('refreshToken', refreshToken);
-                const data = {
-                    accessToken: accessToken,
-                    refreshToken: refreshToken
-                };
-
-                try {
-                    returnTokenToTierceApp(data, navigate)
-                } catch (err: any) {
-                    console.log("Error while redirecting to tierce app: ", err);
-                }
             } catch (error) {
                 console.error("Error refreshing token:", error);
             }
@@ -137,12 +126,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     useEffect(() => {
-        if (!hasCheckedSession) {
-            // Call refreshSession only once at the beginning
-            refreshSession();
-            setHasCheckedSession(true);
-        }
-
         if (isAuthenticated) {
             resetInterval();
         } else {
@@ -151,7 +134,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
-            if (countdownRef.current) clearInterval(countdownRef.current);        };
+            if (countdownRef.current) clearInterval(countdownRef.current);
+        };
     }, [isAuthenticated]);
 
     (window as any).resetAuthRefreshInterval = resetInterval;
