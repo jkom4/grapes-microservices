@@ -1,8 +1,7 @@
-// Fetches order history for a given user
 import {orderAPI} from "./httpCommon";
 import Order from "../utils/models/Order";
 
-export const fetchOrderHistory = async (userId: number): Promise<Order[]> => {
+ const fetchOrderHistory = async (userId: number): Promise<Order[]> => {
     try {
         const url = `${orderAPI.baseURL}${orderAPI.endpoints.orderHistory(userId)}`;
         const response = await fetch(url, {

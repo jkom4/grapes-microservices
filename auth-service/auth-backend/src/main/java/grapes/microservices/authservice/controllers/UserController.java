@@ -1,15 +1,11 @@
 package grapes.microservices.authservice.controllers;
 
-import grapes.microservices.authservice.dto.EmailDTO;
-import grapes.microservices.authservice.dto.UserDTO;
+import grapes.microservices.authservice.dto.*;
+import grapes.microservices.authservice.dto.UserDTOWithPasswordAndPin;
 import grapes.microservices.authservice.mapper.UserMapper;
-import grapes.microservices.authservice.dto.AmountRequest;
-import grapes.microservices.authservice.dto.JsonMessage;
-import grapes.microservices.authservice.dto.PasswordRequest;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.TokenService;
 import grapes.microservices.authservice.services.UserService;
-import grapes.microservices.authservice.dto.PinRequest;
 import grapes.microservices.authservice.services.auth.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -27,7 +23,7 @@ import java.util.List;
  * It provides endpoints for user registration, retrieval, update, and deletion.
  * @author  Cameron
  */
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -45,12 +41,12 @@ public class UserController {
     @Autowired
     private final TokenService tokenService;
 
-    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllUsers(HttpServletRequest request) {
         try {
             String token = authService.checkUserIsAuthenticated(request);
             List<User> users = userService.getAllUsers(token);
-            List<UserDTO> usersDto = userMapper.toDTOList(users);
+            List<UserDTOWithoutPasswordAndPin> usersDto = userMapper.toDTOList(users);
             return ResponseEntity.ok(usersDto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -62,7 +58,7 @@ public class UserController {
         try {
             authService.checkUserIsAuthenticated(request);
             User user = userService.getUserById(id, true);
-            UserDTO userDTO = userMapper.toDTO(user);
+            UserDTOWithoutPasswordAndPin userDTO = userMapper.toDTO(user);
             return ResponseEntity.ok(userDTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -82,10 +78,11 @@ public class UserController {
 
     @Transactional
     @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTOWithPasswordAndPin userDTO) {
         try {
             User userToRegister = userMapper.toEntity(userDTO);
             User savedUser = userService.registerUser(userToRegister);
+            userService.sendRegistrationToQueue(savedUser.getId().toHexString(), savedUser.getEmail(), savedUser.getName(), savedUser.getFirstName(), savedUser.getGender(), savedUser.getBirthDate(), savedUser.getNationalId(), savedUser.getDeliveryAddress());
             return ResponseEntity.ok(userMapper.toDTO(savedUser));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new JsonMessage(e.getMessage()));
@@ -96,7 +93,7 @@ public class UserController {
 
     @Transactional
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTO userDTO, @PathVariable String id, HttpServletRequest request) {
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UserDTOWithoutPasswordAndPin userDTO, @PathVariable String id, HttpServletRequest request) {
         try {
             authService.checkUserIsAuthenticated(request);
 

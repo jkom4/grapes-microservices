@@ -25,7 +25,7 @@ public class EidAuthProvider extends AbstractAuthProvider {
 
     @Override
     public boolean sendChallenge(User user) {
-        try {
+        /*try {
             // 1. Generate a challenge
             String challenge = generateChallenge();
             challengeService.saveChallengeForUser(user.getNationalId(), challenge);
@@ -44,7 +44,8 @@ public class EidAuthProvider extends AbstractAuthProvider {
         } catch (Exception e) {
             System.err.println("Error during challenge generation: " + e.getMessage());
             return false;
-        }
+        }*/
+        return false;
     }
 
     @Override

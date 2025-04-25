@@ -38,3 +38,7 @@ docker/*/volumes/
 # Invoices
 invoices/*
 /invoices/
+
+# Ignore all generated PDF invoices
+invoices/*.pdf
+uploads/invoices/*.pdf

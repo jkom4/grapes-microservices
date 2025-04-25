@@ -9,6 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,9 +30,21 @@ import grapes.microservices.views.components.MySearchBar
 
 @Composable
 fun AllArticlesScreen(navController: NavHostController) {
-    val repository = ArticleRepository(RetrofitClient.articleApiService)
-    val apiService = RetrofitClient.articleApiService
-    val viewModelFactory = ArticleViewModelFactory(repository, apiService)
+    // Obtain context to load CartManager
+    val context = LocalContext.current
+
+    val repository = remember { ArticleRepository(RetrofitClient.articleApiService) }
+    val apiService = remember { RetrofitClient.articleApiService }
+
+    val viewModelFactory = remember {
+        ArticleViewModelFactory.createFactory(
+            context = context,
+            repository = repository,
+            apiService = apiService
+        )
+    }
+
+    // Init viewModel
     val viewModel: ArticleViewModel = viewModel(factory = viewModelFactory)
 
     val space = 16.dp
@@ -72,7 +85,7 @@ fun AllArticlesScreen(navController: NavHostController) {
                 },
                 onSearchStarted = {
                     isSearching = true
-                    searchResults = null // Optional: reset results during search
+                    searchResults = null
                 },
                 onResults = { results ->
                     searchResults = results
@@ -84,7 +97,6 @@ fun AllArticlesScreen(navController: NavHostController) {
             if (isSearching) {
                 Text("Searching...", style = MaterialTheme.typography.titleMedium)
             }
-
             // Show search results if any
             else if (searchResults != null) {
                 if (searchResults!!.isEmpty()) {
@@ -120,7 +132,6 @@ fun AllArticlesScreen(navController: NavHostController) {
                     }
                 }
             }
-
             // Default pagination view
             else {
                 when (val result = state.value) {

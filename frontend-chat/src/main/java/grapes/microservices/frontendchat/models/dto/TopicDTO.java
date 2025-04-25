@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @Data
 public class TopicDTO{
     private String id;
-    String topic;
+    private String topic;
 }

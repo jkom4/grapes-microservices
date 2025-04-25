@@ -127,6 +127,11 @@
 
     <!-- 7. Table delivery -->
     <changeSet author="kilane dounia" id="7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="delivery"/>
+            </not>
+        </preConditions>
         <createTable tableName="delivery">
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -145,6 +150,7 @@
             <column name="comment" type="TEXT"/>
             <column name="doorstep" type="BOOLEAN"/>
             <column name="signature" type="BLOB"/>
+            <column name="is_finished" type="BOOLEAN" defaultValueBoolean="false" />
         </createTable>
     </changeSet>
 
