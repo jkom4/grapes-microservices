@@ -1,7 +1,9 @@
 package grapes.microservices.frontendchat.models;
 
+import java.util.Random;
+
 // topicId could be the multicast address or a unique ID from the API
-public record Topic(int id, String name, String lastMessage) {
+public record Topic(String id, String name, String lastMessage) {
     @Override
     public String toString() {
         return name; // For simple display in ListView
@@ -13,7 +15,9 @@ public record Topic(int id, String name, String lastMessage) {
      */
     public String getMulticastGroup() {
         int multicast_base_address = 224 * 256 * 256 * 256; // 224.0.0.3
-        int multicast_group = this.id % 253 + 3; // so it will never be .0 .1 .2
+        // Basically, the ip is determined by the id of the topic
+        int integer = new Random(this.id.hashCode()).nextInt(Integer.MAX_VALUE);
+        int multicast_group = integer % 253 + 3; // so it will never be .0 .1 .2
         int full_address = multicast_base_address + multicast_group;
         return convertIntToIP(full_address);
     }

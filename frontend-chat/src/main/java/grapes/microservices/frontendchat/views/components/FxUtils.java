@@ -7,6 +7,9 @@ import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.util.Duration;
 
+import java.awt.*;
+import java.net.URI;
+
 public class FxUtils {
     public static void fadeIn(Node node, int duration) {
         // animations
@@ -37,5 +40,19 @@ public class FxUtils {
         PauseTransition pause = new PauseTransition(Duration.millis(milliseconds)); // Wait for 3 seconds
         pause.setOnFinished(event);
         pause.play();
+    }
+
+    public static void redirectToUrl(String url) {
+        try {
+            // Check if Desktop is supported
+            if (Desktop.isDesktopSupported()) {
+                Desktop desktop = Desktop.getDesktop();
+                desktop.browse(new URI(url)); // Open the URL in the default web browser
+            } else {
+                System.out.println("Desktop is not supported on this platform.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

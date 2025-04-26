@@ -17,7 +17,7 @@ public interface IGrapesApi {
     void postMessage(Topic topic, Message message);
 
     /** Fetches the list of messages sent on a topic. */
-    CompletableFuture<List<Message>> fetchMessages(int topicId);
+    CompletableFuture<List<Message>> fetchMessages(String topicId);
 
     /** Authenticate the user with given token, returns user object. */
     CompletableFuture<User> getUser();

@@ -10,6 +10,9 @@ import io.github.cdimascio.dotenv.Dotenv;
 public enum AppEnv { // final modifier not needed for enums as they're implicitly final
     CHAT_SERVICE_URL("CHAT_SERVICE_URL"),
     CHAT_SERVICE_PORT("CHAT_SERVICE_PORT"),
+    PUSHER_CLUSTER("PUSHER_CLUSTER"),
+    PUSHER_APP_KEY("PUSHER_APP_KEY"),
+
     AUTH_SERVICE_URL("AUTH_SERVICE_URL");
 
     private static final Dotenv dotenv;

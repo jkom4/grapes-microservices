@@ -4,16 +4,18 @@ package grapes.microservices.frontendchat.viewmodels;
 import grapes.microservices.frontendchat.SceneController;
 import grapes.microservices.frontendchat.models.User;
 import grapes.microservices.frontendchat.models.exceptions.MyApiException;
-import grapes.microservices.frontendchat.viewmodels.states.OnFail;
-import grapes.microservices.frontendchat.viewmodels.states.OnLoading;
-import grapes.microservices.frontendchat.viewmodels.states.OnSuccess;
+import grapes.microservices.frontendchat.models.services.IHttpAuthService;
+import grapes.microservices.frontendchat.viewmodels.states.*;
 import grapes.microservices.frontendchat.models.services.IGrapesApi;
 import grapes.microservices.frontendchat.models.shared.UserSession;
 import grapes.microservices.frontendchat.viewmodels.states.State;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import lombok.Getter;
+
+import java.io.IOException;
 
 
 /**
@@ -24,17 +26,27 @@ import lombok.Getter;
 public class AuthViewModel {
     // Services
     private final IGrapesApi apiService;
+    private final IHttpAuthService httpAuthService;
     @Getter
-    private SceneController sceneController;
+    private final SceneController sceneController;
     @Getter
-    private ObjectProperty<State> stateObserver = new SimpleObjectProperty<>(null);
+    private final ObjectProperty<State> stateObserver = new SimpleObjectProperty<>(null);
     @Getter
-    private ObjectProperty<User> authenticatedUser = UserSession.getINSTANCE().getAuthenticatedUser();
+    private final ObjectProperty<User> authenticatedUser = UserSession.getINSTANCE().getAuthenticatedUser();
+    @Getter
+    private final SimpleStringProperty redirectUrlObserver = new SimpleStringProperty();
+    @Getter
+    private final SimpleStringProperty tokenObserver =  new SimpleStringProperty();
 
     // Constructor
-    public AuthViewModel(IGrapesApi apiService, SceneController sceneController) {
+    public AuthViewModel(IGrapesApi apiService, SceneController sceneController, IHttpAuthService httpAuthService) {
         this.apiService = apiService;
+        this.httpAuthService = httpAuthService;
         this.sceneController = sceneController;
+
+        httpAuthService.setRedirectUrlObserver(redirectUrlObserver);
+        setStateObserver();
+        setAuthTokenCapturedObserver();
     }
 
     public void getUser() {
@@ -59,5 +71,32 @@ public class AuthViewModel {
                         stateObserver.set(new OnSuccess());
                     }
                 }));
+    }
+
+    // ===============
+    // === PRIVATE ===
+    // ===============
+    private void setStateObserver() {
+        stateObserver.addListener((obs, oldState, newState) -> {
+            if (newState instanceof OnAuth) {
+                try {
+                    httpAuthService.start();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+
+    private void setAuthTokenCapturedObserver() {
+        httpAuthService.setTokenObserver(tokenObserver);
+        // When user send a message, it's added to the list + multicasted in local + notify the api
+        tokenObserver.addListener((observable, oldToken, newToken) -> {
+            Platform.runLater(() -> {
+                UserSession.setToken(newToken);
+                getUser();
+                httpAuthService.stop();
+            });
+        });
     }
 }

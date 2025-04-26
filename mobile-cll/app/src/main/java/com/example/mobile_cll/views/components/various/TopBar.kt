@@ -35,7 +35,7 @@ fun TopSection(
             verticalAlignment = Alignment.Bottom
         ) {
             IconButton(
-                onClick = { navController?.navigate("home") },
+                onClick = { navController?.popBackStack() },
                 modifier = Modifier
                     .align(Alignment.Bottom)
                     .offset(y = 20.dp)
@@ -58,3 +58,4 @@ fun TopSection(
         }
     }
 }
+
