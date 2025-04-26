@@ -65,7 +65,7 @@ services:
       MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
       MONGO_TARGET_DB: BD_OPER_PROC_AUTH # Pass the target DB name for permissions
     ports:
-      - "27018:27017"
+      - "27017:27017"
     volumes:
       - mongodb_data:/data/db
       - ./docker/mongodb/config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
