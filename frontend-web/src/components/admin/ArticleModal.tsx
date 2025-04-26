@@ -1,17 +1,39 @@
-import {ArticleModalProps} from "../../utils/models/interface/ArticleModalProps";
+import { ArticleModalProps } from "../../utils/models/interface/ArticleModalProps";
+import {handleImage} from "../../services/fruitServices";
 
-export const ArticleModal: React.FC<ArticleModalProps> =
-    ({
-         isOpen,
-         editingArticle,
-         formData,
-         errorMessage,
-         onClose,
-         onSubmit,
-         onInputChange,
-         translations,
-     }) => {
+export const ArticleModal: React.FC<ArticleModalProps> = ({
+                                                              isOpen,
+                                                              editingArticle,
+                                                              formData,
+                                                              errorMessage,
+                                                              onClose,
+                                                              onSubmit,
+                                                              onInputChange,
+                                                              setFormData,
+                                                              translations,
+                                                          }) => {
     if (!isOpen) return null;
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        if (!file) return;
+
+        try {
+            const imageUrl = await handleImage(file);
+            onInputChange({
+                target: {
+                    name: "picturePath",
+                    value: imageUrl,
+                },
+            } as any);
+            setFormData((prev) => ({
+                ...prev,
+                file,
+            }));
+        } catch (error) {
+            console.error("Image upload failed:", error);
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4">
@@ -132,10 +154,9 @@ export const ArticleModal: React.FC<ArticleModalProps> =
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">{translations.modal_label_picture_path}</label>
                             <input
-                                type="text"
+                                type="file"
                                 name="picturePath"
-                                value={formData.picturePath || ''}
-                                onChange={onInputChange}
+                                onChange={handleFileChange}
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                             />
                         </div>

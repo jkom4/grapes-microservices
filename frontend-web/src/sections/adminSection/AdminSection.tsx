@@ -1,7 +1,14 @@
 import { useLanguage } from "../../features/LanguageContext";
 import Article from "../../utils/models/Articles";
 import { useEffect, useState } from "react";
-import { addArticle, fetchArticleById, fetchFruits, updateArticle, deleteArticle } from "../../services/fruitServices";
+import {
+    addArticle,
+    fetchArticleById,
+    fetchFruits,
+    updateArticle,
+    deleteArticle,
+    handleImage
+} from "../../services/fruitServices";
 import { AdminHeader } from "../../components/admin/AdminHeader";
 import { ArticleTable } from "../../components/admin/ArticleTable";
 import { PaginationControls } from "../../components/admin/PaginationControls";
@@ -64,27 +71,24 @@ const AdminSection: React.FC = () => {
         toast.success(translationsAdmin[language].article_save_success);
         setErrorMessage('');
         try {
-            // Client-side validation
             if (!formData.name?.trim()) {
-            throw new Error(translationsAdmin[language].error_name_required);
+                throw new Error(translationsAdmin[language].error_name_required);
             }
-            // Ensure categoryId and familyId are numbers and positive
             const categoryId = formData.categoryId ?? 1;
             const familyId = formData.familyId ?? 1;
             if (categoryId <= 0) {
-            throw new Error(translationsAdmin[language].error_category_id_positive);
+                throw new Error(translationsAdmin[language].error_category_id_positive);
             }
             if (familyId <= 0) {
-            throw new Error(translationsAdmin[language].error_family_id_positive);
+                throw new Error(translationsAdmin[language].error_family_id_positive);
             }
             if (formData.priceKg && formData.priceKg < 0 || formData.priceUnit && formData.priceUnit < 0) {
-            throw new Error(translationsAdmin[language].error_prices_negative);
+                throw new Error(translationsAdmin[language].error_prices_negative);
             }
             if (formData.stockKg && formData.stockKg < 0 || formData.stockUnit && formData.stockUnit < 0) {
-            throw new Error(translationsAdmin[language].error_stock_negative);
+                throw new Error(translationsAdmin[language].error_stock_negative);
             }
 
-            // Construct articleData with guaranteed numbers
             const articleData: Article = {
                 ...formData,
                 categoryId,
@@ -97,25 +101,30 @@ const AdminSection: React.FC = () => {
                 stockUnit: formData.stockUnit ?? 0,
                 origin: formData.origin || '',
                 picturePath: formData.picturePath || '',
+                file: formData.file,
                 id: editingArticle ? editingArticle.id : undefined,
             } as Article;
 
             if (editingArticle) {
+                if (formData.file) {
+                    await handleImage(formData.file);
+                }
                 await updateArticle(editingArticle.id, articleData);
             } else {
-                // Remove id for new articles
+                if (formData.file) {
+                    await handleImage(formData.file);
+                }
                 const { id, ...articleDataWithoutId } = articleData;
                 await addArticle(articleDataWithoutId as Article);
             }
 
-            // Refresh articles
             const { content, totalPages } = await fetchFruits(currentPage, pageSize);
             setArticles(content);
             setTotalPages(totalPages);
             closeModal();
         } catch (error) {
             console.error('Error saving article:', error);
-        setErrorMessage(error instanceof Error ? error.message : translationsAdmin[language].error_saving_article);
+            setErrorMessage(error instanceof Error ? error.message : translationsAdmin[language].error_saving_article);
         }
     };
 
@@ -225,6 +234,8 @@ const AdminSection: React.FC = () => {
                     onClose={closeModal}
                     onSubmit={handleSubmit}
                     onInputChange={handleInputChange}
+                    setErrorMessage={setErrorMessage}
+                    setFormData={setFormData}
                     translations={{
                     modal_add_article_title: translationsAdmin[language].modal_add_article_title,
                     modal_edit_article_title: translationsAdmin[language].modal_edit_article_title,
