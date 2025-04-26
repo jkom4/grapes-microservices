@@ -44,33 +44,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
                     value={formData.address}
                     onChange={handleInputChange}
                 />
-                <h2 className="text-lg font-semibold mt-6 text-gray-800">{translations.payNow}</h2>
-                <input
-                    type="text"
-                    name="cardNumber"
-                    placeholder={translations.cardNumber}
-                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-accent focus:border-transparent"
-                    value={formData.cardNumber}
-                    onChange={handleInputChange}
-                />
-                <div className="grid grid-cols-2 gap-4">
-                    <input
-                        type="text"
-                        name="cardExpiry"
-                        placeholder={translations.cardExpiry}
-                        className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-accent focus:border-transparent"
-                        value={formData.cardExpiry}
-                        onChange={handleInputChange}
-                    />
-                    <input
-                        type="text"
-                        name="cardCVC"
-                        placeholder={translations.cardCVC}
-                        className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-accent focus:border-transparent"
-                        value={formData.cardCVC}
-                        onChange={handleInputChange}
-                    />
-                </div>
                 <label className="flex items-center space-x-2 text-sm mt-2 text-gray-600">
                     <input
                         type="checkbox"
