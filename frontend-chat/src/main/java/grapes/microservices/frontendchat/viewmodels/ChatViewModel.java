@@ -240,7 +240,7 @@ public class ChatViewModel {
         int startIndex = Math.max(0, size - count);
         // Iterate over the last 10 messages
         for (int i = startIndex; i < size; i++) {
-            if (messageList.get(i).timestamp().isEqual(date)) {
+            if (messageList.get(i).getDateToString().equals(date)) {
                 return true; // Message ID found
             }
         }
