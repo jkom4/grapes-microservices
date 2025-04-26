@@ -1,4 +1,4 @@
-import {cartAPI, paymentAPI} from "./httpCommon";
+import {cartAPI, myService, paymentAPI, redirectionService} from "./httpCommon";
 import CartItemModel from "../utils/models/CartItem";
 
 interface InitCartResponse {
@@ -87,10 +87,13 @@ export const cartService = {
         customerName: string,
         amount: number
     ): Promise<string> {
+
+        const redirectUrl = `${myService.baseURL}`;
+
         const payload = {
             amount: amount,
             merchantId: "grapes",
-            redirectUrl: "http://localhost:3000", // Your site’s return URL
+            redirectUrl: redirectUrl,
         };
 
         const url = `${paymentAPI.baseURL}${paymentAPI.endpoints.pay}`;
@@ -108,9 +111,10 @@ export const cartService = {
             console.error("Error processing payment for orderId:", orderId, "Details:", errorDetails);
             throw new Error(`Payment failed. Details: ${errorDetails}`);
         }
+
         await this.clearCart(orderId);
 
-        return "http://localhost:3002/login";
+        return `${redirectionService.baseURL}${redirectionService.endpoints.toPayment}`;
     },
 
     async removeItem(orderId: number, itemId: number): Promise<void> {

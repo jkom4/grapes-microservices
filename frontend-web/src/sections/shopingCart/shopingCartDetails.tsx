@@ -106,7 +106,7 @@ const CartPage = () => {
                     theme: "colored",
                 }
             );
-            navigate("/login"); // Redirect to login page, similar to Navbar's login flow
+            navigate("/login");
             return;
         }
 
@@ -130,34 +130,23 @@ const CartPage = () => {
                 address: formData.address,
                 phoneNumber: formData.phone,
                 customerName: formData.fullName,
+                amount: total,
             };
 
-            await cartService.processPayment(
+            const providerRedirectUrl = await cartService.processPayment(
                 paymentData.orderId,
                 paymentData.address,
                 paymentData.phoneNumber,
-                paymentData.customerName
+                paymentData.customerName,
+                paymentData.amount
             );
 
-            setShowSuccess(true);
-            setPaymentCompleted(true);
-
-            setTimeout(async () => {
-                try {
-                    setCart(null);
-                    setOrderId(null);
-                    localStorage.removeItem("orderId");
-                } catch (err) {
-                    // Handle error silently or log it
-                }
-                setShowSuccess(false);
-                window.location.href = "/";
-            }, 10000);
+            window.location.href = providerRedirectUrl;
         } catch (err) {
             setPaymentError(
                 err instanceof Error
                     ? err.message
-                    : translationsPayment[language].paymentError
+                    : translationsPayment[language].paymentError || "Error processing payment"
             );
         } finally {
             setIsPaying(false);
