@@ -140,7 +140,7 @@ public class ChatFx extends VBox {
         var bubbleMessage = new BubbleMessageFx();
         bubbleMessage.setText(message.content());
         bubbleMessage.setAuthor(message.sender().username());
-        bubbleMessage.setDate(message.getDateToString());
+        bubbleMessage.setDate(message.getHumainReadableDate());
         // if the message belongs to the user, then the message bubble is aligned to the left with another color
         var isMyMessage = message.sender().id().equals(userObserver.get().id());
         bubbleMessage.setIsMyText(isMyMessage);
