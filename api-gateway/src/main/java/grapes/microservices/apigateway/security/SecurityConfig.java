@@ -14,6 +14,7 @@ public class SecurityConfig {
     private static final String[] AUTH_PATHS = { "/api/auth/**","/api/users/**"};
     private static final String[] SALES_PATHS = {"/api/cll/**","/api/clm/**"};
     private static final String[] CHAT_PATHS = {"/api/chat/**"};
+    private static final String[] PAYMENT_PATHS = {"/api/payment/**"};
     private static final String[] MONITORING_PATHS = {"/actuator/*"};
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -25,6 +26,7 @@ public class SecurityConfig {
                         .pathMatchers(AUTH_PATHS).permitAll()
                         .pathMatchers(SALES_PATHS).permitAll()
                         .pathMatchers(CHAT_PATHS).permitAll()
+                        .pathMatchers(PAYMENT_PATHS).permitAll()
                         .pathMatchers(MONITORING_PATHS).permitAll()
                         .anyExchange().authenticated()
                 ).build();

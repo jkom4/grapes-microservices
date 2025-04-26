@@ -22,6 +22,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -34,6 +35,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/api/clm/**",
             "/api/cll/**",
             "/api/chat/**",
+            "/api/payment/**",
             "/actuator/*"
     );
     @Value("${auth.service.url}")
@@ -123,8 +125,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     private Mono<String> fetchRefreshTokenFromAuthService(String accessToken) {
         WebClient client = WebClient.create(authServiceUrl);
-        return client.get()
-                .uri("/api/auth/session/init")
+        return client.post()
+                .uri("/api/auth/get-refresh")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .retrieve()
                 .bodyToMono(String.class);
@@ -135,6 +137,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         return client.post()
                 .uri("/api/auth/refresh")
                 .header("X-Refresh-Token", refreshToken)
+                .bodyValue(Collections.singletonMap("refreshToken", refreshToken))
                 .retrieve()
                 .bodyToMono(String.class);
     }

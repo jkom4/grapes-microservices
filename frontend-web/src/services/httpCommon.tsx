@@ -1,8 +1,9 @@
-const BASE_URL = "http://localhost:8092";
-const BASE_URL_AUTH = "http://localhost:8091";
-const BASE_URL_PAYMENT = "http://localhost:8093";
+const BASE_URL = "http://localhost:8090/api";
+const BASE_URL_AUTH = "http://localhost:8090/api";
+const BASE_URL_PAYMENT = "http://localhost:8090/api";
 const BASE_TO_PAY = "http://localhost:3002";
 const MY_BASE_URL = "http://localhost:3000";
+const BASE_FRONT_AUTH = "http://localhost:3001";
 
 const getArticlesAPI = {
     baseURL: BASE_URL,
@@ -37,7 +38,7 @@ const cartAPI = {
 const paymentAPI = {
     baseURL: BASE_URL_PAYMENT,
     endpoints: {
-        pay: "/login/payment-initiate",
+        pay: "payment/login/payment-initiate",
     }
 
 }
@@ -75,9 +76,8 @@ const authenticationAPI = {
 };
 
 const generateLoginUrl = (stateAuthentication: number | null) => {
-    const baseUrl = "http://localhost:3001";
-    const redirectUri = "http://localhost:3000";
-    return `${baseUrl}?redirect_uri=${encodeURIComponent(redirectUri)}&state=${stateAuthentication !== null ? stateAuthentication : 'default'}`;
+    const baseUrl = BASE_FRONT_AUTH;
+    return `${baseUrl}?redirect_uri=${encodeURIComponent(MY_BASE_URL)}&state=${stateAuthentication !== null ? stateAuthentication : 'default'}`;
 };
 
 export { getArticlesAPI, searchArticlesAPI, cartAPI, paymentAPI, myService, redirectionService, orderAPI, deliveryAPI, authenticationAPI, generateLoginUrl };
