@@ -1,9 +1,6 @@
 package grapes.microservices.frontendchat;
 
-import grapes.microservices.frontendchat.models.services.IGrapesApi;
-import grapes.microservices.frontendchat.models.services.GrapesApi;
-import grapes.microservices.frontendchat.models.services.MulticastService;
-import grapes.microservices.frontendchat.models.services.IMulticastService;
+import grapes.microservices.frontendchat.models.services.*;
 import grapes.microservices.frontendchat.viewmodels.AuthViewModel;
 import grapes.microservices.frontendchat.viewmodels.ChatViewModel;
 import grapes.microservices.frontendchat.views.AuthViewController;
@@ -29,7 +26,10 @@ public class FrontendChat extends Application {
     private AuthViewModel authVM;
 
     private final int MULTICAST_PORT = Integer.parseInt(AppEnv.CHAT_SERVICE_PORT.get());
-    private final String GRAPES_BASE = AppEnv.CHAT_SERVICE_URL.get();
+    private final String GRAPES_API = AppEnv.CHAT_SERVICE_URL.get();
+    private final String PUSHER_APP_KEY = AppEnv.PUSHER_APP_KEY.get();
+    private final String PUSHER_CLUSTER = AppEnv.PUSHER_CLUSTER.get();
+    private final String AUTH_SERVICE_URL = AppEnv.AUTH_SERVICE_URL.get();
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -39,11 +39,13 @@ public class FrontendChat extends Application {
 
         // 1. Instantiate Services (using Mocks for now)
         IMulticastService multicastService = new MulticastService(MULTICAST_PORT);
-        IGrapesApi apiService = new GrapesApi(GRAPES_BASE);
+        IGrapesApi apiService = new GrapesApi(GRAPES_API);
+        IPusherService pusherService = new PusherService(PUSHER_APP_KEY, PUSHER_CLUSTER);
+        IHttpAuthService httpAuthService = new HttpAuthService("/auth", AUTH_SERVICE_URL);
 
         // 2. Instantiate ViewModels, injecting services
-        authVM = new AuthViewModel(apiService, sceneController);
-        chatVM = new ChatViewModel(multicastService, apiService, sceneController);
+        authVM = new AuthViewModel(apiService, sceneController, httpAuthService);
+        chatVM = new ChatViewModel(multicastService, apiService, pusherService, sceneController);
 
         // 3. Load the FXML view
         //      a. Auth View

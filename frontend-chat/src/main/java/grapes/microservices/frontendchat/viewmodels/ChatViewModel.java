@@ -7,6 +7,7 @@ import grapes.microservices.frontendchat.models.Topic;
 import grapes.microservices.frontendchat.models.User;
 import grapes.microservices.frontendchat.models.services.IGrapesApi;
 import grapes.microservices.frontendchat.models.services.IMulticastService;
+import grapes.microservices.frontendchat.models.services.IPusherService;
 import grapes.microservices.frontendchat.models.shared.UserSession;
 import javafx.application.Platform;
 import javafx.beans.property.*;
@@ -28,6 +29,7 @@ public class ChatViewModel {
     // Services
     private final IMulticastService multicastService;
     private final IGrapesApi apiService;
+    private final IPusherService pusherService;
     @Getter
     private SceneController sceneController;
 
@@ -41,19 +43,23 @@ public class ChatViewModel {
     @Getter // Display or hide messages loading animation when user select a topic
     private final SimpleBooleanProperty areMessagesLoading = new SimpleBooleanProperty(false);
     @Getter // Updated when user send messages, then actions are executed
-    private SimpleStringProperty postedMessageObserver = new SimpleStringProperty("");
+    private final SimpleStringProperty postedMessageObserver = new SimpleStringProperty("");
+    @Getter // Updated when user send messages, then actions are executed
+    private ObjectProperty<Message> receivedMessageObserver = new SimpleObjectProperty<>();
 
     // Constructor
-    public ChatViewModel(IMulticastService multicastService, IGrapesApi apiService, SceneController sceneController) {
+    public ChatViewModel(IMulticastService multicastService, IGrapesApi apiService, IPusherService pusherService, SceneController sceneController) {
         this.multicastService = multicastService;
         this.apiService = apiService;
         this.sceneController = sceneController;
+        this.pusherService = pusherService;
 
         setObserversEvents();
     }
 
     public void fetchTopics() {
         startMulticastService();
+        startPusherService();
         topicsObserver.clear();
         this.apiService.fetchTopics()
                 .whenComplete((data, error) -> Platform.runLater(() -> {
@@ -67,7 +73,7 @@ public class ChatViewModel {
                 }));
     }
 
-    public void fetchMessages(int selectedTopicId) {
+    public void fetchMessages(String selectedTopicId) {
         this.areMessagesLoading.set(true);
 
         this.apiService.fetchMessages(selectedTopicId)
@@ -114,6 +120,8 @@ public class ChatViewModel {
         setJoinLeftTopicObserver();
         // When multicast message received
         setMulticastMessageObserver();
+        // When pusher message received
+        setPusherMessageObserver();
     }
 
     private void setUserSendMessageObserver() {
@@ -147,22 +155,30 @@ public class ChatViewModel {
         }
     }
 
+    private void startPusherService() {
+        pusherService.connect();
+    }
+
     private void setJoinLeftTopicObserver() {
         currentTopicObserver.addListener((observable, oldTopic, newTopic) -> {
-            boolean HAS_OPENED_A_TOPIC = oldTopic == null && newTopic != null; // if before, topic window was closed
+            boolean HAS_OPENED_TOPIC = oldTopic == null && newTopic != null; // if before, topic window was closed
             boolean HAS_CHANGED_TOPIC = oldTopic != null && newTopic != null; // if before, a topic was closed
             boolean HAS_CLOSED_TOPIC = oldTopic != null && newTopic == null; // if user just closed a topic
 
             try {
-                if (HAS_OPENED_A_TOPIC) {
+                if (HAS_OPENED_TOPIC) {
                     multicastService.joinTopic(newTopic);
+                    pusherService.subscribe(newTopic.id());
                 }
                 if (HAS_CHANGED_TOPIC) {
                     multicastService.leaveTopic(oldTopic);
+                    pusherService.unsubscribe(oldTopic.id());
                     multicastService.joinTopic(newTopic);
+                    pusherService.subscribe(newTopic.id());
                 }
                 if (HAS_CLOSED_TOPIC) {
                     multicastService.leaveTopic(oldTopic);
+                    pusherService.unsubscribe(oldTopic.id());
                 }
             } catch (IOException e) {throw new RuntimeException(e);}
         });
@@ -174,19 +190,19 @@ public class ChatViewModel {
         // 3. As there is limited number of multicast groups (253), collisions can happen => so i check topic id
         multicastService.getMessageReveiceObserver().addListener((change, oldMessage, newMessage) -> {
             final boolean IS_HIS_OWN_MESSAGE = newMessage.sender().id().equals(UserSession.getINSTANCE().getAuthenticatedUser().get().id());
-            final boolean IS_UNIQUE = !isMessageDateInLastX(messageListObserver, newMessage.timestamp(), 10);
-            final boolean IS_MESSAGE_FROM_ANOTHER_TOPIC = newMessage.topicId() != currentTopicObserver.get().id();
+            final boolean IS_UNIQUE = !isMessageDateInLastX(messageListObserver, newMessage.getDateToString(), 10);
+            final boolean IS_MESSAGE_FROM_ANOTHER_TOPIC = !newMessage.topicId().equals(currentTopicObserver.get().id());
 
             if (IS_HIS_OWN_MESSAGE) {
-                System.err.println("[Chat ViewModel] Received your own message => ignored");
+                System.err.println("[Chat ViewModel] Received your own message (via multicast) => ignored");
                 return;
             }
             if (!IS_UNIQUE) {
-                System.err.println("[Chat ViewModel] Received duplicated message => ignored");
+                System.err.println("[Chat ViewModel] Received duplicated message (via multicast) => ignored");
                 return;
             }
             if (IS_MESSAGE_FROM_ANOTHER_TOPIC) {
-                System.err.println("[Chat ViewModel] Received a message from another topic => ignored");
+                System.err.println("[Chat ViewModel] Received a message from another topic (via multicast) => ignored");
                 return;
             }
 
@@ -194,12 +210,29 @@ public class ChatViewModel {
             // => to avoid this problem, We transfert the code below into a JavaFX thread :
             Platform.runLater(() -> {
                     messageListObserver.add(newMessage);
-                    System.out.println("Added message to list: " + newMessage); // Optional logging
+                    System.out.println("[ChatViewModel] Added multicast message to list: " + newMessage); // Optional logging
             });
         });
     }
 
-    public static boolean isMessageDateInLastX(ObservableList<Message> messageList, LocalDateTime date, int count) {
+    private void setPusherMessageObserver() {
+        pusherService.setReceivedMessageObserver(receivedMessageObserver);
+        receivedMessageObserver.addListener((change, oldMessage, newMessage) -> {
+            final boolean IS_UNIQUE = !isMessageDateInLastX(messageListObserver, newMessage.getDateToString(), 10);
+
+            if (!IS_UNIQUE) {
+                System.err.println("[Chat ViewModel] Received duplicated message (via Pusher) => ignored");
+                return;
+            }
+
+            Platform.runLater(() -> {
+                    messageListObserver.add(newMessage);
+                    System.out.println("[ChatViewModel] Added pusher message to list: " + newMessage); // Optional logging
+            });
+        });
+    }
+
+    public static boolean isMessageDateInLastX(ObservableList<Message> messageList, String date, int count) {
         // Check if the list has fewer than 10 messages
         int size = messageList.size();
         if (size == 0) return false;
@@ -207,7 +240,7 @@ public class ChatViewModel {
         int startIndex = Math.max(0, size - count);
         // Iterate over the last 10 messages
         for (int i = startIndex; i < size; i++) {
-            if (messageList.get(i).timestamp().isEqual(date)) {
+            if (messageList.get(i).getDateToString().equals(date)) {
                 return true; // Message ID found
             }
         }

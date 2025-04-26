@@ -31,3 +31,7 @@
 #authButton:pressed {
   -fx-background-color: $secondary-dark;
 }
+
+#infoMessageFx {
+  --body-font-size: 20px;
+}

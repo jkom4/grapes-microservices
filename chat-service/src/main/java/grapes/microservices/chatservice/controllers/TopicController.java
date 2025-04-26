@@ -1,5 +1,7 @@
 package grapes.microservices.chatservice.controllers;
 
+import com.pusher.rest.Pusher;
+import com.pusher.rest.data.Result;
 import grapes.microservices.chatservice.dto.MessageDto;
 import grapes.microservices.chatservice.dto.TopicDto;
 import grapes.microservices.chatservice.dto.UserDto;
@@ -8,11 +10,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/chat")
@@ -23,6 +23,15 @@ public class TopicController {
     @Autowired
     public TopicController(TopicService topicService) {
         this.topicService = topicService;
+    }
+    @Autowired
+    private Pusher pusher;
+
+    @GetMapping("/user")
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("X-User-ID") String userId,
+                                  @RequestHeader("X-User-Name") String userName) {
+        var user = new UserDto(userId, userName);
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/topics")
@@ -37,21 +46,22 @@ public class TopicController {
 
     @PostMapping("/topic/{id}/message")
     @Transactional
-    public ResponseEntity<Void> postMessage(
-            @PathVariable("id") String topicId,
-            @RequestBody Map<String, String> body
+    public ResponseEntity<?> postMessage(
+            @PathVariable String id,
+            @RequestBody MessageDto message
     ) {
-        String userToken = body.get("user-token");
-        String content   = body.get("content");
-        topicService.postMessage(topicId, userToken, content);
+        // 1. save message to database
+        var savedMessage = topicService.postMessage(message);
 
-        return ResponseEntity.noContent().build();
-    }
+        // 2. send message to pusher, so all listener clients will receive the message
+        Result result = pusher.trigger(id, "new message", savedMessage);
 
-    @GetMapping("/user")
-    public UserDto getCurrentUser(@RequestHeader("X-User-ID") String userId,
-                                  @RequestHeader("X-User-Roles") String userRole,
-                                  @RequestHeader("X-User-Name") String userName) {
-        return new UserDto(userId, userName);
+        if (result.getStatus() == Result.Status.SUCCESS) {
+            System.out.println("Message send with succès to Pusher.");
+            return ResponseEntity.ok(savedMessage);
+        } else {
+            System.err.println("Error while sending message to pusher: " + result.getMessage() + " | Status: " + result.getHttpStatus());
+            return ResponseEntity.status(500).body("Erreur lors de l'envoi à Pusher: " + result.getMessage());
+        }
     }
 }

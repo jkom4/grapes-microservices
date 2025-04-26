@@ -1,5 +1,8 @@
 const BASE_URL = "http://localhost:8092";
 const BASE_URL_AUTH = "http://localhost:8091";
+const BASE_URL_PAYMENT = "http://localhost:8093";
+const BASE_TO_PAY = "http://localhost:3002";
+const MY_BASE_URL = "http://localhost:3000";
 
 const getArticlesAPI = {
     baseURL: BASE_URL,
@@ -26,11 +29,29 @@ const cartAPI = {
         init: "/clm/cart/init",
         add: "/clm/cart/add",
         get: (orderId: number | string) => `/clm/cart/${orderId}`,
-        pay: "/clm/cart/pay",
         remove: (orderId: number | string, itemId: number) => `/clm/cart/remove/${orderId}/${itemId}`,
         clear: (orderId: number | string) => `/clm/cart/clear/${orderId}`,
     },
 };
+
+const paymentAPI = {
+    baseURL: BASE_URL_PAYMENT,
+    endpoints: {
+        pay: "/login/payment-initiate",
+    }
+
+}
+
+const redirectionService = {
+    baseURL: BASE_TO_PAY,
+    endpoints: {
+        toPayment: "/login"
+    }
+}
+
+const myService = {
+    baseURL: MY_BASE_URL,
+}
 
 const orderAPI = {
     baseURL: BASE_URL,
@@ -59,4 +80,4 @@ const generateLoginUrl = (stateAuthentication: number | null) => {
     return `${baseUrl}?redirect_uri=${encodeURIComponent(redirectUri)}&state=${stateAuthentication !== null ? stateAuthentication : 'default'}`;
 };
 
-export { getArticlesAPI, searchArticlesAPI, cartAPI, orderAPI, deliveryAPI, authenticationAPI, generateLoginUrl };
+export { getArticlesAPI, searchArticlesAPI, cartAPI, paymentAPI, myService, redirectionService, orderAPI, deliveryAPI, authenticationAPI, generateLoginUrl };

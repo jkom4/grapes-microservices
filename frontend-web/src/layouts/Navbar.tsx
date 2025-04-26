@@ -57,7 +57,8 @@ function Navbar() {
                         {language === 'en' ? 'Login' : 'Se connecter'}
                     </a>
                 )}
-                {isLoggedIn && isAdmin &&(
+
+                {isLoggedIn && isAdmin && (
                     <Link
                         to="/admin"
                         className="text-white text-lg bg-accent px-4 py-1 rounded hover:bg-secondary"
