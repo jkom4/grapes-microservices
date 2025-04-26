@@ -278,6 +278,7 @@ services:
       - "8093:8093"
     depends_on:
       - mariadb
+      - redis
 
   chat-service:
     build: ./chat-service

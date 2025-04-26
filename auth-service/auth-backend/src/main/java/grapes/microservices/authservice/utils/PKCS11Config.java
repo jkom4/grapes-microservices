@@ -38,6 +38,9 @@ public class PKCS11Config {
                     "/Library/OpenSC/lib/opensc-pkcs11.so",                             // macOS OpenSC
                     "/opt/homebrew/lib/opensc-pkcs11.so",                               // macOS M1/M2
                     "/usr/local/lib/opensc-pkcs11.so",                                  // Linux / custom install
+                    "/usr/lib/libopensc-pkcs11.so",                                     // Docker
+                    "/usr/lib/pkcs11/opensc-pkcs11.so",                                     // Docker
+                    "/usr/lib/opensc-pkcs11.so",                                     // Docker
                     "/usr/lib/x86_64-linux-gnu/opensc-pkcs11.so",                       // Debian-based Linux
                     "C:\\Windows\\System32\\beidpkcs11.dll",                            // Windows BE eID
                     "C:\\Program Files\\OpenSC Project\\OpenSC\\pkcs11\\opensc-pkcs11.dll" // Windows OpenSC

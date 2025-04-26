@@ -1,11 +1,11 @@
 package grapes.microservices.apigateway.security;
 
-import grapes.microservices.apigateway.service.AuthSessionService;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -17,13 +17,12 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -34,9 +33,11 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/api/users/**",
             "/api/clm/**",
             "/api/cll/**",
+            "/api/chat/**",
             "/actuator/*"
     );
-
+    @Value("${auth.service.url}")
+    private String authServiceUrl;
     private static final String TOKEN_PREFIX = "Bearer ";
     private static final String USER_ID_HEADER = "X-User-Id";
     private static final String ROLES_HEADER = "X-User-Roles";
@@ -46,13 +47,11 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     private final ReactiveRedisTemplate<String, String> redisTemplate;
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
-    private final AuthSessionService authSessionService;
 
     @Autowired
-    public JwtAuthFilter(JwtUtil jwtUtil, ReactiveRedisTemplate<String, String> redisTemplate, AuthSessionService authSessionService) {
+    public JwtAuthFilter(JwtUtil jwtUtil, ReactiveRedisTemplate<String, String> redisTemplate) {
         this.jwtUtil = jwtUtil;
         this.redisTemplate = redisTemplate;
-        this.authSessionService = authSessionService;
     }
 
     @Override
@@ -61,7 +60,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         String path = request.getPath().toString();
 
         if (isWhitelisted(path)) {
-            logger.warn("whitelisted path: {}", path);
+            logger.info("Whitelisted path: {}", path);
             return chain.filter(exchange);
         }
 
@@ -70,83 +69,84 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return unauthorizedResponse(exchange, "Authorization header missing or invalid");
         }
 
+        // Si access token est expiré
         if (!jwtUtil.validateToken(token)) {
-            return unauthorizedResponse(exchange, "Invalid JWT token");
+            Claims expiredClaims = jwtUtil.extractAllClaims(token);
+            String userId = expiredClaims.getSubject();
+
+            // Vérifier s’il y a une session en cache
+            return redisTemplate.opsForValue().get("session:" + userId)
+                    .flatMap(refreshToken -> {
+                        if (refreshToken == null) {
+                            logger.warn("No session found for user {}", userId);
+                            return unauthorizedResponse(exchange, "Session expired");
+                        }
+
+                        // Appeler le serveur d'auth pour obtenir un nouveau accessToken
+                        return fetchNewAccessTokenFromAuthService(refreshToken)
+                                .flatMap(newToken -> {
+                                    // Stocker dans la session ou remplacer
+                                    return forwardRequestWithToken(newToken, exchange, chain);
+                                });
+                    });
         }
 
-        return redisTemplate.opsForValue().get("invalidated:" + token)
-                .flatMap(invalidated -> {
-                    if (invalidated != null) {
-                        return unauthorizedResponse(exchange, "Token revoked");
-                    }
-
-                    Claims claims = jwtUtil.extractAllClaims(token);
-                    String userId = claims.getSubject();
-
-                    return redisTemplate.opsForHash().hasKey("session:" + userId, "refresh")
-                            .flatMap(hasRefresh -> {
-                                if (Boolean.FALSE.equals(hasRefresh)) {
-                                    // 📡 Appel Auth Service pour récupérer refresh_token
-                                    return authSessionService.initSession(token) // 👉 ta méthode existante
-                                            .flatMap(tokens -> {
-                                                Map<String, String> sessionData = Map.of(
-                                                        "access", tokens.getAccessToken(),
-                                                        "refresh", tokens.getRefreshToken()
-                                                );
-
-                                                return redisTemplate.opsForHash()
-                                                        .putAll("session:" + userId, sessionData)
-                                                        .then(redisTemplate.expire("session:" + userId, Duration.ofHours(1)))
-                                                        .then(injectClaimsAndContinue(token, exchange, chain));
-                                            });
-                                } else {
-                                    return injectClaimsAndContinue(token, exchange, chain);
-                                }
-                            });
-                })
-                .switchIfEmpty(Mono.defer(() -> {
-                    Claims claims = jwtUtil.extractAllClaims(token);
-                    String userId = claims.getSubject();
-
-                    return redisTemplate.opsForHash().hasKey("session:" + userId, "refresh")
-                            .flatMap(hasRefresh -> {
-                                if (Boolean.FALSE.equals(hasRefresh)) {
-                                    return authSessionService.initSession(token) // 👉 ici aussi
-                                            .flatMap(tokens -> {
-                                                Map<String, String> sessionData = Map.of(
-                                                        "access", tokens.getAccessToken(),
-                                                        "refresh", tokens.getRefreshToken()
-                                                );
-
-                                                return redisTemplate.opsForHash()
-                                                        .putAll("session:" + userId, sessionData)
-                                                        .then(redisTemplate.expire("session:" + userId, Duration.ofHours(1)))
-                                                        .then(injectClaimsAndContinue(token, exchange, chain));
-                                            });
-                                } else {
-                                    return injectClaimsAndContinue(token, exchange, chain);
-                                }
-                            });
-                }));
-    }
-
-    private Mono<Void> injectClaimsAndContinue(String token, ServerWebExchange exchange, GatewayFilterChain chain) {
+        // Si accessToken est valide
         Claims claims = jwtUtil.extractAllClaims(token);
         String userId = claims.getSubject();
         String roles = claims.get("roles", String.class);
-        String name = claims.get("name", String.class); // si "name" est dans les claims
 
-        ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+        // Si la session n'existe pas encore, on la crée ici
+        return redisTemplate.opsForValue().get("session:" + userId)
+                .switchIfEmpty(
+                        fetchRefreshTokenFromAuthService(token)
+                                .flatMap(refreshToken -> {
+                                    logger.info("Saving new session for user {}", userId);
+                                    return redisTemplate.opsForValue()
+                                            .set("session:" + userId, refreshToken)
+                                            .then(Mono.just(refreshToken));
+                                })
+                )
+                .then(
+                        forwardRequestWithClaims(exchange, chain, request, userId, roles)
+                );
+    }
+    private Mono<Void> forwardRequestWithClaims(ServerWebExchange exchange, GatewayFilterChain chain, ServerHttpRequest request, String userId, String roles) {
+        ServerHttpRequest modifiedRequest = request.mutate()
                 .header(USER_ID_HEADER, userId)
                 .header(ROLES_HEADER, roles)
-                .header(USER_NAME_HEADER, name != null ? name : "")
+                .header(USER_NAME_HEADER, roles) // si tu as username séparé, change ça
                 .build();
-
-        logger.info("Authenticated request - User: {}, Name: {}, Roles: {}, Path: {}",
-                userId, name, roles, exchange.getRequest().getPath());
 
         return chain.filter(exchange.mutate().request(modifiedRequest).build());
     }
+
+    private Mono<String> fetchRefreshTokenFromAuthService(String accessToken) {
+        WebClient client = WebClient.create(authServiceUrl);
+        return client.get()
+                .uri("/api/auth/session/init")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    private Mono<String> fetchNewAccessTokenFromAuthService(String refreshToken) {
+        WebClient client = WebClient.create(authServiceUrl);
+        return client.post()
+                .uri("/api/auth/refresh")
+                .header("X-Refresh-Token", refreshToken)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    private Mono<Void> forwardRequestWithToken(String newToken, ServerWebExchange exchange, GatewayFilterChain chain) {
+        Claims claims = jwtUtil.extractAllClaims(newToken);
+        String userId = claims.getSubject();
+        String roles = claims.get("roles", String.class);
+
+        return forwardRequestWithClaims(exchange, chain, exchange.getRequest(), userId, roles);
+    }
+
 
 
     @Override

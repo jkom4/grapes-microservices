@@ -1,5 +1,5 @@
-const BASE_URL = "http://localhost:8092";
-const BASE_URL_AUTH = "http://localhost:8091";
+const BASE_URL = "http://localhost:8090/api";
+const BASE_URL_AUTH = "http://localhost:8090/api";
 
 const getArticlesAPI = {
     baseURL: BASE_URL,
