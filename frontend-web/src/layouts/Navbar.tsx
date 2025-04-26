@@ -42,9 +42,9 @@ function Navbar() {
                     {language === 'en' ? 'Our Product' : 'Nos Produits'}
                 </Link>
                 {isLoggedIn && (
-                <Link to="/account" className="text-black hover:text-accent">
-                    {language === 'en' ? 'Account' : 'Mon compte'}
-                </Link>
+                    <Link to="/account" className="text-black hover:text-accent">
+                        {language === 'en' ? 'Account' : 'Mon compte'}
+                    </Link>
                 )}
                 <Link to="/shopping-cart" className="text-black hover:text-accent">
                     <span>🛒</span>
@@ -57,7 +57,8 @@ function Navbar() {
                         {language === 'en' ? 'Login' : 'Se connecter'}
                     </a>
                 )}
-                {isAdmin && (
+
+                {isLoggedIn && isAdmin && (
                     <Link
                         to="/admin"
                         className="text-white text-lg bg-accent px-4 py-1 rounded hover:bg-secondary"
@@ -67,6 +68,13 @@ function Navbar() {
                 )}
             </nav>
             <div className="flex items-center">
+                <a
+                    href="../chat_exe/frontend_chat.exe"
+                    download="frontend_chat.exe"
+                    className="text-white text-lg bg-accent px-4 py-3 rounded-3xl hover:bg-secondary cursor-pointer mr-4"
+                >
+                    {language === 'en' ? 'Need help ?' : 'Besoin d\'aide ?'}
+                </a>
                 <button onClick={() => handleLanguageChange('en')} className="ml-4">
                     <img src={englishFlag} alt="English" className="h-6 w-6 rounded-full cursor-pointer" />
                 </button>

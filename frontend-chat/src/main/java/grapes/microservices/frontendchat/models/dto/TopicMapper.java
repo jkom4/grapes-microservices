@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 public class TopicMapper {
     public static Topic toEntity(TopicDTO dto) {
         return new Topic(
-                Integer.parseInt(dto.getId()),
+                dto.getId(),
                 dto.getTopic(),
                 ""
         );

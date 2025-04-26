@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>.\out\artifacts\frontend_chat_jar\frontend-chat.jar</jar>
+  <outfile>.\exe\frontend_chat.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl></downloadUrl>
+  <supportUrl></supportUrl>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <manifest></manifest>
+  <icon>.\src\main\resources\grapes\microservices\frontendchat\images\logo_grapes.ico</icon>
+  <singleInstance>
+    <mutexName>Frontend_chat</mutexName>
+    <windowTitle></windowTitle>
+  </singleInstance>
+  <classPath>
+    <mainClass>grapes.microservices.frontendchat.App</mainClass>
+  </classPath>
+  <jre>
+    <path>C:\Program Files\Java\jre1.8.0_451</path>
+    <requiresJdk>false</requiresJdk>
+    <requires64Bit>false</requires64Bit>
+    <minVersion>21</minVersion>
+    <maxVersion></maxVersion>
+  </jre>
+</launch4jConfig>

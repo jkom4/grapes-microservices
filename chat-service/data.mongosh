@@ -1,0 +1,20 @@
+use chat_db;
+
+db.messages.insertMany([
+  {
+    id: "1",
+    userId: "1",
+    username: "Jean",
+    content: "Hello, everyone!",
+    createdAt: ,
+    topicId: "topic456"
+  },
+  {
+    id: "2",
+    userId: "2",
+    username: "Alex",
+    content: "Welcome to the group!",
+    createdAt: new Date().toISOString(),
+    topicId: "topic789"
+  }
+]);
