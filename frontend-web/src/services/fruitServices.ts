@@ -73,6 +73,29 @@ export const addArticle = async (article: Article): Promise<void> => {
     }
 };
 
+export const handleImage = async (file: File): Promise<string> => {
+    try {
+        const imageName = file.name;
+        const uploadUrl = `https://objectstorage.eu-frankfurt-1.oraclecloud.com/p/dsqOjUeBwX1kbVmRVuvRENtylcOvLXlpOHdLX5Fngqfo2SrK0r0odRS_R8M6LmPw/n/frnuxmgfepuz/b/image-prod/o/articles/${imageName}`;
+
+        const response = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: {
+                "Content-Type": file.type,
+            },
+            body: file,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Image upload failed with status ${response.status}`);
+        }
+
+        return uploadUrl;
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while uploading the image");
+    }
+};
+
 // Update an article
 export const updateArticle = async (id: number, article: Article): Promise<void> => {
     try {
