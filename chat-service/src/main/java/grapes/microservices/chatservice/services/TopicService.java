@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +26,7 @@ public class TopicService {
 
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
+    public static DateTimeFormatter preciseFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
     private final RabbitTemplate rabbitTemplate;
 
     public List<TopicDto> getAllTopics() {
@@ -41,7 +43,9 @@ public class TopicService {
         return messageRepository.findByChatId(topicId)
                 .stream()
                 .map(message -> MessageDto.builder()
+                        .id(message.getId())
                         .userId(message.getSenderId())
+                        .username(message.getUsername())
                         .content(message.getContent())
                         .createdAt(message.getCreatedAt().toString())
                         .topicId(message.getChatId())
@@ -49,15 +53,16 @@ public class TopicService {
                 .collect(Collectors.toList());
     }
 
-    public void postMessage(String topicId, String userId, String content) {
-        Message saved = messageRepository.save(
-                Message.builder()
-                        .chatId(topicId)
-                        .senderId(userId)
-                        .content(content)
-                        .createdAt(LocalDateTime.now())
-                        .build()
-        );
+    public MessageDto postMessage(MessageDto dto) {
+        Message message = Message.builder()
+                .chatId(dto.getTopicId())
+                .senderId(dto.getUserId()) // userId comes directly from the token
+                .content(dto.getContent())
+                .username(dto.getUsername())
+                .id(UUID.randomUUID().toString())
+                .createdAt(LocalDateTime.parse(dto.getCreatedAt(), preciseFormat))
+                .build();
+
         ActivityLogEvent event = ActivityLogEvent.builder()
                 .eventId(UUID.randomUUID())
                 .eventType("ServiceUsed")
@@ -65,20 +70,22 @@ public class TopicService {
                 .sourceSystem("ChatService")
                 .version("1.0")
                 .payload(ActivityLogEvent.Payload.builder()
-                        .usage_log_id_source(saved.getId())
-                        .client_id(userId)
+                        .usage_log_id_source(message.getId())
+                        .client_id(message.getSenderId())
                         .product_id(null)
-                        .service_id(topicId)
-                        .usage_timestamp(saved.getCreatedAt()
+                        .service_id(message.getChatId())
+                        .usage_timestamp(message.getCreatedAt()
                                 .atZone(ZoneId.systemDefault())
                                 .toInstant()
                         )
-                        .request_details(Map.of("content", content))
+                        .request_details(Map.of("content", message.getContent()))
                         .status("Completed")
                         .duration_ms(null)
                         .build()
                 )
                 .build();
         rabbitTemplate.convertAndSend("q_activity_logs", event);
+
+        return null;
     }
 }

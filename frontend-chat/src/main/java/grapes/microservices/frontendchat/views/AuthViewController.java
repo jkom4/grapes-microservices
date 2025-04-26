@@ -7,7 +7,9 @@ import grapes.microservices.frontendchat.viewmodels.states.*;
 import grapes.microservices.frontendchat.viewmodels.AuthViewModel;
 import grapes.microservices.frontendchat.views.components.FxUtils;
 import grapes.microservices.frontendchat.views.components.LoadingFx;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -16,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
+import lombok.Getter;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -26,9 +29,9 @@ import java.util.ResourceBundle;
 public class AuthViewController implements Initializable {
     // References to Fx components
     @FXML LoadingFx loadingFx;
+    @FXML Label infoMessageFx;
     @FXML Label errorMessageFx;
     @FXML Button authButton;
-    @FXML WebView authWebView;
     @FXML VBox authContainer;
     @FXML VBox authContainerRoot;
     @FXML ImageView successImage;
@@ -41,13 +44,16 @@ public class AuthViewController implements Initializable {
     private ObjectProperty<State> stateObserver;
     private SceneController sceneController;
 
+    // observables
+    private SimpleStringProperty redirectUrlObserver = new SimpleStringProperty();
+    private SimpleStringProperty tokenObserver =  new SimpleStringProperty();
+
     /**
      * Called by the FXMLLoader after FXML elements are injected.
      * Used for initialization that doesn't depend on the ViewModel yet.
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        authWebView.prefHeightProperty().bind(authContainerRoot.heightProperty());
     }
 
     /**
@@ -67,7 +73,14 @@ public class AuthViewController implements Initializable {
     private void bindViewModel() {
         // === OBSERVERS ===
         stateObserver = viewModel.getStateObserver();
+        redirectUrlObserver = viewModel.getRedirectUrlObserver();
+        tokenObserver = viewModel.getTokenObserver();
         // === Add listeners ===
+
+        // manage auth token received via http
+        redirectUrlObserver.addListener((observable, oldUrl, newUrl) -> {
+            Platform.runLater(() -> FxUtils.redirectToUrl(newUrl));
+        });
 
         // manage the token entered after Button clicked
         authButton.setOnAction(event -> handleAuth());
@@ -84,11 +97,9 @@ public class AuthViewController implements Initializable {
            } catch (OnReset e) {
                // Nothing happens because "resetState()" already reset the view state
            } catch (OnAuth e) {
-               show(authWebView);
-               hide(authContainer);
-               FxUtils.wait(100, event -> {
-                   authWebView.getEngine().load(AppEnv.AUTH_SERVICE_URL.get());
-               });
+               hide(authButton);
+               show(loadingFx);
+               infoMessageFx.setText("A new page was opened. You must login there in order to be authenticated.");
            } catch (OnLoading e) {
                show(loadingFx);
            } catch (OnSuccess e) {
@@ -106,29 +117,6 @@ public class AuthViewController implements Initializable {
                errorMessageFx.setText(e.getMessage());
            }
         });
-
-        // Listen to WebView when user login, then get the token
-        // Add a listener to track the URL changes
-        authWebView.getEngine().locationProperty().addListener((obs, oldUrl, newUrl) -> {
-            // Check if the new URL contains the token or required value
-            if (newUrl.contains("q=")) {
-                String token = extractToken(newUrl);
-                UserSession.setToken(token);
-                viewModel.getUser();
-            }
-        });
-
-        // Manage the WebView error if it cannot display the website
-        authWebView.getEngine().getLoadWorker().exceptionProperty().addListener((obs, oldErr, newErr) -> {
-            // Check if the new URL contains the token or required value
-            if (newErr == null) return;
-            stateObserver.set(new OnFail(newErr.getMessage()));
-        });
-    }
-
-    private String extractToken(String url) {
-        String[] parts = url.split("q=");
-        return parts.length > 1 ? parts[1].split("&")[0] : null;
     }
 
     public void handleAuth() {
@@ -137,13 +125,13 @@ public class AuthViewController implements Initializable {
     }
 
     private void resetState() {
-        hide(authWebView);
         show(authContainer);
         show(authButton);
         hide(errorMessageFx);
         hide(successImage);
         hide(errorImage);
         hide(loadingFx);
+        infoMessageFx.setText("");
     }
 
     private static void hide(Node node) {
