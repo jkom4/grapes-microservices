@@ -8,6 +8,7 @@ import grapes.microservices.salesservice.repositories.DeliveryRepository;
 import grapes.microservices.salesservice.repositories.OrderItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,8 +21,8 @@ public class TripService {
     private final DeliveryRepository deliveryRepository;
     private final OrderItemRepository orderItemRepository;
 
-    //  1. Gett all the trips from one deliver man
-    public List<TripDTO> getTripsByDeliveryMan(Integer userId) {
+    // 1. Get all the trips from one delivery man
+    public List<TripDTO> getTripsByDeliveryMan(String userId) {
         List<Delivery> deliveries = deliveryRepository.findByUserId(userId);
 
         return deliveries.stream()
@@ -30,7 +31,7 @@ public class TripService {
                         "Trip " + delivery.getOrderId(),
                         "Unknown distance",
                         delivery.getAddress(),
-                        delivery.getDeliveryStatusId() != null && delivery.getDeliveryStatusId() == 3
+                        delivery.isFinished()
                 ))
                 .collect(Collectors.toList());
     }
@@ -53,7 +54,6 @@ public class TripService {
         }).collect(Collectors.toList());
     }
 
-
     // 3. Mark a product as scanned
     public void updateScanStatus(Integer orderItemId) {
         OrderItem orderItem = orderItemRepository.findById(orderItemId)
@@ -62,6 +62,8 @@ public class TripService {
         orderItemRepository.save(orderItem);
     }
 
+    // 4. Finish a trip
+    @Transactional
     public void finishTrip(Integer tripId) {
         Delivery delivery = deliveryRepository.findByOrderId(tripId)
                 .orElseThrow(() -> new IllegalArgumentException("Trip not found with ID: " + tripId));
@@ -77,15 +79,14 @@ public class TripService {
 
         delivery.setDeliveryStatusId(3); // 3 = Finished
         delivery.setDeliveredAt(LocalDateTime.now());
+        delivery.setFinished(true);
+        System.out.println("Mise à jour de is_finished à true pour tripId: " + tripId);
         deliveryRepository.save(delivery);
+        System.out.println("Delivery après sauvegarde: " + delivery);
     }
 
+    // 5. Check if a trip exists
     public boolean existsTrip(Integer tripId) {
         return deliveryRepository.findByOrderId(tripId).isPresent();
     }
-
-
-
-
-
 }

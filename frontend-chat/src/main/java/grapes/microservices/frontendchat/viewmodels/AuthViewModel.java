@@ -8,6 +8,7 @@ import grapes.microservices.frontendchat.models.services.IHttpAuthService;
 import grapes.microservices.frontendchat.viewmodels.states.*;
 import grapes.microservices.frontendchat.models.services.IGrapesApi;
 import grapes.microservices.frontendchat.models.shared.UserSession;
+import grapes.microservices.frontendchat.viewmodels.states.State;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

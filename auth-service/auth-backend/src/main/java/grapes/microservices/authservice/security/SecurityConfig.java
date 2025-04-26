@@ -19,7 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     private static final String[] SWAGGER_PATHS = {"/users/**", "/auth/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/swagger-ui/**"};
 
-    private static final String[] PUBLIC_PATHS = {"/users/**", "/auth/**"};
+    private static final String[] PUBLIC_PATHS = {"/users/**", "/auth/**", "/actuator/**"};
 
     @Bean
     public OpenAPI customOpenAPI() {

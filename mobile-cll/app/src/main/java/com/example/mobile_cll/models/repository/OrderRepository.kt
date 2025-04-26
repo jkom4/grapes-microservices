@@ -1,29 +1,31 @@
 package com.example.mobile_cll.repository
 
-import com.example.mobile_cll.models.DatabaseHelper
-import com.example.mobile_cll.models.DatabaseOperations
+import android.util.Log
 import com.example.mobile_cll.models.entities.Order
+import com.example.mobile_cll.network.RetrofitClient
 
 /**
- * OrderRepository is responsible for interacting with the database to fetch order-related data.
- *
- * @param databaseHelper The helper class that handles database operations.
+ * Repository for fetching order-related data from the API.
  */
-class OrderRepository(private val databaseHelper: DatabaseHelper) {
-    private val dbOperations = DatabaseOperations(databaseHelper)
-    /**
-     * Retrieves all orders associated with a given trip.
-     *
-     * @param tripId The ID of the trip for which to fetch orders.
-     * @return A list of orders for the specified trip.
-     */
-    fun getOrdersForTrip(tripId: String): List<Order> {
-        return dbOperations.getOrdersForTrip(tripId)
-    }
+class OrderRepository {
+    private val apiService = RetrofitClient.getService(RetrofitClient.ApiService::class.java)
+    private val TAG = "OrderRepository"
 
-    fun updateScannedAt(order: Order, timestamp: Long) {
-        order.scannedAt = timestamp
-        order.isScanned = true
-        dbOperations.updateScannedAt(order.id, timestamp)
+    /**
+     * Retrieves all orders for a specific trip from the API.
+     *
+     * @param tripId The ID of the trip whose orders are to be fetched.
+     * @return A list of orders for the trip.
+     */
+    suspend fun getOrdersForTrip(tripId: String): List<Order> {
+        Log.d(TAG, "Fetching orders for tripId=$tripId")
+        return try {
+            val orders = apiService.getOrdersForTrip(tripId)
+            Log.d(TAG, "Received ${orders.size} orders: $orders")
+            orders
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching orders: ${e.message}", e)
+            emptyList()
+        }
     }
 }

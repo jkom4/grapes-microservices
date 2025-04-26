@@ -1,5 +1,5 @@
-// src/api/apiConfig.ts
 const BASE_URL = "http://localhost:8092";
+const BASE_URL_AUTH = "http://localhost:8091";
 
 const getArticlesAPI = {
     baseURL: BASE_URL,
@@ -26,10 +26,8 @@ const cartAPI = {
         init: "/clm/cart/init",
         add: "/clm/cart/add",
         get: (orderId: number | string) => `/clm/cart/${orderId}`,
-        pay: (orderId: number | string, params: { address: string; phoneNumber: string; customerName: string; country: string; postalCode: string }) =>
-            `/clm/cart/pay/${orderId}?address=${encodeURIComponent(params.address)}&phoneNumber=${encodeURIComponent(params.phoneNumber)}&customerName=${encodeURIComponent(params.customerName)}&country=${encodeURIComponent(params.country)}&postalCode=${encodeURIComponent(params.postalCode)}`,
-        remove: (itemId: number) => `/clm/cart/remove/${itemId}`,
-        applyPromo: "/clm/cart/apply-promo",
+        pay: "/clm/cart/pay",
+        remove: (orderId: number | string, itemId: number) => `/clm/cart/remove/${orderId}/${itemId}`,
         clear: (orderId: number | string) => `/clm/cart/clear/${orderId}`,
     },
 };
@@ -37,8 +35,28 @@ const cartAPI = {
 const orderAPI = {
     baseURL: BASE_URL,
     endpoints: {
-        orderHistory: (userId: number) => `/cll/orders/orders/history/${userId}`,
+        orderHistory: (userId: string) => `/cll/orders/history/${userId}`,
     },
 };
 
-export { getArticlesAPI, searchArticlesAPI, cartAPI, orderAPI };
+const deliveryAPI = {
+    baseURL: BASE_URL,
+    endpoints: {
+        getDeliveryStatus: (orderId: number | string) => `/cll/deliveries/status/${orderId}`,
+    },
+};
+
+const authenticationAPI = {
+    baseURL: BASE_URL_AUTH,
+    endpoints: {
+        logout: "/auth/logout",
+    },
+};
+
+const generateLoginUrl = (stateAuthentication: number | null) => {
+    const baseUrl = "http://localhost:3001";
+    const redirectUri = "http://localhost:3000";
+    return `${baseUrl}?redirect_uri=${encodeURIComponent(redirectUri)}&state=${stateAuthentication !== null ? stateAuthentication : 'default'}`;
+};
+
+export { getArticlesAPI, searchArticlesAPI, cartAPI, orderAPI, deliveryAPI, authenticationAPI, generateLoginUrl };

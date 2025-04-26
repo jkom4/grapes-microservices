@@ -8,8 +8,8 @@ import grapes.microservices.chatservice.dto.UserDto;
 import grapes.microservices.chatservice.services.TopicService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public class TopicController {
         return topicService.getMessagesByTopicId(id);
     }
 
-    @PostMapping(value = "/topic/{id}/message", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("/topic/{id}/message")
     @Transactional
     public ResponseEntity<?> postMessage(
             @PathVariable String id,

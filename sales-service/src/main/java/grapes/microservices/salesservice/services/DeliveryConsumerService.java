@@ -30,7 +30,7 @@ public class DeliveryConsumerService {
             var order = orderRepository.findById(message.getOrderId())
                     .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + message.getOrderId()));
 
-            Integer deliveryManId = findBestDeliveryManId();
+            String deliveryManId = String.valueOf(findBestDeliveryManId());
 
             if (deliveryManId == null) {
                 throw new IllegalStateException(" No available deliveryman found!");
@@ -46,8 +46,6 @@ public class DeliveryConsumerService {
                     .deliveryDate(LocalDateTime.now())
                     .name(message.getCustomerName())
                     .address(message.getAddress())
-                    .postalCode(message.getPostalCode())
-                    .country(message.getCountry())
                     .phoneNumber(message.getPhoneNumber())
                     .build();
 
@@ -67,7 +65,7 @@ public class DeliveryConsumerService {
         long minPendingDeliveries = Long.MAX_VALUE;
 
         for (Integer deliveryManId : deliveryMenIds) {
-            long pendingDeliveries = deliveryRepository.countByUserIdAndDeliveryStatusId(deliveryManId, PENDING_STATUS_ID);
+            long pendingDeliveries = deliveryRepository.countByUserIdAndDeliveryStatusId(String.valueOf(deliveryManId), PENDING_STATUS_ID);
 
             if (pendingDeliveries < minPendingDeliveries) {
                 minPendingDeliveries = pendingDeliveries;

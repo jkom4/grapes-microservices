@@ -21,7 +21,6 @@ export default function UpdateCredentialModal({
     const [updated, setUpdated] = useState("");
     const [confirm, setConfirm] = useState("");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
 
     const label = credentialType === "password" ? "Password" : "PIN Code";
 
@@ -29,7 +28,6 @@ export default function UpdateCredentialModal({
         setCurrent("");
         setUpdated("");
         setConfirm("");
-        setError("");
     };
 
     useEffect(() => {
@@ -56,11 +54,14 @@ export default function UpdateCredentialModal({
                 onClose();
             } else {
                 const data = await response.json();
-                setError(data.message || "An error occurred.");
+                toast.error(data.message || "An error occurred.");
             }
         } catch (err) {
-            // @ts-ignore
-            setError(`${err.message}`);
+            if (err instanceof Error) {
+                toast.error(err.message || "An error occurred.");
+            } else {
+                toast.error("An unknown error occurred.");
+            }
         } finally {
             setLoading(false);
         }
@@ -122,8 +123,6 @@ export default function UpdateCredentialModal({
                             className="w-full border border-gray-300 rounded-xl px-4 py-2"
                         />
                     </div>
-
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
 
                     <button
                         type="submit"

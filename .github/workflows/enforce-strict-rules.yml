@@ -69,12 +69,41 @@ jobs:
         working-directory: ./api-gateway
         run: mvn -B validate test -Dspring.profiles.active=test
 
-
-
       # 🔹 Test Auth Service
+      - name: Install custom pkcs11-provider1
+        run: |
+          mvn install:install-file \
+            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \
+            -DgroupId=iaik \
+            -DartifactId=pkcs11-provider \
+            -Dversion=1.9.4 \
+            -Dpackaging=jar
+
+      - name: Install custom pkcs11-provider2
+        run: |
+          mvn install:install-file \
+            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \
+            -DgroupId=iaik \
+            -DartifactId=pkcs11-provider \
+            -Dversion=1.9.4 \
+            -Dpackaging=jar
+
+      - name: Install custom pkcs11-provider3
+        run: |
+          mvn install:install-file \
+            -Dfile=auth-service/auth-backend/libraries/pkcs11-provider-1.9.4.jar \
+            -DgroupId=iaik \
+            -DartifactId=pkcs11-provider \
+            -Dversion=1.9.4 \
+            -Dpackaging=jar
+
       - name: Run Tests for Auth Service
         working-directory: ./auth-service/auth-backend
         run: mvn -B validate test -Dspring.profiles.active=test
+        env:
+          MAVEN_OPTS: >-
+            --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED
+            --enable-native-access=ALL-UNNAMED
 
 
 
@@ -102,10 +131,19 @@ jobs:
           python-version: "3.10"
 
       - name: Run Tests for Data-Mining Service
-        working-directory: ./data-mining-service
+        working-directory: ./data-mining-service # Run commands FROM this directory
         run: |
+          # Create a temporary .env for the test runner if needed
+          echo "RABBITMQ_PORT=5672" >> .env
+          echo "RABBITMQ_HOST=localhost" >> .env
+          # Add other required ENV VARS for the test script here!
+          echo "RABBITMQ_USER=${{secrets.RABBITMQ_USER}}" >> .env
+          echo "RABBITMQ_PASSWORD=${{secrets.RABBITMQ_PASSWORD}}" >> .env
+          echo "ACTIVITY_LOGS_QUEUE=q_activity_logs" >> .env
+          echo "AUTH_LOGS_QUEUE=q.auth_logs" >> .env
+
           pip install -r requirements.txt
-          pytest
+          python -m pytest
 
       # ⚠️ Final status report
       - name: Determine overall status

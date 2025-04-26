@@ -3,11 +3,9 @@ package grapes.microservices.authservice.services.auth;
 import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.SmsService;
-import grapes.microservices.authservice.services.TokenService;
 import grapes.microservices.authservice.utils.challenge_request_limiter.OneCallPerMinutePerUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,11 +21,12 @@ public class SmsAuthProvider extends AbstractAuthProvider {
 
     @Override
     @OneCallPerMinutePerUser
-    public boolean sendChallenge(User user) {
+    public String sendChallenge(User user) {
         String challenge = generateChallenge();
         challengeService.saveChallengeForUser(user.getPhoneNumber(), challenge);
         String message = "Please use the following code to authenticate: " + challenge;
-        return smsService.sendSms(user.getPhoneNumber(), message);
+        smsService.sendSms(user.getPhoneNumber(), message);
+        return challenge;
     }
 
     @Override

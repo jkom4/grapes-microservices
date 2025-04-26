@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/cll/trips")
 @RequiredArgsConstructor
 public class TripController {
@@ -19,7 +20,7 @@ public class TripController {
     private final TripService tripService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<List<TripDTO>> getTripsByUserId(@PathVariable Integer userId) {
+    public ResponseEntity<List<TripDTO>> getTripsByUserId(@PathVariable String userId) {
         List<TripDTO> trips = tripService.getTripsByDeliveryMan(userId);
         return ResponseEntity.ok(trips);
     }

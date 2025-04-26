@@ -1,10 +1,11 @@
 // src/components/DisplayProductSection.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Article from "../../utils/models/Articles";
 import { useLanguage } from "../../features/LanguageContext";
 import { fetchFruits } from "../../services/fruitServices";
-import { cartService } from "../../services/cartService";
 import CardComponent from "../../components/CardComponent";
+import { cartService } from "../../services/cartService";
+import { useCart } from "../../features/CartContext";
 
 function DisplayProductSection({ limit = 6 }: { limit?: number }) {
     const [articles, setArticles] = useState<Article[]>([]);
@@ -22,6 +23,7 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
     const [quantityKg, setQuantityKg] = useState<string>("0");
     const [quantityUnits, setQuantityUnits] = useState<string>("1");
     const [unitType, setUnitType] = useState<"kg" | "units">("units");
+    const { orderId } = useCart();
 
     const text = {
         en: {
@@ -50,10 +52,32 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
         },
     };
 
+    useEffect(() => {
+        const fetchArticles = async () => {
+            try {
+                setLoading(true);
+                const { content } = await fetchFruits(0, limit);
+                setArticles(content);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "An error occurred");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchArticles();
+    }, [limit]);
+
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => setToast(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [toast]);
+
     const handleOpenModal = (article: Article, event: React.MouseEvent<HTMLButtonElement>) => {
         setSelectedArticle(article);
         setModalOpen(true);
-        // Trigger animation
         const button = event.currentTarget;
         const rect = button.getBoundingClientRect();
         setCartAnimation({
@@ -73,17 +97,15 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
     };
 
     const handleAddToCart = async () => {
-        if (!selectedArticle) {
+        if (!selectedArticle || !orderId) {
             setToast({ message: text[language].addToCartError, type: "error" });
             return;
         }
 
-        const orderId = 1; // Hardcoded orderId
         const articleId = selectedArticle.id;
         const quantityKgValue = unitType === "kg" ? parseFloat(quantityKg) || 0 : 0;
         const quantityUnitsValue = unitType === "units" ? parseInt(quantityUnits) || 1 : 0;
 
-        // Validate stock
         if (unitType === "kg" && quantityKgValue > selectedArticle.stockKg) {
             setToast({ message: text[language].stockError, type: "error" });
             return;
@@ -99,10 +121,14 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
         }
 
         try {
-            await cartService.addItemToCart(orderId, articleId, quantityKgValue, quantityUnitsValue);
+            await cartService.addItemToCart(
+                orderId,
+                articleId,
+                quantityKgValue,
+                quantityUnitsValue
+            );
             setToast({ message: text[language].addToCartSuccess, type: "success" });
 
-            // Reset animation after a delay
             setTimeout(() => {
                 setCartAnimation({ id: null, x: 0, y: 0 });
             }, 1000);
@@ -114,29 +140,6 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
             setCartAnimation({ id: null, x: 0, y: 0 });
         }
     };
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const { content } = await fetchFruits(0, limit);
-                setArticles(content);
-                setLoading(false);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : "An error occurred");
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [limit]);
-
-    // Auto-dismiss toast after 3 seconds
-    useEffect(() => {
-        if (toast) {
-            const timer = setTimeout(() => setToast(null), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [toast]);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -161,12 +164,11 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
                     <CardComponent
                         key={article.id}
                         article={article}
-                        handleAddToCart={handleOpenModal} // Pass handleOpenModal
+                        handleAddToCart={handleOpenModal}
                     />
                 ))}
             </section>
 
-            {/* Modal */}
             {modalOpen && selectedArticle && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -225,7 +227,8 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
                             </button>
                             <button
                                 onClick={handleAddToCart}
-                                className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-accent"
+                                disabled={!orderId}
+                                className={`px-4 py-2 text-white rounded-lg ${orderId ? "bg-secondary hover:bg-accent" : "bg-gray-400 cursor-not-allowed"}`}
                             >
                                 {text[language].addButton}
                             </button>
@@ -234,7 +237,6 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
                 </div>
             )}
 
-            {/* Cart Animation */}
             {cartAnimation.id && (
                 <div
                     className="cart-animation fixed z-50"
@@ -257,7 +259,6 @@ function DisplayProductSection({ limit = 6 }: { limit?: number }) {
                 </div>
             )}
 
-            {/* Toast Notification */}
             {toast && (
                 <div
                     className={`fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white ${

@@ -1,9 +1,16 @@
-// src/services/cartService.ts
-import { cartAPI } from "./httpCommon"; // Adjust path if needed
+import { cartAPI } from "./httpCommon";
 import CartItemModel from "../utils/models/CartItem";
 
 interface InitCartResponse {
-    orderId: number;
+    id: number;
+    code?: number;
+    userId?: string; // userId is now a string to match sub
+    facturePath?: string | null;
+    totalPrice?: number | null;
+    createdAt?: string;
+    orderItems?: any[] | null;
+    paid?: boolean;
+    finished?: boolean;
 }
 
 export interface CartResponse {
@@ -12,122 +19,123 @@ export interface CartResponse {
 }
 
 export const cartService = {
-    // Initialize a cart for a user
-    async initializeCart(userId: number): Promise<InitCartResponse> {
+    async initializeCart(sub: string): Promise<InitCartResponse> {
+        const payload = { userId: sub };
+
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.init}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userId }),
+            body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
             const errorDetails = await response.text();
+            console.error("Error initializing cart for userId:", sub, "Details:", errorDetails);
             throw new Error(`Failed to initialize cart. Details: ${errorDetails}`);
         }
 
-        return response.json();
+        const data = await response.json();
+        return data;
     },
 
-    // Add an item to the cart
     async addItemToCart(
         orderId: number,
         articleId: number,
         quantityKg: number,
         quantity: number
     ): Promise<CartResponse> {
+        const payload = { orderId, articleId, quantityKg, quantity };
+
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.add}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ orderId, articleId, quantityKg, quantity }),
+            body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
             const errorDetails = await response.text();
+            console.error("Error adding item to cart for orderId:", orderId, "Details:", errorDetails);
             throw new Error(`Failed to add item to cart. Details: ${errorDetails}`);
         }
 
-        return response.json();
+        const data = await response.json();
+        return data;
     },
 
-    // Fetch cart by order ID
-    async fetchCart(orderId: string): Promise<CartResponse> {
+    async fetchCart(orderId: number): Promise<CartResponse> {
+
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.get(orderId)}`);
+
         if (!response.ok) {
             const errorDetails = await response.text();
+            console.error("Error fetching cart for orderId:", orderId, "Details:", errorDetails);
             throw new Error(`Failed to fetch cart items. Details: ${errorDetails}`);
         }
-        return response.json();
+
+        const data = await response.json();
+        return data;
     },
 
-    // Process payment for the cart
     async processPayment(
-        orderId: string,
+        orderId: number,
         address: string,
         phoneNumber: string,
-        customerName: string,
-        country: string,
-        postalCode: string
+        customerName: string
     ): Promise<void> {
-        const response = await fetch(
-            `${cartAPI.baseURL}${cartAPI.endpoints.pay(orderId, { address, phoneNumber, customerName, country, postalCode })}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        const payload = { orderId, address, phoneNumber, customerName };
+
+        const url = `${cartAPI.baseURL}${cartAPI.endpoints.pay}`;
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
         if (!response.ok) {
             const errorDetails = await response.text();
+            console.error("Error processing payment for orderId:", orderId, "Details:", errorDetails);
             throw new Error(`Payment failed. Details: ${errorDetails}`);
         }
+
     },
 
-    // Remove an item from the cart
-    async removeItem(itemId: number): Promise<void> {
-        const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.remove(itemId)}`, {
+    async removeItem(orderId: number, itemId: number): Promise<void> {
+
+        const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.remove(orderId, itemId)}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
             },
         });
+
         if (!response.ok) {
             const errorDetails = await response.text();
+            console.error("Error removing item for orderId:", orderId, "itemId:", itemId, "Details:", errorDetails);
             throw new Error(`Failed to remove item. Details: ${errorDetails}`);
         }
+
     },
 
-    // Apply a promo code to the cart
-    async applyPromoCode(orderId: string, promoCode: string): Promise<CartResponse> {
-        const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.applyPromo}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ orderId, promoCode }),
-        });
-        if (!response.ok) {
-            const errorDetails = await response.text();
-            throw new Error(`Failed to apply promo code. Details: ${errorDetails}`);
-        }
-        return response.json();
-    },
+    async clearCart(orderId: number): Promise<void> {
 
-    // Clear the cart
-    async clearCart(orderId: string): Promise<void> {
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.clear(orderId)}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
             },
         });
+
         if (!response.ok) {
             const errorDetails = await response.text();
+            console.error("Error clearing cart for orderId:", orderId, "Details:", errorDetails);
             throw new Error(`Failed to clear cart. Details: ${errorDetails}`);
         }
+
     },
 };

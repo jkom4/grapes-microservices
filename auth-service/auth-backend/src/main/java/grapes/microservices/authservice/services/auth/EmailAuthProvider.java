@@ -25,11 +25,13 @@ public class EmailAuthProvider extends AbstractAuthProvider {
     private EmailService emailService;
 
     @Override
-    public boolean sendChallenge(User user) throws IOException {
+    @OneCallPerMinutePerUser
+    public String sendChallenge(User user) throws IOException {
         String challenge = generateChallenge();
         challengeService.saveChallengeForUser(user.getEmail(), challenge);
         String message = "Please use the following code to authenticate: " + challenge;
-        return emailService.sendMail(user.getEmail(), "Authentication challenge", message);
+        emailService.sendMail(user.getEmail(), "Authentication challenge", message);
+        return challenge;
     }
 
     @Override

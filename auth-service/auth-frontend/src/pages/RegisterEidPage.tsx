@@ -2,22 +2,36 @@ import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {useAuth} from "../context/AuthContext";
 import AlreadyAuthenticated from "../components/AlreadyAuthenticated";
+import {registerWithEid} from "../services/authService";
+import { ErrorUtils } from "../utils/ErrorUtils";
+import {toast} from "react-toastify";
 
 const RegisterEidPage = () => {
     const [email, setEmail] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const {isAuthenticated} = useAuth();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle registration logic here, e.g., form validation, API call, etc.
-        console.log("Form Submitted: ", { email, phoneNumber, password });
+        setLoading(true);
+
+        try {
+            await registerWithEid(email, password, phoneNumber);
+            toast.success('Registration successful', { autoClose: 2000 });
+            navigate('/');
+        } catch (err: any) {
+            ErrorUtils.handleErrors(err, setError);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        const token = localStorage.getItem('jwt');
+        const token = localStorage.getItem('accessToken');
         if (token) {
             navigate('/dashboard');
         }
@@ -51,19 +65,6 @@ const RegisterEidPage = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone Number</label>
-                            <input
-                                type="tel"
-                                id="phone"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                required
-                                className="mt-2 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Enter your phone number"
-                            />
-                        </div>
-
-                        <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
                             <input
                                 type="password"
@@ -73,6 +74,19 @@ const RegisterEidPage = () => {
                                 required
                                 className="mt-2 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Enter your password"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone Number</label>
+                            <input
+                                type="tel"
+                                id="phone"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                required
+                                className="mt-2 p-2 w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter your phone number"
                             />
                         </div>
 

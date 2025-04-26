@@ -3,7 +3,6 @@ package grapes.microservices.salesservice;
 import com.jayway.jsonpath.JsonPath;
 import grapes.microservices.salesservice.models.*;
 import grapes.microservices.salesservice.repositories.*;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +106,7 @@ class TransactionsServiceApplicationTests {
 
         Delivery delivery = Delivery.builder()
                 .orderId(8)
-                .userId(1)
+                .userId("1")
                 .deliveryStatusId(deliveryStatusRepository.findByLabel("Pending").get().getId())
                 .deliveryDate(LocalDateTime.now())
                 .build();
@@ -401,7 +400,7 @@ class TransactionsServiceApplicationTests {
         // MANUALLY simulate delivery creation (simulate RabbitMQ behavior)
         Delivery delivery = Delivery.builder()
                 .orderId(orderId)
-                .userId(2) // 🛠️ Choose an existing deliveryMan ID
+                .userId("2") // 🛠️ Choose an existing deliveryMan ID
                 .deliveryStatusId(1) // pending
                 .deliveryDate(LocalDateTime.now())
                 .build();

@@ -1,11 +1,17 @@
 package grapes.microservices.models.network
 
+import grapes.microservices.models.data.AddToCartRequest
 import grapes.microservices.models.data.Article
 import grapes.microservices.models.data.Cart
+import grapes.microservices.models.data.CartResponse
+import grapes.microservices.models.data.InitCartRequest
+import grapes.microservices.models.data.Order
+import grapes.microservices.models.data.PayCartRequest
 import okhttp3.OkHttpClient
-import grapes.microservices.BuildConfig
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -15,64 +21,52 @@ import retrofit2.http.Query
 
 // Retrofit client to handle network operations
 object RetrofitClient {
-    // Base URL for the API endpoint
-    private const val BASE_URL = BuildConfig.BASE_URL
+    private const val BASE_URL = "http://192.168.129.10:8092/"
 
-    // Create the Retrofit instance with the specified configurations
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .client(OkHttpClient.Builder().build())
+        .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    // Create an instance of the ArticleApiService to access the API endpoints
     val articleApiService: ArticleApiService by lazy {
         retrofit.create(ArticleApiService::class.java)
     }
+
+    val orderApiService: OrderApiService by lazy {
+        retrofit.create(OrderApiService::class.java)
+    }
 }
 
-// Define the API service interface with endpoints
 interface ArticleApiService {
-    // Fetch the list of articles from the API
     @GET("clm/articles")
     suspend fun getArticles(): List<Article>
 
-    // Fetch an article by its ID
     @GET("/clm/articles/{id}")
     suspend fun getArticleById(@Path("id") id: Int): Article
 
-    // Fetch the cart data using the order ID
     @GET("clm/cart/{orderId}")
     suspend fun getCart(@Path("orderId") orderId: Int): Cart
 
-    // Remove an item from the cart using the item ID
-    @DELETE("clm/cart/remove/{itemId}")
-    suspend fun removeFromCart(@Path("itemId") itemId: Int): retrofit2.Response<Unit>
-
-    // Pay for the cart using the order ID with query parameters
-    @POST("clm/cart/pay/{orderId}")
-    suspend fun payCart(
+    @DELETE("clm/cart/remove/{orderId}/{itemId}")
+    suspend fun removeFromCart(
         @Path("orderId") orderId: Int,
-        @Query("address") address: String,
-        @Query("phoneNumber") phoneNumber: String,
-        @Query("customerName") customerName: String,
-        @Query("country") country: String,
-        @Query("postalCode") postalCode: String
-    ): retrofit2.Response<Unit>
+        @Path("itemId") itemId: Int
+    ): Response<Unit>
 
-    // Clear the cart using the order ID
+    @POST("clm/cart/pay")
+    suspend fun payCart(@Body request: PayCartRequest): Response<Unit>
+
     @DELETE("clm/cart/clear/{orderId}")
     suspend fun clearCart(@Path("orderId") orderId: Int): retrofit2.Response<Unit>
 
-    // Initialize a new cart with a user ID
     @POST("clm/cart/init")
-    suspend fun initCart(@Body request: InitCartRequest): retrofit2.Response<Unit>
+    suspend fun initCart(@Body request: InitCartRequest): Response<CartResponse>
 
-    // Add an article to the cart
     @POST("clm/cart/add")
     suspend fun addToCart(@Body request: AddToCartRequest): retrofit2.Response<Unit>
 
-    // Fetch a paginated list of articles with pagination parameters
     @GET("clm/articles")
     suspend fun getArticlesPaginated(
         @Query("page") page: Int,
@@ -83,11 +77,16 @@ interface ArticleApiService {
     suspend fun searchArticles(@Query("name") name: String): List<Article>
 }
 
-// Data classes to handle request bodies for cart-related operations
-data class InitCartRequest(val userId: Int)
-data class AddToCartRequest(
-    val orderId: Int,
-    val articleId: Int,
-    val quantityKg: Float,
-    val quantity: Float
-)
+interface OrderApiService {
+    @GET("cll/orders/history/{userId}")
+    suspend fun getOrderHistory(
+        @Path("userId") userId: Int,
+        @Query("page") page: Int,
+        @Query("size") size: Int,
+        @Query("code") code: Int? = null,
+        @Query("date") date: String? = null
+    ): List<Order>
+
+    @GET("cll/deliveries/status/{orderId}")
+    suspend fun getDeliveryStatus(@Path("orderId") orderId: Int): String
+}

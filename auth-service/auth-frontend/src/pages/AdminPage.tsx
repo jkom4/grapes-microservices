@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import UserList from "../sections/UsersList";
 import Loader from "../components/Loader";
 import {
-    handleDisableUser,
-    handleEnableUser,
-    handleFetchAllUsers,
-    handleLogout,
-    handleUserUpdate
+    disableUser,
+    enableUser,
+    getAllUsers,
+    logout,
+    updateUser
 } from "../services/authService";
 import { toast } from "react-toastify";
 import { Role, User } from "../models/User";
@@ -32,7 +32,8 @@ const AdminPage = () => {
         const fetchUsers = async () => {
             setLoading(true);
             try {
-                await handleFetchAllUsers(token, setUsers, setLoading);
+                const users = await getAllUsers(token);
+                setUsers(users);
             } catch (error: unknown) {
                 if (error instanceof Error) {
                     toast.error("Failed to load users: " + error.message, { autoClose: 2000 });
@@ -63,17 +64,24 @@ const AdminPage = () => {
         );
     };
 
-    const kickCurrentUser = () => {
-        handleLogout(setLoading, setToken, navigate);
+    const kickCurrentUser = async () => {
+        setLoading(true)
+        try {
+            await logout(token);
+            toast.success("You are kicked because something changed on your account", {autoClose: 2000});
+        } catch (error: any) {
+            toast.error(error.message || "Logout failed.", {autoClose: 2000});
+        } finally {
+            setLoading(false);
+            await setToken(null);
+            navigate("/");
+        }
     };
 
     const handleUpdate = async (user: User) => {
         setLoading(true);
         try {
-            await handleUserUpdate({
-                updatedUser: { ...user},
-                reload: true,
-            });
+            await updateUser(user, token!);
             if (user.id === id) {
                 kickCurrentUser();
                 return;
@@ -93,7 +101,7 @@ const AdminPage = () => {
     const handleDisable = async (userId: string | undefined) => {
         setLoading(true);
         try {
-            await handleDisableUser(userId, token!);
+            await disableUser(userId, token!);
             toast.success('User disabled successfully');
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -110,7 +118,7 @@ const AdminPage = () => {
     const handleEnable = async (userId: string | undefined) => {
         setLoading(true);
         try {
-            await handleEnableUser(userId, token!);
+            await enableUser(userId, token!);
             toast.success('User enabled successfully');
         } catch (error: unknown) {
             if (error instanceof Error) {

@@ -1,21 +1,37 @@
 import React, {useState} from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { handleLogout } from "../services/authService";
+import {logout} from "../services/authService";
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 import Loader from "./Loader";
 
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [loading, setLoading] = useState(false);
-    const { isAuthenticated, role, setToken } = useAuth();
+    const { isAuthenticated, role, token, setToken } = useAuth();
 
-    const onLogoutClick = () => {
-        handleLogout(setLoading, setToken, navigate);
+    const onLogoutClick = async () => {
+        setLoading(true);
+        try {
+            if (!token) {
+                toast.warning("No active session found.", {autoClose: 2000});
+                return;
+            }
+
+            await logout(token);
+            toast.success("Successfully logged out.", {autoClose: 2000});
+        } catch (error: any) {
+            toast.error(error.message || "Logout failed.", {autoClose: 2000});
+        } finally {
+            setLoading(false);
+            await setToken(null);
+            navigate("/");
+        }
     };
 
     const handleNavigateToDashboard = () => {
-        navigate('/dashboard');
+        window.location.href = '/dashboard';
     };
 
     return (

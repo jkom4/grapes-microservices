@@ -1,14 +1,15 @@
 import React, {useRef, useState} from 'react';
 import {AuthMethod} from '../models/User';
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {useAuth} from "../context/AuthContext";
 import {toast} from "react-toastify";
 import AlreadyAuthenticated from "../components/AlreadyAuthenticated";
 import LoginForm from "../sections/LoginForm";
-import {handleGetChallenge, handleLogin} from "../services/authService";
+import {getChallenge, getRefreshToken, login, returnTokenToTierceApp} from "../services/authService";
+import {decryptChallengeWithEid} from "../services/eidService";
 
 const LoginPage = () => {
-    const { method } = useParams<{ method: AuthMethod }>();
+    const {method} = useParams<{ method: AuthMethod }>();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [challenge, setChallenge] = useState<string[]>(Array(6).fill(''));
@@ -19,15 +20,16 @@ const LoginPage = () => {
     const [showChallenge, setShowChallenge] = useState(false);
     const [challengeCountdown, setChallengeCountdown] = useState<number | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const navigate = useNavigate();
 
     if (!method) {
         throw new Error("Method is not provided in the URL");
     }
 
-    const { isAuthenticated } = useAuth();
+    const {isAuthenticated, setIsAuthenticated} = useAuth();
 
     if (isAuthenticated) {
-        return <AlreadyAuthenticated />;
+        return <AlreadyAuthenticated/>;
     }
 
     const triggerChallenge = () => {
@@ -63,9 +65,29 @@ const LoginPage = () => {
         }
 
         try {
-            const { message } = await handleGetChallenge(email, password, method as AuthMethod);
-            toast.success(message, {autoClose: 2000});
-            triggerChallenge();
+            const res = await getChallenge(email, password, method as AuthMethod);
+            const json = await res.json();
+
+            let decryptedChallenge = null;
+            if (method === "EID") {
+                decryptedChallenge = await decryptChallengeWithEid(json.challenge);
+                setChallenge(decryptedChallenge.split(''));
+                setShowChallenge(true);
+                setChallengeCountdown(60);
+
+                if (intervalRef.current) clearInterval(intervalRef.current);
+                intervalRef.current = setInterval(() => {
+                    setChallengeCountdown(prev => {
+                        if (prev && prev > 1) return prev - 1;
+                        clearInterval(intervalRef.current!);
+                        setShowChallenge(false);
+                        return null;
+                    });
+                }, 1000);
+            } else {
+                triggerChallenge();
+            }
+            toast.success(json.message, {autoClose: 2000});
         } catch (err: any) {
             toast.error(err.message, {autoClose: 2000});
         } finally {
@@ -77,31 +99,36 @@ const LoginPage = () => {
 
     const onClickLogin = async () => {
         if (challenge.join('').length !== 6 || pinCode.join('').length !== 4) {
-            toast.error('Please complete both the challenge and PIN code.', { autoClose: 2000 });
+            toast.error('Please complete both the challenge and PIN code.', {autoClose: 2000});
             return;
         }
 
         try {
             setLoading(true);
-            const token = await handleLogin(
+            const accessToken: string = await login(
                 challenge.join(''),
                 pinCode.join(''),
                 email,
                 method
             );
 
-            localStorage.setItem('jwt', token);
-            toast.success('Login successful.', { autoClose: 2000 });
-
-            window.location.href =
-                new URLSearchParams(window.location.search).get('redirectUrl') || '/';
-
+            localStorage.setItem('accessToken', accessToken);
+            toast.success('Login successful.', {autoClose: 2000});
+            setIsAuthenticated(true);
+            const refreshToken = await getRefreshToken(accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
+            try {
+                returnTokenToTierceApp(accessToken, navigate)
+            } catch (err: any) {
+                console.log("Error while redirecting to tierce app: ", err);
+            }
         } catch (err: any) {
-            toast.error(err, { autoClose: 2000 });
+            toast.error(err.message || "An unexpected error occurred", {autoClose: 2000});
         } finally {
             setLoading(false);
             setChallenge(Array(6).fill(''));
             setPinCode(Array(4).fill(''));
+            (window as any).resetAuthRefreshInterval?.();
         }
     };
 
@@ -133,7 +160,7 @@ const LoginPage = () => {
     const handleKeyDown = (
         e: React.KeyboardEvent<HTMLInputElement>,
         index: number,
-        type: 'challenge' | 'pin'
+        type: 'challenge' | 'pin' | 'credentials'
     ) => {
         const values = type === 'challenge' ? challenge : pinCode;
         const prefix = type === 'challenge' ? 'challenge' : 'pin';
@@ -141,6 +168,14 @@ const LoginPage = () => {
         if (e.key === 'Backspace' && values[index] === '') {
             if (index > 0) {
                 document.getElementById(`${prefix}-${index - 1}`)?.focus();
+            }
+        }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!showChallenge) {
+                onClickGetChallenge();
+            } else {
+                onClickLogin();
             }
         }
     };
@@ -163,6 +198,7 @@ const LoginPage = () => {
 
     return (
         <LoginForm
+            method={method}
             loading={loading}
             email={email}
             password={password}

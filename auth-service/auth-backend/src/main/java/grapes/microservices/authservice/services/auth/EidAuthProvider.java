@@ -4,12 +4,7 @@ import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.security.*;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
-import grapes.microservices.authservice.services.EidCardService;
-
-import javax.crypto.Cipher;
+import grapes.microservices.authservice.services.EIDCardService;
 
 /**
  * Authentication provider using Belgian eID smart-card.
@@ -21,36 +16,24 @@ import javax.crypto.Cipher;
 @RequiredArgsConstructor
 public class EidAuthProvider extends AbstractAuthProvider {
 
-    private final EidCardService eidCardService;
+    private final EIDCardService eidCardService;
 
     @Override
-    public boolean sendChallenge(User user) {
+    public String sendChallenge(User user) {
+        String challenge = generateChallenge();
+        challengeService.saveChallengeForUser(user.getNationalId(), challenge);
+
+        // encrypt the challenge using the public key from the eID card
         try {
-            // 1. Generate a challenge
-            String challenge = generateChallenge();
-            challengeService.saveChallengeForUser(user.getNationalId(), challenge);
-
-            // 2. Encrypt the challenge using the user's public key from eID
-            X509Certificate cert = eidCardService.getCertificateFromUser(user); // public key cert
-            PublicKey publicKey = cert.getPublicKey();
-            Cipher cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            byte[] encryptedChallenge = cipher.doFinal(challenge.getBytes());
-
-            // 3. Send encrypted challenge to the client
-            // For now, just log or return it in dev (in prod, send via secure channel)
-            System.out.println("Encrypted challenge (Base64): " + Base64.getEncoder().encodeToString(encryptedChallenge));
-            return true;
+            return eidCardService.encryptMessage(challenge);
         } catch (Exception e) {
-            System.err.println("Error during challenge generation: " + e.getMessage());
-            return false;
+            throw new RuntimeException("Failed to encrypt challenge: " + e.getMessage());
         }
     }
 
     @Override
     public String getChallenge(User user) throws Exception {
         try {
-            // TODO : check this
             ChallengeWithTimestamp storedChallenge = challengeService.getChallengeForUser(user.getNationalId());
             challengeService.verifyChallengeAuthenticity(storedChallenge);
             return storedChallenge.getChallenge();

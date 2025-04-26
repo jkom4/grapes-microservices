@@ -63,7 +63,7 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="code" type="INT"/>
-            <column name="user_id" type="INT"/>
+            <column name="user_id" type="VARCHAR(255)"/>
             <column name="facture_path" type="VARCHAR(255)"/>
             <column name="total_price" type="DECIMAL(10,2)"/>
             <column name="created_at" type="DATETIME"/>
@@ -127,6 +127,11 @@
 
     <!-- 7. Table delivery -->
     <changeSet author="kilane dounia" id="7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="delivery"/>
+            </not>
+        </preConditions>
         <createTable tableName="delivery">
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -134,7 +139,7 @@
             <column name="order_id" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="user_id" type="INT"/>
+            <column name="user_id" type="VARCHAR(255)"/>
             <column name="delivery_status_id" type="INT">
                 <constraints nullable="false"/>
             </column>
@@ -145,6 +150,7 @@
             <column name="comment" type="TEXT"/>
             <column name="doorstep" type="BOOLEAN"/>
             <column name="signature" type="BLOB"/>
+            <column name="is_finished" type="BOOLEAN" defaultValueBoolean="false" />
         </createTable>
     </changeSet>
 
