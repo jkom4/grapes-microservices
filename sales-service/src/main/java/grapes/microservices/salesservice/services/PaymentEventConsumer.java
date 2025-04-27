@@ -11,6 +11,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -20,18 +21,21 @@ public class PaymentEventConsumer {
     private final RabbitTemplate rabbitTemplate;
     private final TransactionRepository transactionRepository;
     private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
     @Autowired
     public PaymentEventConsumer(RabbitTemplate rabbitTemplate,
                                 TransactionRepository transactionRepository,
-                                OrderRepository orderRepository) {
+                                OrderRepository orderRepository,
+                                OrderService orderService) {
         this.rabbitTemplate = rabbitTemplate;
         this.transactionRepository = transactionRepository;
         this.orderRepository = orderRepository;
+        this.orderService = orderService;
     }
 
     @RabbitListener(queues = "payment-validated-queue")
-    public void onPaymentValidated(PaymentValidatedMessageDTO message) {
+    public void onPaymentValidated(PaymentValidatedMessageDTO message) throws FileNotFoundException {
         System.out.println("[Sales-Service] Received payment validated message: " + message);
 
         String localTransactionId = UUID.randomUUID().toString();
@@ -55,10 +59,16 @@ public class PaymentEventConsumer {
 
         Order order = orderRepository.findById(message.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found with ID: " + message.getOrderId()));
-
         order.setPaid(true);
         orderRepository.save(order);
         System.out.println("[Sales-Service] Order ID " + order.getId() + " marked as paid.");
+
+        orderService.finalizePaymentAndClearCart(
+                order.getId(),
+                message.getAddress(),
+                message.getPhoneNumber(),
+                message.getCustomerName()
+        );
 
         ActivityLogEvent activityLog = ActivityLogEvent.builder()
                 .eventId(UUID.randomUUID().toString())
@@ -69,21 +79,21 @@ public class PaymentEventConsumer {
                 .payload(ActivityLogEvent.Payload.builder()
                         .sourceTransactionId("BANK_TX_" + message.getTransactionId())
                         .clientId("user_" + message.getClientName())
-                        .productId("PROD_FRUIT_003") // TODO : mettre à jour selon l’article concerné
+                        .productId("PROD_FRUIT_003") // TODO: Dynamique plus tard
                         .serviceId(null)
                         .transactionTimestamp(message.getTransactionDateTime().toString())
-                        .quantity(1) // TODO : mettre à jour si tu récupères la vraie quantiter
+                        .quantity(1) // TODO: récup réelle quantité
                         .unitPrice(message.getTransferAmount())
                         .totalAmount(message.getTransferAmount())
-                        .currency("EUR")
+                        .currency(message.getCurrency())
                         .paymentMethod(message.getCardType())
                         .paymentStatus("Success")
                         .deliveryStatus("Pending")
-                        .deliveryTimeDays(2)
+                        .deliveryTimeDays(message.getDeliveryTimeDays())
                         .build())
                 .build();
 
         rabbitTemplate.convertAndSend("q_activity_logs", activityLog);
-        System.out.println("[Sales-Service] Sent activity log to q_activity_logs: " + activityLog);
+        System.out.println("[Sales-Service] Activity log sent to 'q_activity_logs': " + activityLog);
     }
 }

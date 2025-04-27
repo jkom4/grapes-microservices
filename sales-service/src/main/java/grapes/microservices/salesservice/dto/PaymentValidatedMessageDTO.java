@@ -22,4 +22,7 @@ public class PaymentValidatedMessageDTO {
     private String paymentStatus;    // "Success"
     private String deliveryStatus;   // "Pending"
     private Integer deliveryTimeDays;
+    private String address;
+    private String phoneNumber;
+    private String customerName;
 }
