@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@CrossOrigin
 @RequestMapping("/cll/orders")
 public class OrderController {
 

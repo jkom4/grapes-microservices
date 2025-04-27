@@ -7,8 +7,8 @@ export class AuthService {
     static async login(user) {
         try {
             // Use the imported URL and correct path
-            console.log(`Sending authentication request to ${AUTH_API_URL}/login`);
-            const response = await axios.post(`${AUTH_API_URL}/login`, {
+            console.log(`Sending authentication request to ${AUTH_API_URL}/payment/login`);
+            const response = await axios.post(`${AUTH_API_URL}/payment/login`, {
                 email: user.login, // Backend expects 'email'
                 password: user.password
             }, {
