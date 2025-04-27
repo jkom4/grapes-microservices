@@ -8,7 +8,8 @@ FROM eclipse-temurin:21-jdk-alpine
 LABEL authors="jkom"
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
-#COPY src/main/resources/keystore /app/keystore
+COPY src/main/resources/keystore/generate-keystore.sh /app/generate-keystore.sh
+RUN chmod +x /app/generate-keystore.sh
 
 # Set environment variables
 ENV PAYMENT_SERVICE_PORT=${PAYMENT_SERVICE_PORT}
@@ -73,4 +74,5 @@ ENV REDIS_HOST=${REDIS_HOST}
 ENV REDIS_PORT=${REDIS_PORT}
 ENV REDIS_PASSWORD=${REDIS_PASSWORD}
 EXPOSE ${PAYMENT_SERVICE_PORT}
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "/app/generate-keystore.sh && java -jar app.jar"]
+

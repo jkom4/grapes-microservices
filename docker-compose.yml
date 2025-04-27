@@ -169,7 +169,7 @@ services:
   ### BACKEND
   data-ingestion-service:
     build: ./data-mining-service/data_ingestion_service
-    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-ingestion-service:latest
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-mining-sevice:latest
     container_name: data-ingestion-service
     restart: unless-stopped
     env_file: .env
