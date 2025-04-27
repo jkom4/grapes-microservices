@@ -72,7 +72,7 @@ public class PaymentEventConsumer {
                         .productId("PROD_FRUIT_003") // TODO : mettre à jour selon l’article concerné
                         .serviceId(null)
                         .transactionTimestamp(message.getTransactionDateTime().toString())
-                        .quantity(1) // TODO : mettre à jour si tu récupères la vraie quantité
+                        .quantity(1) // TODO : mettre à jour si tu récupères la vraie quantiter
                         .unitPrice(message.getTransferAmount())
                         .totalAmount(message.getTransferAmount())
                         .currency("EUR")
