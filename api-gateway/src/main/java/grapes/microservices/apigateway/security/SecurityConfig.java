@@ -7,6 +7,7 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
@@ -39,19 +40,20 @@ public class SecurityConfig {
 
     @Bean
     public CorsWebFilter corsFilter() {
-        return new CorsWebFilter(exchange -> {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(Arrays.asList(
+                "http://79.76.108.164",
+                "http://79.76.108.164:80",
+                "http://79.76.108.164:81",
+                "http://79.76.108.164:82"
+        ));
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
 
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowCredentials(true);
-            config.setAllowedOrigins(Arrays.asList(
-                    "http://79.76.108.164",
-                    "http://79.76.108.164:80",
-                    "http://79.76.108.164:81",
-                    "http://79.76.108.164:82"
-            ));
-            config.addAllowedMethod("*");
-            config.addAllowedHeader("*");
-            return config;
-        });
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsWebFilter(source);
     }
 }
