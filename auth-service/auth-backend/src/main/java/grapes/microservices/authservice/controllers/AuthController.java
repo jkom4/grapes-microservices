@@ -1,133 +1,127 @@
 package grapes.microservices.authservice.controllers;
 
+import grapes.microservices.authservice.dto.*;
 import grapes.microservices.authservice.models.AuthMethod;
-import grapes.microservices.authservice.models.AuthResponse;
-import grapes.microservices.authservice.models.User;
-import grapes.microservices.authservice.services.SessionService;
-import grapes.microservices.authservice.services.TokenService;
-import grapes.microservices.authservice.services.UserService;
-import grapes.microservices.authservice.services.auth.AbstractAuthProvider;
-import grapes.microservices.authservice.services.auth.AuthMethodService;
+import grapes.microservices.authservice.services.auth.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
-    private AuthMethodService authMethodService;
+    private AuthService authService;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private SessionService sessionService;
-
-    @Autowired
-    private TokenService tokenService;
-
-    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password, @RequestParam AuthMethod authMethod) throws IOException {
+    @PostMapping(value = "/challenge", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> sendChallenge(@RequestBody ChallengeRequest challengeRequest) {
         try {
-            User user = userService.getUserByEmail(email);
-            if (user == null || !user.verifyPassword(password)) {
-                return ResponseEntity.status(401).body("Credentials are incorrect.");
+            String challenge = authService.sendChallenge(challengeRequest);
+            if (challengeRequest.getAuthMethod() == AuthMethod.EID) {
+                return ResponseEntity.ok(new ChallengeEidResponse("Challenge sent on the EID card", challenge));
             }
-            AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
-            if (authProvider.sendChallenge(user)) {
-                return ResponseEntity.ok("Challenge sent to user by : " + authMethod.getName());
-            } else {
-                return ResponseEntity.status(400).body("Failed to send challenge.");
-            }
+            return ResponseEntity.ok(new JsonMessage("Challenge sent by : " + challengeRequest.getAuthMethod().getName()));
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(new JsonMessage(e.getMessage()));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
+        }
+    }
+
+    @PostMapping(value  = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        // for rabbitMQ
+        String userId = authService.getUserIdFromEmail(loginRequest.getEmail());
+        String sourceIp = getClientIp(request);
+        String userAgent = request.getHeader("User-Agent");
+        String failureReason = null;
+
+        try {
+            String accessToken = authService.getTokenFromChallenge(loginRequest);
+            authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Success", failureReason);
+            return ResponseEntity.ok(new AuthResponse(accessToken));
+        } catch (RuntimeException e) {
+            failureReason = e.getMessage();
+            authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Failed", failureReason);
+            return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
+        } catch (Exception e) {
+            failureReason = e.getMessage();
+            authService.sendAuthToQueue(userId, loginRequest.getAuthMethod(), sourceIp, userAgent,"Failed", failureReason);
+            return ResponseEntity.status(500).body(new JsonMessage(e.getMessage()));
         }
     }
 
     @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> logout(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        if (token == null || !token.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body("Unauthorized");
-        }
+    public ResponseEntity<JsonMessage> logout(HttpServletRequest request) {
         try {
-            token = token.substring(7); // Deletes
-            String userId = tokenService.extractUserId(token);
-
-            sessionService.deleteSession(userId);
-            return ResponseEntity.ok("Logged out successfully");
+            String token = authService.checkUserIsAuthenticated(request);
+            authService.logout(token);
+            return ResponseEntity.ok(new JsonMessage("Logged out successfully"));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(400).body(new JsonMessage("No active session found"));
         }
     }
 
-    @PostMapping(value  = "/verify-challenge", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> verifyChallenge(@RequestParam String email, @RequestParam String submittedChallenge, @RequestParam AuthMethod authMethod) {
+    @PostMapping(value = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshRequest refreshRequest) {
+        String refreshToken = refreshRequest.getRefreshToken();
+        if (refreshToken.isEmpty()) {
+            return ResponseEntity.status(400).body(new JsonMessage("Required token 'refreshToken' is not present"));
+        }
         try {
-            User user = userService.getUserByEmail(email);
-            AbstractAuthProvider authProvider = authMethodService.getAuthProvider(authMethod);
-            //reset session
-            sessionService.resetSession(user.getId().toHexString());
-            //new session
-            String token = authProvider.processChallenge(user, submittedChallenge);
-            switch (authMethod) {
-                case EMAIL:
-                    if (!user.isEmailVerified()) {
-                        user.setEmailVerified(true);
-                    }
-                case SMS:
-                    if (!user.isPhoneVerified()) {
-                        user.setPhoneVerified(true);
-                    }
-                    break;
-            }
-            return ResponseEntity.ok(new AuthResponse(token));
+            String accessToken = authService.refreshToken(refreshToken);
+            return ResponseEntity.ok(new AuthResponse(accessToken));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new JsonMessage(e.getMessage()));
         }
     }
 
-    // TODO : finish refresh token
-    @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
-        String refreshToken = request.getHeader("Authorization");
-        if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body("Invalid token");
+    @PostMapping(value = "/get-refresh", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getRefreshToken(HttpServletRequest request) {
+        try {
+            String token = authService.checkUserIsAuthenticated(request);
+            String refreshToken = authService.getRefreshToken(token);
+            return ResponseEntity.ok(new RefreshResponse(refreshToken));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(new JsonMessage(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new JsonMessage(e.getMessage()));
         }
-
-        refreshToken = refreshToken.substring(7);
-        String userId = tokenService.extractUserId(refreshToken);
-
-        String storedRefreshToken = tokenService.getRefreshToken(userId);
-        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
-            return ResponseEntity.status(403).body("Invalid refresh token");
-        }
-        String newAccessToken = tokenService.generateToken(userId);
-        return ResponseEntity.ok(newAccessToken);
     }
 
     @GetMapping(value = "/session", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getSession(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        if (token == null || !token.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body("Unauthorized");
-        }
         try {
-            token = token.substring(7); // Deletes "Bearer "
-            String userId = tokenService.extractUserId(token);
-            String session = sessionService.getSession(userId);
-            if (session == null) {
-                return ResponseEntity.status(404).body("Session not found");
+            if (authService.checkSession(token)) {
+                return ResponseEntity.ok(new JsonMessage("Session is valid"));
+            } else {
+                return ResponseEntity.status(401).body(new JsonMessage("Session is invalid"));
             }
-            return ResponseEntity.ok(true);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(401).body(e.getMessage());
         }
     }
+
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+            return ip.split(",")[0].trim();
+        }
+
+        ip = request.getHeader("X-Real-IP");
+        if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+            return ip;
+        }
+
+        return request.getRemoteAddr(); // fallback
+    }
+
 }

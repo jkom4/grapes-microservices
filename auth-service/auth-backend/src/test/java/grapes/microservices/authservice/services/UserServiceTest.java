@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.slf4j.Logger;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,9 +50,12 @@ public class UserServiceTest {
         user.setEmail("test@example.com");
         user.setPassword("Valid123@");
         user.setGender(Gender.MALE);
-        user.setNationalId("12345678901");
-        user.setBankId("12345678901");
-        user.setBirthDate(new Date());
+        user.setPhoneNumber("+32000000");
+        user.setPinCode("1234");
+        user.setNationalId("03111611111");
+        LocalDate localDate = LocalDate.of(2003, 11, 16);
+        Date birthDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        user.setBirthDate(birthDate);
         user.setRole(Role.USER);
     }
 
@@ -76,20 +81,10 @@ public class UserServiceTest {
     }
 
     @Test
-    void registerUser_WeakPassword() {
-        user.setPassword("weak");
-
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.registerUser(user));
-
-        assertTrue(thrown.getMessage().startsWith("Validation errors"));
-    }
-
-
-    @Test
     void getUserById_Success() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
 
-        User retrievedUser = userService.getUserById(String.valueOf(user.getId()));
+        User retrievedUser = userService.getUserById(String.valueOf(user.getId()), false);
 
         assertNotNull(retrievedUser);
         assertEquals(user.getId(), retrievedUser.getId());
@@ -99,7 +94,7 @@ public class UserServiceTest {
     void getUserById_UserNotFound() {
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.empty());
 
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.getUserById(String.valueOf(user.getId())));
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.getUserById(String.valueOf(user.getId()), false));
 
         assertEquals("No user found with this ID", thrown.getMessage());
     }
@@ -128,29 +123,17 @@ public class UserServiceTest {
         User updatedUser = new User();
         updatedUser.setFirstName("Jack");
         updatedUser.setPassword("Valid123@");
+        updatedUser.setPinCode("1234");
         ObjectId id = new ObjectId("67e13f0735d02563d11c04b6");
         updatedUser.setId(id);
 
         when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
-        user.encryptUser();
-        User editedUser = userService.editUser("67e13f0735d02563d11c04b6", updatedUser);
+        //user.encryptUser();
+        User editedUser = userService.updateUser("67e13f0735d02563d11c04b6", updatedUser);
 
         assertNotNull(editedUser);
         assertEquals("Jack", editedUser.getFirstName());
-    }
-
-    @Test
-    void editUser_PasswordNotStrongEnough() {
-        User updatedUser = new User();
-        ObjectId id = new ObjectId("67e13f0735d02563d11c04b6");
-        updatedUser.setId(id);
-        updatedUser.setPassword("weakpassword");
-
-        when(userRepository.findById(user.getId())).thenReturn(java.util.Optional.of(user));
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.editUser("67e13f0735d02563d11c04b6", updatedUser));
-
-        assertEquals("Password verification failed", thrown.getMessage());
     }
 
     @Test

@@ -61,7 +61,7 @@ grapes-microservices/
 3. **Start specific services
 
    If you wish to start only certain services, you can do so by specifying the desired services as follows:
-    
+
    ```bash
     docker-compose up -d api-gateway auth-service payment-service
     ```
@@ -110,15 +110,15 @@ This will rebuild the images and restart the services.
 
 ## Authors
 
-   - [Jobelin KOM](https://linkedin.com/in/jobelin-kom/).
-   - [Smets NGOUMOU](https://linkedin.com/).
-   - [Benjamin SUKRANLI](https://linkedin.com/).
-   - [Cameron NOUPOUE](https://linkedin.com).
-   - [Mathys FRANCO](https://linkedin.com).
-   - [Nassim BELLI](https://linkedin.com).
-   - [Dounia KILANE](https://linkedin.com).
-   - [Nasser KOTIYEV](https://linkedin.com).
-   - [Charles VIGNON](https://linkedin.com).
+- [Jobelin KOM](https://linkedin.com/in/jobelin-kom/).
+- [Smets NGOUMOU](https://linkedin.com/).
+- [Benjamin SUKRANLI](https://linkedin.com/).
+- [Cameron NOUPOUE](https://linkedin.com/cnoupoue).
+- [Mathys FRANCO](https://linkedin.com).
+- [Nassim BELLI](https://linkedin.com).
+- [Dounia KILANE](https://linkedin.com).
+- [Nasser KOTIYEV](https://linkedin.com).
+- [Charles VIGNON](https://linkedin.com).
 
 ## Licenses
 

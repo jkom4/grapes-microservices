@@ -1,6 +1,8 @@
 package grapes.microservices.authservice.mapper;
 
-import grapes.microservices.authservice.dto.UserDTO;
+import grapes.microservices.authservice.dto.EIDCardInfo;
+import grapes.microservices.authservice.dto.UserDTOWithPasswordAndPin;
+import grapes.microservices.authservice.dto.UserDTOWithoutPasswordAndPin;
 import grapes.microservices.authservice.models.User;
 import org.bson.types.ObjectId;
 import org.mapstruct.*;
@@ -10,18 +12,37 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
+    User toEntity(UserDTOWithPasswordAndPin dto);
+
     @Mapping(source = "id", target = "id", qualifiedByName = "stringToObjectId")
     @Mapping(source = "loyaltyPoints", target = "loyaltyPoints")
-    User toEntity(UserDTO dto);
+    User toEntity(UserDTOWithoutPasswordAndPin dto);
 
     @Mapping(target = "age", expression = "java(computeAge(user.getBirthDate()))")
     @Mapping(source = "id", target = "id", qualifiedByName = "objectIdToString")
-    UserDTO toDTO(User user);
+    UserDTOWithoutPasswordAndPin toDTO(User user);
+
+    @Mapping(target = "name", source = "lastName")
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "nationalId", source = "nationalId")
+    @Mapping(target = "birthDate", source = "birthDate")
+    @Mapping(target = "gender", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "phoneNumber", ignore = true)
+    @Mapping(target = "pinCode", ignore = true)
+    @Mapping(target = "role", constant = "USER")
+    @Mapping(target = "profession", ignore = true)
+    @Mapping(target = "deliveryAddress", ignore = true)
+    @Mapping(target = "billingAddress", ignore = true)
+    User toEntityFromEID(EIDCardInfo info);
+
 
     @Named("stringToObjectId")
     static ObjectId stringToObjectId(String id) {
@@ -32,6 +53,9 @@ public interface UserMapper {
     static String objectIdToString(ObjectId id) {
         return id != null ? id.toHexString() : null;
     }
+
+    List<UserDTOWithoutPasswordAndPin> toDTOList(List<User> users);
+
 
     /**
      * Compute the age based on the birthDate

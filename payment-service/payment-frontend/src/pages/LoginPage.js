@@ -4,8 +4,10 @@ import SPMB from '../images/SMPB.png';
 import { AuthService } from '../services/AuthService';
 import { User } from '../models/User';
 
+// Handles user authentication and payment-specific login
 const LoginPage = () => {
-    // State for form inputs and validation
+    // State for paymentId, form inputs, validation, errors, and loading
+    const [paymentId, setPaymentId] = useState(null);
     const [loginData, setLoginData] = useState({ login: '', password: '' });
     const [passwordValidation, setPasswordValidation] = useState({
         hasLowerAndUpper: false,
@@ -14,25 +16,33 @@ const LoginPage = () => {
         showValidation: false
     });
     const [errorMessage, setErrorMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Handle input changes and reset error message
+    // Extract paymentId from URL on mount
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentIdParam = urlParams.get('paymentId');
+        if (paymentIdParam) {
+            setPaymentId(paymentIdParam);
+        }
+    }, []);
+
+    // Update form inputs and clear errors
     const handleChange = (e) => {
         const { id, value } = e.target;
         setLoginData(prev => ({ ...prev, [id]: value }));
         setErrorMessage('');
-
         if (id === 'password') {
             setPasswordValidation(prev => ({ ...prev, showValidation: true }));
         }
     };
 
-    // Check password requirements whenever password changes
+    // Validate password requirements on change
     useEffect(() => {
         if (loginData.password) {
             const hasLowerAndUpper = /(?=.*[a-z])(?=.*[A-Z])/.test(loginData.password);
             const hasNumberOrSymbol = /(?=.*\d)|(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])/.test(loginData.password);
             const isLongEnough = loginData.password.length >= 8;
-
             setPasswordValidation(prev => ({
                 ...prev,
                 hasLowerAndUpper,
@@ -42,34 +52,46 @@ const LoginPage = () => {
         }
     }, [loginData.password]);
 
-    // Login form submission handler
+    // Handle login submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        setIsLoading(true);
         try {
-            // Attempt login with provided credentials
+            if (passwordValidation.showValidation &&
+                (!passwordValidation.hasLowerAndUpper ||
+                    !passwordValidation.hasNumberOrSymbol ||
+                    !passwordValidation.isLongEnough)) {
+                setErrorMessage("Password does not meet security requirements");
+                setIsLoading(false);
+                return;
+            }
             const user = new User(loginData.login, loginData.password);
-            const data = await AuthService.login(user);
-
-            // Handle successful login or error
-            if (data.redirectUrl) {
-                window.location.href = data.redirectUrl;
+            const data = await AuthService.login(user, paymentId);
+            if (data.success) {
+                window.location.href = data.redirectUrl || '/dashboard';
             } else {
-                setErrorMessage(data.error);
+                setErrorMessage(data.error || "Authentication failed");
             }
         } catch (error) {
-            setErrorMessage("Connection to server failed");
+            setErrorMessage("Connection to server failed. Please try again later.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
+    // Render login form and UI
     return (
         <div className="login-container">
             <div className="logo-container">
                 <img src={SPMB} alt="Bank Logo" />
             </div>
-            <h2>Login</h2>
+            <h2>Login to Your Account</h2>
+            {paymentId && (
+                <div className="payment-notice">
+                    <p>Payment authentication required</p>
+                </div>
+            )}
             <form id="loginForm" onSubmit={handleSubmit}>
-                {/* Username input field */}
                 <label htmlFor="login">Username:</label>
                 <input
                     type="text"
@@ -77,10 +99,9 @@ const LoginPage = () => {
                     placeholder="Enter your username"
                     value={loginData.login}
                     onChange={handleChange}
+                    disabled={isLoading}
                     required
                 />
-
-                {/* Password input with dynamic styling based on validation */}
                 <label htmlFor="password">Password:</label>
                 <input
                     type="password"
@@ -88,13 +109,12 @@ const LoginPage = () => {
                     placeholder="Enter your password"
                     value={loginData.password}
                     onChange={handleChange}
+                    disabled={isLoading}
                     required
                     className={passwordValidation.showValidation ?
                         ((!passwordValidation.hasLowerAndUpper || !passwordValidation.hasNumberOrSymbol || !passwordValidation.isLongEnough)
                             ? 'password-error' : 'password-valid') : ''}
                 />
-
-                {/* Password validation requirements display */}
                 {passwordValidation.showValidation && (
                     <div className="password-validation">
                         <div className="lock-icon">
@@ -102,7 +122,6 @@ const LoginPage = () => {
                         </div>
                         <p>Your password needs to:</p>
                         <ul>
-                            {/* Check for lowercase and uppercase */}
                             <li className={passwordValidation.hasLowerAndUpper ? 'valid' : 'invalid'}>
                                 <span>
                                     {passwordValidation.hasLowerAndUpper ? (
@@ -117,7 +136,6 @@ const LoginPage = () => {
                                 </span>
                                 include both lower and upper case characters.
                             </li>
-                            {/* Check for numbers or symbols */}
                             <li className={passwordValidation.hasNumberOrSymbol ? 'valid' : 'invalid'}>
                                 <span>
                                     {passwordValidation.hasNumberOrSymbol ? (
@@ -132,7 +150,6 @@ const LoginPage = () => {
                                 </span>
                                 include at least one number or symbol.
                             </li>
-                            {/* Check for minimum length */}
                             <li className={passwordValidation.isLongEnough ? 'valid' : 'invalid'}>
                                 <span>
                                     {passwordValidation.isLongEnough ? (
@@ -150,11 +167,13 @@ const LoginPage = () => {
                         </ul>
                     </div>
                 )}
-
-                <button type="submit">Login</button>
+                <button type="submit" disabled={isLoading}>{isLoading ? 'Logging in...' : 'Login'}</button>
             </form>
-            {/* Display error messages */}
             {errorMessage && <p className="error-message">{errorMessage}</p>}
+            <div className="security-notice">
+                <p>This is a secure 3D authentication system for your bank account</p>
+                <p>Your security is our priority</p>
+            </div>
         </div>
     );
 };

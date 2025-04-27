@@ -63,7 +63,7 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="code" type="INT"/>
-            <column name="user_id" type="INT"/>
+            <column name="user_id" type="VARCHAR(255)"/>
             <column name="facture_path" type="VARCHAR(255)"/>
             <column name="total_price" type="DECIMAL(10,2)"/>
             <column name="created_at" type="DATETIME"/>
@@ -127,6 +127,11 @@
 
     <!-- 7. Table delivery -->
     <changeSet author="kilane dounia" id="7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="delivery"/>
+            </not>
+        </preConditions>
         <createTable tableName="delivery">
             <column name="id" type="INT" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -134,7 +139,7 @@
             <column name="order_id" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="user_id" type="INT"/>
+            <column name="user_id" type="VARCHAR(255)"/>
             <column name="delivery_status_id" type="INT">
                 <constraints nullable="false"/>
             </column>
@@ -145,6 +150,7 @@
             <column name="comment" type="TEXT"/>
             <column name="doorstep" type="BOOLEAN"/>
             <column name="signature" type="BLOB"/>
+            <column name="is_finished" type="BOOLEAN" defaultValueBoolean="false" />
         </createTable>
     </changeSet>
 
@@ -409,6 +415,45 @@
         </insert>
     </changeSet>
 
+    <changeSet author="nassim" id="22" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="delivery" columnName="name"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="delivery">
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="postal_code" type="VARCHAR(20)"/>
+            <column name="country" type="VARCHAR(50)"/>
+            <column name="phone_number" type="VARCHAR(20)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Changelog: 20250424_add_transaction_table.xml -->
+    <changeSet id="20250424-transaction-table" author="nassim">
+        <createTable tableName="transaction">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="transaction_uuid" type="CHAR(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="order_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="VARCHAR(255)"/>
+            <column name="card_type" type="VARCHAR(50)"/>
+            <column name="payment_status" type="VARCHAR(50)"/>
+            <column name="delivery_status" type="VARCHAR(50)"/>
+            <column name="delivery_time_days" type="INT"/>
+            <column name="currency" type="VARCHAR(10)"/>
+            <column name="amount" type="DECIMAL(10,2)"/>
+            <column name="transaction_date_time" type="DATETIME"/>
+            <column name="created_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
 
     <!-- 18. Foreign key: review -> user -->
 <!--    <changeSet author="kilane dounia" id="18">-->

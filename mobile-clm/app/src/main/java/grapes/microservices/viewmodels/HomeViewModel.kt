@@ -1,74 +1,41 @@
 package grapes.microservices.viewmodels
 
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import grapes.microservices.models.data.Article
-import grapes.microservices.models.data.ArticleFilterSettings
-import grapes.microservices.models.data.ArticleMinMaxPrice
 import grapes.microservices.models.repository.ArticleRepository
+import grapes.microservices.models.utils.CartManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
+// ViewModel class for managing Home-related data (articles, filters, etc.)
 class HomeViewModel(
-    private val articleRepo: ArticleRepository
+    private val articleRepo: ArticleRepository, // Repository for fetching articles and related data
+    private val cartManager: CartManager
 ) : ViewModel() {
-    // lazy: initialize only when called for the first tome
-    private val _filterSettings by lazy {
-        // i don't know the min and max cost among all the articles, so i ask to the API
-        MutableStateFlow(ArticleFilterSettings(articleMinMaxPrice = ArticleMinMaxPrice(
-            articleRepo.getMinMaxCost(),
-            articleRepo.getMinMaxCost()
-        )))
-    }
-    val filterSettings: StateFlow<ArticleFilterSettings> = _filterSettings.asStateFlow()
 
-    fun getFilterSettings(): ArticleFilterSettings {
-        return _filterSettings.asStateFlow().value
+    // StateFlow to hold the list of articles
+    private val _articles = MutableStateFlow<List<Article>>(emptyList())
+    val articles: StateFlow<List<Article>> = _articles.asStateFlow() // Expose articles list as StateFlow
+
+    // Initialization block to fetch articles as soon as the ViewModel is created
+    init {
+        fetchArticles()
+        resetAndInitializeCart()
     }
 
-    fun getArticles(): List<Article> {
-        return articleRepo.getArticles()
-    }
-
-    fun getCategories(): List<String> {
-        return articleRepo.getCategories().values.map { it.name.orEmpty() }
-    }
-
-    fun getFamilies(): List<String> {
-        return articleRepo.getFamilies().values.map { it.name.orEmpty() }
-    }
-
-    fun updateCategory(newCategory: String) {
-        _filterSettings.update { currentState ->
-            // if select already selected item, deselect it
-            val categoryToSet = if (currentState.category == newCategory) "" else newCategory
-            currentState.copy(category = categoryToSet) // Crée une nouvelle instance avec la catégorie mise à jour
+    // Function to fetch articles from the repository
+    private fun fetchArticles() {
+        viewModelScope.launch {
+            val fetchedArticles = articleRepo.getArticles() // Fetch articles from the repository
+            _articles.value = fetchedArticles // Update the articles list
         }
     }
 
-    fun updateFamily(newFamily: String) {
-        _filterSettings.update { currentState ->
-            // if select already selected item, deselect it
-            val familyToSet = if (currentState.family == newFamily) "" else newFamily
-            currentState.copy(family = familyToSet) // Crée une nouvelle instance avec la famille mise à jour
-        }
-    }
-
-    fun updateQuery(newQuery: String) {
-        _filterSettings.update { it.copy(query = newQuery) }
-    }
-
-    fun updatePriceRange(newRange: ClosedFloatingPointRange<Float>) {
-        _filterSettings.update {
-            it.copy(articleMinMaxPrice = it.articleMinMaxPrice.copy(currentInterval = newRange))
-        }
-    }
-
-    fun updateRattingRange(newRange: ClosedFloatingPointRange<Float>) {
-        _filterSettings.update {
-            it.copy(articleMinMaxRatting = it.articleMinMaxRatting.copy(currentInterval = newRange))
-        }
+    private fun resetAndInitializeCart() {
+        cartManager.resetAndInitializeCart(userId = 1) // Use appropriate userId
     }
 }

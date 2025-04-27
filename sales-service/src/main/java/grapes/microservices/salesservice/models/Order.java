@@ -20,10 +20,12 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(unique = true)
     private Integer code;
 
+
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    private String userId;
 
     @Column(name = "facture_path")
     private String facturePath;
@@ -47,6 +49,13 @@ public class Order {
      */
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;
+
+    @PrePersist
+    public void generateCode() {
+        if (this.code == null) {
+            this.code = (int) (Math.random() * 900000) + 100000; // between 100000 et 999999
+        }
+    }
 
 
 }

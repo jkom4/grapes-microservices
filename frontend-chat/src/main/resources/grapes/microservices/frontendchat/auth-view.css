@@ -1,0 +1,58 @@
+.header {
+  -fx-border-color: transparent transparent rgba(0, 0, 0, 0.2) transparent;
+  -fx-border-width: 0 0 1px 0; }
+
+.footer {
+  -fx-border-color: rgba(0, 0, 0, 0.2) transparent transparent transparent;
+  -fx-border-width: 1px 0 0 0; }
+
+.button-icon {
+  -fx-opacity: 0.2; }
+
+.button-icon:hover {
+  -fx-opacity: 0.4; }
+
+.button-icon:pressed {
+  -fx-opacity: 0.1; }
+
+.scroll-bar:vertical {
+  -fx-padding: 0;
+  -fx-background-color: transparent;
+  /* Background for scrollbar track */ }
+
+.scroll-bar:vertical .increment-button,
+.scroll-bar:vertical .decrement-button {
+  -fx-background-color: transparent;
+  /* Hide increment/decrement buttons */ }
+
+.scroll-bar:vertical .thumb {
+  -fx-background-insets: 2;
+  -fx-background-radius: 5;
+  /* Rounded corners */ }
+
+.auth-title {
+  -fx-text-fill: black; }
+
+.authPage {
+  -fx-background-color: #ae17e6; }
+
+#errorMessageFx {
+  -fx-text-fill: #990000;
+  -fx-font-weight: bold; }
+
+#authButton {
+  -fx-font-family: "Segoe UI Semibold", sans-serif;
+  -fx-font-size: 14px;
+  -fx-background-color: #ff00ff;
+  -fx-background-radius: 10px;
+  -fx-border-color: transparent;
+  -fx-border-radius: 10px;
+  -fx-padding: 8px 20px;
+  -fx-cursor: hand;
+  -fx-transition: background-color 0.2s ease-in-out; }
+
+#authButton:hover {
+  -fx-background-color: #ff4dff; }
+
+#authButton:pressed {
+  -fx-background-color: #cc00cc; }

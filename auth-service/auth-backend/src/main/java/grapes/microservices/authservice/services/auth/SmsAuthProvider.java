@@ -2,14 +2,11 @@ package grapes.microservices.authservice.services.auth;
 
 import grapes.microservices.authservice.models.ChallengeWithTimestamp;
 import grapes.microservices.authservice.models.User;
-import grapes.microservices.authservice.services.EmailService;
 import grapes.microservices.authservice.services.SmsService;
-import grapes.microservices.authservice.services.TokenService;
+import grapes.microservices.authservice.utils.challenge_request_limiter.OneCallPerMinutePerUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
 
 /**
  * SmsAuthProvider is an authentication provider that sends challenges to users via SMS.
@@ -22,42 +19,33 @@ public class SmsAuthProvider extends AbstractAuthProvider {
     @Autowired
     private final SmsService smsService;
 
-    @Autowired
-    private TokenService tokenService;
-
     @Override
-    public boolean sendChallenge(User user) {
+    @OneCallPerMinutePerUser
+    public String sendChallenge(User user) {
         String challenge = generateChallenge();
         challengeService.saveChallengeForUser(user.getPhoneNumber(), challenge);
         String message = "Please use the following code to authenticate: " + challenge;
-        return smsService.sendSms(user.getPhoneNumber(), message);
+        smsService.sendSms(user.getPhoneNumber(), message);
+        return challenge;
     }
 
     @Override
-    public boolean verifyChallenge(User user, String submittedChallenge) {
-        ChallengeWithTimestamp storedChallenge = challengeService.getChallengeForUser(user.getPhoneNumber());
-        if (storedChallenge == null) {
-            throw new RuntimeException("Challenge not found.");
+    public String getChallenge(User user) throws Exception {
+        try {
+            ChallengeWithTimestamp storedChallenge = challengeService.getChallengeForUser(user.getPhoneNumber());
+            challengeService.verifyChallengeAuthenticity(storedChallenge);
+            return storedChallenge.getChallenge();
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
         }
-        if (storedChallenge.isExpired()) {
-            challengeService.evictChallengeCache(user.getPhoneNumber());
-            throw new RuntimeException("Challenge has expired.");
-        }
-        if (storedChallenge.getChallenge().equals(submittedChallenge)) {
-            return true;
-        }
-        throw new RuntimeException("Challenge does not match");
     }
 
     @Override
-    public String processChallenge(User user, String submittedChallenge) {
-        boolean isValid = verifyChallenge(user, submittedChallenge);
-        if (isValid) {
+    public void deleteChallenge(User user) {
+        try {
             challengeService.evictChallengeCache(user.getPhoneNumber());
-            String token = tokenService.generateToken(user.getId().toHexString());
-            sessionService.saveSession(user.getId().toHexString(), token);
-            return token;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete challenge: " + e.getMessage());
         }
-        throw new RuntimeException("The challenge is not valid.");
     }
 }

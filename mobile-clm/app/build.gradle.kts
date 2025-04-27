@@ -21,6 +21,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "BASE_URL", "\"${project.properties["BASE_URL"]}\"")
     }
 
     buildTypes {
@@ -41,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3"  // Example version; adjust as needed
@@ -57,6 +60,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.preferences.core.android)
 
     // --- Testing ---
     testImplementation(libs.junit)
@@ -70,8 +75,8 @@ dependencies {
     // --- Koin ---
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.navigation)
-    implementation(libs.koin.androidx.compose) // Pour l'intégration avec la navigation Compose
-    testImplementation(libs.koin.test.junit4) // Pour les tests unitaires
+    implementation(libs.koin.androidx.compose)
+    testImplementation(libs.koin.test.junit4)
 
     // --- Url Image ---
     implementation(libs.coil3.coil.compose)
@@ -79,4 +84,13 @@ dependencies {
 
     // --- Image Primary Color extractor
     implementation(libs.androidx.palette.ktx)
+
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation ("io.coil-kt:coil-compose:2.4.0")
+    implementation ("androidx.compose.material:material-icons-extended:1.5.0")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+    implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
 }

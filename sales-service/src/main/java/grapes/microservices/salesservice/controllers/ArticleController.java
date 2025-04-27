@@ -1,6 +1,7 @@
 package grapes.microservices.salesservice.controllers;
 
 import grapes.microservices.salesservice.dto.ArticleDTO;
+import grapes.microservices.salesservice.exceptions.ResourceNotFoundException;
 import grapes.microservices.salesservice.mapper.ArticleMapper;
 import grapes.microservices.salesservice.models.Article;
 import grapes.microservices.salesservice.services.ArticleService;
@@ -42,7 +43,7 @@ public class ArticleController {
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while retrieving all articles.");
+                    .body("An error occurred while retrieving all articles." + e.getMessage());
         }
     }
 
@@ -59,7 +60,7 @@ public class ArticleController {
             return ResponseEntity.ok(dtoPage);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while retrieving available articles.");
+                    .body("An error occurred while retrieving available articles." + e.getMessage() );
         }
     }
 
@@ -87,9 +88,11 @@ public class ArticleController {
                     .collect(Collectors.toList());
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while searching articles.");
+                    .body("An error occurred while searching articles: " + e.getMessage());
         }
+
     }
 
 
@@ -129,11 +132,28 @@ public class ArticleController {
         }
     }
 
-    @GetMapping("/clm/articles/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ArticleDTO> getArticleById(@PathVariable Integer id) {
         Article article = articleService.getArticleById(id);
         return ResponseEntity.ok(articleMapper.toDTO(article));
     }
+
+    /**
+     * Deletes an article by its ID (admin only).
+     * // @PreAuthorize("hasRole('ADMIN')")
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteArticle(@PathVariable Integer id) {
+        try {
+            articleService.deleteArticleById(id);
+            return ResponseEntity.ok("Article with ID " + id + " has been deleted successfully.");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the article.");
+        }
+    }
+
 
 
 

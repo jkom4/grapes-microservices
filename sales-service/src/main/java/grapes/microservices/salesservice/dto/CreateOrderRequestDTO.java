@@ -16,5 +16,5 @@ public class CreateOrderRequestDTO {
     /**
      * ID of the user creating the cart.
      */
-    private Integer userId;
+    private String userId;
 }

@@ -1,13 +1,13 @@
 package grapes.microservices.authservice.mapper;
 
-import grapes.microservices.authservice.dto.UserDTO;
+import grapes.microservices.authservice.dto.UserDTOWithPasswordAndPin;
+import grapes.microservices.authservice.dto.UserDTOWithoutPasswordAndPin;
 import grapes.microservices.authservice.models.Gender;
 import grapes.microservices.authservice.models.Role;
 import grapes.microservices.authservice.models.User;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +30,7 @@ class UserMapperTest {
         user.setFirstName("John");
         user.setBirthDate(new Date(1000000000000L));
 
-        UserDTO dto = userMapper.toDTO(user);
+        UserDTOWithoutPasswordAndPin dto = userMapper.toDTO(user);
 
         assertEquals("65f1a9a2a9b77b1e37bcabc1", dto.getId());
         assertEquals("Doe", dto.getName());
@@ -83,36 +83,28 @@ class UserMapperTest {
     @Test
     void toEntity_withValidDTO() {
         // Given a valid UserDTO
-        UserDTO dto = new UserDTO();
-        dto.setBankId("bank123");
+        UserDTOWithPasswordAndPin dto = new UserDTOWithPasswordAndPin();
         dto.setName("John");
         dto.setFirstName("Doe");
         dto.setPassword("password");
         dto.setEmail("john.doe@example.com");
-        dto.setEmailVerified(true);
         dto.setPhoneNumber("1234567890");
-        dto.setPhoneVerified(true);
         dto.setNationalId("12345");
         dto.setBirthDate(new Date(1000000000000L));  // Sample birthdate (example timestamp)
         dto.setGender(Gender.MALE);
-        dto.setCardNumber("1111-2222-3333-4444");
         dto.setPinCode("1234");
         dto.setRole(Role.valueOf("USER"));
         dto.setProfession("Engineer");
 
         User user = userMapper.toEntity(dto);
 
-        assertEquals("bank123", user.getBankId());
         assertEquals("John", user.getName());
         assertEquals("Doe", user.getFirstName());
         assertEquals("password", user.getPassword());
         assertEquals("john.doe@example.com", user.getEmail());
-        assertTrue(user.isEmailVerified());
         assertEquals("1234567890", user.getPhoneNumber());
-        assertTrue(user.isPhoneVerified());
         assertEquals("12345", user.getNationalId());
         assertEquals("MALE", user.getGender().name());
-        assertEquals("1111-2222-3333-4444", user.getCardNumber());
         assertEquals("1234", user.getPinCode());
         assertEquals(Role.valueOf("USER"), user.getRole());
         assertEquals("Engineer", user.getProfession());

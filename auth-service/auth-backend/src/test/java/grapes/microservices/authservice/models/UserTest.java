@@ -22,6 +22,7 @@ class UserTest {
         user.setFirstName("Doe");
         user.setEmail("john.doe@example.com");
         user.setPhoneNumber("1234567890");
+        user.setPinCode("1234");
         user.setNationalId("11111111111");
         user.encryptUser();
     }
@@ -37,12 +38,12 @@ class UserTest {
     @Test
     void verifyPassword_CorrectPassword_ReturnsTrue() {
         when(passwordEncoder.matches("correctPassword", "hashedPassword")).thenReturn(true);
-        assertTrue(user.verifyPassword("correctPassword"));
+        assertTrue(user.verifyUserPassword("correctPassword"));
     }
 
     @Test
     void verifyPassword_IncorrectPassword_ThrowsException() {
         when(passwordEncoder.matches("wrongPassword", "hashedPassword")).thenReturn(false);
-        assertFalse(user.verifyPassword("wrongPassword"));
+        assertFalse(user.verifyUserPassword("wrongPassword"));
     }
 }

@@ -1,8 +1,9 @@
+// src/services/fruitServices.ts
 import Article from "../utils/models/Articles";
 import { getArticlesAPI } from "./httpCommon";
 
 // Fetches paginated articles from the API
-const fetchFruits = async (
+export const fetchFruits = async (
     page: number, // Current page number (0-based index)
     size: number // Number of articles per page
 ): Promise<{ content: Article[]; totalPages: number }> => {
@@ -35,4 +36,110 @@ const fetchFruits = async (
     }
 };
 
-export default fetchFruits;
+export const fetchArticleById = async (id: number): Promise<Article> => {
+    try {
+        const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.articleById(id)}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return Article.parse(data);  // Assuming Article.parse() is a static method that parses the response
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while fetching the article");
+    }
+};
+
+// Add a new article
+export const addArticle = async (article: Article): Promise<void> => {
+    try {
+        const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.addArticle}`;
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(article),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text(); // Capture server error details
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}. Details: ${errorText}`);
+        }
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while adding the article");
+    }
+};
+
+export const handleImage = async (file: File): Promise<string> => {
+    try {
+        const imageName = file.name;
+        const uploadUrl = `https://objectstorage.eu-frankfurt-1.oraclecloud.com/p/dsqOjUeBwX1kbVmRVuvRENtylcOvLXlpOHdLX5Fngqfo2SrK0r0odRS_R8M6LmPw/n/frnuxmgfepuz/b/image-prod/o/articles/${imageName}`;
+
+        const response = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: {
+                "Content-Type": file.type,
+            },
+            body: file,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Image upload failed with status ${response.status}`);
+        }
+
+        return uploadUrl;
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while uploading the image");
+    }
+};
+
+// Update an article
+export const updateArticle = async (id: number, article: Article): Promise<void> => {
+    try {
+        const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.updateArticle(id)}`;
+        const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(article),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+        }
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while updating the article");
+    }
+};
+
+// Delete an article
+export const deleteArticle = async (id: number): Promise<void> => {
+    try {
+        const url = `${getArticlesAPI.baseURL}${getArticlesAPI.endpoints.deleteArticle(id)}`;
+        const response = await fetch(url, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text(); // Capture server error details
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}. Details: ${errorText}`);
+        }
+    } catch (err) {
+        throw new Error(err instanceof Error ? err.message : "An error occurred while deleting the article");
+    }
+};
+
+export default {
+    fetchFruits,
+    fetchArticleById,
+    addArticle,
+    updateArticle,
+    deleteArticle,
+};

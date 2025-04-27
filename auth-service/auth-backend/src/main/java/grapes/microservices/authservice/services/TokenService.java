@@ -1,6 +1,6 @@
 package grapes.microservices.authservice.services;
 
-import grapes.microservices.authservice.models.User;
+import grapes.microservices.authservice.models.Role;
 import grapes.microservices.authservice.utils.AuthLogger;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
@@ -18,8 +18,10 @@ import org.springframework.stereotype.Service;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Service for generating and validating tokens
@@ -33,8 +35,8 @@ public class TokenService {
     @Value("${auth.service.jwt.secret.key}")
     private String secretKey;
 
-    @Value("${auth.service.jwt.expiration.time}")
-    private long expirationTime;
+    @Value("${auth.service.access.token.expiration.time.minutes}")
+    private long ACCESS_EXPIRATION_TIME;
 
     @Autowired
     private SessionService sessionService;
@@ -84,33 +86,41 @@ public class TokenService {
     /**
      * Generates a token for the given email
      * The token is valid for 24 hours
+     *
      * @param idStr the identifier to be used in the token
      * @return the generated token
      */
-    public String generateToken(String idStr) {
+    public String generateToken(String idStr, String name, Role role) {
         return Jwts.builder()
                 .setSubject(idStr)
+                .claim("name", name)
+                .claim("role", role.getRole())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION_TIME * 60 * 1000))
                 .signWith(SECRET_KEY)
                 .compact();
     }
 
     /**
-     * Get the refresh token for the given user ID from the session service
-     * @param userId the user ID
-     * @return the refresh token
+     * Generates a secure opaque refresh token for the specified user.
+     * Unlike access tokens, which are stateless JWTs containing user claims and signed cryptographically,
+     * refresh tokens are implemented here as opaque random UUID strings. This is a common approach in enterprise applications
+     * where refresh tokens are:
+     * <ul>
+     *     <li>Stored securely on the server (e.g., Redis or database)</li>
+     *     <li>Not parseable by the client (no embedded claims)</li>
+     *     <li>Easily revocable by deleting the entry from the server</li>
+     * </ul>
+     *
+     * @return the newly generated refresh token as a random UUID string
      */
-    public String getRefreshToken(String userId) {
-        String refreshToken = sessionService.getRefresh(userId);
-        if (refreshToken == null) {
-            throw new RuntimeException("Refresh token not found.");
-        }
-        return refreshToken;
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
     }
 
     /**
      * Extracts the user ID from the given token
+     *
      * @param token the token to extract the user ID from
      * @return the user ID
      */
@@ -129,23 +139,28 @@ public class TokenService {
     }
 
     /**
-     * Validates the given token
-     * @param token the token to validate
-     * @return true if the token is valid, false otherwise
+     * Extracts the user's role from the given token
+     *
+     * @param token the token to extract the user's role from
+     * @return the user's role
      */
-    private boolean isTokenExpired(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration()
-                .before(new Date());
+    public String extractUserRole(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSECRET_KEY())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.get("role", String.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
      * Checks if the token is valid
      * The token is valid if it is not expired and the signature is valid
+     *
      * @param token the token to check
      * @return true if the token is valid, false otherwise
      */

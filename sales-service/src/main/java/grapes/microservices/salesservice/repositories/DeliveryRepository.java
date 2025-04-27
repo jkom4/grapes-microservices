@@ -10,7 +10,6 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Integer> {
     List<Delivery> findByDeliveryStatusId(Integer deliveryStatusId);
     Optional<Delivery> findByOrderId(Integer orderId);
 
-    List<Delivery> findByUserId(Integer userId);
-
-
+    List<Delivery> findByUserId(String userId);
+    long countByUserIdAndDeliveryStatusId(String userId, Integer deliveryStatusId);
 }

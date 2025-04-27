@@ -1,31 +1,20 @@
-// First, import the Card class
-import { Card } from './Card'; // Adjust the path based on your project structure
-
 export class Payment {
-    // Constructor for payment with card and amount
-    constructor(card, amount) {
-        this.card = card;
+    constructor(card, amount = null) {
+        this.cardNumber = card.getFullCardNumber();
+        this.expirationDate = card.getFormattedExpiryDate(); // Uses the MM/YYYY format from Card model
+        this.cvv = card.cvc;
         this.amount = amount;
+        this.merchantName = null; // Will be set later if available
     }
 
-    // Factory method to create Payment from data object
-    static parse(data) {
-        return new Payment(
-            Card.parse(data.card),
-            data.amount
-        );
-    }
-
-    // Prepares payment data for API submission
+    // Convert to JSON for API requests
     toJSON() {
         return {
-            ...this.card.toJSON(),  // Spread card properties
-            amount: this.amount      // Add payment amount
+            cardNumber: this.cardNumber,
+            expirationDate: this.expirationDate,
+            cvv: this.cvv,
+            amount: this.amount,
+            merchantName: this.merchantName
         };
-    }
-
-    // Human-readable representation
-    toString() {
-        return `Payment: ${this.amount} for ${this.card.toString()}`;
     }
 }

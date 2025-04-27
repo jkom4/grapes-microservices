@@ -18,15 +18,4 @@ public class Chat {
     private String id;
 
     private String topic;
-
-    private List<Participant> participants;
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Participant {
-        private String userId;
-    }
 }

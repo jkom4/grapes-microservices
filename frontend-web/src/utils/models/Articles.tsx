@@ -13,6 +13,7 @@ class Article {
     stockUnit: number;
     origin: string;
     picturePath: string;
+    file: File;
     rating?: number;
 
     constructor(
@@ -27,8 +28,9 @@ class Article {
         stockUnit: number,
         origin: string,
         picturePath: string,
-        rating?: number
-    ) {
+        file: File,
+        rating?: number,
+) {
         this.id = id;
         this.categoryId = categoryId;
         this.familyId = familyId;
@@ -40,7 +42,9 @@ class Article {
         this.stockUnit = stockUnit;
         this.origin = origin;
         this.picturePath = picturePath;
+        this.file = file;
         this.rating = rating;
+
     }
 
     static parse(data: any): Article {
@@ -56,7 +60,9 @@ class Article {
             data.stockUnit,
             data.origin,
             data.picturePath || placeholder,
-            data.rating || 4
+            data.file,
+            data.rating || 4,
+
         );
     }
 }

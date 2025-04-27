@@ -5,6 +5,7 @@ import java.security.SecureRandom;
 import grapes.microservices.authservice.models.User;
 import grapes.microservices.authservice.services.ChallengeService;
 import grapes.microservices.authservice.services.SessionService;
+import grapes.microservices.authservice.services.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,31 +24,29 @@ public abstract class AbstractAuthProvider {
     protected SessionService sessionService;
 
     @Autowired
+    protected TokenService tokenService;
+
+    @Autowired
     protected ChallengeService challengeService;
 
     /**
      * Sends a challenge to the user to verify their identity
      * @param user the user to send the challenge to
-     * @return true if the challenge was sent successfully, false otherwise
+     * @return the provided challenge
      */
-    public abstract boolean sendChallenge(User user) throws IOException;
+    public abstract String sendChallenge(User user) throws IOException;
 
     /**
-     * Verifies the challenge submitted by the user
-     * @param user the email of the user
-     * @param submittedChallenge the challenge submitted by the user
-     * @return true if the challenge is correct, false otherwise
-     */
-    public abstract boolean verifyChallenge(User user, String submittedChallenge);
-
-    /**
-     * Processes the challenge submitted by the user
-     * If the challenge is correct, a token is generated
+     * Get the challenge submitted to the user
      * @param user the user that submitted the challenge
-     * @param submittedChallenge the challenge submitted by the user
-     * @return the generated token
      */
-    public abstract String processChallenge(User user, String submittedChallenge);
+    public abstract String getChallenge(User user) throws Exception;
+
+    /**
+     * Deletes the challenge for the user
+     * @param user the user to delete the challenge for
+     */
+    public abstract void deleteChallenge(User user);
 
     /**
      * Generates a random challenge
