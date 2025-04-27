@@ -228,105 +228,12 @@ jobs:
       - name: 🔑 Log in to OCIR
         run:  |
           echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
+
+
+        # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
+      - name: 🏗️ Build & Push Frontend Services (amd64 only)
+        run: |
+          docker compose build  frontend-auth   
+          docker compose push frontend-auth 
   
 
-      # 🐳 Multi-Arch build for ARM-hosted services (VM3)
-      - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
-        run: |
-
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
-           --push ./api-gateway
-          
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/chat-service:latest \
-           --push ./chat-service
-
-
-
-  deploy-replica-monitoring:
-    name: Deploy to VM 1 - Replica + Monitoring (Manual)
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - tests
-      - docker-build-and-push
-    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
-
-      - name: 🔑 SSH into ORACLE VM and Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM1_IP }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM1_KEY }}
-          script: |
-            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \
-            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
-            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
-            cd grapes-microservices
-            docker compose -f docker-compose-vm1.yml down 
-            docker image prune -a
-            docker compose pull
-            docker compose -f docker-compose-vm1.yml up -d
-
-  deploy-frontend:
-    name: Deploy to VM 2 - FRONTEND
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - tests
-      - docker-build-and-push
-    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
-
-      - name: 🔑 SSH into ORACLE VM and Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM2_IP }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM2_KEY }}
-          script: |
-            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \
-            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
-            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
-            cd grapes-microservices
-            docker compose -f docker-compose-vm2.yml down 
-            docker image prune -a
-            docker compose pull
-            docker compose -f docker-compose-vm2.yml up -d
-
-  deploy-bd-backend:
-      name: Deploy to VM 3 - VM ARM (Manual)
-      runs-on: ubuntu-latest
-      needs:
-        - build
-        - tests
-        - docker-build-and-push
-      if: github.event_name == 'workflow_dispatch'  # Launches only if manual
-
-      steps:
-        - name: 📥 Checkout repository
-          uses: actions/checkout@v3
-
-        - name: 🔑 SSH into ORACLE VM and Deploy
-          uses: appleboy/ssh-action@master
-          with:
-            host: ${{ secrets.VM3_IP }}
-            username: ${{ secrets.VM_USER }}
-            key: ${{ secrets.VM3_KEY }}
-            script: |
-              echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \
-              -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \
-              --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
-              cd grapes-microservices
-              docker compose -f docker-compose-vm3.yml down 
-              docker image prune -a
-              docker compose pull
-              docker compose -f docker-compose-vm3.yml up -d
