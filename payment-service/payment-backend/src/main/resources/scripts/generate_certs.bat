@@ -3,7 +3,7 @@ setlocal
 
 REM === Configuration ===
 set "KEYSTORE_DIR=src\main\resources\keystore"
-set "PASSWORD=bankservicepassword"
+set /p KEYSTORE_PASSWORD=Entrer votre mot de passe :
 
 echo 🔧 Création du dossier %KEYSTORE_DIR% si nécessaire...
 if not exist "%KEYSTORE_DIR%" (

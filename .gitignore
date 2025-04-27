@@ -42,3 +42,4 @@ invoices/*
 # Ignore all generated PDF invoices
 invoices/*.pdf
 uploads/invoices/*.pdf
+/uploads/

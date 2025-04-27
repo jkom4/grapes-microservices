@@ -370,9 +370,6 @@ jobs:
            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
            --push ./api-gateway
 
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/auth-service-backend:latest \
-           --push ./auth-service/auth-backend
 
           docker buildx build --platform linux/amd64,linux/arm64 \
            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/sales-service:latest \
