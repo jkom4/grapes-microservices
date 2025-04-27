@@ -2,7 +2,9 @@ package grapes.microservices.salesservice.services;
 
 import grapes.microservices.salesservice.dto.ActivityLogEvent;
 import grapes.microservices.salesservice.dto.PaymentValidatedMessageDTO;
+import grapes.microservices.salesservice.models.Order;
 import grapes.microservices.salesservice.models.Transaction;
+import grapes.microservices.salesservice.repositories.OrderRepository;
 import grapes.microservices.salesservice.repositories.TransactionRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -17,11 +19,15 @@ public class PaymentEventConsumer {
 
     private final RabbitTemplate rabbitTemplate;
     private final TransactionRepository transactionRepository;
+    private final OrderRepository orderRepository;
 
     @Autowired
-    public PaymentEventConsumer(RabbitTemplate rabbitTemplate, TransactionRepository transactionRepository) {
+    public PaymentEventConsumer(RabbitTemplate rabbitTemplate,
+                                TransactionRepository transactionRepository,
+                                OrderRepository orderRepository) {
         this.rabbitTemplate = rabbitTemplate;
         this.transactionRepository = transactionRepository;
+        this.orderRepository = orderRepository;
     }
 
     @RabbitListener(queues = "payment-validated-queue")
@@ -46,6 +52,13 @@ public class PaymentEventConsumer {
 
         transactionRepository.save(transaction);
         System.out.println("[Sales-Service] Transaction saved in DB with UUID: " + localTransactionId);
+
+        Order order = orderRepository.findById(message.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + message.getOrderId()));
+
+        order.setPaid(true);
+        orderRepository.save(order);
+        System.out.println("[Sales-Service] Order ID " + order.getId() + " marked as paid.");
 
         ActivityLogEvent activityLog = ActivityLogEvent.builder()
                 .eventId(UUID.randomUUID().toString())

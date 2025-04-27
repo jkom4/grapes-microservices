@@ -62,7 +62,7 @@ public class OrderService {
 
         String pdfPath = InvoiceGenerator.generateInvoice(order, customerName, address, phoneNumber, items, articleRepository);
         order.setFacturePath(pdfPath);
-        order.setPaid(true);
+        //order.setPaid(true);
 
         orderRepository.save(order);
         sendToDataMining(order, items);
@@ -139,7 +139,7 @@ public class OrderService {
         OrderDTO dto = new OrderDTO();
         dto.setOrderItemId(item.getId());
         dto.setQuantity(item.getQuantityKg() != null ? item.getQuantityKg() : item.getQuantity());
-        dto.setTripId(item.getOrderId()); // ou autre selon ta logique
+        dto.setTripId(item.getOrderId());
         dto.setScanned(Boolean.TRUE.equals(item.getScanned()));
         dto.setProductDescription(
                 articleRepository.findById(item.getArticleId())
