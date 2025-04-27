@@ -27,3 +27,20 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+# Password and env properties
+.env
+*.env
+
+# Volumes
+docker/*/volumes/
+**/docker/volumes/
+
+# Invoices
+invoices/*
+/invoices/
+
+# Ignore all generated PDF invoices
+invoices/*.pdf
+uploads/invoices/*.pdf
+/uploads/
+/payment-service/payment-backend/src/main/resources/keystore/

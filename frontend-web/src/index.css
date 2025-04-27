@@ -1,13 +1,72 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Import TailwindCSS config */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+* {
+    font-family: 'Poppins', sans-serif;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Pulse effect on button click */
+.buy-btn .pulse-effect {
+    animation: pulse 0.3s ease-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Cart icon animation */
+.cart-animation {
+    animation: fly-to-cart 1s ease-in-out forwards;
+}
+
+@keyframes fly-to-cart {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(50vw, -50vh) scale(0.8);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(80vw, -80vh) scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* Toast notification animation */
+.animate-toast {
+    animation: slide-in 0.5s ease-out, fade-out 0.5s ease-out 2.5s;
+}
+
+@keyframes slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
 }

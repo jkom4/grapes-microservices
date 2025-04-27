@@ -1,21 +1,28 @@
+// app/build.gradle.kts
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.kapt") // Utilisez-le directement
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "grapes.microservices"
-    compileSdk = 35
+    // Consider using compileSdk 34 if 35 causes issues, as 35 might still be in preview/beta
+    compileSdk = 35 // Or 35 if you are sure it's stable and needed
 
     defaultConfig {
         applicationId = "grapes.microservices"
         minSdk = 24
-        targetSdk = 35
+        // targetSdk should usually match compileSdk
+        targetSdk = 34 // Or 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "BASE_URL", "\"${project.properties["BASE_URL"]}\"")
     }
 
     buildTypes {
@@ -36,24 +43,54 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.3"  // Example version; adjust as needed
     }
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
+    implementation(platform(libs.androidx.compose.bom)) // Use the BOM correctly
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.preferences.core.android)
+
+    // --- Testing ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(platform(libs.androidx.compose.bom)) // Use BOM here too
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    debugImplementation(libs.androidx.ui.test.manifest) // Often only needed for specific test scenarios
+
+    // --- Koin ---
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.navigation)
+    implementation(libs.koin.androidx.compose)
+    testImplementation(libs.koin.test.junit4)
+
+    // --- Url Image ---
+    implementation(libs.coil3.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
+    // --- Image Primary Color extractor
+    implementation(libs.androidx.palette.ktx)
+
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation ("io.coil-kt:coil-compose:2.4.0")
+    implementation ("androidx.compose.material:material-icons-extended:1.5.0")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+    implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
 }

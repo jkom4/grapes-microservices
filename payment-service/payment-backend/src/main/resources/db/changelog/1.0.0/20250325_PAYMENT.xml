@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="1" author="grapes_en">
+        <createTable tableName="bank">
+            <column name="bank_name" type="VARCHAR(100)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="bank_address" type="VARCHAR(255)"/>
+            <column name="country" type="VARCHAR(100)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="grapes_en">
+        <createTable tableName="client">
+            <column name="client_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(100)"/>
+            <column name="first_name" type="VARCHAR(100)"/>
+            <column name="gender" type="VARCHAR(10)"/>
+            <column name="birth_date" type="DATE"/>
+            <column name="marital_status" type="VARCHAR(20)"/>
+            <column name="average_monthly_salary" type="DECIMAL(10,2)"/>
+            <column name="email" type="VARCHAR(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="national_registry_number" type="VARCHAR(50)"/>
+            <column name="phone_number" type="VARCHAR(20)"/>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="registration_date" type="DATE"/>
+            <column name="status" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="grapes_en">
+        <createTable tableName="merchant">
+            <column name="merchant_name" type="VARCHAR(100)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="business_sector" type="VARCHAR(100)"/>
+            <column name="merchant_address" type="VARCHAR(255)"/>
+            <column name="vat_number" type="VARCHAR(50)"/>
+            <column name="registration_date" type="DATE"/>
+            <column name="merchant_status" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="grapes_en">
+        <createTable tableName="account">
+            <column name="account_number" type="VARCHAR(30)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="client_id" type="BIGINT"/>
+            <column name="bank_name" type="VARCHAR(100)"/>
+            <column name="authentication_type" type="VARCHAR(50)"/>
+            <column name="balance" type="DECIMAL(10,2)"/>
+            <column name="opening_date" type="DATE"/>
+            <column name="account_type" type="VARCHAR(20)"/>
+            <column name="account_status" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="5" author="grapes_en">
+        <createTable tableName="transaction">
+            <column name="transaction_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="debtor_account" type="VARCHAR(30)"/>
+            <column name="creditor_account" type="VARCHAR(30)"/>
+            <column name="debtor_bank" type="VARCHAR(100)"/>
+            <column name="creditor_bank" type="VARCHAR(100)"/>
+            <column name="client_id" type="BIGINT"/>
+            <column name="transaction_type" type="VARCHAR(50)"/>
+            <column name="client_account_number" type="VARCHAR(30)"/>
+            <column name="transaction_date_time" type="DATETIME"/>
+            <column name="transfer_amount" type="DECIMAL(10,2)"/>
+            <column name="merchant_name" type="VARCHAR(100)"/>
+            <column name="merchant_business_sector" type="VARCHAR(100)"/>
+            <column name="authentication_type_3ds" type="VARCHAR(50)"/>
+            <column name="status_3ds" type="VARCHAR(20)"/>
+            <column name="debtor_account_new_balance" type="DECIMAL(10,2)"/>
+            <column name="creditor_account_new_balance" type="DECIMAL(10,2)"/>
+            <column name="status" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="6" author="grapes_en">
+        <createTable tableName="transaction_log">
+            <column name="log_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="transaction_id" type="BIGINT"/>
+            <column name="log_date_time" type="DATETIME"/>
+            <column name="event_type" type="VARCHAR(100)"/>
+            <column name="description" type="TEXT"/>
+            <column name="ip_location" type="VARCHAR(45)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="7" author="grapes_en">
+        <createTable tableName="auth_tokens">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="token" type="VARCHAR(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_used" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="8" author="grapes_en">
+        <createTable tableName="cards">
+            <column name="card_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="client_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="card_number" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiration_date" type="VARCHAR(7)"> <constraints nullable="false"/>
+            </column>
+            <column name="cardholder_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="card_type" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="card_status" type="VARCHAR(20)" defaultValue="active">
+                <constraints nullable="false"/>
+            </column>
+            <column name="added_date" type="DATE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="9" author="grapes_en">
+        <addForeignKeyConstraint
+                baseTableName="account" baseColumnNames="client_id"
+                referencedTableName="client" referencedColumnNames="client_id"
+                constraintName="fk_account_client"/>
+        <addForeignKeyConstraint
+                baseTableName="account" baseColumnNames="bank_name"
+                referencedTableName="bank" referencedColumnNames="bank_name"
+                constraintName="fk_account_bank"/>
+    </changeSet>
+
+    <changeSet id="10" author="grapes_en">
+        <addForeignKeyConstraint
+                baseTableName="transaction" baseColumnNames="debtor_account"
+                referencedTableName="account" referencedColumnNames="account_number"
+                constraintName="fk_transaction_account_debtor"/>
+        <addForeignKeyConstraint
+                baseTableName="transaction" baseColumnNames="creditor_account"
+                referencedTableName="account" referencedColumnNames="account_number"
+                constraintName="fk_transaction_account_creditor"/>
+    </changeSet>
+
+    <changeSet id="11" author="grapes_en">
+        <addForeignKeyConstraint
+                baseTableName="transaction_log" baseColumnNames="transaction_id"
+                referencedTableName="transaction" referencedColumnNames="transaction_id"
+                constraintName="fk_log_transaction_transaction"/>
+    </changeSet>
+
+    <changeSet id="12" author="grapes_en">
+        <addForeignKeyConstraint
+                baseTableName="auth_tokens" baseColumnNames="client_id"
+                referencedTableName="client" referencedColumnNames="client_id"
+                constraintName="fk_authtoken_client"/>
+    </changeSet>
+
+    <changeSet id="13" author="grapes_en">
+        <addForeignKeyConstraint
+                baseTableName="cards" baseColumnNames="client_id"
+                referencedTableName="client" referencedColumnNames="client_id"
+                constraintName="fk_cards_client"/>
+    </changeSet>
+
+    <changeSet id="14" author="grapes_en">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="transaction" columnName="status_3ds"/>
+        </preConditions>
+        <dropColumn tableName="transaction" columnName="status_3ds"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,468 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <!-- 1. Table category -->
+    <changeSet author="kilane dounia" id="1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="category"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="category">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+            <column name="description" type="TEXT"/>
+            <column name="picture_path" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+
+    <!-- 2. Table family -->
+    <changeSet author="kilane dounia" id="2">
+        <createTable tableName="family">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+            <column name="description" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 3. Table article -->
+    <changeSet author="kilane dounia" id="3">
+        <createTable tableName="article">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="category_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="family_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+            <column name="description" type="TEXT"/>
+            <column name="price_kg" type="DECIMAL(10,2)"/>
+            <column name="price_unit" type="DECIMAL(10,2)"/>
+            <column name="stock_kg" type="DECIMAL(10,2)"/>
+            <column name="unit_stock" type="DECIMAL(10,2)"/>
+            <column name="origin" type="VARCHAR(100)"/>
+            <column name="picture_path" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 4. Table order -->
+    <changeSet author="kilane dounia" id="4">
+        <createTable tableName="order">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="code" type="INT"/>
+            <column name="user_id" type="VARCHAR(255)"/>
+            <column name="facture_path" type="VARCHAR(255)"/>
+            <column name="total_price" type="DECIMAL(10,2)"/>
+            <column name="created_at" type="DATETIME"/>
+            <column name="is_paid" type="BOOLEAN"/>
+            <column name="is_finished" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- 5. Table order_item -->
+    <changeSet author="kilane dounia" id="5">
+        <createTable tableName="order_item">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="article_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cart_id" type="INT"/>
+            <column name="price" type="DECIMAL(10,2)"/>
+            <column name="quantity_kg" type="DECIMAL(10,2)"/>
+            <column name="quantity" type="DECIMAL(10,2)"/>
+            <column name="scanned_at" type="DATETIME"/>
+            <column name="is_scanned" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- 6. Table delivery_status -->
+    <changeSet author="kilane dounia" id="6">
+        <createTable tableName="delivery_status">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="label" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+    <!--  Insert the 3 status -->
+    <changeSet author="kilane dounia" id="6-1">
+        <insert tableName="delivery_status">
+            <column name="id" valueNumeric="1"/>
+            <column name="label" value="Pending"/>
+        </insert>
+
+        <insert tableName="delivery_status">
+            <column name="id" valueNumeric="2"/>
+            <column name="label" value="In Progress"/>
+        </insert>
+
+        <insert tableName="delivery_status">
+            <column name="id" valueNumeric="3"/>
+            <column name="label" value="Delivered"/>
+        </insert>
+    </changeSet>
+
+    <!-- 7. Table delivery -->
+    <changeSet author="kilane dounia" id="7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="delivery"/>
+            </not>
+        </preConditions>
+        <createTable tableName="delivery">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="order_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(255)"/>
+            <column name="delivery_status_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_date" type="DATETIME"/>
+            <column name="delivered_at" type="DATETIME"/>
+            <column name="scanned_at" type="DATETIME"/>
+            <column name="tracking_url" type="VARCHAR(255)"/>
+            <column name="comment" type="TEXT"/>
+            <column name="doorstep" type="BOOLEAN"/>
+            <column name="signature" type="BLOB"/>
+            <column name="is_finished" type="BOOLEAN" defaultValueBoolean="false" />
+        </createTable>
+    </changeSet>
+
+    <!-- 8. Table delivery_picture -->
+    <changeSet author="kilane dounia" id="8">
+        <createTable tableName="delivery_picture">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="delivery_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="picture_path" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 9–15. Foreign keys -->
+    <changeSet author="kilane dounia" id="9">
+        <addForeignKeyConstraint baseTableName="article" baseColumnNames="category_id"
+                                 referencedTableName="category" referencedColumnNames="id"
+                                 constraintName="fk_article_category"/>
+    </changeSet>
+
+    <changeSet author="kilane dounia" id="10">
+        <addForeignKeyConstraint baseTableName="article" baseColumnNames="family_id"
+                                 referencedTableName="family" referencedColumnNames="id"
+                                 constraintName="fk_article_family"/>
+    </changeSet>
+
+    <changeSet author="kilane dounia" id="11">
+        <addForeignKeyConstraint baseTableName="order_item" baseColumnNames="article_id"
+                                 referencedTableName="article" referencedColumnNames="id"
+                                 constraintName="fk_orderitem_article"/>
+    </changeSet>
+
+    <changeSet author="kilane dounia" id="12">
+        <addForeignKeyConstraint baseTableName="order_item" baseColumnNames="order_id"
+                                 referencedTableName="order" referencedColumnNames="id"
+                                 constraintName="fk_orderitem_order"/>
+    </changeSet>
+
+    <changeSet author="kilane dounia" id="13">
+        <addForeignKeyConstraint baseTableName="delivery" baseColumnNames="order_id"
+                                 referencedTableName="order" referencedColumnNames="id"
+                                 constraintName="fk_delivery_order"/>
+    </changeSet>
+
+    <changeSet author="kilane dounia" id="14">
+        <addForeignKeyConstraint baseTableName="delivery" baseColumnNames="delivery_status_id"
+                                 referencedTableName="delivery_status" referencedColumnNames="id"
+                                 constraintName="fk_delivery_status"/>
+    </changeSet>
+
+    <changeSet author="kilane dounia" id="15">
+        <addForeignKeyConstraint baseTableName="delivery_picture" baseColumnNames="delivery_id"
+                                 referencedTableName="delivery" referencedColumnNames="id"
+                                 constraintName="fk_deliverypicture_delivery"/>
+    </changeSet>
+    <!-- 16. Table review -->
+    <changeSet author="kilane dounia" id="16">
+        <createTable tableName="review">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="TEXT"/>
+            <column name="created_at" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="kilane dounia" id="17">
+        <sql>
+            ALTER TABLE review
+                ADD CONSTRAINT chk_review_rating
+                    CHECK (rating BETWEEN 1 AND 5);
+        </sql>
+    </changeSet>
+
+    <changeSet author="kilane dounia" id="18">
+        <addForeignKeyConstraint
+                baseTableName="review"
+                baseColumnNames="order_id"
+                referencedTableName="order"
+                referencedColumnNames="id"
+                constraintName="fk_review_order"/>
+    </changeSet>
+
+    <!-- 20. Insert default categories -->
+    <changeSet author="nassim" id="19">
+        <insert tableName="category">
+            <column name="id" value="1"/>
+            <column name="name" value="Fruits classiques"/>
+            <column name="description" value="Fruits standards du quotidien"/>
+            <column name="picture_path" value="fruits_classiques.jpg"/>
+        </insert>
+
+        <insert tableName="category">
+            <column name="id" value="2"/>
+            <column name="name" value="Fruits exotiques"/>
+            <column name="description" value="Fruits rares et savoureux"/>
+            <column name="picture_path" value="fruits_exotiques.jpg"/>
+        </insert>
+
+        <insert tableName="category">
+            <column name="id" value="4"/>
+            <column name="name" value="Fruits rares"/>
+            <column name="description" value="Produits d'exception et de saison"/>
+            <column name="picture_path" value="fruits_rares.jpg"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="nassim" id="20">
+        <insert tableName="family">
+            <column name="id" value="1"/>
+            <column name="name" value="Fruits d'été"/>
+            <column name="description" value="Fruits disponibles en été"/>
+        </insert>
+        <insert tableName="family">
+            <column name="id" value="2"/>
+            <column name="name" value="Fruits d'hiver"/>
+            <column name="description" value="Fruits disponibles en hiver"/>
+        </insert>
+    </changeSet>
+
+
+    <!-- 19. Insert default articles -->
+    <changeSet author="nassim" id="21">
+        <insert tableName="article">
+            <column name="category_id" value="1"/>
+            <column name="family_id" value="1"/>
+            <column name="name" value="Kiwi"/>
+            <column name="description" value="Petit fruit vert vitaminé"/>
+            <column name="price_kg" valueNumeric="4.50"/>
+            <column name="price_unit" valueNumeric="1.10"/>
+            <column name="stock_kg" valueNumeric="8.00"/>
+            <column name="unit_stock" valueNumeric="12.00"/>
+            <column name="origin" value="Nouvelle-Zélande"/>
+            <column name="picture_path" value="kiwi.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="1"/>
+            <column name="family_id" value="1"/>
+            <column name="name" value="Banane"/>
+            <column name="description" value="Fruit jaune énergétique"/>
+            <column name="price_kg" valueNumeric="2.80"/>
+            <column name="price_unit" valueNumeric="0.70"/>
+            <column name="stock_kg" valueNumeric="10.00"/>
+            <column name="unit_stock" valueNumeric="30.00"/>
+            <column name="origin" value="Colombie"/>
+            <column name="picture_path" value="banane.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="1"/>
+            <column name="family_id" value="1"/>
+            <column name="name" value="Pomme"/>
+            <column name="description" value="Fruit rouge croquant"/>
+            <column name="price_kg" valueNumeric="3.99"/>
+            <column name="price_unit" valueNumeric="1.20"/>
+            <column name="stock_kg" valueNumeric="20.00"/>
+            <column name="unit_stock" valueNumeric="15.00"/>
+            <column name="origin" value="France"/>
+            <column name="picture_path" value="pomme.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="4"/>
+            <column name="family_id" value="1"/>
+            <column name="name" value="Ananas Victoria"/>
+            <column name="description" value="Délicieux petit ananas sucré, parfait pour l'été"/>
+            <column name="price_kg" valueNumeric="5.99"/>
+            <column name="price_unit" valueNumeric="2.50"/>
+            <column name="stock_kg" valueNumeric="15.00"/>
+            <column name="unit_stock" valueNumeric="10.00"/>
+            <column name="origin" value="Réunion"/>
+            <column name="picture_path" value="ananas_victoria.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="1"/>
+            <column name="family_id" value="1"/>
+            <column name="name" value="Fraise"/>
+            <column name="description" value="Fruit rouge sucré, idéal pour les desserts"/>
+            <column name="price_kg" valueNumeric="6.50"/>
+            <column name="price_unit" valueNumeric="2.00"/>
+            <column name="stock_kg" valueNumeric="5.00"/>
+            <column name="unit_stock" valueNumeric="8.00"/>
+            <column name="origin" value="Espagne"/>
+            <column name="picture_path" value="fraise.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="2"/>
+            <column name="family_id" value="2"/>
+            <column name="name" value="Orange"/>
+            <column name="description" value="Agrume riche en vitamine C"/>
+            <column name="price_kg" valueNumeric="3.20"/>
+            <column name="price_unit" valueNumeric="1.00"/>
+            <column name="stock_kg" valueNumeric="18.00"/>
+            <column name="unit_stock" valueNumeric="25.00"/>
+            <column name="origin" value="Maroc"/>
+            <column name="picture_path" value="orange.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="2"/>
+            <column name="family_id" value="2"/>
+            <column name="name" value="Raisin"/>
+            <column name="description" value="Petites grappes sucrées"/>
+            <column name="price_kg" valueNumeric="4.80"/>
+            <column name="price_unit" valueNumeric="1.80"/>
+            <column name="stock_kg" valueNumeric="12.00"/>
+            <column name="unit_stock" valueNumeric="15.00"/>
+            <column name="origin" value="Italie"/>
+            <column name="picture_path" value="raisin.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="2"/>
+            <column name="family_id" value="2"/>
+            <column name="name" value="Poire"/>
+            <column name="description" value="Fruit doux et juteux"/>
+            <column name="price_kg" valueNumeric="3.60"/>
+            <column name="price_unit" valueNumeric="1.30"/>
+            <column name="stock_kg" valueNumeric="14.00"/>
+            <column name="unit_stock" valueNumeric="10.00"/>
+            <column name="origin" value="Belgique"/>
+            <column name="picture_path" value="poire.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="2"/>
+            <column name="family_id" value="2"/>
+            <column name="name" value="Cerise"/>
+            <column name="description" value="Petite douceur rouge, sucrée"/>
+            <column name="price_kg" valueNumeric="7.20"/>
+            <column name="price_unit" valueNumeric="2.90"/>
+            <column name="stock_kg" valueNumeric="7.00"/>
+            <column name="unit_stock" valueNumeric="8.00"/>
+            <column name="origin" value="Turquie"/>
+            <column name="picture_path" value="cerise.jpg"/>
+        </insert>
+
+        <insert tableName="article">
+            <column name="category_id" value="2"/>
+            <column name="family_id" value="2"/>
+            <column name="name" value="Mangue"/>
+            <column name="description" value="Fruit exotique juteux"/>
+            <column name="price_kg" valueNumeric="5.80"/>
+            <column name="price_unit" valueNumeric="2.30"/>
+            <column name="stock_kg" valueNumeric="9.00"/>
+            <column name="unit_stock" valueNumeric="10.00"/>
+            <column name="origin" value="Brésil"/>
+            <column name="picture_path" value="mangue.jpg"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="nassim" id="22" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="delivery" columnName="name"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="delivery">
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="postal_code" type="VARCHAR(20)"/>
+            <column name="country" type="VARCHAR(50)"/>
+            <column name="phone_number" type="VARCHAR(20)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Changelog: 20250424_add_transaction_table.xml -->
+    <changeSet id="20250424-transaction-table" author="nassim">
+        <createTable tableName="transaction">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="transaction_uuid" type="CHAR(36)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="order_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="VARCHAR(255)"/>
+            <column name="card_type" type="VARCHAR(50)"/>
+            <column name="payment_status" type="VARCHAR(50)"/>
+            <column name="delivery_status" type="VARCHAR(50)"/>
+            <column name="delivery_time_days" type="INT"/>
+            <column name="currency" type="VARCHAR(10)"/>
+            <column name="amount" type="DECIMAL(10,2)"/>
+            <column name="transaction_date_time" type="DATETIME"/>
+            <column name="created_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 18. Foreign key: review -> user -->
+<!--    <changeSet author="kilane dounia" id="18">-->
+<!--        <addForeignKeyConstraint-->
+<!--                baseTableName="review"-->
+<!--                baseColumnNames="user_id"-->
+<!--                referencedTableName="user"-->
+<!--                referencedColumnNames="id"-->
+<!--                constraintName="fk_review_user"/>-->
+<!--    </changeSet>-->
+
+</databaseChangeLog>

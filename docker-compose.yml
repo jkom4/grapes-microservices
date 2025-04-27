@@ -1,43 +1,106 @@
-version: '3.8'
+version: '3.9'
 
 services:
+  ### DATABASES
   mariadb:
     build: ./docker/mariadb
+    env_file:
+      - .env
+    image:  ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
     container_name: grapes-mariadb
+
     environment:
-      MARIADB_ROOT_PASSWORD: SparringMASI!
-      MARIADB_USER: module
-      MARIADB_PASSWORD: SparringMASI!
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - ./docker/mariadb/volumes/mariadb_data:/var/lib/mysql
+      - ./docker/mariadb/config/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    command:
+      [
+        "--server-id=1",
+        "--log-bin=mysql-bin",
+        "--binlog-do-db=sales_db",
+        "--binlog-do-db=payment_db",
+        "--bind-address=0.0.0.0"
+      ]
+
+  mariadb-secondary:
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mariadb-grapes:latest
+    container_name: mariadb-secondary
+    env_file: .env
+    environment:
+      MARIADB_REPLICATION_ROLE: slave
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MARIADB_MASTER_HOST: ${MARIADB_MASTER_HOST}
+      MARIADB_REPLICATION_USER: ${MARIADB_REPLICATION_USER}
+      MARIADB_REPLICATION_PASSWORD: ${MARIADB_REPLICATION_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docker/mariadb/volumes/mariadb_slave_data:/var/lib/mysql
+    command:
+      [
+        "--server-id=2",
+        "--relay-log=relay-bin",
+        "--read-only=1",
+        "--bind-address=0.0.0.0"
+      ]
+    depends_on:
+      - mariadb
+
 
   mongodb:
     build: ./docker/mongodb
+    env_file:
+      - ./.env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/mongodb-grapes:latest
     container_name: grapes-mongodb
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: SparringMASI!
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_USER_RW: ${MONGO_USER_RW}
+      MONGO_PASSWORD_RW: ${MONGO_PASSWORD_RW}
+      MONGO_TARGET_DB: BD_OPER_PROC_AUTH # Pass the target DB name for permissions
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+      - ./docker/mongodb/config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     command: ["--auth"]  # To activate authentication
 
-
+### Exchange
   rabbitmq:
     build: ./docker/rabbitmq
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/rabbitmq-grapes:latest
     container_name: grapes-rabbitmq
     volumes:
       - ./docker/rabbitmq/volumes/data/:/var/lib/rabbitmq/mnesia
       - ./docker/rabbitmq/volumes/logs/:/var/log/rabbitmq/
     environment:
-      RABBITMQ_DEFAULT_USER: grapes
-      RABBITMQ_DEFAULT_PASS: grapes
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
       - "5672:5672"
       - "15673:15672"
+
+### MONITORING
+  redis:
+    image: redis:7.2-alpine
+    env_file: .env
+    container_name: grapes-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    entrypoint: [ "sh", "-c", "redis-server --requirepass \"$REDIS_PASSWORD\"" ]
+
+
 
   sonarqube:
     image: sonarqube:lts-community
@@ -63,6 +126,7 @@ services:
 
   prometheus:
     image: prom/prometheus
+    env_file: .env
     container_name: grapes-prometheus
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -74,12 +138,228 @@ services:
     container_name: grapes-grafana
     volumes:
       - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana/dashboards:/etc/grafana/dashboards
     ports:
       - "3000:3000"
     depends_on:
       - prometheus
 
+  mongodb-exporter:
+    image: bitnami/mongodb-exporter:latest
+    container_name: mongo-exporter
+    restart: always
+    environment:
+      MONGODB_URI: "mongodb://exporter:exporterpass@grapes-mongodb:27017/admin"
+    ports:
+      - "9216:9216"
+    depends_on:
+      - mongodb
+
+  redis-exporter:
+    image: oliver006/redis_exporter
+    container_name: redis-exporter
+    environment:
+      REDIS_ADDR: redis://grapes-redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - redis
+    ports:
+      - "9121:9121"
+
+  ### BACKEND
+  data-ingestion-service:
+    build: ./data-mining-service/data_ingestion_service
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-mining-sevice:latest
+    container_name: data-ingestion-service
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - RABBITMQ_HOST=rabbitmq # Use service name
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER} # From .env via env_file
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD} # From .env via env_file
+      - AMQP_VHOST=/ # Default VHost usually correct
+      - ACTIVITY_LOGS_QUEUE=q_activity_logs # Explicitly set
+      - AUTH_LOGS_QUEUE=q.auth_logs
+
+      # --- DB Connection (Using ROOT Credentials) ---
+      # MariaDB Root
+      - MYSQL_USER=root # Explicitly set to root
+      - MYSQL_PWD=${DB_PASSWORD} # Use the ROOT password defined for MariaDB (DB_PASSWORD from .env)
+      - MYSQL_HOST=mariadb # Use service name
+      - MYSQL_PORT=3306
+      - MYSQL_DB_ACTIVITIES=BD_OPER_ACTIVITIES
+      - MYSQL_TRANSACTIONS_TABLE=transactions #
+
+      # MongoDB Root
+      - MONGO_USER=${MONGO_ROOT_USER} # Use ROOT user from .env
+      - MONGO_PWD=${MONGO_ROOT_PASSWORD} # Use ROOT password from .env
+      - MONGO_HOST=mongodb # Use service name
+      - MONGO_PORT=27017
+      - MONGO_DB_AUTH=BD_OPER_PROC_AUTH # Target DB Name for auth logs
+      - MONGO_AUTH_SOURCE=admin # Root user is usually defined in 'admin' db
+      - MONGO_AUTH_COLLECTION=authentication_logs #
+
+      # --- SQLAlchemy Pool Recycle ---
+      - POOL_RECYCLE=${POOL_RECYCLE:-3600} # Use from .env or default
+
+#       --- Consumer Logic Params (Optional - Override defaults in consumer.py) ---
+#       - SAVE_INTERVAL_SECONDS=60
+#       - MAX_BATCH_SIZE_TRANS=50
+#       - MAX_BATCH_SIZE_AUTH=100
+#       - MAX_HOLD_TIME_SECONDS=120
+#       - LOG_LEVEL=debug
+
+      # --- Python & Other ---
+      - PYTHONUNBUFFERED=1 # Good for seeing logs immediately
+      - USER=${USER:-unknown} # Usually not needed by script
+
+    depends_on:
+        - rabbitmq
+        - mariadb
+        - mongodb
+
+
+
+  api-gateway:
+    build: ./api-gateway
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/api-gateway:latest
+    container_name: api-gateway
+    ports:
+      - "8090:8090"
+    depends_on:
+      - mongodb
+      - mariadb
+      - data-mining-service
+      - auth-service
+      - sales-service
+      - payment-service
+      - chat-service
+      - redis
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+
+  auth-service:
+    build: ./auth-service/auth-backend
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-backend:latest
+    container_name: auth-backend
+    ports:
+      - "8091:8091"
+    depends_on:
+      - mongodb
+      - mariadb
+
+  sales-service:
+    build: ./sales-service
+    env_file: .env
+    image:  ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/sales-service:latest
+    container_name: sales-backend
+    ports:
+      - "8092:8092"
+    environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    depends_on:
+      - mariadb
+      - rabbitmq
+
+
+  payment-service:
+    build: ./payment-service/payment-backend
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-backend:latest
+    container_name: payment-backend
+    ports:
+      - "8093:8093"
+    depends_on:
+      - mariadb
+      - redis
+
+
+  chat-service:
+    build: ./chat-service
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/chat-service:latest
+    container_name: chat-backend
+    ports:
+      - "8094:8094"
+    depends_on:
+      - rabbitmq
+      - mongodb
+
+
+  data-mining-service:
+    build: ./data-mining-service
+    env_file: .env
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/data-mining-service:latest
+    container_name: data-mining-backend
+    ports:
+      - "8096:8096"
+    depends_on:
+      - mongodb
+      - mariadb
+
+
+
+  shiny-app:
+    build: ./data-mining-service
+    env_file: .env
+    container_name: grapes-insights-app
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/shiny-app:latest
+    restart: unless-stopped
+    ports:
+      - "83:3838"
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PWD=${DB_PASSWORD}
+      - MYSQL_HOST=mariadb
+      - MYSQL_PORT=3306
+      - MYSQL_DB_ACTIVITIES=BD_OPER_ACTIVITIES
+      - MONGO_URI=${DATA_MINING_MONGO_URI}
+      - MONGO_DB_AUTH=BD_OPER_PROC_AUTH
+      - DECIS_MONGO_URI=${DATA_MINING_MONGO_URI}
+      - DECIS_MONGO_DB=BD_DECIS_TEMP
+      - USER=${USER:-unknown}
+    depends_on:
+      - mariadb
+      - mongodb
+
+
+### FRONTEND
+
+  frontend-web:
+    build: ./frontend-web
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/grapes-frontend:latest
+    container_name: grapes-frontend
+    ports:
+      - "80:80"
+
+  frontend-auth:
+    build: ./auth-service/auth-frontend
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-frontend:latest
+    container_name: auth-frontend
+    ports:
+      - "81:80"
+    depends_on:
+      - api-gateway
+
+  frontend-payment:
+    build: ./payment-service/payment-frontend
+    image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/payment-service-frontend:latest
+    ports:
+      - "82:80"
+    depends_on:
+      - api-gateway
+
 volumes:
   mariadb_data:
   mongodb_data:
   sonarqube-data:
+  redis_data:
+
+

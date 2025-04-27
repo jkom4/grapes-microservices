@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import grapes.microservices.frontendchat.views.components.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox fx:id="authContainerRoot" alignment="CENTER" prefHeight="400.0" prefWidth="600.0" styleClass="authPage" stylesheets="@auth-view.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="grapes.microservices.frontendchat.views.AuthViewController">
+    <VBox fx:id="authContainer" alignment="CENTER">
+        <Label styleClass="auth-title" text="Grapes Support">
+          <font>
+             <Font name="Forte" size="60.0" />
+          </font>
+        </Label>
+
+        <ImageView fx:id="successImage" fitHeight="50" fitWidth="50" managed="false" visible="false">
+            <Image url="@images/success.png" />
+        </ImageView>
+        <ImageView fx:id="errorImage" fitHeight="50" fitWidth="50" managed="false" visible="false">
+            <Image url="@images/error.png" />
+        </ImageView>
+        <Label fx:id="infoMessageFx" textAlignment="CENTER" wrapText="true">
+            <font><Font name="Arial" size="14.0" /></font>
+            <padding><Insets bottom="5.0" left="5.0" right="5.0" top="20.0" /></padding>
+        </Label>
+        <Label fx:id="errorMessageFx" text="Error: token invalid" visible="false" />
+        <HBox alignment="CENTER">
+            <VBox.margin><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></VBox.margin>
+            <LoadingFx fx:id="loadingFx" maxHeight="60.0" maxWidth="60.0" visible="false" />
+        </HBox>
+        <HBox alignment="CENTER" minHeight="40">
+            <VBox.margin><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></VBox.margin>
+            <Button fx:id="authButton" text="Authenticate"/>
+        </HBox>
+    </VBox>
+</VBox>

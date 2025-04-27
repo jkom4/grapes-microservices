@@ -3,45 +3,31 @@ package com.example.mobile_cll
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import com.example.mobile_cll.ui.theme.MobileCLLTheme
+import com.example.mobile_cll.views.components.various.MyNavigation
 
+
+/**
+ * Main entry point of the application, responsible for setting up navigation and the UI theme.
+ * It initializes the DatabaseHelper and delegates navigation to MyNavigation composable.
+ */
 class MainActivity : ComponentActivity() {
+
+    /**
+     * Called when the activity is first created. Sets up the database helper, UI content,
+     * and navigation structure using Jetpack Compose and Navigation.
+     *
+     * @param savedInstanceState If non-null, this activity is being re-initialized with previously saved state.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
         setContent {
             MobileCLLTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                val navController = rememberNavController()
+                MyNavigation(navController = navController)
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MobileCLLTheme {
-        Greeting("Android")
     }
 }

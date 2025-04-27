@@ -3,12 +3,12 @@ package grapes.microservices.salesservice.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transactions")
-@Getter
-@Setter
+@Table(name = "transaction")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,15 +18,16 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "client_id")
-    private String clientId;
+    private String transactionId;
 
-    @Column(name = "amount")
-    private Double amount;
-
-    @Column(name = "transaction_date")
-    private LocalDateTime transactionDate;
-
-    @Column(name = "status")
-    private String status;
+    private Integer orderId;
+    private Long userId;
+    private String bankTransactionId;
+    private String paymentMethod;
+    private BigDecimal amount;
+    private String currency;
+    private String paymentStatus;
+    private String deliveryStatus;
+    private Integer deliveryTimeDays;
+    private LocalDateTime transactionDateTime;
 }

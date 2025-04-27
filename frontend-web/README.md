@@ -68,3 +68,46 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Architecture 
+
+```
+src/
+│-- assets/               # Contains images, icons, and other static files
+│-- components/           # Reusable components (forms, buttons, etc.)
+│-- features/             # Feature-specific components (e.g., login, dashboard)
+│-- layouts/              # Page layouts (e.g., Header, Footer, Sidebar)
+│-- pages/                # Components representing specific pages (e.g., Home, About)
+│-- sections/             # Section representing specific parts of a page
+│-- services/             # Use to call API endpoints (fetch, ...)
+│-- utils/                # Utility functions (helpers, formatters, models, etc.)
+│-- App.tsx               # Main application component
+│-- index.tsx             # Entry point of the React application
+```
+
+# Newsletter Subscription Setup
+
+This guide will help you set up the Brevo integration for the newsletter subscription form in your React app.
+
+## 1. Create the `.env` File
+
+In your `frontend-web` directory, create a `.env` file and add the following:
+```bash
+REACT_APP_BREVO_API_KEY=your_brevo_api_key_here 
+REACT_APP_BREVO_LIST_ID=your_brevo_list_id_here
+```
+
+
+## 2. Get Your Brevo API Key
+
+1. Log in to [Brevo](https://app.brevo.com/accounts/login).
+2. Go to **SMTP & API** > **API Keys**.
+3. Create a new API key and copy it.
+4. Paste the API key into the `.env` file as `REACT_APP_BREVO_API_KEY`.
+
+## 3. Get Your Brevo List ID
+
+1. Go to **Contacts** in Brevo.
+2. Create or select a list.
+3. Copy the List ID and paste it into the `.env` file as `REACT_APP_BREVO_LIST_ID`.
+
