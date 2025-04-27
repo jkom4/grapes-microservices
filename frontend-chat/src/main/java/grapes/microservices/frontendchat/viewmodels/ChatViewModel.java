@@ -134,6 +134,7 @@ public class ChatViewModel {
             var topicId = currentTopicObserver.get().id();
             var authUser = UserSession.getINSTANCE().getAuthenticatedUser().get();
             var message = new Message("0", topicId, authUser, newValue, LocalDateTime.now());
+            message.setOrigin(Message.Origin.local);
             // 1. add user's own message to the list
             messageListObserver.add(message);
             // 2. multicast the message in local
@@ -189,9 +190,9 @@ public class ChatViewModel {
         // 2. /!\ CURRENTLY I MANAGE THE MESSAGE UNICITY BY THE DATE, to avoid duplicated messages (not the best way)
         // 3. As there is limited number of multicast groups (253), collisions can happen => so i check topic id
         multicastService.getMessageReveiceObserver().addListener((change, oldMessage, newMessage) -> {
-            final boolean IS_HIS_OWN_MESSAGE = newMessage.sender().id().equals(UserSession.getINSTANCE().getAuthenticatedUser().get().id());
+            final boolean IS_HIS_OWN_MESSAGE = newMessage.getSender().id().equals(UserSession.getINSTANCE().getAuthenticatedUser().get().id());
             final boolean IS_UNIQUE = !isMessageDateInLastX(messageListObserver, newMessage.getDateToString(), 10);
-            final boolean IS_MESSAGE_FROM_ANOTHER_TOPIC = !newMessage.topicId().equals(currentTopicObserver.get().id());
+            final boolean IS_MESSAGE_FROM_ANOTHER_TOPIC = !newMessage.getTopicId().equals(currentTopicObserver.get().id());
 
             if (IS_HIS_OWN_MESSAGE) {
                 System.err.println("[Chat ViewModel] Received your own message (via multicast) => ignored");
@@ -209,6 +210,7 @@ public class ChatViewModel {
             // This code is executed by a system thread that is not realted to JavaFx, So it will cause Exception
             // => to avoid this problem, We transfert the code below into a JavaFX thread :
             Platform.runLater(() -> {
+                    newMessage.setOrigin(Message.Origin.multicast);
                     messageListObserver.add(newMessage);
                     System.out.println("[ChatViewModel] Added multicast message to list: " + newMessage); // Optional logging
             });
@@ -226,6 +228,7 @@ public class ChatViewModel {
             }
 
             Platform.runLater(() -> {
+                    newMessage.setOrigin(Message.Origin.pusher);
                     messageListObserver.add(newMessage);
                     System.out.println("[ChatViewModel] Added pusher message to list: " + newMessage); // Optional logging
             });

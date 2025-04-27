@@ -29,7 +29,7 @@ public class FrontendChat extends Application {
     private final String GRAPES_API = AppEnv.CHAT_SERVICE_URL.get();
     private final String PUSHER_APP_KEY = AppEnv.PUSHER_APP_KEY.get();
     private final String PUSHER_CLUSTER = AppEnv.PUSHER_CLUSTER.get();
-    private final String AUTH_SERVICE_URL = AppEnv.AUTH_SERVICE_URL.get();
+    private final String AUTH_SERVICE_URL = AppEnv.AUTH_FRONTEND_URL.get();
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -72,7 +72,7 @@ public class FrontendChat extends Application {
         sceneController.registerScene(SceneController.SCENE.AUTH, authScene);
         sceneController.registerScene(SceneController.SCENE.CHAT, chatScene);
 
-        stage.setTitle("Grapes Support");
+        stage.setTitle("Grapes Chat");
         stage.setScene(authScene);
         stage.setMinWidth(800);
         stage.setMinHeight(500);

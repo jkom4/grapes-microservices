@@ -39,7 +39,7 @@ public class HtmlPages {
             <body>
             <div class="container">
                 <h1>Authenticated Successfully!</h1>
-                <p>You've been authenticated. Return to the Grapes Support app.</p>
+                <p>You've been authenticated. Return to the Grapes Chat app.</p>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c6/Sign-check-icon.png" alt="Check Icon" style="width:150px;height:auto;">
             </div>
             </body>

@@ -68,10 +68,13 @@ public class MulticastService implements IMulticastService {
 
         this.currentTopic = topic;
 
+        NetworkInterface ni;
+        try (MulticastSocket s = new MulticastSocket()) {
+            ni = s.getNetworkInterface();
+        }
         adresseGroupe = InetAddress.getByName(topic.getMulticastGroup());
-        NetworkInterface networkInterface = NetworkInterface.getByName("Wi-Fi");
         InetSocketAddress socketAddress = new InetSocketAddress(adresseGroupe, port);
-        multicastSocket.joinGroup(socketAddress, networkInterface);
+        multicastSocket.joinGroup(socketAddress, ni);
         running = true;
         System.out.println("[MulticastService] Listening to group: " + adresseGroupe + ".");
         listenerExecutor.submit(this::listenInLoop);

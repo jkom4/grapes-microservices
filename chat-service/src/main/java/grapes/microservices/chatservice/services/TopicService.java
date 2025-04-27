@@ -63,6 +63,8 @@ public class TopicService {
                 .createdAt(LocalDateTime.parse(dto.getCreatedAt(), preciseFormat))
                 .build();
 
+        Message savedMessage = messageRepository.save(message);
+
         ActivityLogEvent event = ActivityLogEvent.builder()
                 .eventId(UUID.randomUUID())
                 .eventType("ServiceUsed")
@@ -86,6 +88,7 @@ public class TopicService {
                 .build();
         rabbitTemplate.convertAndSend("q_activity_logs", event);
 
-        return null;
+        dto.setId(savedMessage.getId());
+        return dto;
     }
 }
