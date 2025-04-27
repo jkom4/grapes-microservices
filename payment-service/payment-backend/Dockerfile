@@ -8,7 +8,7 @@ FROM eclipse-temurin:21-jdk-alpine
 LABEL authors="jkom"
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
-COPY src/main/resources/keystore/generate-keystore.sh /app/generate-keystore.sh
+COPY src/main/resources/scripts/generate-keystore.sh /app/generate-keystore.sh
 RUN chmod +x /app/generate-keystore.sh
 
 # Set environment variables

@@ -366,12 +366,6 @@ jobs:
       - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
         run: |
 
-          
-
-
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/sales-service:latest \
-           --push ./sales-service
 
           docker buildx build --platform linux/amd64,linux/arm64 \
            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/payment-service-backend:latest \
