@@ -8,6 +8,8 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
@@ -38,11 +40,15 @@ public class SecurityConfig {
     @Bean
     public CorsWebFilter corsFilter() {
         return new CorsWebFilter(exchange -> {
+
             CorsConfiguration config = new CorsConfiguration();
-            config.addAllowedOrigin("http://79.76.108.164");
-            config.addAllowedOrigin("http://79.76.108.164:80");
-            config.addAllowedOrigin("http://79.76.108.164:81");
-            config.addAllowedOrigin("http://79.76.108.164:82");
+            config.setAllowCredentials(true);
+            config.setAllowedOrigins(Arrays.asList(
+                    "http://79.76.108.164",
+                    "http://79.76.108.164:80",
+                    "http://79.76.108.164:81",
+                    "http://79.76.108.164:82"
+            ));
             config.addAllowedMethod("*");
             config.addAllowedHeader("*");
             return config;

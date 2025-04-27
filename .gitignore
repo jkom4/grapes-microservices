@@ -43,3 +43,4 @@ invoices/*
 invoices/*.pdf
 uploads/invoices/*.pdf
 /uploads/
+/payment-service/payment-backend/src/main/resources/keystore/

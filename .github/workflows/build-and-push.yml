@@ -228,12 +228,15 @@ jobs:
       - name: 🔑 Log in to OCIR
         run:  |
           echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
-
-
-        # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
-      - name: 🏗️ Build & Push Frontend Services (amd64 only)
-        run: |
-          docker compose build  frontend-auth   
-          docker compose push frontend-auth 
   
+
+      # 🐳 Multi-Arch build for ARM-hosted services (VM3)
+      - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
+        run: |
+
+          docker buildx build --platform linux/amd64,linux/arm64 \
+           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
+           --push ./api-gateway
+          
+      
 
