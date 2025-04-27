@@ -18,7 +18,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { sub } = useAuth();
     const location = useLocation();
 
-    const initializeCart = async () => {
+    const initializeCart = async (forceNew: boolean = false) => {
         try {
             if (!sub) {
                 console.warn("User ID (sub) not available, cannot initialize cart");
@@ -31,7 +31,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             let dynamicOrderId = localStorage.getItem("orderId");
 
-            if (!dynamicOrderId) {
+            if (forceNew || !dynamicOrderId) {
                 const initResponse = await cartService.initializeCart(sub);
                 if (initResponse.userId !== sub) {
                     console.warn("Mismatch: Expected userId:", sub, "but received:", initResponse.userId);
@@ -43,11 +43,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 dynamicOrderId = initResponse.id.toString();
                 localStorage.setItem("orderId", dynamicOrderId);
                 setOrderId(initResponse.id);
-                setHasInitialized(true);
             } else {
                 setOrderId(parseInt(dynamicOrderId, 10));
-                setHasInitialized(true);
             }
+            setHasInitialized(true);
         } catch (err) {
             console.error("Error initializing cart:", err);
             toast.error("Failed to initialize cart. Please try again.", {

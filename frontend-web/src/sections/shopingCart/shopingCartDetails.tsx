@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 const CartPage = () => {
     const { language } = useLanguage();
     const navigate = useNavigate();
-    const { orderId, setOrderId } = useCart();
+    const { orderId, setOrderId, initializeCart } = useCart();
     const [cart, setCart] = useState<CartResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -141,6 +141,9 @@ const CartPage = () => {
                 paymentData.amount
             );
 
+            setCart(null);
+            localStorage.removeItem("orderId");
+            await initializeCart();
             window.location.href = providerRedirectUrl;
         } catch (err) {
             setPaymentError(
