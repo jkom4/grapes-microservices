@@ -1,9 +1,9 @@
-const BASE_URL = "http://localhost:8090/api";
-const BASE_URL_AUTH = "http://localhost:8090/api";
-const BASE_URL_PAYMENT = "http://localhost:8090/api";
-const BASE_TO_PAY = "http://localhost:3002";
-const MY_BASE_URL = "http://localhost:3000";
-const BASE_FRONT_AUTH = "http://localhost:3001";
+const BASE_URL = "http://89.168.47.217:8090/api";
+const BASE_URL_AUTH = "http://89.168.47.217:8090/api";
+const BASE_URL_PAYMENT = "http://89.168.47.217:8090/api";
+const BASE_TO_PAY = "http://79.76.108.164:82";
+const MY_BASE_URL = "http://79.76.108.164:80";
+const BASE_FRONT_AUTH = "http://79.76.108.164:81";
 
 const getArticlesAPI = {
     baseURL: BASE_URL,
@@ -38,7 +38,7 @@ const cartAPI = {
 const paymentAPI = {
     baseURL: BASE_URL_PAYMENT,
     endpoints: {
-        pay: "payment/login/payment-initiate",
+        pay: "/payment/login/payment-initiate",
     }
 
 }

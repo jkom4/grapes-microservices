@@ -39,7 +39,9 @@ public class SecurityConfig {
     public CorsWebFilter corsFilter() {
         return new CorsWebFilter(exchange -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.addAllowedOrigin("*");
+            config.addAllowedOrigin("http://79.76.108.164:3000");
+            config.addAllowedOrigin("http://79.76.108.164:3001");
+            config.addAllowedOrigin("http://79.76.108.164:3002");
             config.addAllowedMethod("*");
             config.addAllowedHeader("*");
             return config;

@@ -1,4 +1,4 @@
-const API_GATEWAY_URL = 'http://localhost:8093';
+const API_GATEWAY_URL = 'http://89.168.47.217:8090/api';
 
 // Adjust base paths to match backend controller mappings
 export const AUTH_API_URL = `${API_GATEWAY_URL}`; // Base path for authentication service (LoginController is at /login)

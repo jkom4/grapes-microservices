@@ -213,7 +213,6 @@ jobs:
 
           # 🚀 API Gateway
           GATEWAY_PORT=8090
-          GATEWAY_PORT=8090  
           AUTH_SERVICE_URI=${{ secrets.AUTH_SERVICE_URI }}
           SALES_SERVICE_URI=${{ secrets.SALES_SERVICE_URI }}
           PAYMENT_SERVICE_URI=${{ secrets.PAYMENT_SERVICE_URI }}
@@ -226,7 +225,8 @@ jobs:
           
           # 🔐 Authentication Service
           AUTH_SERVICE_PORT=8091
-          TOKEN_EXPIRATION=3600
+          ACCESS_TOKEN_EXPIRATION=15 # minutes
+          REFRESH_TOKEN_EXPIRATION=7 # days
           AUTH_MONGO_URI=${{ secrets.MONGO_URI }}
           AUTH_MONGO_DB=db_auth
           GRAPES_AES_KEY=${{ secrets.GRAPES_AES_KEY }}
@@ -247,16 +247,73 @@ jobs:
           # 💳 Payment Service
           PAYMENT_SERVICE_PORT=8093
           PAYMENT_DB_URL=${{ secrets.PAYMENT_DB_URL }}
+          PAYMENT_SERVER_SSL_ENABLED=false
+          PAYMENT_SERVER_SSL_KEY_STORE_TYPE=JKS
+          PAYMENT_PASSWORD_SALT=${{ secrets.PAYMENT_PASSWORD_SALT }}
           PAYMENT_DB_USER=${{ secrets.PAYMENT_DB_USER }}
           PAYMENT_DB_PASSWORD=${{ secrets.PAYMENT_DB_PASSWORD }}
-
+          
+          # 📱 Twilio SMS Configuration
+          PAYMENT_TWILIO_ACCOUNT_SID=${{ secrets.PAYMENT_TWILIO_ACCOUNT_SID }}
+          PAYMENT_TWILIO_AUTH_TOKEN=${{ secrets.PAYMENT_TWILIO_AUTH_TOKEN }}
+          PAYMENT_TWILIO_PHONE_NUMBER=${{ secrets.PAYMENT_TWILIO_PHONE_NUMBER }}
+          
+          # 🏦 Bank Account Details
+          PAYMENT_BANK_ACCOUNT_NUMBER=${{ secrets.PAYMENT_BANK_ACCOUNT_NUMBER }}
+          PAYMENT_BANK_CLIENT_PASSWORD=${{ secrets.PAYMENT_BANK_CLIENT_PASSWORD }}
+          PAYMENT_BANK_CLIENT_PHONE=${{ secrets.PAYMENT_BANK_CLIENT_PHONE }}
+          
+          # 🔑 Keystore Configurations
+          # ACS Server Keystore
+          PAYMENT_KEYSTORE_ACS_PATH=/app/keystore/acs_keystore.jks
+          PAYMENT_KEYSTORE_ACS_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_KEYSTORE_ACS_KEY_ALIAS=acs
+          PAYMENT_KEYSTORE_ACS_KEY_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          
+          # ACQ Server Keystore
+          PAYMENT_KEYSTORE_ACQ_PATH=/app/keystore/acq_keystore.jks
+          PAYMENT_KEYSTORE_ACQ_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_KEYSTORE_ACQ_KEY_ALIAS=acq
+          PAYMENT_KEYSTORE_ACQ_KEY_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          
+          # Client/Backend Keystore
+          PAYMENT_KEYSTORE_CLIENT_PATH=/app/keystore/client_keystore.jks
+          PAYMENT_KEYSTORE_CLIENT_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_KEYSTORE_CLIENT_ALIAS=client
+          PAYMENT_KEYSTORE_CLIENT_KEY_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          
+          # 🔒 Truststore Configurations
+          PAYMENT_TRUSTSTORE_ACS_PATH=/app/keystore/acs_truststore.jks
+          PAYMENT_TRUSTSTORE_ACS_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_TRUSTSTORE_ACS_CLIENT_ALIAS=client_trusted
+          PAYMENT_TRUSTSTORE_ACS_ACQ_ALIAS=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          
+          PAYMENT_TRUSTSTORE_ACQ_PATH=/app/keystore/acq_truststore.jks
+          PAYMENT_TRUSTSTORE_ACQ_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_TRUSTSTORE_ACQ_ACS_ALIAS=acs_trusted
+          
+          PAYMENT_TRUSTSTORE_CLIENT_PATH=/app/keystore/client_truststore.jks
+          PAYMENT_TRUSTSTORE_CLIENT_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_TRUSTSTORE_CLIENT_ACS_ALIAS=acs_trusted
+          PAYMENT_TRUSTSTORE_CLIENT_ACQ_ALIAS=acq_trusted
+          
+          # Internal Server Ports
+          PAYMENT_PORT_ACS=8081
+          PAYMENT_PORT_ACS_MONEY=8083
+          PAYMENT_PORT_ACQ=8082
+          
           # 💬 Chat Service
           CHAT_SERVICE_PORT=8094
           CHAT_MONGO_URI=${{ secrets.CHAT_MONGO_URI }}
           CHAT_MONGO_DB=db_chat
+          PUSHER_APP_ID=${{ secrets.PUSHER_APP_ID }}
+          PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
+          PUSHER_SECRET=${{ secrets.PUSHER_SECRET }}
+          PUSHER_CLUSTER=eu
                
           # Data Mining Service  
-          DATA_MINING_MONGO_URI=mongodb://root:SparringMASI!@mongodb:27017/
+          DATA_MINING_MONGO_URI=${{ secrets.DATA_MINING_MONGO_URI }}
+          POOL_RECYCLE=3600
           
           # 📊 Database
           # MariaDB
@@ -274,7 +331,9 @@ jobs:
           RABBITMQ_PORT=5672
           RABBITMQ_USER=${{ secrets.RABBITMQ_USER }}
           RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
-
+          AUTH_SERVICE_RABBIT_MQ_QUEUE_NAME=q_auth_service
+          AUTH_SERVICE_RABBIT_MQ_QUEUE_REGISTRATION_NAME=q_auth_service_registration
+          
           # 📈 Monitoring
           PROMETHEUS_PORT=${{ secrets.PROMETHEUS_PORT || '9090' }}
           GRAFANA_PORT=${{ secrets.GRAFANA_PORT || '3000' }}
@@ -307,17 +366,17 @@ jobs:
       - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
         run: |
           
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mariadb-grapes:latest \
-           --push ./docker/mariadb
+#          docker buildx build --platform linux/amd64,linux/arm64 \
+#           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mariadb-grapes:latest \
+#           --push ./docker/mariadb
 
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mongodb-grapes:latest \
-           --push ./docker/mongodb
+#          docker buildx build --platform linux/amd64,linux/arm64 \
+#           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mongodb-grapes:latest \
+#           --push ./docker/mongodb
 
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/rabbitmq-grapes:latest \
-           --push ./docker/rabbitmq
+#          docker buildx build --platform linux/amd64,linux/arm64 \
+#           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/rabbitmq-grapes:latest \
+#           --push ./docker/rabbitmq
 
           docker buildx build --platform linux/amd64,linux/arm64 \
            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
@@ -346,8 +405,11 @@ jobs:
       # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
       - name: 🏗️ Build & Push Frontend Services (amd64 only)
         run: |
-          docker compose build frontend-web frontend-auth frontend-payment shiny-app
-          docker compose push frontend-web frontend-auth frontend-payment shiny-app
+          docker compose build frontend-web frontend-auth frontend-payment 
+          docker compose push frontend-web frontend-auth frontend-payment 
+
+#          docker compose build frontend-web frontend-auth frontend-payment shiny-app
+#          docker compose push frontend-web frontend-auth frontend-payment shiny-app
   
 
   deploy-replica-monitoring:

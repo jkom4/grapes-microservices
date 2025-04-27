@@ -16,7 +16,6 @@ import java.util.Map;
  * Controller handling user authentication operations.
  */
 @RestController
-@CrossOrigin
 @RequestMapping("/payment/login")
 public class LoginController {
 
