@@ -8,7 +8,7 @@ FROM eclipse-temurin:21-jdk-alpine
 LABEL authors="jkom"
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
-COPY payment-service/payment-backend/src/main/resources/keystore /app/keystore
+COPY src/main/resources/keystore /app/keystore
 
 # Set environment variables
 ENV PAYMENT_SERVICE_PORT=${PAYMENT_SERVICE_PORT}

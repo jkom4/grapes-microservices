@@ -235,12 +235,12 @@ jobs:
         run: |
 
           docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/payment-service-backend:latest \
-           --push ./payment-service/payment-backend
-
-          docker buildx build --platform linux/amd64,linux/arm64 \
            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/chat-service:latest \
            --push ./api-gateway
+          
+          docker buildx build --platform linux/amd64,linux/arm64 \
+           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/payment-service-backend:latest \
+           --push ./payment-service/payment-backend
 
 
 
