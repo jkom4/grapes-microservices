@@ -21,53 +21,6 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-        # DskipTests to skip running tests during the build process.
-      - name: "🔍 Build API Gateway"
-        run: mvn -B clean install -DskipTests --file api-gateway/pom.xml
-
-      - name: Install custom pkcs11-provider1
-        run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
-
-      - name: Install custom pkcs11-provider2
-        run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
-
-      - name: Install custom pkcs11-provider3
-        run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/pkcs11-provider-1.9.4.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
-
-      - name: "🔍 Build Auth Service"
-        run: mvn -B clean install -DskipTests --file auth-service/auth-backend/pom.xml
-        env:
-          MAVEN_OPTS: >-
-            --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED  
-            --enable-native-access=ALL-UNNAMED  
-
-      - name: "🔍 Build Chat Service"
-        run: mvn -B clean install -DskipTests --file chat-service/pom.xml
-
-      - name: "🔍 Build Payment Service"
-        run: mvn -B clean install -DskipTests --file payment-service/payment-backend/pom.xml
-
-      - name: "🔍 Build Sales Service"
-        run: mvn -B clean install -DskipTests --file sales-service/pom.xml
-
       - name: 🐍 Set up Python
         uses: actions/setup-python@v3
         with:
@@ -81,24 +34,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-
-      - name: "📦 Install Frontend-web Dependencies"
-        run: |
-         cd frontend-web
-         npm ci --legacy-peer-deps
-         npm run-script build
-
-      - name: "📦 Install Frontend-auth Dependencies"
-        run: |
-          cd auth-service/auth-frontend
-          npm ci --legacy-peer-deps
-          npm run-script build
-
-      - name: "📦 Install Frontend-Payment Dependencies"
-        run: |
-          cd payment-service/payment-frontend
-          npm ci --legacy-peer-deps
-          npm run-script build
 
   tests :
     name: Test Microservices
@@ -114,79 +49,13 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: "🔍 Run Tests for API Gateway"
-        run: mvn -B test --file api-gateway/pom.xml
-      - name: Install custom pkcs11-provider1
-        run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
 
-      - name: Install custom pkcs11-provider2
-        run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
-
-      - name: Install custom pkcs11-provider3
-        run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/pkcs11-provider-1.9.4.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
-
-      - name: "🔍 Run Tests for Auth Service"
-        run: mvn -B test --file auth-service/auth-backend/pom.xml
-        env:
-          MAVEN_OPTS: >-
-            --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED  
-            --enable-native-access=ALL-UNNAMED  
-
-      - name: "🔍 Run Tests for Chat Service"
-        run: mvn -B test --file chat-service/pom.xml
-
-      - name: "🔍 Run Tests for Payment Service"
-        run: mvn -B test --file payment-service/payment-backend/pom.xml
-
-      - name: "🔍 Run Tests for Sales Service"
-        run: mvn -B test --file sales-service/pom.xml
 
       - name: 🐍 Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
 
-      - name: Run Tests for Data-Mining Service
-        working-directory: ./data-mining-service # Run commands FROM this directory
-        run: |
-          # Create a temporary .env for the test runner if needed  
-          echo "RABBITMQ_PORT=5672" >> .env  
-          echo "RABBITMQ_HOST=localhost" >> .env  
-          # Add other required ENV VARS for the test script here!  
-          echo "RABBITMQ_USER=${{secrets.RABBITMQ_USER}}" >> .env  
-          echo "RABBITMQ_PASSWORD=${{secrets.RABBITMQ_PASSWORD}}" >> .env  
-          echo "ACTIVITY_LOGS_QUEUE=q_activity_logs" >> .env  
-          echo "AUTH_LOGS_QUEUE=q.auth_logs" >> .env  
-          
-          pip install -r requirements.txt  
-          python -m pytest  
-
-      ## FRONTEND
-  #      - name: 🌐 Install Node.js#        uses: actions/setup-node@v3
-  #        with:
-  #          node-version: 18
-  #
-  #      - name: 🧪 Run Frontend Tests#        working-directory: ./frontend-web
-  #        run: |
-  #          npm run test
 
   docker-build-and-push:
     name: Build & Push Docker Images
@@ -204,282 +73,170 @@ jobs:
 
       - name: Create .env file from GitHub secrets
         run: |
-          cat <<EOF > .env  
-          # 🌍 General config  
-          ENVIRONMENT=development  
-          LOG_LEVEL=debug  
-          
-          # 🚀 API Gateway  
-          GATEWAY_PORT=8090  
-          AUTH_SERVICE_URI=${{ secrets.AUTH_SERVICE_URI }}  
-          SALES_SERVICE_URI=${{ secrets.SALES_SERVICE_URI }}  
-          PAYMENT_SERVICE_URI=${{ secrets.PAYMENT_SERVICE_URI }}  
-          CHAT_SERVICE_URI=${{ secrets.CHAT_SERVICE_URI }}  
-          DATA_MINING_SERVICE_URI=${{ secrets.DATA_MINING_SERVICE_URI }}  
-          REDIS_HOST=${{ secrets.REDIS_HOST }}  
-          REDIS_PORT=${{ secrets.REDIS_PORT }}  
-          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}  
-          REDIS_TTL=${{ secrets.REDIS_TTL }}  
-          
-          # 🔐 Authentication Service  
-          AUTH_SERVICE_PORT=8091  
-          ACCESS_TOKEN_EXPIRATION=15 # minutes  
-          REFRESH_TOKEN_EXPIRATION=7 # days  
-          AUTH_MONGO_URI=${{ secrets.MONGO_URI }}  
-          AUTH_MONGO_DB=db_auth  
-          GRAPES_AES_KEY=${{ secrets.GRAPES_AES_KEY }}  
-          GRAPES_TWILIO_API_SECRET=${{ secrets.GRAPES_TWILIO_API_SECRET }}  
-          COMPANY_MAIL=${{ secrets.COMPANY_MAIL }}  
-          GRAPES_JWT_SECRET_KEY=${{ secrets.GRAPES_JWT_SECRET_KEY }}  
-          MAX_REQUESTS_PER_MINUTE=600    
-          CHALLENGE_REQUEST_INTERVAL_IN_SECONDS=3600  
-          CHALLENGE_VALIDITY_PERIOD_IN_SECONDS=3600  
-          REQUIRED_AGE=10  
-          
-          # 📦 Sales Service  
-          SALES_SERVICE_PORT=8092  
-          SALES_DB_URL=${{ secrets.SALES_DB_URL }}  
-          SALES_DB_USER=${{ secrets.SALES_DB_USER }}  
-          SALES_DB_PASSWORD=${{ secrets.SALES_DB_PASSWORD }}  
-          
-          # 💳 Payment Service  
-          PAYMENT_SERVICE_PORT=8093  
-          PAYMENT_DB_URL=${{ secrets.PAYMENT_DB_URL }}  
-          PAYMENT_SERVER_SSL_ENABLED=false  
-          PAYMENT_SERVER_SSL_KEY_STORE_TYPE=JKS  
-          PAYMENT_PASSWORD_SALT=${{ secrets.PAYMENT_PASSWORD_SALT }}  
-          PAYMENT_DB_USER=${{ secrets.PAYMENT_DB_USER }}  
-          PAYMENT_DB_PASSWORD=${{ secrets.PAYMENT_DB_PASSWORD }}  
-          
-          # 📱 Twilio SMS Configuration  
-          PAYMENT_TWILIO_ACCOUNT_SID=${{ secrets.PAYMENT_TWILIO_ACCOUNT_SID }}  
-          PAYMENT_TWILIO_AUTH_TOKEN=${{ secrets.PAYMENT_TWILIO_AUTH_TOKEN }}  
-          PAYMENT_TWILIO_PHONE_NUMBER=${{ secrets.PAYMENT_TWILIO_PHONE_NUMBER }}  
-          
-          # 🏦 Bank Account Details  
-          PAYMENT_BANK_ACCOUNT_NUMBER=${{ secrets.PAYMENT_BANK_ACCOUNT_NUMBER }}  
-          PAYMENT_BANK_CLIENT_PASSWORD=${{ secrets.PAYMENT_BANK_CLIENT_PASSWORD }}  
-          PAYMENT_BANK_CLIENT_PHONE=${{ secrets.PAYMENT_BANK_CLIENT_PHONE }}  
-          
-          # 🔑 Keystore Configurations  
-          # ACS Server Keystore  
-          PAYMENT_KEYSTORE_ACS_PATH=/app/keystore/acs_keystore.jks  
-          PAYMENT_KEYSTORE_ACS_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          PAYMENT_KEYSTORE_ACS_KEY_ALIAS=acs  
-          PAYMENT_KEYSTORE_ACS_KEY_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          
-          # ACQ Server Keystore  
-          PAYMENT_KEYSTORE_ACQ_PATH=/app/keystore/acq_keystore.jks  
-          PAYMENT_KEYSTORE_ACQ_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          PAYMENT_KEYSTORE_ACQ_KEY_ALIAS=acq  
-          PAYMENT_KEYSTORE_ACQ_KEY_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          
-          # Client/Backend Keystore  
-          PAYMENT_KEYSTORE_CLIENT_PATH=/app/keystore/client_keystore.jks  
-          PAYMENT_KEYSTORE_CLIENT_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          PAYMENT_KEYSTORE_CLIENT_ALIAS=client  
-          PAYMENT_KEYSTORE_CLIENT_KEY_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          
-          # 🔒 Truststore Configurations  
-          PAYMENT_TRUSTSTORE_ACS_PATH=/app/keystore/acs_truststore.jks  
-          PAYMENT_TRUSTSTORE_ACS_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          PAYMENT_TRUSTSTORE_ACS_CLIENT_ALIAS=client_trusted  
-          PAYMENT_TRUSTSTORE_ACS_ACQ_ALIAS=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          
-          PAYMENT_TRUSTSTORE_ACQ_PATH=/app/keystore/acq_truststore.jks  
-          PAYMENT_TRUSTSTORE_ACQ_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          PAYMENT_TRUSTSTORE_ACQ_ACS_ALIAS=acs_trusted  
-          
-          PAYMENT_TRUSTSTORE_CLIENT_PATH=/app/keystore/client_truststore.jks  
-          PAYMENT_TRUSTSTORE_CLIENT_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          PAYMENT_TRUSTSTORE_CLIENT_ACS_ALIAS=acs_trusted  
-          PAYMENT_TRUSTSTORE_CLIENT_ACQ_ALIAS=acq_trusted  
-          
-          # Internal Server Ports  
-          PAYMENT_PORT_ACS=8081  
-          PAYMENT_PORT_ACS_MONEY=8083  
-          PAYMENT_PORT_ACQ=8082  
-          
-          # 💬 Chat Service  
-          CHAT_SERVICE_PORT=8094  
-          CHAT_MONGO_URI=${{ secrets.CHAT_MONGO_URI }}  
-          CHAT_MONGO_DB=db_chat  
-          PUSHER_APP_ID=${{ secrets.PUSHER_APP_ID }}  
-          PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}  
-          PUSHER_SECRET=${{ secrets.PUSHER_SECRET }}  
-          PUSHER_CLUSTER=eu  
-          
-          # Data Mining Service    
-          DATA_MINING_MONGO_URI=${{ secrets.DATA_MINING_MONGO_URI }}  
-          POOL_RECYCLE=3600  
-          
-          # 📊 Database  
-          # MariaDB  
-          DB_PORT=3306  
-          DB_USER=${{ secrets.DB_USER }}  
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}  
-          
-          # MongoDB  
-          MONGO_PORT=27017  
-          MONGO_USER=${{ secrets.MONGO_USER }}  
-          MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}  
-          
-          # 🐰 Message Broker (RabbitMQ)  
-          RABBITMQ_HOST=rabbitmq  
-          RABBITMQ_PORT=5672  
-          RABBITMQ_USER=${{ secrets.RABBITMQ_USER }}  
-          RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}  
-          AUTH_SERVICE_RABBIT_MQ_QUEUE_NAME=q_auth_service  
-          AUTH_SERVICE_RABBIT_MQ_QUEUE_REGISTRATION_NAME=q_auth_service_registration  
-          
-          # 📈 Monitoring  
-          PROMETHEUS_PORT=${{ secrets.PROMETHEUS_PORT || '9090' }}  
-          GRAFANA_PORT=${{ secrets.GRAFANA_PORT || '3000' }}  
-          
-          # 🛠️ SonarQube  
-          SONARQUBE_HOST=http://localhost:9000  
-          SONARQUBE_TOKEN=${{ secrets.SONARQUBE_TOKEN }}  
-          SONARQUBE_JDBC_USERNAME=${{ secrets.SONARQUBE_JDBC_USERNAME }}  
-          SONARQUBE_JDBC_PASSWORD=${{ secrets.SONARQUBE_JDBC_PASSWORD }}  
-          POSTGRES_DB=${{ secrets.POSTGRES_DB }}  
-          POSTGRES_USER=${{ secrets.POSTGRES_USER }}  
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}  
-          
-          # ☁️ Oracle Cloud (OCIR)  
-          ORACLE_REGION_ID=${{ secrets.ORACLE_REGION_ID }}  
-          ORACLE_TENANCY_NAMESPACE=${{ secrets.ORACLE_TENANCY_NAMESPACE }}  
-          
-          #REPLICATION  
-          DB_REPLICATION_USER=${{ secrets.DB_REPLICATION_USER }}  
-          DB_REPLICATION_PASSWORD=${{ secrets.DB_REPLICATION_PASSWORD }}  
-          MARIADB_MASTER_HOST=${{ secrets.VM3_IP }}  
-          EOF  
+          cat <<EOF > .env
+          # 🌍 General config
+          ENVIRONMENT=development
+          LOG_LEVEL=debug
 
+          # 🚀 API Gateway
+          GATEWAY_PORT=8090
+          AUTH_SERVICE_URI=${{ secrets.AUTH_SERVICE_URI }}
+          SALES_SERVICE_URI=${{ secrets.SALES_SERVICE_URI }}
+          PAYMENT_SERVICE_URI=${{ secrets.PAYMENT_SERVICE_URI }}
+          CHAT_SERVICE_URI=${{ secrets.CHAT_SERVICE_URI }}
+          DATA_MINING_SERVICE_URI=${{ secrets.DATA_MINING_SERVICE_URI }}
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          REDIS_PORT=${{ secrets.REDIS_PORT }}
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          REDIS_TTL=${{ secrets.REDIS_TTL }}
+          
+          # 🔐 Authentication Service
+          AUTH_SERVICE_PORT=8091
+          ACCESS_TOKEN_EXPIRATION=15 # minutes
+          REFRESH_TOKEN_EXPIRATION=7 # days
+          AUTH_MONGO_URI=${{ secrets.MONGO_URI }}
+          AUTH_MONGO_DB=db_auth
+          GRAPES_AES_KEY=${{ secrets.GRAPES_AES_KEY }}
+          GRAPES_TWILIO_API_SECRET=${{ secrets.GRAPES_TWILIO_API_SECRET }}
+          COMPANY_MAIL=${{ secrets.COMPANY_MAIL }}
+          GRAPES_JWT_SECRET_KEY=${{ secrets.GRAPES_JWT_SECRET_KEY }}
+          MAX_REQUESTS_PER_MINUTE=600  
+          CHALLENGE_REQUEST_INTERVAL_IN_SECONDS=3600
+          CHALLENGE_VALIDITY_PERIOD_IN_SECONDS=3600
+          REQUIRED_AGE=10
+          
+          # 📦 Sales Service
+          SALES_SERVICE_PORT=8092
+          SALES_DB_URL=${{ secrets.SALES_DB_URL }}
+          SALES_DB_USER=${{ secrets.SALES_DB_USER }}
+          SALES_DB_PASSWORD=${{ secrets.SALES_DB_PASSWORD }}
+
+          # 💳 Payment Service
+          PAYMENT_SERVICE_PORT=8093
+          PAYMENT_DB_URL=${{ secrets.PAYMENT_DB_URL }}
+          PAYMENT_SERVER_SSL_ENABLED=false
+          PAYMENT_SERVER_SSL_KEY_STORE_TYPE=JKS
+          PAYMENT_PASSWORD_SALT=${{ secrets.PAYMENT_PASSWORD_SALT }}
+          PAYMENT_DB_USER=${{ secrets.PAYMENT_DB_USER }}
+          PAYMENT_DB_PASSWORD=${{ secrets.PAYMENT_DB_PASSWORD }}
+          
+          # 📱 Twilio SMS Configuration
+          PAYMENT_TWILIO_ACCOUNT_SID=${{ secrets.PAYMENT_TWILIO_ACCOUNT_SID }}
+          PAYMENT_TWILIO_AUTH_TOKEN=${{ secrets.PAYMENT_TWILIO_AUTH_TOKEN }}
+          PAYMENT_TWILIO_PHONE_NUMBER=${{ secrets.PAYMENT_TWILIO_PHONE_NUMBER }}
+          
+          # 🏦 Bank Account Details
+          PAYMENT_BANK_ACCOUNT_NUMBER=${{ secrets.PAYMENT_BANK_ACCOUNT_NUMBER }}
+          PAYMENT_BANK_CLIENT_PASSWORD=${{ secrets.PAYMENT_BANK_CLIENT_PASSWORD }}
+          PAYMENT_BANK_CLIENT_PHONE=${{ secrets.PAYMENT_BANK_CLIENT_PHONE }}
+          
+          # 🔑 Keystore Configurations
+          # ACS Server Keystore
+          PAYMENT_KEYSTORE_ACS_PATH=/app/keystore/acs_keystore.jks
+          PAYMENT_KEYSTORE_ACS_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_KEYSTORE_ACS_KEY_ALIAS=acs
+          PAYMENT_KEYSTORE_ACS_KEY_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          
+          # ACQ Server Keystore
+          PAYMENT_KEYSTORE_ACQ_PATH=/app/keystore/acq_keystore.jks
+          PAYMENT_KEYSTORE_ACQ_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_KEYSTORE_ACQ_KEY_ALIAS=acq
+          PAYMENT_KEYSTORE_ACQ_KEY_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          
+          # Client/Backend Keystore
+          PAYMENT_KEYSTORE_CLIENT_PATH=/app/keystore/client_keystore.jks
+          PAYMENT_KEYSTORE_CLIENT_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_KEYSTORE_CLIENT_ALIAS=client
+          PAYMENT_KEYSTORE_CLIENT_KEY_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          
+          # 🔒 Truststore Configurations
+          PAYMENT_TRUSTSTORE_ACS_PATH=/app/keystore/acs_truststore.jks
+          PAYMENT_TRUSTSTORE_ACS_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_TRUSTSTORE_ACS_CLIENT_ALIAS=client_trusted
+          PAYMENT_TRUSTSTORE_ACS_ACQ_ALIAS=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          
+          PAYMENT_TRUSTSTORE_ACQ_PATH=/app/keystore/acq_truststore.jks
+          PAYMENT_TRUSTSTORE_ACQ_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_TRUSTSTORE_ACQ_ACS_ALIAS=acs_trusted
+          
+          PAYMENT_TRUSTSTORE_CLIENT_PATH=/app/keystore/client_truststore.jks
+          PAYMENT_TRUSTSTORE_CLIENT_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}
+          PAYMENT_TRUSTSTORE_CLIENT_ACS_ALIAS=acs_trusted
+          PAYMENT_TRUSTSTORE_CLIENT_ACQ_ALIAS=acq_trusted
+          
+          # Internal Server Ports
+          PAYMENT_PORT_ACS=8081
+          PAYMENT_PORT_ACS_MONEY=8083
+          PAYMENT_PORT_ACQ=8082
+          
+          # 💬 Chat Service
+          CHAT_SERVICE_PORT=8094
+          CHAT_MONGO_URI=${{ secrets.CHAT_MONGO_URI }}
+          CHAT_MONGO_DB=db_chat
+          PUSHER_APP_ID=${{ secrets.PUSHER_APP_ID }}
+          PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
+          PUSHER_SECRET=${{ secrets.PUSHER_SECRET }}
+          PUSHER_CLUSTER=eu
+               
+          # Data Mining Service  
+          DATA_MINING_MONGO_URI=${{ secrets.DATA_MINING_MONGO_URI }}
+          POOL_RECYCLE=3600
+          
+          # 📊 Database
+          # MariaDB
+          DB_PORT=3306
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+
+          # MongoDB
+          MONGO_PORT=27017
+          MONGO_USER=${{ secrets.MONGO_USER }}
+          MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }}
+
+          # 🐰 Message Broker (RabbitMQ)
+          RABBITMQ_HOST=rabbitmq
+          RABBITMQ_PORT=5672
+          RABBITMQ_USER=${{ secrets.RABBITMQ_USER }}
+          RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+          AUTH_SERVICE_RABBIT_MQ_QUEUE_NAME=q_auth_service
+          AUTH_SERVICE_RABBIT_MQ_QUEUE_REGISTRATION_NAME=q_auth_service_registration
+          
+          # 📈 Monitoring
+          PROMETHEUS_PORT=${{ secrets.PROMETHEUS_PORT || '9090' }}
+          GRAFANA_PORT=${{ secrets.GRAFANA_PORT || '3000' }}
+
+          # 🛠️ SonarQube
+          SONARQUBE_HOST=http://localhost:9000
+          SONARQUBE_TOKEN=${{ secrets.SONARQUBE_TOKEN }}
+          SONARQUBE_JDBC_USERNAME=${{ secrets.SONARQUBE_JDBC_USERNAME }}
+          SONARQUBE_JDBC_PASSWORD=${{ secrets.SONARQUBE_JDBC_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+
+          # ☁️ Oracle Cloud (OCIR)
+          ORACLE_REGION_ID=${{ secrets.ORACLE_REGION_ID }}
+          ORACLE_TENANCY_NAMESPACE=${{ secrets.ORACLE_TENANCY_NAMESPACE }}
+          
+          #REPLICATION
+          DB_REPLICATION_USER=${{ secrets.DB_REPLICATION_USER }}
+          DB_REPLICATION_PASSWORD=${{ secrets.DB_REPLICATION_PASSWORD }}
+          MARIADB_MASTER_HOST=${{ secrets.VM3_IP }}
+          EOF
+          
 
       - name: 🔑 Log in to OCIR
         run:  |
-          echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io  
+          echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io
+  
 
-      - name: Generate keystore
-        run: |
-          echo "Generating keystore..."  
-          mkdir -p ./keystore  
-          payment-service/payment-backend/src/main/resources/scripts/generate-keystore.sh --password "${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}" --output ./keystore/
-        # 🐳 Multi-Arch build for ARM-hosted services (VM3)
+      # 🐳 Multi-Arch build for ARM-hosted services (VM3)
       - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
         run: |
+
+          docker buildx build --platform linux/amd64,linux/arm64 \
+           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
+           --push ./api-gateway
           
-          docker buildx build --platform linux/amd64,linux/arm64 \
-          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
-          --push ./api-gateway
+      
 
-
-          docker buildx build --platform linux/amd64,linux/arm64 \
-          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/sales-service:latest \
-          --push ./sales-service
-          
-          docker buildx build --platform linux/amd64,linux/arm64 \  
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/payment-service-backend:latest \  
-           --push ./payment-service/payment-backend  
-          
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/chat-service:latest \
-           --push ./chat-service
-
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/data-mining-service:latest \
-           --push ./data-mining-service
-        
-
-        # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
-      - name: 🏗️ Build & Push Frontend Services (amd64 only)
-        run: |
-          docker compose build frontend-web frontend-auth frontend-payment  shiny-app
-          docker compose push frontend-web frontend-auth frontend-payment   shiny-app
-
-  deploy-replica-monitoring:
-    name: Deploy to VM 1 - Replica + Monitoring (Manual)
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - tests
-      - docker-build-and-push
-    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
-
-      - name: 🔑 SSH into ORACLE VM and Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM1_IP }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM1_KEY }}
-          script: |
-            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \  
-            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \  
-            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io  
-            cd grapes-microservices  
-            docker compose -f docker-compose-vm1.yml down   
-            docker image prune -a  
-            docker compose pull  
-            docker compose -f docker-compose-vm1.yml up -d  
-
-  deploy-frontend:
-    name: Deploy to VM 2 - FRONTEND
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - tests
-      - docker-build-and-push
-    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
-
-      - name: 🔑 SSH into ORACLE VM and Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM2_IP }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM2_KEY }}
-          script: |
-            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \  
-            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \  
-            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io  
-            cd grapes-microservices  
-            docker compose -f docker-compose-vm2.yml down   
-            docker image prune -a  
-            docker compose pull  
-            docker compose -f docker-compose-vm2.yml up -d  
-
-  deploy-bd-backend:
-    name: Deploy to VM 3 - VM ARM (Manual)
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - tests
-      - docker-build-and-push
-    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
-
-      - name: 🔑 SSH into ORACLE VM and Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM3_IP }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM3_KEY }}
-          script: |
-            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \  
-            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \  
-            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io  
-            cd grapes-microservices  
-            docker compose -f docker-compose-vm3.yml down   
-            docker image prune -a  
-            docker compose pull  
-            docker compose -f docker-compose-vm3.yml up -d
