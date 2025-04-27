@@ -280,6 +280,7 @@ services:
       - mariadb
       - redis
 
+
   chat-service:
     build: ./chat-service
     env_file: .env
@@ -291,6 +292,7 @@ services:
       - rabbitmq
       - mongodb
 
+
   data-mining-service:
     build: ./data-mining-service
     env_file: .env
@@ -301,6 +303,7 @@ services:
     depends_on:
       - mongodb
       - mariadb
+
 
 
   shiny-app:
@@ -325,6 +328,7 @@ services:
     depends_on:
       - mariadb
       - mongodb
+
 
 ### FRONTEND
 
