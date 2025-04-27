@@ -365,18 +365,6 @@ jobs:
       # 🐳 Multi-Arch build for ARM-hosted services (VM3)
       - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
         run: |
-          
-#          docker buildx build --platform linux/amd64,linux/arm64 \
-#           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mariadb-grapes:latest \
-#           --push ./docker/mariadb
-
-#          docker buildx build --platform linux/amd64,linux/arm64 \
-#           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/mongodb-grapes:latest \
-#           --push ./docker/mongodb
-
-#          docker buildx build --platform linux/amd64,linux/arm64 \
-#           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/rabbitmq-grapes:latest \
-#           --push ./docker/rabbitmq
 
           docker buildx build --platform linux/amd64,linux/arm64 \
            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
@@ -407,10 +395,6 @@ jobs:
         run: |
           docker compose build frontend-web frontend-auth frontend-payment 
           docker compose push frontend-web frontend-auth frontend-payment 
-
-#          docker compose build frontend-web frontend-auth frontend-payment shiny-app
-#          docker compose push frontend-web frontend-auth frontend-payment shiny-app
-  
 
   deploy-replica-monitoring:
     name: Deploy to VM 1 - Replica + Monitoring (Manual)
