@@ -8,6 +8,7 @@ ARG REACT_APP_BREVO_LIST_ID
 RUN REACT_APP_BREVO_API_KEY=${REACT_APP_BREVO_API_KEY} \
     REACT_APP_BREVO_LIST_ID=${REACT_APP_BREVO_LIST_ID} \
     npm ci --legacy-peer-deps
+
 COPY . .
 RUN npm run build && ls
 

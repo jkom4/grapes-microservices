@@ -121,6 +121,7 @@ jobs:
         run: |
           mvn install:install-file -Dfile=/tmp/sunpkcs11-wrapper-1.4.0.jar -DgroupId=sun -DartifactId=sunpkcs11-wrapper -Dversion=1.4.0 -Dpackaging=jar 
 
+
       - name: "🔍 Run Tests for Auth Service"
         run: mvn -B test --file auth-service/auth-backend/pom.xml
         env:
@@ -349,6 +350,7 @@ jobs:
           docker buildx build --platform linux/amd64,linux/arm64 \
           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
           --push ./api-gateway
+
           
           docker buildx build --platform linux/amd64,linux/arm64 \  
            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/auth-service-backend:latest \  

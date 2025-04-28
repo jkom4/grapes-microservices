@@ -280,6 +280,7 @@ services:
       - mariadb
       - redis
 
+
   chat-service:
     build: ./chat-service
     env_file: .env
@@ -341,6 +342,7 @@ services:
     environment:
       - REACT_APP_BREVO_API_KEY=${REACT_APP_BREVO_API_KEY}
       - REACT_APP_BREVO_LIST_ID=${REACT_APP_BREVO_API_KEY}
+
 
   frontend-auth:
     build: ./auth-service/auth-frontend
