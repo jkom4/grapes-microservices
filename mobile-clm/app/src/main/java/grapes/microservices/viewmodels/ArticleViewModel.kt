@@ -9,12 +9,15 @@ import grapes.microservices.models.data.Article
 import grapes.microservices.models.data.Cart
 import grapes.microservices.models.data.PayCartRequest
 import grapes.microservices.models.network.ArticleApiService
+import grapes.microservices.models.network.PaymentApiService
+import grapes.microservices.models.network.PaymentInitiateRequest
 import grapes.microservices.models.repository.ArticleRepository
 import grapes.microservices.models.utils.CartManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
 
 sealed class ArticleState {
     object Loading : ArticleState()
@@ -51,6 +54,7 @@ sealed class PaymentState {
 class ArticleViewModel(
     private val repository: ArticleRepository,
     private val apiService: ArticleApiService,
+    private val paymentApiService: PaymentApiService,
     private val cartManager: CartManager
 ) : ViewModel() {
     private companion object {
@@ -165,7 +169,7 @@ class ArticleViewModel(
                     }
                 }.toFloat()
                 Log.d(TAG, "Calculated totalPrice: $calculatedTotalPrice")
-                // Create a new oject Cart with the totalPrice
+                // Create a new object Cart with the totalPrice
                 val correctedCart = cart.copy(totalPrice = calculatedTotalPrice)
                 _cartScreenState.value = CartScreenState.Success(correctedCart)
             } catch (e: Exception) {
@@ -200,44 +204,98 @@ class ArticleViewModel(
         }
     }
 
-    fun payAndClearCart(
+    suspend fun payAndClearCart(
         address: String,
         phoneNumber: String,
         customerName: String,
         country: String,
         postalCode: String
-    ) {
-        viewModelScope.launch {
-            val orderId = cartManager.orderId.value
-            Log.d(TAG, "payAndClearCart with orderId: $orderId")
-            if (orderId == null) {
-                _paymentState.value = PaymentState.Error("Cart not initialized")
-                Log.e(TAG, "payAndClearCart failed: orderId is null")
-                return@launch
-            }
-            val payRequest = PayCartRequest(
-                orderId = orderId,
-                customerName = customerName,
-                phoneNumber = phoneNumber,
-                address = address,
-                country = country,
-                postalCode = postalCode
-            )
-            Log.d(TAG, "PayCartRequest: $payRequest")
-            _paymentState.value = PaymentState.Loading
-            try {
-                val payResponse = apiService.payCart(payRequest)
-                if (!payResponse.isSuccessful) {
-                    _paymentState.value = PaymentState.Error("Payment error: HTTP ${payResponse.code()}")
-                    Log.e(TAG, "payAndClearCart failed: HTTP ${payResponse.code()}, Response: ${payResponse.errorBody()?.string()}")
-                    return@launch
-                }
+    ): Result<Unit> {
+        val orderId = cartManager.orderId.value
+        Log.d(TAG, "payAndClearCart with orderId: $orderId")
+        if (orderId == null) {
+            _paymentState.value = PaymentState.Error("Cart not initialized")
+            Log.e(TAG, "payAndClearCart failed: orderId is null")
+            return Result.failure(Exception("Cart not initialized"))
+        }
+        val payRequest = PayCartRequest(
+            orderId = orderId,
+            customerName = customerName,
+            phoneNumber = phoneNumber,
+            address = address,
+            country = country,
+            postalCode = postalCode
+        )
+        Log.d(TAG, "PayCartRequest: $payRequest")
+        _paymentState.value = PaymentState.Loading
+        return try {
+            val payResponse = apiService.payCart(payRequest)
+            if (payResponse.isSuccessful) {
                 cartManager.clearCart()
                 _paymentState.value = PaymentState.Success
                 Log.d(TAG, "payAndClearCart successful for orderId: $orderId")
+                Result.success(Unit)
+            } else {
+                val errorMessage = "Payment error: HTTP ${payResponse.code()}"
+                _paymentState.value = PaymentState.Error(errorMessage)
+                Log.e(TAG, "payAndClearCart failed: HTTP ${payResponse.code()}, Response: ${payResponse.errorBody()?.string()}")
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            _paymentState.value = PaymentState.Error(e.message ?: "Network error")
+            Log.e(TAG, "payAndClearCart error: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    fun initiatePayment(totalAmount: Float, redirectUrl: String, onRedirect: (String) -> Unit) {
+        viewModelScope.launch {
+            _paymentState.value = PaymentState.Loading
+            try {
+                val request = PaymentInitiateRequest(
+                    amount = totalAmount,
+                    merchantId = "grapes",
+                    redirectUrl = redirectUrl
+                )
+                val response = paymentApiService.initiatePayment(request)
+                Log.d(TAG, "initiatePayment response: $response")
+                if (response.isSuccessful && response.body() != null) {
+                    var finalRedirectUrl = response.body()!!.redirectUrl
+                    // Workaround: Append redirectUrl as return_url if the response is the login page
+                    if (finalRedirectUrl.contains("79.76.108.164:82/login")) {
+                        Log.w(TAG, "Detected payment gateway login URL: $finalRedirectUrl")
+                        val encodedRedirectUrl = URLEncoder.encode(redirectUrl, "UTF-8")
+                        finalRedirectUrl = "$finalRedirectUrl?return_url=$encodedRedirectUrl"
+                        Log.d(TAG, "Modified redirect URL: $finalRedirectUrl")
+                    }
+                    _paymentState.value = PaymentState.Success
+                    onRedirect(finalRedirectUrl)
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e(TAG, "initiatePayment failed: HTTP ${response.code()}, Response: $errorBody")
+                    _paymentState.value = PaymentState.Error("Payment initiation failed: HTTP ${response.code()}")
+                }
             } catch (e: Exception) {
+                Log.e(TAG, "initiatePayment error: ${e.message}", e)
                 _paymentState.value = PaymentState.Error(e.message ?: "Network error")
-                Log.e(TAG, "payAndClearCart error: ${e.message}")
+            }
+        }
+    }
+
+    fun processPaymentAndInitiate(
+        address: String,
+        phoneNumber: String,
+        customerName: String,
+        country: String,
+        postalCode: String,
+        totalAmount: Float,
+        redirectUrl: String,
+        onRedirect: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            val payResult = payAndClearCart(address, phoneNumber, customerName, country, postalCode)
+            if (payResult.isSuccess) {
+                initiatePayment(totalAmount, redirectUrl, onRedirect)
             }
         }
     }

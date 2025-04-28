@@ -30,9 +30,6 @@ fun PaymentForm(
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
-    var cardNumber by remember { mutableStateOf("") }
-    var expiryDate by remember { mutableStateOf("") }
-    var cvc by remember { mutableStateOf("") }
     var termsAccepted by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     val errorRequiredFieldsMessage = stringResource(R.string.error_required_fields)
@@ -70,9 +67,6 @@ fun PaymentForm(
                 Triple(R.string.field_email, email, { newValue: String -> email = newValue }),
                 Triple(R.string.field_phone, phoneNumber, { newValue: String -> phoneNumber = newValue }),
                 Triple(R.string.field_address, address, { newValue: String -> address = newValue }),
-                Triple(R.string.field_card_number, cardNumber, { newValue: String -> cardNumber = newValue }),
-                Triple(R.string.field_expiry, expiryDate, { newValue: String -> expiryDate = newValue }),
-                Triple(R.string.field_cvc, cvc, { newValue: String -> cvc = newValue })
             )
 
             fields.forEach { (labelResId, value, onChange) ->
@@ -122,31 +116,39 @@ fun PaymentForm(
                 )
             }
 
-            // Form validation for Stripe button
-            val formIsValid = fullName.isNotBlank() && phoneNumber.isNotBlank() &&
-                    address.isNotBlank() && cardNumber.isNotBlank() &&
-                    expiryDate.isNotBlank() && cvc.isNotBlank()
+            // Form validation for buttons
+            val formIsValid = fullName.isNotBlank() && phoneNumber.isNotBlank() && address.isNotBlank()
             val isCartNotEmpty = cartState is CartScreenState.Success && cartState.cart.items.isNotEmpty()
 
+            // Pay Now Button (combines cart payment and payment gateway)
             Button(
                 onClick = {
                     // Validate required fields
-                    if (fullName.isBlank() || phoneNumber.isBlank() || address.isBlank() ||
-                        cardNumber.isBlank() || expiryDate.isBlank() || cvc.isBlank()
-                    ) {
+                    if (fullName.isBlank() || phoneNumber.isBlank() || address.isBlank()) {
                         errorMessage = errorRequiredFieldsMessage
-                    } else {
+                    } else if (cartState is CartScreenState.Success) {
                         errorMessage = ""
-                        viewModel.payAndClearCart(
+                        val totalAmount = cartState.cart.totalPrice
+                        // Use deep link to redirect back to the app's home page
+                        val redirectUrl = "grapes://home"
+                        viewModel.processPaymentAndInitiate(
                             address = address,
                             phoneNumber = phoneNumber,
                             customerName = fullName,
                             country = "",
-                            postalCode = ""
-                        )
+                            postalCode = "",
+                            totalAmount = totalAmount,
+                            redirectUrl = redirectUrl
+                        ) { redirectUrl ->
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl))
+                            )
+                        }
+                    } else {
+                        errorMessage = "Cart is empty or not loaded"
                     }
                 },
-                enabled = termsAccepted && isCartNotEmpty,
+                enabled = termsAccepted && isCartNotEmpty && formIsValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -170,7 +172,6 @@ fun PaymentForm(
                 )
             }
 
-            // Stripe Button
             Button(
                 onClick = {
                     context.startActivity(
@@ -194,7 +195,7 @@ fun PaymentForm(
                 )
             ) {
                 Text(
-                    text = "Stripe",
+                    text = stringResource(R.string.pay_stripe),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     )

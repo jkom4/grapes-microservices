@@ -43,14 +43,16 @@ fun CartScreen(
 
     // Initialize dependencies
     val repository = remember { ArticleRepository(RetrofitClient.articleApiService) }
-    val apiService = remember { RetrofitClient.articleApiService }
+    val articleApiService = remember { RetrofitClient.articleApiService }
+    val paymentApiService = remember { RetrofitClient.paymentApiService }
 
     // Create the factory for ViewModel
     val viewModelFactory = remember {
         ArticleViewModelFactory.createFactory(
             context = context,
             repository = repository,
-            apiService = apiService
+            articleApiService = articleApiService,
+            paymentApiService = paymentApiService
         )
     }
 

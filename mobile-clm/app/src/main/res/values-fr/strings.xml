@@ -31,6 +31,7 @@
     <string name="field_cvc">CVC</string>
     <string name="terms_conditions">J\'accepte les termes et conditions</string>
     <string name="pay_button">Payer maintenant</string>
+    <string name="pay_stripe">Payer avec Stripe</string>
     <string name="payment_success">Paiement réussi !</string>
     <string name="payment_thanks">Merci pour votre achat.</string>
     <string name="error_prefix">Erreur</string>
