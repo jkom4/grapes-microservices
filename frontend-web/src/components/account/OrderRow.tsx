@@ -1,6 +1,7 @@
 import { useLanguage } from "../../features/LanguageContext";
 import { Order } from "../../utils/models/interface/Order";
 import { translationsAccount } from "../../utils/translations-account";
+import {getArticlesAPI} from "../../services/httpCommon";
 
 interface OrderRowProps {
     order: Order;
@@ -20,7 +21,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, translations }) => {
 
     // Function to handle the invoice download
     const handleInvoiceDownload = async (orderId: number) => {
-        const url = `http://localhost:8092/clm/cart/${orderId}/invoice`; // URL for the invoice
+        const url = `${getArticlesAPI.baseURL}/clm/cart/${orderId}/invoice`; // URL for the invoice
 
         try {
             // Make a GET request to fetch the invoice
