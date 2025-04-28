@@ -54,7 +54,7 @@ jobs:
       - name: "🔍 Build Auth Service"
         run: mvn -B clean install -DskipTests --file auth-service/auth-backend/pom.xml
         env:
-        MAVEN_OPTS: >-
+          MAVEN_OPTS: >-
               --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED  
               --enable-native-access=ALL-UNNAMED
       - name: 🐍 Set up Python
