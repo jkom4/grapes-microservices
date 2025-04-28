@@ -20,7 +20,43 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
+            # DskipTests to skip running tests during the build process.
+      - name: "🔍 Build API Gateway"
+        run: mvn -B clean install -DskipTests --file api-gateway/pom.xml
 
+      - name: Install custom pkcs11-provider1
+        run: |
+            mvn install:install-file \  
+            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
+            -DgroupId=iaik \  
+            -DartifactId=pkcs11-provider \  
+            -Dversion=1.9.4 \  
+            -Dpackaging=jar  
+
+      - name: Install custom pkcs11-provider2
+        run: |
+          mvn install:install-file \  
+          -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
+          -DgroupId=iaik \  
+          -DartifactId=pkcs11-provider \  
+          -Dversion=1.9.4 \  
+          -Dpackaging=jar  
+
+      - name: Install custom pkcs11-provider3
+        run: |
+          mvn install:install-file \  
+          -Dfile=auth-service/auth-backend/libraries/pkcs11-provider-1.9.4.jar \  
+          -DgroupId=iaik \  
+          -DartifactId=pkcs11-provider \  
+          -Dversion=1.9.4 \  
+          -Dpackaging=jar  
+
+      - name: "🔍 Build Auth Service"
+        run: mvn -B clean install -DskipTests --file auth-service/auth-backend/pom.xml
+        env:
+        MAVEN_OPTS: >-
+              --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED  
+              --enable-native-access=ALL-UNNAMED
       - name: 🐍 Set up Python
         uses: actions/setup-python@v3
         with:
@@ -34,6 +70,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+      - name: "📦 Install Frontend-web Dependencies"
+        run: |
+            cd frontend-web
+            npm ci --legacy-peer-deps
+            npm run-script build
 
   tests :
     name: Test Microservices
@@ -217,6 +258,9 @@ jobs:
           # ☁️ Oracle Cloud (OCIR)
           ORACLE_REGION_ID=${{ secrets.ORACLE_REGION_ID }}
           ORACLE_TENANCY_NAMESPACE=${{ secrets.ORACLE_TENANCY_NAMESPACE }}
+          # Frontend WEB
+          REACT_APP_BREVO_API_KEY=${{ secrets.REACT_APP_BREVO_API_KEY }}
+          REACT_APP_BREVO_LIST_ID=${{ secrets.REACT_APP_BREVO_LIST_ID }}
           
           #REPLICATION
           DB_REPLICATION_USER=${{ secrets.DB_REPLICATION_USER }}
@@ -233,10 +277,22 @@ jobs:
       # 🐳 Multi-Arch build for ARM-hosted services (VM3)
       - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
         run: |
-
+               
+          docker buildx build --platform linux/amd64,linux/arm64 \
+          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/rabbitmq-grapes:latest \
+          --push ./docker/rabbitmq
+          
+            docker buildx build --platform linux/amd64,linux/arm64 \
+           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/auth-service-backend:latest \
+           --push ./auth-service/auth-backend
+          
           docker buildx build --platform linux/amd64,linux/arm64 \
            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
            --push ./api-gateway
           
-      
 
+      # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
+      - name: 🏗️ Build & Push Frontend Services (amd64 only)
+        run: |
+          docker compose build frontend-web 
+          docker compose push frontend-web 
