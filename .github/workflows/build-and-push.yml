@@ -30,30 +30,16 @@ jobs:
 
       - name: Install custom pkcs11-provider1
         run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
+         mvn install:install-file -Dfile=/tmp/pkcs11-provider-1.9.4.jar -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion=1.9.4 -Dpackaging=jar
 
       - name: Install custom pkcs11-provider2
         run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
+          mvn install:install-file -Dfile=/tmp/iaikPkcs11Provider.jar -DgroupId=iaik -DartifactId=iaikPkcs11Provider -Dversion=1.0.0 -Dpackaging=jar
 
       - name: Install custom pkcs11-provider3
         run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/pkcs11-provider-1.9.4.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
+          mvn install:install-file -Dfile=/tmp/sunpkcs11-wrapper-1.4.0.jar -DgroupId=sun -DartifactId=sunpkcs11-wrapper -Dversion=1.4.0 -Dpackaging=jar 
+
 
       - name: "🔍 Build Auth Service"
         run: mvn -B clean install -DskipTests --file auth-service/auth-backend/pom.xml
@@ -125,30 +111,16 @@ jobs:
         run: mvn -B test --file api-gateway/pom.xml
       - name: Install custom pkcs11-provider1
         run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
+          mvn install:install-file -Dfile=/tmp/pkcs11-provider-1.9.4.jar -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion=1.9.4 -Dpackaging=jar
 
       - name: Install custom pkcs11-provider2
         run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
+          mvn install:install-file -Dfile=/tmp/iaikPkcs11Provider.jar -DgroupId=iaik -DartifactId=iaikPkcs11Provider -Dversion=1.0.0 -Dpackaging=jar
 
       - name: Install custom pkcs11-provider3
         run: |
-          mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/pkcs11-provider-1.9.4.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
+          mvn install:install-file -Dfile=/tmp/sunpkcs11-wrapper-1.4.0.jar -DgroupId=sun -DartifactId=sunpkcs11-wrapper -Dversion=1.4.0 -Dpackaging=jar 
+
 
       - name: "🔍 Run Tests for Auth Service"
         run: mvn -B test --file auth-service/auth-backend/pom.xml
@@ -170,7 +142,6 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
-
 
       - name: Run Tests for Data-Mining Service
         working-directory: ./data-mining-service # Run commands FROM this directory
@@ -195,7 +166,6 @@ jobs:
   #      - name: 🧪 Run Frontend Tests#        working-directory: ./frontend-web
   #        run: |
   #          npm run test
-
 
   docker-build-and-push:
     name: Build & Push Docker Images
@@ -294,7 +264,6 @@ jobs:
           PAYMENT_TRUSTSTORE_ACS_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
           PAYMENT_TRUSTSTORE_ACS_CLIENT_ALIAS=client_trusted  
           PAYMENT_TRUSTSTORE_ACS_ACQ_ALIAS=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
-          
           PAYMENT_TRUSTSTORE_ACQ_PATH=/app/keystore/acq_truststore.jks  
           PAYMENT_TRUSTSTORE_ACQ_PASSWORD=${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}  
           PAYMENT_TRUSTSTORE_ACQ_ACS_ALIAS=acs_trusted  
@@ -381,6 +350,11 @@ jobs:
           docker buildx build --platform linux/amd64,linux/arm64 \
           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
           --push ./api-gateway
+
+          
+          docker buildx build --platform linux/amd64,linux/arm64 \  
+           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/auth-service-backend:latest \  
+           --push ./auth-service/auth-backend  
 
 
           docker buildx build --platform linux/amd64,linux/arm64 \

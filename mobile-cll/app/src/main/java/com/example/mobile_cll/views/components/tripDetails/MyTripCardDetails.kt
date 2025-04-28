@@ -54,6 +54,7 @@ fun TripInfoCard(
                 ) {
                     Text(text = trip.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Text(text = "Dist: ${trip.distance}", fontSize = 12.sp, color = MaterialTheme.colorScheme.tertiary)
+
                 }
                 Spacer(modifier = Modifier.height(4.dp))
 

@@ -3,6 +3,7 @@ import { Order } from "../../utils/models/interface/Order";
 import { translationsAccount } from "../../utils/translations-account";
 import {getArticlesAPI} from "../../services/httpCommon";
 
+
 interface OrderRowProps {
     order: Order;
     translations: typeof translationsAccount["en"];
@@ -11,13 +12,14 @@ interface OrderRowProps {
 const OrderRow: React.FC<OrderRowProps> = ({ order, translations }) => {
     const { language } = useLanguage();
 
-    // Function to format the date for display
+
     const formatDate = (dateString: string): string => {
         return new Date(dateString).toLocaleString(language === "en" ? "en-US" : "fr-FR", {
             dateStyle: "medium",
             timeStyle: "short",
         });
     };
+
 
     // Function to handle the invoice download
     const handleInvoiceDownload = async (orderId: number) => {
@@ -60,6 +62,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, translations }) => {
             <td className="px-6 py-4 text-gray-700">{order.code}</td>
             <td className="px-6 py-4 text-gray-700">{formatDate(order.createdAt)}</td>
             <td className="px-6 py-4">
+
                 <span
                     className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${
                         order.paid ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
@@ -79,10 +82,13 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, translations }) => {
                     </button>
                 ) : (
                     <span className="text-gray-500">{translations.na}</span> // If no invoice, show "N/A"
+
                 )}
             </td>
         </tr>
     );
 };
 
+
 export default OrderRow;
+
