@@ -25,34 +25,16 @@ jobs:
         run: mvn -B clean install -DskipTests --file api-gateway/pom.xml
 
       - name: Install custom pkcs11-provider1
-        working-directory: ./auth-service/auth-backend
         run: |
-            mvn install:install-file \  
-            -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
-            -DgroupId=iaik \  
-            -DartifactId=pkcs11-provider \  
-            -Dversion=1.9.4 \  
-            -Dpackaging=jar  
+            mvn install:install-file -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion=1.9.4 -Dpackaging=jar  
 
       - name: Install custom pkcs11-provider2
-        working-directory: ./auth-service/auth-backend
         run: |
-          mvn install:install-file \  
-          -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar \  
-          -DgroupId=iaik \  
-          -DartifactId=pkcs11-provider \  
-          -Dversion=1.9.4 \  
-          -Dpackaging=jar  
+          mvn install:install-file -Dfile=auth-service/auth-backend/libraries/iaikPkcs11Provider.jar -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion=1.9.4 -Dpackaging=jar  
 
       - name: Install custom pkcs11-provider3
-        working-directory: ./auth-service/auth-backend
         run: |
-          mvn install:install-file \  
-          -Dfile=auth-service/auth-backend/libraries/pkcs11-provider-1.9.4.jar \  
-          -DgroupId=iaik \  
-          -DartifactId=pkcs11-provider \  
-          -Dversion=1.9.4 \  
-          -Dpackaging=jar  
+          mvn install:install-file -Dfile=auth-service/auth-backend/libraries/pkcs11-provider-1.9.4.jar -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion=1.9.4 -Dpackaging=jar  
 
       - name: "🔍 Build Auth Service"
         run: mvn -B clean install -DskipTests --file auth-service/auth-backend/pom.xml
