@@ -29,6 +29,7 @@ const cartAPI = {
     endpoints: {
         init: "/clm/cart/init",
         add: "/clm/cart/add",
+        pay: "/clm/cart/pay",
         get: (orderId: number | string) => `/clm/cart/${orderId}`,
         remove: (orderId: number | string, itemId: number) => `/clm/cart/remove/${orderId}/${itemId}`,
         clear: (orderId: number | string) => `/clm/cart/clear/${orderId}`,
