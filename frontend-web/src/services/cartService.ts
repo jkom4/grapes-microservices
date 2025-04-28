@@ -1,3 +1,4 @@
+
 import { cartAPI, myService, paymentAPI, redirectionService } from "./httpCommon";
 import CartItemModel from "../utils/models/CartItem";
 
@@ -20,8 +21,8 @@ export interface CartResponse {
 
 export const cartService = {
     async initializeCart(sub: string): Promise<InitCartResponse> {
-        console.log(`Initializing cart for userId: ${sub}`);
-        const payload = { userId: sub };
+
+        const payload = {userId: sub};
 
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.init}`, {
             method: "POST",
@@ -38,7 +39,7 @@ export const cartService = {
         }
 
         const data = await response.json();
-        console.log(`Initialized cart response:`, data);
+
         return data;
     },
 
@@ -47,9 +48,8 @@ export const cartService = {
         articleId: number,
         quantityKg: number,
         quantity: number
-    ): Promise<CartResponse> {
-        console.log(`Adding item to cart with orderId: ${orderId}, articleId: ${articleId}, quantityKg: ${quantityKg}, quantity: ${quantity}`);
-        const payload = { orderId, articleId, quantityKg, quantity };
+
+        const payload = {orderId, articleId, quantityKg, quantity};
 
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.add}`, {
             method: "POST",
@@ -66,12 +66,12 @@ export const cartService = {
         }
 
         const data = await response.json();
-        console.log(`Add item response for orderId: ${orderId}:`, data);
+
         return data;
     },
 
     async fetchCart(orderId: number): Promise<CartResponse> {
-        console.log(`Fetching cart for orderId: ${orderId}`);
+
 
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.get(orderId)}`);
 
@@ -82,7 +82,7 @@ export const cartService = {
         }
 
         const data = await response.json();
-        console.log(`Fetch cart response for orderId: ${orderId}:`, data);
+
         return data;
     },
 
@@ -93,19 +93,21 @@ export const cartService = {
         customerName: string,
         amount: number
     ): Promise<string> {
-        console.log(`Processing payment for orderId: ${orderId}, amount: ${amount}, address: ${address}, phoneNumber: ${phoneNumber}, customerName: ${customerName}`);
 
+    
         // First API call: Original paymentAPI call
         const redirectUrl = `${myService.baseURL}`;
         const paymentPayload = {
+
             amount: amount,
             merchantId: "grapes",
             redirectUrl: redirectUrl,
         };
-        console.log(`paymentAPI payload:`, paymentPayload);
+
 
         const paymentUrl = `${paymentAPI.baseURL}${paymentAPI.endpoints.pay}`;
         const paymentResponse = await fetch(paymentUrl, {
+
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -146,11 +148,11 @@ export const cartService = {
         const cartText = await cartResponse.text();
         console.log(`cartAPI raw response for orderId: ${orderId}:`, cartText);
 
+
         return `${redirectionService.baseURL}${redirectionService.endpoints.toPayment}`;
     },
 
     async removeItem(orderId: number, itemId: number): Promise<void> {
-        console.log(`Removing item from cart with orderId: ${orderId}, itemId: ${itemId}`);
 
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.remove(orderId, itemId)}`, {
             method: "DELETE",
@@ -164,6 +166,7 @@ export const cartService = {
             console.error("Error removing item for orderId:", orderId, "itemId:", itemId, "Details:", errorDetails);
             throw new Error(`Failed to remove item. Details: ${errorDetails}`);
         }
+
 
         console.log(`Item removed successfully for orderId: ${orderId}, itemId: ${itemId}`);
     },
@@ -186,4 +189,6 @@ export const cartService = {
 
         console.log(`Cart cleared successfully for orderId: ${orderId}`);
     }
+
 };
+

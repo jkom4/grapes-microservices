@@ -18,6 +18,7 @@ const CartPage = () => {
     const { language } = useLanguage();
     const navigate = useNavigate();
     const { orderId, setOrderId, initializeCart } = useCart();
+
     const [cart, setCart] = useState<CartResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -140,6 +141,7 @@ const CartPage = () => {
                 paymentData.customerName,
                 paymentData.amount
             );
+
 
             setCart(null);
             localStorage.removeItem("orderId");
