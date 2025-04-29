@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.net.URLEncoder
 
 sealed class ArticleState {
     object Loading : ArticleState()
@@ -60,6 +59,7 @@ class ArticleViewModel(
     private companion object {
         const val DEFAULT_USER_ID = 1
         const val PAGE_SIZE = 20
+        private const val TAG = "ArticleViewModel"
     }
 
     private val _articleState = MutableStateFlow<ArticleState>(ArticleState.Loading)
@@ -84,6 +84,27 @@ class ArticleViewModel(
 
     init {
         loadArticles()
+        initializeCart()
+    }
+
+    private fun initializeCart() {
+        viewModelScope.launch {
+            try {
+                cartManager.initializeCart(DEFAULT_USER_ID)
+                cartManager.orderId.collect { orderId ->
+                    if (orderId != null) {
+                        Log.d(TAG, "Cart initialized with orderId: $orderId")
+                        fetchCart()
+                    } else {
+                        Log.e(TAG, "Cart initialization failed: orderId is null")
+                        _cartScreenState.value = CartScreenState.Error("Failed to initialize cart")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error initializing cart: ${e.message}", e)
+                _cartScreenState.value = CartScreenState.Error("Error initializing cart: ${e.message}")
+            }
+        }
     }
 
     fun fetchArticleById(id: Int) {
@@ -134,7 +155,7 @@ class ArticleViewModel(
                 )
                 if (addResponse.isSuccessful) {
                     _cartState.value = CartState.Success
-                    fetchCart() // Refresh cart after an item added
+                    fetchCart()
                 } else {
                     _cartState.value = CartState.Error("This product is out of stock")
                 }
@@ -156,11 +177,6 @@ class ArticleViewModel(
             try {
                 val cart = apiService.getCart(orderId)
                 Log.d(TAG, "Cart fetched: $cart")
-                cart.items.forEach { item ->
-                    Log.d(TAG, "Item: ${item.articleName}, quantityKg: ${item.quantityKg}, quantity: ${item.quantity}, price: ${item.price}, itemTotal: ${if (item.quantityKg > 0) item.quantityKg * item.price else item.quantity * item.price}")
-                }
-                Log.d(TAG, "API totalPrice: ${cart.totalPrice}")
-                // Calculate totalPrice
                 val calculatedTotalPrice = cart.items.sumOf { item ->
                     if (item.quantityKg > 0) {
                         (item.quantityKg * item.price).toDouble()
@@ -168,8 +184,6 @@ class ArticleViewModel(
                         (item.quantity * item.price).toDouble()
                     }
                 }.toFloat()
-                Log.d(TAG, "Calculated totalPrice: $calculatedTotalPrice")
-                // Create a new object Cart with the totalPrice
                 val correctedCart = cart.copy(totalPrice = calculatedTotalPrice)
                 _cartScreenState.value = CartScreenState.Success(correctedCart)
             } catch (e: Exception) {
@@ -182,7 +196,6 @@ class ArticleViewModel(
     fun removeFromCart(itemId: Int) {
         viewModelScope.launch {
             val orderId = cartManager.orderId.value
-            Log.d(TAG, "removeFromCart with orderId: $orderId, itemId: $itemId")
             if (orderId == null) {
                 _cartScreenState.value = CartScreenState.Error("Cart not initialized")
                 Log.e(TAG, "removeFromCart failed: orderId is null")
@@ -192,14 +205,11 @@ class ArticleViewModel(
                 val response = apiService.removeFromCart(orderId, itemId)
                 if (response.isSuccessful) {
                     fetchCart()
-                    Log.d(TAG, "removeFromCart successful for orderId: $orderId, itemId: $itemId")
                 } else {
                     _cartScreenState.value = CartScreenState.Error("Error removing item from cart: HTTP ${response.code()}")
-                    Log.e(TAG, "removeFromCart failed: HTTP ${response.code()}")
                 }
             } catch (e: Exception) {
                 _cartScreenState.value = CartScreenState.Error(e.message ?: "Network error")
-                Log.e(TAG, "removeFromCart error: ${e.message}")
             }
         }
     }
@@ -212,10 +222,8 @@ class ArticleViewModel(
         postalCode: String
     ): Result<Unit> {
         val orderId = cartManager.orderId.value
-        Log.d(TAG, "payAndClearCart with orderId: $orderId")
         if (orderId == null) {
             _paymentState.value = PaymentState.Error("Cart not initialized")
-            Log.e(TAG, "payAndClearCart failed: orderId is null")
             return Result.failure(Exception("Cart not initialized"))
         }
         val payRequest = PayCartRequest(
@@ -226,24 +234,20 @@ class ArticleViewModel(
             country = country,
             postalCode = postalCode
         )
-        Log.d(TAG, "PayCartRequest: $payRequest")
         _paymentState.value = PaymentState.Loading
         return try {
             val payResponse = apiService.payCart(payRequest)
             if (payResponse.isSuccessful) {
                 cartManager.clearCart()
                 _paymentState.value = PaymentState.Success
-                Log.d(TAG, "payAndClearCart successful for orderId: $orderId")
                 Result.success(Unit)
             } else {
                 val errorMessage = "Payment error: HTTP ${payResponse.code()}"
                 _paymentState.value = PaymentState.Error(errorMessage)
-                Log.e(TAG, "payAndClearCart failed: HTTP ${payResponse.code()}, Response: ${payResponse.errorBody()?.string()}")
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
             _paymentState.value = PaymentState.Error(e.message ?: "Network error")
-            Log.e(TAG, "payAndClearCart error: ${e.message}")
             Result.failure(e)
         }
     }
@@ -255,29 +259,52 @@ class ArticleViewModel(
                 val request = PaymentInitiateRequest(
                     amount = totalAmount,
                     merchantId = "grapes",
-                    redirectUrl = redirectUrl
+                    redirectUrl = "http://79.76.108.164:82/login"
                 )
+                Log.d(TAG, "Sending payment initiation request to /payment/login/payment-initiate")
+                Log.d(TAG, "JSON data: amount=${request.amount}, merchantId=${request.merchantId}, redirectUrl=${request.redirectUrl}")
                 val response = paymentApiService.initiatePayment(request)
-                Log.d(TAG, "initiatePayment response: $response")
-                if (response.isSuccessful && response.body() != null) {
-                    var finalRedirectUrl = response.body()!!.redirectUrl
-                    // Workaround: Append redirectUrl as return_url if the response is the login page
-                    if (finalRedirectUrl.contains("79.76.108.164:82/login")) {
-                        Log.w(TAG, "Detected payment gateway login URL: $finalRedirectUrl")
-                        val encodedRedirectUrl = URLEncoder.encode(redirectUrl, "UTF-8")
-                        finalRedirectUrl = "$finalRedirectUrl?return_url=$encodedRedirectUrl"
-                        Log.d(TAG, "Modified redirect URL: $finalRedirectUrl")
+                Log.d(TAG, "Payment initiation response: HTTP ${response.code()}, Body: ${response.body()}")
+                if (response.isSuccessful) {
+                    if (response.body() != null && response.body()!!.isSuccess) {
+                        val finalRedirectUrl = response.body()!!.redirectUrl
+                        Log.d(TAG, "Payment initiation successful, redirectUrl: $finalRedirectUrl")
+                        if (finalRedirectUrl.contains("79.76.108.164:82/login")) {
+                            Log.w(TAG, "Payment gateway requires authentication: $finalRedirectUrl")
+                        }
+                        _paymentState.value = PaymentState.Success
+                        onRedirect(finalRedirectUrl)
+                        // Test session details après un succès
+                        testSessionDetails()
+                    } else {
+                        val errorBody = response.errorBody()?.string() ?: response.body()?.message ?: "No body or invalid response"
+                        Log.e(TAG, "Payment initiation failed: HTTP ${response.code()}, Response: $errorBody")
+                        _paymentState.value = PaymentState.Error("Invalid response: $errorBody")
                     }
-                    _paymentState.value = PaymentState.Success
-                    onRedirect(finalRedirectUrl)
                 } else {
-                    val errorBody = response.errorBody()?.string()
-                    Log.e(TAG, "initiatePayment failed: HTTP ${response.code()}, Response: $errorBody")
+                    val errorBody = response.errorBody()?.string() ?: "No error body"
+                    Log.e(TAG, "Payment initiation failed: HTTP ${response.code()}, Response: $errorBody")
                     _paymentState.value = PaymentState.Error("Payment initiation failed: HTTP ${response.code()}")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "initiatePayment error: ${e.message}", e)
+                Log.e(TAG, "Payment initiation error: ${e.message}", e)
                 _paymentState.value = PaymentState.Error(e.message ?: "Network error")
+            }
+        }
+    }
+
+    fun testSessionDetails() {
+        viewModelScope.launch {
+            try {
+                val response = paymentApiService.getSessionDetails()
+                Log.d(TAG, "Session details response: HTTP ${response.code()}, Body: ${response.body()}")
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Log.d(TAG, "Session details: amount=${response.body()?.amount}, merchant=${response.body()?.merchantName}, redirectUrl=http://79.76.108.164:82/login")
+                } else {
+                    Log.e(TAG, "Failed to get session details: ${response.body()?.message}")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching session details: ${e.message}", e)
             }
         }
     }
@@ -296,6 +323,8 @@ class ArticleViewModel(
             val payResult = payAndClearCart(address, phoneNumber, customerName, country, postalCode)
             if (payResult.isSuccess) {
                 initiatePayment(totalAmount, redirectUrl, onRedirect)
+            } else {
+                _paymentState.value = PaymentState.Error("Payment processing failed")
             }
         }
     }

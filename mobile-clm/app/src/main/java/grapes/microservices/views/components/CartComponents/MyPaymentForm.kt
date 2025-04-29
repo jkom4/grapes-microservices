@@ -85,7 +85,7 @@ fun PaymentForm(
                         unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
                     keyboardOptions = when (labelResId) {
-                        R.string.field_phone, R.string.field_zip, R.string.field_card_number, R.string.field_cvc -> KeyboardOptions(keyboardType = KeyboardType.Number)
+                        R.string.field_phone -> KeyboardOptions(keyboardType = KeyboardType.Number)
                         R.string.field_email -> KeyboardOptions(keyboardType = KeyboardType.Email)
                         else -> KeyboardOptions.Default
                     },
@@ -120,30 +120,17 @@ fun PaymentForm(
             val formIsValid = fullName.isNotBlank() && phoneNumber.isNotBlank() && address.isNotBlank()
             val isCartNotEmpty = cartState is CartScreenState.Success && cartState.cart.items.isNotEmpty()
 
-            // Pay Now Button (combines cart payment and payment gateway)
+            // Pay Now Button
             Button(
                 onClick = {
-                    // Validate required fields
                     if (fullName.isBlank() || phoneNumber.isBlank() || address.isBlank()) {
                         errorMessage = errorRequiredFieldsMessage
-                    } else if (cartState is CartScreenState.Success) {
+                    } else if (cartState is CartScreenState.Success && cartState.cart.items.isNotEmpty()) {
                         errorMessage = ""
-                        val totalAmount = cartState.cart.totalPrice
-                        // Use deep link to redirect back to the app's home page
-                        val redirectUrl = "grapes://home"
-                        viewModel.processPaymentAndInitiate(
-                            address = address,
-                            phoneNumber = phoneNumber,
-                            customerName = fullName,
-                            country = "",
-                            postalCode = "",
-                            totalAmount = totalAmount,
-                            redirectUrl = redirectUrl
-                        ) { redirectUrl ->
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl))
-                            )
-                        }
+                        // Appel direct de l'URL en dur
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse("http://79.76.108.164:82/login"))
+                        )
                     } else {
                         errorMessage = "Cart is empty or not loaded"
                     }
@@ -172,6 +159,7 @@ fun PaymentForm(
                 )
             }
 
+            // Stripe Button
             Button(
                 onClick = {
                     context.startActivity(
@@ -233,7 +221,7 @@ fun PaymentForm(
                     )
                 }
                 else -> {
-                    // Idle: no message
+                    // Idle or Success: no message
                 }
             }
         }

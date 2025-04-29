@@ -1,5 +1,6 @@
 package grapes.microservices.models.network
 
+import android.util.Log
 import com.google.gson.annotations.SerializedName
 import grapes.microservices.models.data.AddToCartRequest
 import grapes.microservices.models.data.Article
@@ -8,6 +9,9 @@ import grapes.microservices.models.data.CartResponse
 import grapes.microservices.models.data.InitCartRequest
 import grapes.microservices.models.data.Order
 import grapes.microservices.models.data.PayCartRequest
+import okhttp3.Cookie
+import okhttp3.CookieJar
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -20,16 +24,57 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-// Retrofit client to handle network operations
 object RetrofitClient {
+
     private const val BASE_URL = "http://89.168.47.217:8090/api/"
+
+    private val cookieJar = object : CookieJar {
+        private val cookieStore = mutableListOf<Cookie>()
+
+        override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
+            cookies.forEach { cookie ->
+                cookieStore.removeAll { it.name == cookie.name }
+                cookieStore.add(cookie)
+                Log.d("CookieJar", "Saved cookie: $cookie for domain: ${cookie.domain ?: url.host}")
+            }
+        }
+
+        override fun loadForRequest(url: HttpUrl): List<Cookie> {
+            val validCookies = cookieStore.filter { cookie ->
+                url.host.contains(cookie.domain ?: url.host) &&
+                        url.encodedPath.startsWith(cookie.path) &&
+                        !cookie.isExpired()
+            }
+            Log.d("CookieJar", "Loading cookies for $url: $validCookies")
+            return validCookies
+        }
+
+        private fun Cookie.isExpired(): Boolean {
+            return expiresAt < System.currentTimeMillis()
+        }
+    }
+
+    private val client = OkHttpClient.Builder()
+        .cookieJar(cookieJar)
+        .addInterceptor { chain ->
+            val request = chain.request()
+            val response = chain.proceed(request)
+            val responseBody = response.peekBody(Long.MAX_VALUE).string()
+            Log.d("OkHttp", "Request: ${request.url}, Response: HTTP ${response.code}, Body: $responseBody")
+            response
+        }
+        .build()
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
-        .client(OkHttpClient.Builder().build())
+        .client(client)
         .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
         .build()
+
+    val paymentApiService: PaymentApiService by lazy {
+        retrofit.create(PaymentApiService::class.java)
+    }
 
     val articleApiService: ArticleApiService by lazy {
         retrofit.create(ArticleApiService::class.java)
@@ -37,10 +82,6 @@ object RetrofitClient {
 
     val orderApiService: OrderApiService by lazy {
         retrofit.create(OrderApiService::class.java)
-    }
-
-    val paymentApiService: PaymentApiService by lazy {
-        retrofit.create(PaymentApiService::class.java)
     }
 }
 
@@ -53,7 +94,23 @@ data class PaymentInitiateRequest(
 
 // Data class for payment initiation response
 data class PaymentInitiateResponse(
-    @SerializedName("redirectUrl") val redirectUrl: String
+    @SerializedName("success") val success: Boolean? = null,
+    @SerializedName("status") val status: String? = null, // Pour gérer l'ancienne réponse
+    @SerializedName("redirectUrl") val redirectUrl: String,
+    @SerializedName("message") val message: String? = null
+) {
+    // Propriété calculée pour déterminer si la requête a réussi
+    val isSuccess: Boolean
+        get() = success == true || status == "success"
+}
+
+// Data class for session details response
+data class SessionDetailsResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("amount") val amount: Float?,
+    @SerializedName("merchantName") val merchantName: String?,
+    @SerializedName("redirectUrl") val redirectUrl: String?,
+    @SerializedName("message") val message: String?
 )
 
 interface ArticleApiService {
@@ -109,7 +166,9 @@ interface OrderApiService {
 }
 
 interface PaymentApiService {
-    // Initiates payment and returns a redirect URL
     @POST("payment/login/payment-initiate")
     suspend fun initiatePayment(@Body request: PaymentInitiateRequest): Response<PaymentInitiateResponse>
+
+    @GET("payment/session-details")
+    suspend fun getSessionDetails(): Response<SessionDetailsResponse>
 }
