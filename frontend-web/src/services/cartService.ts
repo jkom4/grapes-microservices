@@ -1,4 +1,5 @@
-import {cartAPI, myService, paymentAPI, redirectionService} from "./httpCommon";
+
+import { cartAPI, myService, paymentAPI, redirectionService } from "./httpCommon";
 import CartItemModel from "../utils/models/CartItem";
 
 interface InitCartResponse {
@@ -20,6 +21,7 @@ export interface CartResponse {
 
 export const cartService = {
     async initializeCart(sub: string): Promise<InitCartResponse> {
+
         const payload = {userId: sub};
 
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.init}`, {
@@ -37,6 +39,7 @@ export const cartService = {
         }
 
         const data = await response.json();
+
         return data;
     },
 
@@ -45,7 +48,7 @@ export const cartService = {
         articleId: number,
         quantityKg: number,
         quantity: number
-    ): Promise<CartResponse> {
+
         const payload = {orderId, articleId, quantityKg, quantity};
 
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.add}`, {
@@ -63,10 +66,12 @@ export const cartService = {
         }
 
         const data = await response.json();
+
         return data;
     },
 
     async fetchCart(orderId: number): Promise<CartResponse> {
+
 
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.get(orderId)}`);
 
@@ -77,6 +82,7 @@ export const cartService = {
         }
 
         const data = await response.json();
+
         return data;
     },
 
@@ -88,31 +94,60 @@ export const cartService = {
         amount: number
     ): Promise<string> {
 
+    
+        // First API call: Original paymentAPI call
         const redirectUrl = `${myService.baseURL}`;
+        const paymentPayload = {
 
-        const payload = {
             amount: amount,
             merchantId: "grapes",
             redirectUrl: redirectUrl,
         };
 
-        const url = `${paymentAPI.baseURL}${paymentAPI.endpoints.pay}`;
-        const response = await fetch(url, {
+
+        const paymentUrl = `${paymentAPI.baseURL}${paymentAPI.endpoints.pay}`;
+        const paymentResponse = await fetch(paymentUrl, {
+
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(paymentPayload),
             credentials: 'include'
         });
 
-        if (!response.ok) {
-            const errorDetails = await response.text();
-            console.error("Error processing payment for orderId:", orderId, "Details:", errorDetails);
-            throw new Error(`Payment failed. Details: ${errorDetails}`);
+        if (!paymentResponse.ok) {
+            const errorDetails = await paymentResponse.text();
+            console.error("Error processing payment for orderId:", orderId, "Status:", paymentResponse.status, "Details:", errorDetails);
+            throw new Error(`Payment failed (paymentAPI). Status: ${paymentResponse.status}, Details: ${errorDetails}`);
         }
 
-        await this.clearCart(orderId);
+        const paymentText = await paymentResponse.text();
+        console.log(`paymentAPI raw response for orderId: ${orderId}:`, paymentText);
+
+        // Second API call: New cartAPI call
+        const cartPayload = { orderId, address, phoneNumber, customerName };
+        console.log(`cartAPI payload:`, cartPayload);
+
+        const cartUrl = `${cartAPI.baseURL}${cartAPI.endpoints.pay}`;
+        const cartResponse = await fetch(cartUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(cartPayload),
+            credentials: 'include'
+        });
+
+        if (!cartResponse.ok) {
+            const errorDetails = await cartResponse.text();
+            console.error("Error processing payment for orderId:", orderId, "Status:", cartResponse.status, "Details:", errorDetails);
+            throw new Error(`Payment failed (cartAPI). Status: ${cartResponse.status}, Details: ${errorDetails}`);
+        }
+
+        const cartText = await cartResponse.text();
+        console.log(`cartAPI raw response for orderId: ${orderId}:`, cartText);
+
 
         return `${redirectionService.baseURL}${redirectionService.endpoints.toPayment}`;
     },
@@ -132,10 +167,13 @@ export const cartService = {
             throw new Error(`Failed to remove item. Details: ${errorDetails}`);
         }
 
+
+        console.log(`Item removed successfully for orderId: ${orderId}, itemId: ${itemId}`);
     },
 
     async clearCart(orderId: number): Promise<void> {
-        console.log(`Attempting to clear cart for orderId: ${orderId}`);
+        console.log(`Attempting tographql clear cart for orderId: ${orderId}`);
+
         const response = await fetch(`${cartAPI.baseURL}${cartAPI.endpoints.clear(orderId)}`, {
             method: "DELETE",
             headers: {
@@ -151,4 +189,6 @@ export const cartService = {
 
         console.log(`Cart cleared successfully for orderId: ${orderId}`);
     }
-}
+
+};
+
