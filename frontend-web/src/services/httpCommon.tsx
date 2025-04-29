@@ -1,9 +1,9 @@
-const BASE_URL = "http://89.168.47.217:8090/api";
-const BASE_URL_AUTH = "http://89.168.47.217:8090/api";
-const BASE_URL_PAYMENT = "http://89.168.47.217:8090/api";
-const BASE_TO_PAY = "http://79.76.108.164:82";
-const MY_BASE_URL = "http://79.76.108.164:80";
-const BASE_FRONT_AUTH = "http://79.76.108.164:81";
+const BASE_URL = "https://api.grapesmasi.me/api";
+const BASE_URL_AUTH = "https://api.grapesmasi.me/api";
+const BASE_URL_PAYMENT = "https://api.grapesmasi.me/api";
+const BASE_TO_PAY = "https://pay.grapesmasi.me";
+const MY_BASE_URL = "https://grapesmasi.me";
+const BASE_FRONT_AUTH = "https://auth.grapesmasi.me";
 
 const getArticlesAPI = {
     baseURL: BASE_URL,
