@@ -24,9 +24,6 @@ jobs:
           java-version: '21'
 
 
-        # DskipTests to skip running tests during the build process.
-      - name: "🔍 Build API Gateway"
-        run: mvn -B clean install -DskipTests --file api-gateway/pom.xml
 
 
 
@@ -50,17 +47,7 @@ jobs:
          npm ci --legacy-peer-deps
          npm run-script build
 
-      - name: "📦 Install Frontend-auth Dependencies"
-        run: |
-          cd auth-service/auth-frontend
-          npm ci --legacy-peer-deps
-          npm run-script build
-
-      - name: "📦 Install Frontend-Payment Dependencies"
-        run: |
-          cd payment-service/payment-frontend
-          npm ci --legacy-peer-deps
-          npm run-script build
+    
 
   tests :
     name: Test Microservices
@@ -77,8 +64,7 @@ jobs:
           java-version: '21'
 
 
-      - name: "🔍 Run Tests for API Gateway"
-        run: mvn -B test --file api-gateway/pom.xml
+
 
       - name: 🐍 Set up Python
         uses: actions/setup-python@v3
@@ -266,15 +252,11 @@ jobs:
       - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
         run: |
           
-          docker buildx build --platform linux/amd64,linux/arm64 \
-          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
-          --push ./api-gateway
-      
         
 
         # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
       - name: 🏗️ Build & Push Frontend Services (amd64 only)
         run: |
-          docker compose build frontend-web frontend-auth frontend-payment 
-          docker compose push frontend-web frontend-auth frontend-payment 
+          docker compose build frontend-web 
+          docker compose push frontend-web
 
