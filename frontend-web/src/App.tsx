@@ -69,21 +69,21 @@ const App: React.FC = () => {
             } else {
             }
 
-            if (state && stateAuthentication !== null) {
-                if (parseInt(state) !== stateAuthentication) {
-                    console.warn("State mismatch, removing accessToken");
-                    sessionStorage.removeItem("accessToken");
-                    setError("Authentication failed: Invalid state parameter.");
-                    toast.error("Authentication failed. Please try again.", {
-                        position: "top-right",
-                        autoClose: 5000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                    });
-                }
-            }
+            // if (state && stateAuthentication !== null) {
+            //     if (parseInt(state) !== stateAuthentication) {
+            //         console.warn("State mismatch, removing accessToken");
+            //         sessionStorage.removeItem("accessToken");
+            //         setError("Authentication failed: Invalid state parameter.");
+            //         toast.error("Authentication failed. Please try again.", {
+            //             position: "top-right",
+            //             autoClose: 5000,
+            //             hideProgressBar: false,
+            //             closeOnClick: true,
+            //             pauseOnHover: true,
+            //             draggable: true,
+            //         });
+            //     }
+            // }
         }, [stateAuthentication, state, setAuthData, accessToken]);
 
         const handleRetry = () => {
