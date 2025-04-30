@@ -130,7 +130,6 @@ fun PaymentForm(
                         val totalAmount = cartState.cart.totalPrice
                         val redirectUrl = "grapes://home"
                         val merchantId = "grapes"
-                        Log.d(TAG, "Processing payment with amount: $totalAmount, merchantId: $merchantId, redirectUrl: $redirectUrl")
                         viewModel.processPaymentAndInitiate(
                             address = address,
                             phoneNumber = phoneNumber,
@@ -138,10 +137,9 @@ fun PaymentForm(
                             country = "Unknown",
                             postalCode = "Unknown",
                             totalAmount = totalAmount,
-                            merchantId = merchantId, // Ajout explicite
+                            merchantId = merchantId,
                             redirectUrl = redirectUrl,
                             onRedirect = { redirectUrl ->
-                                Log.d(TAG, "Opening redirectUrl in Chrome: $redirectUrl")
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl)).apply {
                                     setPackage("com.android.chrome")
                                     setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -149,7 +147,6 @@ fun PaymentForm(
                                 try {
                                     context.startActivity(intent)
                                 } catch (e: Exception) {
-                                    Log.e(TAG, "Failed to open Chrome, falling back to default browser", e)
                                     context.startActivity(
                                         Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl)).apply {
                                             setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -227,7 +224,6 @@ fun PaymentForm(
                     )
                 }
                 else -> {
-                    // Idle: rien à afficher
                 }
             }
         }

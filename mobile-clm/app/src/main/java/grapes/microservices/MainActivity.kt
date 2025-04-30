@@ -44,7 +44,6 @@ class MainActivity : ComponentActivity() {
         intent?.data?.let { uri ->
             Log.d(TAG, "Received deep link: $uri")
             if (uri.scheme == "grapes" && uri.host == "home") {
-                Log.d(TAG, "Handling grapes://home, navigating to home screen")
             } else {
                 Log.w(TAG, "Unhandled deep link: $uri")
             }

@@ -35,7 +35,6 @@ object RetrofitClient {
             cookies.forEach { cookie ->
                 cookieStore.removeAll { it.name == cookie.name }
                 cookieStore.add(cookie)
-                Log.d("CookieJar", "Saved cookie: $cookie for domain: ${cookie.domain ?: url.host}")
             }
         }
 
@@ -45,7 +44,6 @@ object RetrofitClient {
                         url.encodedPath.startsWith(cookie.path) &&
                         !cookie.isExpired()
             }
-            Log.d("CookieJar", "Loading cookies for $url: $validCookies")
             return validCookies
         }
 
@@ -60,7 +58,6 @@ object RetrofitClient {
             val request = chain.request()
             val response = chain.proceed(request)
             val responseBody = response.peekBody(Long.MAX_VALUE).string()
-            Log.d("OkHttp", "Request: ${request.url}, Response: HTTP ${response.code}, Body: $responseBody")
             response
         }
         .build()
@@ -95,11 +92,10 @@ data class PaymentInitiateRequest(
 // Data class for payment initiation response
 data class PaymentInitiateResponse(
     @SerializedName("success") val success: Boolean? = null,
-    @SerializedName("status") val status: String? = null, // Pour gérer l'ancienne réponse
+    @SerializedName("status") val status: String? = null,
     @SerializedName("redirectUrl") val redirectUrl: String,
     @SerializedName("message") val message: String? = null
 ) {
-    // Propriété calculée pour déterminer si la requête a réussi
     val isSuccess: Boolean
         get() = success == true || status == "success"
 }
