@@ -30,7 +30,7 @@ jobs:
 
       - name: Install custom pkcs11-provider1
         run: |
-         mvn install:install-file -Dfile=/tmp/pkcs11-provider-1.9.4.jar -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion=1.9.4 -Dpackaging=jar
+          mvn install:install-file -Dfile=/tmp/pkcs11-provider-1.9.4.jar -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion=1.9.4 -Dpackaging=jar
 
       - name: Install custom pkcs11-provider2
         run: |
@@ -76,9 +76,9 @@ jobs:
 
       - name: "📦 Install Frontend-web Dependencies"
         run: |
-         cd frontend-web
-         npm ci --legacy-peer-deps
-         npm run-script build
+          cd frontend-web
+          npm ci --legacy-peer-deps
+          npm run-script build
 
       - name: "📦 Install Frontend-auth Dependencies"
         run: |
@@ -350,7 +350,7 @@ jobs:
           docker buildx build --platform linux/amd64,linux/arm64 \
           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
           --push ./api-gateway
-
+          
           
           docker buildx build --platform linux/amd64,linux/arm64 \  
            -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/auth-service-backend:latest \  
@@ -466,4 +466,3 @@ jobs:
             docker image prune -a  
             docker compose pull  
             docker compose -f docker-compose-vm3.yml up -d
-
