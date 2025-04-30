@@ -1,7 +1,7 @@
 import {AuthMethod, User} from '../models/User';
 import {jwtDecode} from 'jwt-decode';
 
-const API_BASE_URL = 'http://89.168.47.217:8090/api';
+const API_BASE_URL = 'https://api.grapesmasi.me/api';
 
 const headers = {
     'Content-Type': 'application/json',

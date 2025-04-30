@@ -4,8 +4,12 @@ services:
   frontend-web:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/grapes-frontend:latest
     container_name: frontend-web
+    env_file: .env
     ports:
       - "80:80"
+    environment:
+      - REACT_APP_BREVO_API_KEY=${REACT_APP_BREVO_API_KEY}
+      - REACT_APP_BREVO_LIST_ID=${REACT_APP_BREVO_API_KEY}
 
   frontend-auth:
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/auth-service-frontend:latest

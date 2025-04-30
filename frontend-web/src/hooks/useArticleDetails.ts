@@ -15,9 +15,6 @@ export const useArticleDetails = (id: string | undefined, sub: string | null) =>
                 if (!id) {
                     throw new Error("Article ID is missing");
                 }
-                if (!sub) {
-                    throw new Error("User ID (sub) is missing");
-                }
 
                 // Fetch article details
                 const articleId = parseInt(id, 10);
