@@ -1,5 +1,6 @@
 package grapes.microservices.apigateway.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -19,6 +20,14 @@ public class SecurityConfig {
     private static final String[] CHAT_PATHS = {"/api/chat/**"};
     private static final String[] PAYMENT_PATHS = {"/api/payment/**"};
     private static final String[] MONITORING_PATHS = {"/actuator/*"};
+    @Value("${auth.frontend.url}")
+    private String authfrontendurl;
+    @Value("${payment.frontend.url}")
+    private String paymentfrontendurl;
+    @Value("${frontend.url}")
+    private String frontendurl;
+    @Value("${grapes.frontend.url}")
+    private String grapesfrontendurl;
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
@@ -43,13 +52,17 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.setAllowedOrigins(Arrays.asList(
-                "http://79.76.108.164",
-                "http://79.76.108.164:80",
-                "http://79.76.108.164:81",
-                "http://79.76.108.164:82"
+                frontendurl,
+                grapesfrontendurl,
+                authfrontendurl,
+                paymentfrontendurl
         ));
-        config.addAllowedMethod("*");
-        config.addAllowedHeader("*");
+
+
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+        config.setAllowedHeaders(Arrays.asList("origin", "content-type", "accept", "authorization", "x-requested-with"));
+        config.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

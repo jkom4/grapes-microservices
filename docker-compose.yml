@@ -334,10 +334,15 @@ services:
 
   frontend-web:
     build: ./frontend-web
+    env_file: .env
     image: ${ORACLE_REGION_ID}.ocir.io/${ORACLE_TENANCY_NAMESPACE}/grapeshub/grapes-frontend:latest
     container_name: grapes-frontend
     ports:
       - "80:80"
+    environment:
+      - REACT_APP_BREVO_API_KEY=${REACT_APP_BREVO_API_KEY}
+      - REACT_APP_BREVO_LIST_ID=${REACT_APP_BREVO_API_KEY}
+
 
   frontend-auth:
     build: ./auth-service/auth-frontend

@@ -28,7 +28,7 @@ function AllArticlesSection({ limit = 0 }: { limit?: number }) {
     const [quantityKg, setQuantityKg] = useState<string>("0");
     const [quantityUnits, setQuantityUnits] = useState<string>("1");
     const [unitType, setUnitType] = useState<"kg" | "units">("units");
-    const { orderId } = useCart(); // Utiliser le contexte
+    const { orderId } = useCart();
     const { language } = useLanguage();
     const articlesPerPage = 27;
 
