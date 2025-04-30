@@ -251,12 +251,10 @@ jobs:
       # 🐳 Multi-Arch build for ARM-hosted services (VM3)
       - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
         run: |
-          
+          docker buildx build --platform linux/amd64,linux/arm64 \
+          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
+          --push ./api-gateway
+
         
 
-        # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
-      - name: 🏗️ Build & Push Frontend Services (amd64 only)
-        run: |
-          docker compose build frontend-web 
-          docker compose push frontend-web
-
+      
