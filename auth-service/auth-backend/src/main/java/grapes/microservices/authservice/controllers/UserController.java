@@ -24,7 +24,7 @@ import java.util.List;
  * It provides endpoints for user registration, retrieval, update, and deletion.
  * @author  Cameron
  */
-@CrossOrigin
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor

@@ -69,7 +69,8 @@ function Navbar() {
             </nav>
             <div className="flex items-center">
                 <a
-                    href="../chat_exe/frontend_chat.exe"
+                    href="/chat_exe/frontend_chat.exe"
+
                     download="frontend_chat.exe"
                     className="text-white text-lg bg-accent px-4 py-3 rounded-3xl hover:bg-secondary cursor-pointer mr-4"
                 >
