@@ -1,7 +1,10 @@
 package grapes.microservices
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -10,6 +13,9 @@ import grapes.microservices.ui.theme.MobileCLMTheme
 import grapes.microservices.views.components.MyNavigation
 
 class MainActivity : ComponentActivity() {
+    private companion object {
+        private const val TAG = "MainActivity"
+    }
 
     override fun attachBaseContext(newBase: Context) {
         val prefs = newBase.getSharedPreferences("settings", Context.MODE_PRIVATE)
@@ -23,7 +29,24 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MobileCLMTheme(false) {
-                MyNavigation()
+                MyNavigation(deepLinkUri = intent?.data)
+            }
+        }
+        handleDeepLink(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    private fun handleDeepLink(intent: Intent?) {
+        intent?.data?.let { uri ->
+            Log.d(TAG, "Received deep link: $uri")
+            if (uri.scheme == "grapes" && uri.host == "home") {
+                Log.d(TAG, "Handling grapes://home, navigating to home screen")
+            } else {
+                Log.w(TAG, "Unhandled deep link: $uri")
             }
         }
     }

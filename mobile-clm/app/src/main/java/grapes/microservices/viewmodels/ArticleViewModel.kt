@@ -1,6 +1,5 @@
 package grapes.microservices.viewmodel
 
-import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -223,6 +222,7 @@ class ArticleViewModel(
     ): Result<Unit> {
         val orderId = cartManager.orderId.value
         if (orderId == null) {
+            Log.e(TAG, "payAndClearCart failed: orderId is null")
             _paymentState.value = PaymentState.Error("Cart not initialized")
             return Result.failure(Exception("Cart not initialized"))
         }
@@ -235,21 +235,40 @@ class ArticleViewModel(
             postalCode = postalCode
         )
         _paymentState.value = PaymentState.Loading
+        Log.d(TAG, "Sending pay request to /clm/cart/pay: ${payRequest.toJson()}")
         return try {
             val payResponse = apiService.payCart(payRequest)
+            Log.d(TAG, "Pay response: HTTP ${payResponse.code()}, Body: ${payResponse.body()}")
             if (payResponse.isSuccessful) {
                 cartManager.clearCart()
                 _paymentState.value = PaymentState.Success
+                Log.d(TAG, "Pay and clear cart successful")
                 Result.success(Unit)
             } else {
-                val errorMessage = "Payment error: HTTP ${payResponse.code()}"
+                val errorBody = payResponse.errorBody()?.string() ?: "No error body"
+                val errorMessage = "Payment error: HTTP ${payResponse.code()}, Response: $errorBody"
+                Log.e(TAG, errorMessage)
                 _paymentState.value = PaymentState.Error(errorMessage)
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
+            Log.e(TAG, "payAndClearCart error: ${e.message}", e)
             _paymentState.value = PaymentState.Error(e.message ?: "Network error")
             Result.failure(e)
         }
+    }
+
+    private fun PayCartRequest.toJson(): String {
+        return """
+            {
+                "orderId": $orderId,
+                "customerName": "$customerName",
+                "phoneNumber": "$phoneNumber",
+                "address": "$address",
+                "country": "$country",
+                "postalCode": "$postalCode"
+            }
+        """.trimIndent()
     }
 
     fun initiatePayment(totalAmount: Float, redirectUrl: String, onRedirect: (String) -> Unit) {
@@ -259,22 +278,18 @@ class ArticleViewModel(
                 val request = PaymentInitiateRequest(
                     amount = totalAmount,
                     merchantId = "grapes",
-                    redirectUrl = "http://79.76.108.164:82/login"
+                    redirectUrl = redirectUrl
                 )
                 Log.d(TAG, "Sending payment initiation request to /payment/login/payment-initiate")
-                Log.d(TAG, "JSON data: amount=${request.amount}, merchantId=${request.merchantId}, redirectUrl=${request.redirectUrl}")
+                Log.d(TAG, "JSON data: ${request.toJson()}")
                 val response = paymentApiService.initiatePayment(request)
                 Log.d(TAG, "Payment initiation response: HTTP ${response.code()}, Body: ${response.body()}")
                 if (response.isSuccessful) {
                     if (response.body() != null && response.body()!!.isSuccess) {
                         val finalRedirectUrl = response.body()!!.redirectUrl
                         Log.d(TAG, "Payment initiation successful, redirectUrl: $finalRedirectUrl")
-                        if (finalRedirectUrl.contains("79.76.108.164:82/login")) {
-                            Log.w(TAG, "Payment gateway requires authentication: $finalRedirectUrl")
-                        }
                         _paymentState.value = PaymentState.Success
                         onRedirect(finalRedirectUrl)
-                        // Test session details après un succès
                         testSessionDetails()
                     } else {
                         val errorBody = response.errorBody()?.string() ?: response.body()?.message ?: "No body or invalid response"
@@ -293,13 +308,23 @@ class ArticleViewModel(
         }
     }
 
+    private fun PaymentInitiateRequest.toJson(): String {
+        return """
+            {
+                "amount": $amount,
+                "merchantId": "$merchantId",
+                "redirectUrl": "$redirectUrl"
+            }
+        """.trimIndent()
+    }
+
     fun testSessionDetails() {
         viewModelScope.launch {
             try {
                 val response = paymentApiService.getSessionDetails()
                 Log.d(TAG, "Session details response: HTTP ${response.code()}, Body: ${response.body()}")
                 if (response.isSuccessful && response.body()?.success == true) {
-                    Log.d(TAG, "Session details: amount=${response.body()?.amount}, merchant=${response.body()?.merchantName}, redirectUrl=http://79.76.108.164:82/login")
+                    Log.d(TAG, "Session details: amount=${response.body()?.amount}, merchant=${response.body()?.merchantName}, redirectUrl=${response.body()?.redirectUrl}")
                 } else {
                     Log.e(TAG, "Failed to get session details: ${response.body()?.message}")
                 }
@@ -316,10 +341,12 @@ class ArticleViewModel(
         country: String,
         postalCode: String,
         totalAmount: Float,
+        merchantId: String = "grapes",
         redirectUrl: String,
         onRedirect: (String) -> Unit
     ) {
         viewModelScope.launch {
+            Log.d(TAG, "Starting processPaymentAndInitiate with amount: $totalAmount, merchantId: $merchantId, redirectUrl: $redirectUrl")
             val payResult = payAndClearCart(address, phoneNumber, customerName, country, postalCode)
             if (payResult.isSuccess) {
                 initiatePayment(totalAmount, redirectUrl, onRedirect)

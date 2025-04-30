@@ -2,6 +2,7 @@ package grapes.microservices.views.components.CartComponents
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -34,6 +35,7 @@ fun PaymentForm(
     var errorMessage by remember { mutableStateOf("") }
     val errorRequiredFieldsMessage = stringResource(R.string.error_required_fields)
     val paymentState = viewModel.paymentState.collectAsState()
+    val TAG = "PaymentForm"
 
     Card(
         modifier = Modifier
@@ -116,20 +118,45 @@ fun PaymentForm(
                 )
             }
 
-            // Form validation for buttons
             val formIsValid = fullName.isNotBlank() && phoneNumber.isNotBlank() && address.isNotBlank()
             val isCartNotEmpty = cartState is CartScreenState.Success && cartState.cart.items.isNotEmpty()
 
-            // Pay Now Button
             Button(
                 onClick = {
                     if (fullName.isBlank() || phoneNumber.isBlank() || address.isBlank()) {
                         errorMessage = errorRequiredFieldsMessage
                     } else if (cartState is CartScreenState.Success && cartState.cart.items.isNotEmpty()) {
                         errorMessage = ""
-                        // Appel direct de l'URL en dur
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse("http://79.76.108.164:82/login"))
+                        val totalAmount = cartState.cart.totalPrice
+                        val redirectUrl = "grapes://home"
+                        val merchantId = "grapes"
+                        Log.d(TAG, "Processing payment with amount: $totalAmount, merchantId: $merchantId, redirectUrl: $redirectUrl")
+                        viewModel.processPaymentAndInitiate(
+                            address = address,
+                            phoneNumber = phoneNumber,
+                            customerName = fullName,
+                            country = "Unknown",
+                            postalCode = "Unknown",
+                            totalAmount = totalAmount,
+                            merchantId = merchantId, // Ajout explicite
+                            redirectUrl = redirectUrl,
+                            onRedirect = { redirectUrl ->
+                                Log.d(TAG, "Opening redirectUrl in Chrome: $redirectUrl")
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl)).apply {
+                                    setPackage("com.android.chrome")
+                                    setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                try {
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Failed to open Chrome, falling back to default browser", e)
+                                    context.startActivity(
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl)).apply {
+                                            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        }
+                                    )
+                                }
+                            }
                         )
                     } else {
                         errorMessage = "Cart is empty or not loaded"
@@ -153,37 +180,6 @@ fun PaymentForm(
             ) {
                 Text(
                     text = stringResource(R.string.pay_button),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-            }
-
-            // Stripe Button
-            Button(
-                onClick = {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse("https://buy.stripe.com/test_fZe3cr0INeIK50c6oo"))
-                    )
-                },
-                enabled = termsAccepted && isCartNotEmpty && formIsValid,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                    disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
-                ),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 2.dp,
-                    pressedElevation = 4.dp
-                )
-            ) {
-                Text(
-                    text = stringResource(R.string.pay_stripe),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     )
@@ -220,8 +216,18 @@ fun PaymentForm(
                             .padding(top = 8.dp)
                     )
                 }
+                is PaymentState.Success -> {
+                    Text(
+                        text = "Payment initiated, please complete in browser",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    )
+                }
                 else -> {
-                    // Idle or Success: no message
+                    // Idle: rien à afficher
                 }
             }
         }
