@@ -466,3 +466,4 @@ jobs:
             docker image prune -a  
             docker compose pull  
             docker compose -f docker-compose-vm3.yml up -d
+
