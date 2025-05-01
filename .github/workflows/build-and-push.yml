@@ -24,48 +24,7 @@ jobs:
           java-version: '21'
 
 
-        # DskipTests to skip running tests during the build process.
-      - name: "🔍 Build API Gateway"
-        run: mvn -B clean install -DskipTests --file api-gateway/pom.xml
 
-      - name: Install custom pkcs11-provider1
-        run: |
-          mvn install:install-file -Dfile=/tmp/pkcs11-provider-1.9.4.jar -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion=1.9.4 -Dpackaging=jar
-
-      - name: Install custom pkcs11-provider2
-        run: |
-          mvn install:install-file -Dfile=/tmp/iaikPkcs11Provider.jar -DgroupId=iaik -DartifactId=iaikPkcs11Provider -Dversion=1.0.0 -Dpackaging=jar
-
-      - name: Install custom pkcs11-provider3
-        run: |
-          mvn install:install-file -Dfile=/tmp/sunpkcs11-wrapper-1.4.0.jar -DgroupId=sun -DartifactId=sunpkcs11-wrapper -Dversion=1.4.0 -Dpackaging=jar 
-
-
-      - name: "🔍 Build Auth Service"
-        run: mvn -B clean install -DskipTests --file auth-service/auth-backend/pom.xml
-        env:
-          MAVEN_OPTS: >-
-            --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED  
-            --enable-native-access=ALL-UNNAMED  
-
-      - name: "🔍 Build Chat Service"
-        run: mvn -B clean install -DskipTests --file chat-service/pom.xml
-
-      - name: "🔍 Build Payment Service"
-        run: mvn -B clean install -DskipTests --file payment-service/payment-backend/pom.xml
-
-      - name: "🔍 Build Sales Service"
-        run: mvn -B clean install -DskipTests --file sales-service/pom.xml
-
-
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-
-
-      - name: "🧪 Install dependencies for Python Microservices"
-        run: pip install -r data-mining-service/requirements.txt
 
       ## FRONTEND
       - name: 🌐 Install Node.js
@@ -80,17 +39,6 @@ jobs:
           npm ci --legacy-peer-deps
           npm run-script build
 
-      - name: "📦 Install Frontend-auth Dependencies"
-        run: |
-          cd auth-service/auth-frontend
-          npm ci --legacy-peer-deps
-          npm run-script build
-
-      - name: "📦 Install Frontend-Payment Dependencies"
-        run: |
-          cd payment-service/payment-frontend
-          npm ci --legacy-peer-deps
-          npm run-script build
 
   tests :
     name: Test Microservices
@@ -107,56 +55,11 @@ jobs:
           java-version: '21'
 
 
-      - name: "🔍 Run Tests for API Gateway"
-        run: mvn -B test --file api-gateway/pom.xml
-      - name: Install custom pkcs11-provider1
-        run: |
-          mvn install:install-file -Dfile=/tmp/pkcs11-provider-1.9.4.jar -DgroupId=iaik -DartifactId=pkcs11-provider -Dversion=1.9.4 -Dpackaging=jar
-
-      - name: Install custom pkcs11-provider2
-        run: |
-          mvn install:install-file -Dfile=/tmp/iaikPkcs11Provider.jar -DgroupId=iaik -DartifactId=iaikPkcs11Provider -Dversion=1.0.0 -Dpackaging=jar
-
-      - name: Install custom pkcs11-provider3
-        run: |
-          mvn install:install-file -Dfile=/tmp/sunpkcs11-wrapper-1.4.0.jar -DgroupId=sun -DartifactId=sunpkcs11-wrapper -Dversion=1.4.0 -Dpackaging=jar 
-
-
-      - name: "🔍 Run Tests for Auth Service"
-        run: mvn -B test --file auth-service/auth-backend/pom.xml
-        env:
-          MAVEN_OPTS: >-
-            --add-exports=jdk.crypto.cryptoki/sun.security.pkcs11.wrapper=ALL-UNNAMED  
-            --enable-native-access=ALL-UNNAMED  
-
-      - name: "🔍 Run Tests for Chat Service"
-        run: mvn -B test --file chat-service/pom.xml
-
-      - name: "🔍 Run Tests for Payment Service"
-        run: mvn -B test --file payment-service/payment-backend/pom.xml
-
-      - name: "🔍 Run Tests for Sales Service"
-        run: mvn -B test --file sales-service/pom.xml
-
       - name: 🐍 Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
 
-      - name: Run Tests for Data-Mining Service
-        working-directory: ./data-mining-service # Run commands FROM this directory
-        run: |
-          # Create a temporary .env for the test runner if needed  
-          echo "RABBITMQ_PORT=5672" >> .env  
-          echo "RABBITMQ_HOST=localhost" >> .env  
-          # Add other required ENV VARS for the test script here!  
-          echo "RABBITMQ_USER=${{secrets.RABBITMQ_USER}}" >> .env  
-          echo "RABBITMQ_PASSWORD=${{secrets.RABBITMQ_PASSWORD}}" >> .env  
-          echo "ACTIVITY_LOGS_QUEUE=q_activity_logs" >> .env  
-          echo "AUTH_LOGS_QUEUE=q.auth_logs" >> .env  
-          
-          pip install -r requirements.txt  
-          python -m pytest  
 
       ## FRONTEND
   #      - name: 🌐 Install Node.js#        uses: actions/setup-node@v3
@@ -338,132 +241,13 @@ jobs:
         run:  |
           echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io  
 
-      - name: Generate keystore
-        run: |
-          echo "Generating keystore..."  
-          mkdir -p ./keystore  
-          payment-service/payment-backend/src/main/resources/scripts/generate-keystore.sh --password "${{ secrets.PAYMENT_KEYSTORE_PASSWORD }}" --output ./keystore/
-        # 🐳 Multi-Arch build for ARM-hosted services (VM3)
-      - name: 🏗️ Build & Push Multi-Arch Services (ARM-Compatible)
-        run: |
+    
           
-          docker buildx build --platform linux/amd64,linux/arm64 \
-          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/api-gateway:latest \
-          --push ./api-gateway
-          
-          
-          docker buildx build --platform linux/amd64,linux/arm64 \  
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/auth-service-backend:latest \  
-           --push ./auth-service/auth-backend  
-
-
-          docker buildx build --platform linux/amd64,linux/arm64 \
-          -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/sales-service:latest \
-          --push ./sales-service
-          
-          docker buildx build --platform linux/amd64,linux/arm64 \  
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/payment-service-backend:latest \  
-           --push ./payment-service/payment-backend  
-          
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/chat-service:latest \
-           --push ./chat-service
-
-          docker buildx build --platform linux/amd64,linux/arm64 \
-           -t ${{ secrets.ORACLE_REGION_ID }}.ocir.io/${{ secrets.ORACLE_TENANCY_NAMESPACE }}/grapeshub/data-mining-service:latest \
-           --push ./data-mining-service
-        
 
         # 🧱 Default Arch Build (x86 only) for Frontends (VM2)
       - name: 🏗️ Build & Push Frontend Services (amd64 only)
         run: |
-          docker compose build frontend-web frontend-auth frontend-payment  shiny-app
-          docker compose push frontend-web frontend-auth frontend-payment   shiny-app
+          docker compose build frontend-web
+          docker compose push frontend-web
 
-  deploy-replica-monitoring:
-    name: Deploy to VM 1 - Replica + Monitoring (Manual)
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - tests
-      - docker-build-and-push
-    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
-
-      - name: 🔑 SSH into ORACLE VM and Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM1_IP }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM1_KEY }}
-          script: |
-            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \  
-            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \  
-            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io  
-            cd grapes-microservices  
-            docker compose -f docker-compose-vm1.yml down   
-            docker image prune -a  
-            docker compose pull  
-            docker compose -f docker-compose-vm1.yml up -d  
-
-  deploy-frontend:
-    name: Deploy to VM 2 - FRONTEND
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - tests
-      - docker-build-and-push
-    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
-
-      - name: 🔑 SSH into ORACLE VM and Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM2_IP }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM2_KEY }}
-          script: |
-            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \  
-            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \  
-            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io  
-            cd grapes-microservices  
-            docker compose -f docker-compose-vm2.yml down   
-            docker image prune -a  
-            docker compose pull  
-            docker compose -f docker-compose-vm2.yml up -d  
-
-  deploy-bd-backend:
-    name: Deploy to VM 3 - VM ARM (Manual)
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - tests
-      - docker-build-and-push
-    if: github.event_name == 'workflow_dispatch'  # Launches only if manual
-
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v3
-
-      - name: 🔑 SSH into ORACLE VM and Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM3_IP }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM3_KEY }}
-          script: |
-            echo "${{ secrets.ORACLE_AUTH_TOKEN }}" | docker login \  
-            -u "${{ secrets.ORACLE_TENANCY_NAMESPACE }}/${{ secrets.ORACLE_USERNAME }}" \  
-            --password-stdin ${{ secrets.ORACLE_REGION_ID }}.ocir.io  
-            cd grapes-microservices  
-            docker compose -f docker-compose-vm3.yml down   
-            docker image prune -a  
-            docker compose pull  
-            docker compose -f docker-compose-vm3.yml up -d
-
+  
