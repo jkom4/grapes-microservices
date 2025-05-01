@@ -1,6 +1,5 @@
 package grapes.microservices.viewmodel
 
-import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,6 +8,8 @@ import grapes.microservices.models.data.Article
 import grapes.microservices.models.data.Cart
 import grapes.microservices.models.data.PayCartRequest
 import grapes.microservices.models.network.ArticleApiService
+import grapes.microservices.models.network.PaymentApiService
+import grapes.microservices.models.network.PaymentInitiateRequest
 import grapes.microservices.models.repository.ArticleRepository
 import grapes.microservices.models.utils.CartManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,11 +52,13 @@ sealed class PaymentState {
 class ArticleViewModel(
     private val repository: ArticleRepository,
     private val apiService: ArticleApiService,
+    private val paymentApiService: PaymentApiService,
     private val cartManager: CartManager
 ) : ViewModel() {
     private companion object {
         const val DEFAULT_USER_ID = 1
         const val PAGE_SIZE = 20
+        private const val TAG = "ArticleViewModel"
     }
 
     private val _articleState = MutableStateFlow<ArticleState>(ArticleState.Loading)
@@ -80,6 +83,24 @@ class ArticleViewModel(
 
     init {
         loadArticles()
+        initializeCart()
+    }
+
+    private fun initializeCart() {
+        viewModelScope.launch {
+            try {
+                cartManager.initializeCart(DEFAULT_USER_ID)
+                cartManager.orderId.collect { orderId ->
+                    if (orderId != null) {
+                        fetchCart()
+                    } else {
+                        _cartScreenState.value = CartScreenState.Error("Failed to initialize cart")
+                    }
+                }
+            } catch (e: Exception) {
+                _cartScreenState.value = CartScreenState.Error("Error initializing cart: ${e.message}")
+            }
+        }
     }
 
     fun fetchArticleById(id: Int) {
@@ -130,7 +151,7 @@ class ArticleViewModel(
                 )
                 if (addResponse.isSuccessful) {
                     _cartState.value = CartState.Success
-                    fetchCart() // Refresh cart after an item added
+                    fetchCart()
                 } else {
                     _cartState.value = CartState.Error("This product is out of stock")
                 }
@@ -145,18 +166,11 @@ class ArticleViewModel(
             val orderId = cartManager.orderId.value
             if (orderId == null) {
                 _cartScreenState.value = CartScreenState.Error("Cart not initialized")
-                Log.e(TAG, "fetchCart failed: orderId is null")
                 return@launch
             }
             _cartScreenState.value = CartScreenState.Loading
             try {
                 val cart = apiService.getCart(orderId)
-                Log.d(TAG, "Cart fetched: $cart")
-                cart.items.forEach { item ->
-                    Log.d(TAG, "Item: ${item.articleName}, quantityKg: ${item.quantityKg}, quantity: ${item.quantity}, price: ${item.price}, itemTotal: ${if (item.quantityKg > 0) item.quantityKg * item.price else item.quantity * item.price}")
-                }
-                Log.d(TAG, "API totalPrice: ${cart.totalPrice}")
-                // Calculate totalPrice
                 val calculatedTotalPrice = cart.items.sumOf { item ->
                     if (item.quantityKg > 0) {
                         (item.quantityKg * item.price).toDouble()
@@ -164,13 +178,10 @@ class ArticleViewModel(
                         (item.quantity * item.price).toDouble()
                     }
                 }.toFloat()
-                Log.d(TAG, "Calculated totalPrice: $calculatedTotalPrice")
-                // Create a new oject Cart with the totalPrice
                 val correctedCart = cart.copy(totalPrice = calculatedTotalPrice)
                 _cartScreenState.value = CartScreenState.Success(correctedCart)
             } catch (e: Exception) {
                 _cartScreenState.value = CartScreenState.Error(e.message ?: "Error fetching cart")
-                Log.e(TAG, "fetchCart error: ${e.message}")
             }
         }
     }
@@ -178,66 +189,134 @@ class ArticleViewModel(
     fun removeFromCart(itemId: Int) {
         viewModelScope.launch {
             val orderId = cartManager.orderId.value
-            Log.d(TAG, "removeFromCart with orderId: $orderId, itemId: $itemId")
             if (orderId == null) {
                 _cartScreenState.value = CartScreenState.Error("Cart not initialized")
-                Log.e(TAG, "removeFromCart failed: orderId is null")
                 return@launch
             }
             try {
                 val response = apiService.removeFromCart(orderId, itemId)
                 if (response.isSuccessful) {
                     fetchCart()
-                    Log.d(TAG, "removeFromCart successful for orderId: $orderId, itemId: $itemId")
                 } else {
                     _cartScreenState.value = CartScreenState.Error("Error removing item from cart: HTTP ${response.code()}")
-                    Log.e(TAG, "removeFromCart failed: HTTP ${response.code()}")
                 }
             } catch (e: Exception) {
                 _cartScreenState.value = CartScreenState.Error(e.message ?: "Network error")
-                Log.e(TAG, "removeFromCart error: ${e.message}")
             }
         }
     }
 
-    fun payAndClearCart(
+    suspend fun payAndClearCart(
         address: String,
         phoneNumber: String,
         customerName: String,
         country: String,
         postalCode: String
-    ) {
-        viewModelScope.launch {
-            val orderId = cartManager.orderId.value
-            Log.d(TAG, "payAndClearCart with orderId: $orderId")
-            if (orderId == null) {
-                _paymentState.value = PaymentState.Error("Cart not initialized")
-                Log.e(TAG, "payAndClearCart failed: orderId is null")
-                return@launch
-            }
-            val payRequest = PayCartRequest(
-                orderId = orderId,
-                customerName = customerName,
-                phoneNumber = phoneNumber,
-                address = address,
-                country = country,
-                postalCode = postalCode
-            )
-            Log.d(TAG, "PayCartRequest: $payRequest")
-            _paymentState.value = PaymentState.Loading
-            try {
-                val payResponse = apiService.payCart(payRequest)
-                if (!payResponse.isSuccessful) {
-                    _paymentState.value = PaymentState.Error("Payment error: HTTP ${payResponse.code()}")
-                    Log.e(TAG, "payAndClearCart failed: HTTP ${payResponse.code()}, Response: ${payResponse.errorBody()?.string()}")
-                    return@launch
-                }
+    ): Result<Unit> {
+        val orderId = cartManager.orderId.value
+        if (orderId == null) {
+            _paymentState.value = PaymentState.Error("Cart not initialized")
+            return Result.failure(Exception("Cart not initialized"))
+        }
+        val payRequest = PayCartRequest(
+            orderId = orderId,
+            customerName = customerName,
+            phoneNumber = phoneNumber,
+            address = address,
+            country = country,
+            postalCode = postalCode
+        )
+        _paymentState.value = PaymentState.Loading
+        return try {
+            val payResponse = apiService.payCart(payRequest)
+            if (payResponse.isSuccessful) {
                 cartManager.clearCart()
                 _paymentState.value = PaymentState.Success
-                Log.d(TAG, "payAndClearCart successful for orderId: $orderId")
+                Result.success(Unit)
+            } else {
+                val errorBody = payResponse.errorBody()?.string() ?: "No error body"
+                val errorMessage = "Payment error: HTTP ${payResponse.code()}, Response: $errorBody"
+                Log.e(TAG, errorMessage)
+                _paymentState.value = PaymentState.Error(errorMessage)
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            _paymentState.value = PaymentState.Error(e.message ?: "Network error")
+            Result.failure(e)
+        }
+    }
+
+    private fun PayCartRequest.toJson(): String {
+        return """
+            {
+                "orderId": $orderId,
+                "customerName": "$customerName",
+                "phoneNumber": "$phoneNumber",
+                "address": "$address",
+                "country": "$country",
+                "postalCode": "$postalCode"
+            }
+        """.trimIndent()
+    }
+
+    fun initiatePayment(totalAmount: Float, redirectUrl: String, onRedirect: (String) -> Unit) {
+        viewModelScope.launch {
+            _paymentState.value = PaymentState.Loading
+            try {
+                val request = PaymentInitiateRequest(
+                    amount = totalAmount,
+                    merchantId = "grapes",
+                    redirectUrl = redirectUrl
+                )
+                val response = paymentApiService.initiatePayment(request)
+                if (response.isSuccessful) {
+                    if (response.body() != null && response.body()!!.isSuccess) {
+                        val finalRedirectUrl = response.body()!!.redirectUrl
+                        _paymentState.value = PaymentState.Success
+                        onRedirect(finalRedirectUrl)
+                    } else {
+                        val errorBody = response.errorBody()?.string() ?: response.body()?.message ?: "No body or invalid response"
+                        _paymentState.value = PaymentState.Error("Invalid response: $errorBody")
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string() ?: "No error body"
+                    _paymentState.value = PaymentState.Error("Payment initiation failed: HTTP ${response.code()}")
+                }
             } catch (e: Exception) {
                 _paymentState.value = PaymentState.Error(e.message ?: "Network error")
-                Log.e(TAG, "payAndClearCart error: ${e.message}")
+            }
+        }
+    }
+
+    private fun PaymentInitiateRequest.toJson(): String {
+        return """
+            {
+                "amount": $amount,
+                "merchantId": "$merchantId",
+                "redirectUrl": "$redirectUrl"
+            }
+        """.trimIndent()
+    }
+
+
+    fun processPaymentAndInitiate(
+        address: String,
+        phoneNumber: String,
+        customerName: String,
+        country: String,
+        postalCode: String,
+        totalAmount: Float,
+        merchantId: String = "grapes",
+        redirectUrl: String,
+        onRedirect: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            Log.d(TAG, "Starting processPaymentAndInitiate with amount: $totalAmount, merchantId: $merchantId, redirectUrl: $redirectUrl")
+            val payResult = payAndClearCart(address, phoneNumber, customerName, country, postalCode)
+            if (payResult.isSuccess) {
+                initiatePayment(totalAmount, redirectUrl, onRedirect)
+            } else {
+                _paymentState.value = PaymentState.Error("Payment processing failed")
             }
         }
     }
