@@ -33,18 +33,22 @@ fun AllArticlesScreen(navController: NavHostController) {
     // Obtain context to load CartManager
     val context = LocalContext.current
 
+    // Initialize repository and API services
     val repository = remember { ArticleRepository(RetrofitClient.articleApiService) }
-    val apiService = remember { RetrofitClient.articleApiService }
+    val articleApiService = remember { RetrofitClient.articleApiService }
+    val paymentApiService = remember { RetrofitClient.paymentApiService }
 
+    // Create ViewModel factory
     val viewModelFactory = remember {
         ArticleViewModelFactory.createFactory(
             context = context,
             repository = repository,
-            apiService = apiService
+            articleApiService = articleApiService,
+            paymentApiService = paymentApiService
         )
     }
 
-    // Init viewModel
+    // Initialize ViewModel
     val viewModel: ArticleViewModel = viewModel(factory = viewModelFactory)
 
     val space = 16.dp

@@ -27,6 +27,7 @@ public class BubbleMessageFx extends VBox {
     @FXML private Label bubbleLabel;
     @FXML private Label messageAuthor;
     @FXML private Label messageDate;
+    @FXML private Label messageOrigin;
     @FXML private HBox messageHeaderContainer;
 
     // the reason I use ObjectProperty<Boolean> instead of SimpleBooleanProperty, it's because I need null value, so
@@ -37,6 +38,7 @@ public class BubbleMessageFx extends VBox {
     @Getter @Setter private String text = "";
     @Getter @Setter private String author = "";
     @Getter @Setter private String date = "";
+    @Getter @Setter private String origin = "";
 
     public BubbleMessageFx() {
         URL fxmlUrl = getClass().getResource("/grapes/microservices/frontendchat/components/bubble-message-component.fxml");
@@ -65,6 +67,7 @@ public class BubbleMessageFx extends VBox {
             bubbleLabel.setText(text);
             messageAuthor.setText(author);
             messageDate.setText(date);
+            messageOrigin.setText("(from " + origin + ")");
         });
     }
 }

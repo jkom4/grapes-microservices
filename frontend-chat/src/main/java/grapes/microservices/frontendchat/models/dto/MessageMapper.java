@@ -12,12 +12,12 @@ public class MessageMapper {
     public static MessageDTO toDTO(Message msg) {
 
         return new MessageDTO(
-                msg.id(),
-                msg.topicId(),
-                msg.sender().id(),
-                msg.sender().username(),
-                msg.content(),
-                msg.timestamp().format(preciseFormat)
+                msg.getId(),
+                msg.getTopicId(),
+                msg.getSender().id(),
+                msg.getSender().username(),
+                msg.getContent(),
+                msg.getTimestamp().format(preciseFormat)
         );
     }
 

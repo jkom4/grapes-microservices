@@ -9,7 +9,7 @@
 
 <VBox fx:id="authContainerRoot" alignment="CENTER" prefHeight="400.0" prefWidth="600.0" styleClass="authPage" stylesheets="@auth-view.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="grapes.microservices.frontendchat.views.AuthViewController">
     <VBox fx:id="authContainer" alignment="CENTER">
-        <Label styleClass="auth-title" text="Grapes Support">
+        <Label styleClass="auth-title" text="Grapes Chat">
           <font>
              <Font name="Forte" size="60.0" />
           </font>

@@ -2,6 +2,7 @@ package grapes.microservices.views.components.CartComponents
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -30,13 +31,11 @@ fun PaymentForm(
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
-    var cardNumber by remember { mutableStateOf("") }
-    var expiryDate by remember { mutableStateOf("") }
-    var cvc by remember { mutableStateOf("") }
     var termsAccepted by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     val errorRequiredFieldsMessage = stringResource(R.string.error_required_fields)
     val paymentState = viewModel.paymentState.collectAsState()
+    val TAG = "PaymentForm"
 
     Card(
         modifier = Modifier
@@ -70,9 +69,6 @@ fun PaymentForm(
                 Triple(R.string.field_email, email, { newValue: String -> email = newValue }),
                 Triple(R.string.field_phone, phoneNumber, { newValue: String -> phoneNumber = newValue }),
                 Triple(R.string.field_address, address, { newValue: String -> address = newValue }),
-                Triple(R.string.field_card_number, cardNumber, { newValue: String -> cardNumber = newValue }),
-                Triple(R.string.field_expiry, expiryDate, { newValue: String -> expiryDate = newValue }),
-                Triple(R.string.field_cvc, cvc, { newValue: String -> cvc = newValue })
             )
 
             fields.forEach { (labelResId, value, onChange) ->
@@ -91,7 +87,7 @@ fun PaymentForm(
                         unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
                     keyboardOptions = when (labelResId) {
-                        R.string.field_phone, R.string.field_zip, R.string.field_card_number, R.string.field_cvc -> KeyboardOptions(keyboardType = KeyboardType.Number)
+                        R.string.field_phone -> KeyboardOptions(keyboardType = KeyboardType.Number)
                         R.string.field_email -> KeyboardOptions(keyboardType = KeyboardType.Email)
                         else -> KeyboardOptions.Default
                     },
@@ -122,31 +118,48 @@ fun PaymentForm(
                 )
             }
 
-            // Form validation for Stripe button
-            val formIsValid = fullName.isNotBlank() && phoneNumber.isNotBlank() &&
-                    address.isNotBlank() && cardNumber.isNotBlank() &&
-                    expiryDate.isNotBlank() && cvc.isNotBlank()
+            val formIsValid = fullName.isNotBlank() && phoneNumber.isNotBlank() && address.isNotBlank()
             val isCartNotEmpty = cartState is CartScreenState.Success && cartState.cart.items.isNotEmpty()
 
             Button(
                 onClick = {
-                    // Validate required fields
-                    if (fullName.isBlank() || phoneNumber.isBlank() || address.isBlank() ||
-                        cardNumber.isBlank() || expiryDate.isBlank() || cvc.isBlank()
-                    ) {
+                    if (fullName.isBlank() || phoneNumber.isBlank() || address.isBlank()) {
                         errorMessage = errorRequiredFieldsMessage
-                    } else {
+                    } else if (cartState is CartScreenState.Success && cartState.cart.items.isNotEmpty()) {
                         errorMessage = ""
-                        viewModel.payAndClearCart(
+                        val totalAmount = cartState.cart.totalPrice
+                        val redirectUrl = "grapes://home"
+                        val merchantId = "grapes"
+                        viewModel.processPaymentAndInitiate(
                             address = address,
                             phoneNumber = phoneNumber,
                             customerName = fullName,
-                            country = "",
-                            postalCode = ""
+                            country = "Unknown",
+                            postalCode = "Unknown",
+                            totalAmount = totalAmount,
+                            merchantId = merchantId,
+                            redirectUrl = redirectUrl,
+                            onRedirect = { redirectUrl ->
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl)).apply {
+                                    setPackage("com.android.chrome")
+                                    setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                try {
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    context.startActivity(
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl)).apply {
+                                            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        }
+                                    )
+                                }
+                            }
                         )
+                    } else {
+                        errorMessage = "Cart is empty or not loaded"
                     }
                 },
-                enabled = termsAccepted && isCartNotEmpty,
+                enabled = termsAccepted && isCartNotEmpty && formIsValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -164,37 +177,6 @@ fun PaymentForm(
             ) {
                 Text(
                     text = stringResource(R.string.pay_button),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-            }
-
-            // Stripe Button
-            Button(
-                onClick = {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse("https://buy.stripe.com/test_fZe3cr0INeIK50c6oo"))
-                    )
-                },
-                enabled = termsAccepted && isCartNotEmpty && formIsValid,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                    disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
-                ),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 2.dp,
-                    pressedElevation = 4.dp
-                )
-            ) {
-                Text(
-                    text = "Stripe",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     )
@@ -231,8 +213,17 @@ fun PaymentForm(
                             .padding(top = 8.dp)
                     )
                 }
+                is PaymentState.Success -> {
+                    Text(
+                        text = "Payment initiated, please complete in browser",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    )
+                }
                 else -> {
-                    // Idle: no message
                 }
             }
         }

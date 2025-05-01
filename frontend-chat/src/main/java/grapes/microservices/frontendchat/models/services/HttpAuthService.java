@@ -3,6 +3,12 @@ package grapes.microservices.frontendchat.models.services;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.sun.net.httpserver.HttpServer;
 import javafx.beans.property.SimpleStringProperty;
@@ -42,6 +48,7 @@ public class HttpAuthService implements IHttpAuthService {
             return;
         }
 
+        int state = (int) (Math.random() * 1000);
         server = HttpServer.create(new InetSocketAddress(0), 0);
         server.createContext(contextPath, exchange -> {
             // Display html
@@ -53,19 +60,23 @@ public class HttpAuthService implements IHttpAuthService {
 
             // Extract the query from the request URI
             String query = exchange.getRequestURI().getQuery();
-            String accessToken = "";
-            if (query != null && query.contains("accessToken=")) {
-                accessToken = query.split("accessToken=")[1].split("&")[0];
-            }
+            Map<String, String> queryParams = extractQueryParams(query);
+            String accessToken = queryParams.get("accessToken");
+            int givenState = Integer.parseInt(queryParams.get("state"));
 
-            // notify auth success
-            tokenObserver.set(accessToken);
+
+            // If the session is from the same instance, then it's recognized
+            if (givenState == state) {
+                // notify auth success
+                tokenObserver.set(accessToken);
+            }
         });
         server.setExecutor(null); // default executor
         server.start();
 
-        String returnUrl =  "http://localhost:" + getPort() + contextPath + "?accessToken=";
-        redirectUrlObserver.set(authUrl + "?" + "redirect=" + returnUrl);
+        String returnUrl =  "http://localhost:" + getPort() + contextPath;
+        String encodedReturnUrl = URLEncoder.encode(returnUrl, StandardCharsets.UTF_8);
+        redirectUrlObserver.set(authUrl + "?" + "redirect_uri=" + encodedReturnUrl + "&state=" + state);
         System.out.println("[HttpAuthService] Server started on port " + getPort() + " (context: " + contextPath + ")");
         System.out.println("[HttpAuthService] Listening at " + returnUrl);
     }
@@ -92,6 +103,29 @@ public class HttpAuthService implements IHttpAuthService {
         server.stop(1);
         server = null;
         System.out.println("[HttpAuthService] Server stopped.");
+    }
+
+    public static Map<String, String> extractQueryParams(String query) {
+        Map<String, String> queryParams = new HashMap<>();
+
+        if (query == null || query.isEmpty()) {
+            System.out.println("No query parameters found.");
+            return queryParams;
+        }
+
+        try {
+            String[] params = query.split("&");
+            for (String param : params) {
+                String[] keyValue = param.split("=");
+                if (keyValue.length == 2) {
+                    queryParams.put(keyValue[0], URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error parsing query parameters: " + e.getMessage());
+        }
+
+        return queryParams;
     }
 }
 

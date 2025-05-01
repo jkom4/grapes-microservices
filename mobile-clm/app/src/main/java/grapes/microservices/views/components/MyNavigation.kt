@@ -1,9 +1,12 @@
 package grapes.microservices.views.components
 
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
@@ -21,9 +24,30 @@ import grapes.microservices.views.OrderHistory.OrderHistoryScreen
 import grapes.microservices.views.Settings.DeliveryTrackingScreen
 import grapes.microservices.views.Settings.SettingsScreen
 
+private const val TAG = "MyNavigation"
+
 @Composable
-fun MyNavigation() {
+fun MyNavigation(deepLinkUri: Uri? = null) {
     val navController = rememberNavController()
+
+    // Gérer le deep link
+    LaunchedEffect(deepLinkUri) {
+        deepLinkUri?.let { uri ->
+            Log.d(TAG, "Processing deep link: $uri")
+            if (uri.scheme == "grapes" && uri.host == "home") {
+                Log.d(TAG, "Navigating to ${Screen.HomeScreen.route} due to grapes://home")
+                navController.navigate(Screen.HomeScreen.route) {
+                    // Effacer la pile de navigation pour revenir à l'écran d'accueil
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            } else {
+                Log.w(TAG, "Unhandled deep link: $uri")
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -37,8 +61,7 @@ fun MyNavigation() {
         NavHost(
             navController = navController,
             startDestination = Screen.HomeScreen.route,
-            modifier = Modifier
-                .padding(paddingValues)
+            modifier = Modifier.padding(paddingValues)
         ) {
             composable(route = Screen.HomeScreen.route) {
                 HomeScreen(navController)
