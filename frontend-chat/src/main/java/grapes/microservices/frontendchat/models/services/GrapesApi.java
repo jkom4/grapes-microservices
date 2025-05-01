@@ -49,8 +49,8 @@ public class GrapesApi implements IGrapesApi {
                 throw new CompletionException(new MyApiBadRequestException("Your request is unauthorized"));
             }
 
-            if (response.statusCode() == 400) {
-                throw new CompletionException(new MyApiBadRequestException(response.body()));
+            if (response.statusCode() >= 400) {
+                throw new CompletionException(new MyApiBadRequestException("Error: " + response.statusCode() + " " + response.body()));
             }
 
             // convert response

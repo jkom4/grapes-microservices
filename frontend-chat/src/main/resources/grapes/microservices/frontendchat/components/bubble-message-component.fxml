@@ -15,6 +15,9 @@
         <Pane prefWidth="20.0"/>
         <Label fx:id="messageDate" layoutX="10.0" layoutY="10.0" minHeight="-Infinity" text="10/03/2025 10:43"
                wrapText="true"/>
+        <Pane prefWidth="20.0"/>
+        <Label fx:id="messageOrigin" layoutX="10.0" layoutY="10.0" minHeight="-Infinity" text="(from backend)"
+               wrapText="true"/>
     </HBox>
     <!--MESSAGE (picture + message)-->
     <HBox fx:id="messageOrienter" alignment="CENTER_LEFT" nodeOrientation="LEFT_TO_RIGHT">
