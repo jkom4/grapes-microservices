@@ -62,7 +62,7 @@ public class OrderService {
 
         String pdfPath = InvoiceGenerator.generateInvoice(order, customerName, address, phoneNumber, items, articleRepository);
         order.setFacturePath(pdfPath);
-        //order.setPaid(true);
+        order.setPaid(true);
 
         orderRepository.save(order);
         sendToDataMining(order, items);
