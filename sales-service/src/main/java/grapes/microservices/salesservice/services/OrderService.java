@@ -67,8 +67,9 @@ public class OrderService {
         orderRepository.save(order);
         sendToDataMining(order, items);
 
-        //  Send to RabbitMQ to create the delivery
-        sendOrderToDeliveryQueue(order.getId(), address, phoneNumber, customerName);
+        System.out.println("[Sales-Service] Sending delivery message to 'order-paid-queue' for order ID: " + orderId);
+        sendOrderToDeliveryQueue(orderId, address, phoneNumber, customerName);
+
     }
 
     //  Retrieve all valid items from an order
