@@ -78,9 +78,9 @@ public class AuthRegistrationListener {
 
             // Map fields from the message to the Client entity
             try {
-                newClient.setId(Long.parseLong(message.getId()));
+                newClient.setId(Long.parseLong(message.getClient_id()));
             } catch (NumberFormatException e) {
-                log.error("Invalid ID format received in message: {}. Cannot set client_id.", message.getId());
+                log.error("Invalid ID format received in message: {}. Cannot set client_id.", message.getClient_id());
                 return;
             }
             newClient.setEmail(message.getEmail());
@@ -89,7 +89,7 @@ public class AuthRegistrationListener {
             newClient.setGender(message.getGender());
             newClient.setBirthDate(message.getBirth_date());
             newClient.setNationalRegistryNumber(message.getNational_id());
-            newClient.setAddress(message.getAddress());
+            newClient.setAddress(message.getAddressAsString());
             newClient.setPassword(clientPasswordHash);
             newClient.setPhoneNumber(clientPhoneNumber);
             newClient.setMaritalStatus(getRandomMaritalStatus());

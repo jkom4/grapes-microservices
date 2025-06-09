@@ -16,12 +16,13 @@ import java.time.LocalDate;
 public class AuthRegistrationMessageDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String id;
+    private String client_id;
+    private String registration_id;
     private String email;
     private String name;
     private String firstName;
     private String gender;
     private LocalDate birth_date;
     private String national_id;
-    private String address;
+    private String addressAsString;
 }
