@@ -28,6 +28,7 @@ public class LoginService {
 
     private static final String SESSION_INIT_AMOUNT_KEY = "initialPaymentAmount";
     private static final String SESSION_INIT_MERCHANT_KEY = "initialMerchantName";
+    private static final String SESSION_INIT_ORDER_KEY = "initialOrderID";
     private static final String SESSION_INIT_PAYMENT_ID_KEY = "initialPaymentId";
     private static final String SESSION_INIT_REDIRECT_URL_KEY = "initialRedirectUrl";
     private static final String SESSION_CLIENT_ID_KEY = "clientId";
@@ -36,6 +37,7 @@ public class LoginService {
     public Map<String, Object> initiatePayment(PaymentInitiateRequest paymentRequest, HttpServletRequest request) {
         BigDecimal amount = paymentRequest.getAmount();
         String merchantId = paymentRequest.getMerchantId();
+        Long orderId = paymentRequest.getOrderId();
         String redirectUrl = paymentRequest.getRedirectUrl();
 
         if (amount == null || merchantId == null || merchantId.isEmpty()) {
@@ -55,6 +57,7 @@ public class LoginService {
         HttpSession session = request.getSession(true);
         session.setAttribute(SESSION_INIT_AMOUNT_KEY, amount);
         session.setAttribute(SESSION_INIT_MERCHANT_KEY, merchantId);
+        session.setAttribute(SESSION_INIT_ORDER_KEY, orderId);
         session.setAttribute(SESSION_INIT_PAYMENT_ID_KEY, initialPaymentId);
         session.setAttribute(SESSION_INIT_REDIRECT_URL_KEY, redirectUrl);
         log.info("[LoginService] Payment details stored in session ID: {}", session.getId());

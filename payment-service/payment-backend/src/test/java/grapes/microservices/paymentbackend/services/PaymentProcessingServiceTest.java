@@ -431,6 +431,7 @@ class PaymentProcessingServiceTest {
                 eq("123456"),
                 eq(validPaymentRequest),
                 eq(testClient),
+                eq(1L),
                 eq(1L))).thenReturn(true);
 
         // Act
@@ -461,6 +462,7 @@ class PaymentProcessingServiceTest {
                 eq("123456"),
                 eq(validPaymentRequest),
                 eq(testClient),
+                eq(1L),
                 eq(1L))).thenReturn(false);
 
         // Act

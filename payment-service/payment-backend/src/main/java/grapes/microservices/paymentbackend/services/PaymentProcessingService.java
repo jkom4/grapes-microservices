@@ -30,6 +30,7 @@ public class PaymentProcessingService {
 
     private static final String SESSION_INIT_AMOUNT_KEY = "initialPaymentAmount";
     private static final String SESSION_INIT_MERCHANT_KEY = "initialMerchantName";
+    private static final String SESSION_INIT_ORDER_KEY = "initialOrderID";
     private static final String SESSION_INIT_PAYMENT_ID_KEY = "initialPaymentId";
     private static final String SESSION_INIT_REDIRECT_URL_KEY = "initialRedirectUrl";
     private static final String SESSION_CLIENT_ID_KEY = "clientId";
@@ -207,7 +208,8 @@ public class PaymentProcessingService {
                 completeRequest.getPaymentToken(),
                 paymentRequest,
                 client,
-                transactionId
+                transactionId,
+                (Long) session.getAttribute(SESSION_INIT_ORDER_KEY)
         );
 
         if (paymentSuccess) {

@@ -61,7 +61,7 @@ public class PaymentService {
      * @return true if payment verification and processing succeeded, false otherwise
      */
     @Transactional
-    public boolean processPayment(String token, PaymentRequestDTO paymentRequest, Client client, Long transactionId) {
+    public boolean processPayment(String token, PaymentRequestDTO paymentRequest, Client client, Long transactionId,Long orderId) {
         String context = "transactionId-" + transactionId + "-client-" + client.getId();
         log.info("Processing payment completion for client {} with token '{}' for context {}",
                 client.getEmail(), maskToken(token), context);
@@ -87,7 +87,8 @@ public class PaymentService {
                 TransactionEntity completedTransaction = transactionService.completePaymentTransaction(
                         client,
                         paymentRequest.getAmount(),
-                        transactionId
+                        transactionId,
+                        orderId
                 );
                 log.info("Payment transaction ID {} completed successfully for client {} and context {}",
                         completedTransaction.getId(), client.getEmail(), context);

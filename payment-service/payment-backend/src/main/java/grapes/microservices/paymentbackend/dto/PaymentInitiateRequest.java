@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentInitiateRequest {
+    private Long orderId;
     private BigDecimal amount;
     private String merchantId;
     private String redirectUrl;

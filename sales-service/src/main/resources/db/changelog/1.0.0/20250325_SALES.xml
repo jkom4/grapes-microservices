@@ -437,15 +437,18 @@
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="transaction_uuid" type="CHAR(36)">
+            <column name="transaction_id" type="CHAR(36)">
                 <constraints nullable="false" unique="true"/>
             </column>
             <column name="order_id" type="INT">
                 <constraints nullable="false"/>
             </column>
             <column name="client_id" type="VARCHAR(255)"/>
+            <column name="user_id" type="VARCHAR(255)"/>
+            <column name="bank_transaction_id" type="VARCHAR(255)"/>
             <column name="card_type" type="VARCHAR(50)"/>
             <column name="payment_status" type="VARCHAR(50)"/>
+            <column name="payment_method" type="VARCHAR(50)"/>
             <column name="delivery_status" type="VARCHAR(50)"/>
             <column name="delivery_time_days" type="INT"/>
             <column name="currency" type="VARCHAR(10)"/>

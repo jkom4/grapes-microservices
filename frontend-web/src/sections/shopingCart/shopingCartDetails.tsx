@@ -127,7 +127,7 @@ const CartPage = () => {
         setIsPaying(true);
         try {
             const paymentData = {
-                orderId,
+                orderId: orderId,
                 address: formData.address,
                 phoneNumber: formData.phone,
                 customerName: formData.fullName,

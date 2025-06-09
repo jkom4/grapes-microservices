@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class PaymentValidatedMessageDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private Long orderId;
     private String clientName;
     private Long clientId;
     private String accountNumber;

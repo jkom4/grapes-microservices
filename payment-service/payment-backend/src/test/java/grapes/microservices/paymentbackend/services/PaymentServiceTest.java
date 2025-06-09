@@ -98,6 +98,7 @@ class PaymentServiceTest {
         // Arrange
         String token = "123456";
         Long transactionId = 1L;
+        Long orderId = 1L;
 
         when(cardRepository.findByCardNumberAndClientId("4111111111111111", 1L))
                 .thenReturn(Optional.of(testCard));
@@ -117,11 +118,11 @@ class PaymentServiceTest {
             when(mockSocket.getInputStream()).thenReturn(inputStream);
 
             // Act
-            boolean result = paymentService.processPayment(token, validPaymentRequest, testClient, transactionId);
+            boolean result = paymentService.processPayment(token, validPaymentRequest, testClient, transactionId,orderId);
 
             // Assert
             assertFalse(result);
-            verify(transactionService, never()).completePaymentTransaction(any(), any(), anyLong());
+            verify(transactionService, never()).completePaymentTransaction(any(), any(), anyLong(),anyLong());
             verify(transactionService, never()).failTransaction(anyLong(), anyString());
         }
     }

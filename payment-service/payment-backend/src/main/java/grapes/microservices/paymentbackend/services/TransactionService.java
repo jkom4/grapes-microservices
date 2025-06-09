@@ -102,7 +102,7 @@ public class TransactionService {
      * @throws SecurityException if client mismatch occurs.
      */
     @Transactional
-    public TransactionEntity completePaymentTransaction(Client client, BigDecimal amount, Long transactionId) {
+    public TransactionEntity completePaymentTransaction(Client client, BigDecimal amount, Long transactionId,Long orderId) {
         log.info("Completing payment transaction ID: {}, client ID: {}, amount: {}", transactionId, client.getId(), amount);
 
         // Find and validate the transaction
@@ -141,6 +141,7 @@ public class TransactionService {
             }
 
             PaymentValidatedMessageDTO messageDTO = new PaymentValidatedMessageDTO(
+                    orderId,
                     client.getFullName(),
                     client.getId(),
                     debtorAccount != null ? debtorAccount.getAccountNumber() : transaction.getClientAccountNumber(),
