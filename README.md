@@ -111,14 +111,14 @@ This will rebuild the images and restart the services.
 ## Authors
 
 - [Jobelin KOM](https://linkedin.com/in/jobelin-kom/).
-- [Smets NGOUMOU](https://linkedin.com/).
-- [Benjamin SUKRANLI](https://linkedin.com/).
-- [Cameron NOUPOUE](https://linkedin.com/cnoupoue).
-- [Mathys FRANCO](https://linkedin.com).
-- [Nassim BELLI](https://linkedin.com).
-- [Dounia KILANE](https://linkedin.com).
-- [Nasser KOTIYEV](https://linkedin.com).
-- [Charles VIGNON](https://linkedin.com).
+- [Cameron NOUPOUE](https://linkedin.com/in/cnoupoue/).
+- [Mathys FRANCO](https://www.linkedin.com/in/mathys-franco/).
+- [Smets NGOUMOU](https://www.linkedin.com/in/smets-ngoumou-289b7a249/).
+- [Benjamin SUKRANLI](https://linkedin.com/in/benjamin-sukranli-09957a22b/).
+- [Nassim BELLI](https://linkedin.com/in/nassim-belli-a67784294/).
+- [Dounia KILANE](https://linkedin.com/in/dounia-kilane-605170255/).
+- [Nasser KOTIYEV](https://linkedin.com/in/nasser-kotiyev/).
+- [Charles VIGNON](https://linkedin.com/in/charles-vignon-godonou-18056620a/).
 
 ## Licenses
 
