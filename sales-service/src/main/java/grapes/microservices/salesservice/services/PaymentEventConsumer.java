@@ -3,7 +3,9 @@ package grapes.microservices.salesservice.services;
 import grapes.microservices.salesservice.dto.ActivityLogEvent;
 import grapes.microservices.salesservice.dto.PaymentValidatedMessageDTO;
 import grapes.microservices.salesservice.models.Order;
+import grapes.microservices.salesservice.models.OrderItem;
 import grapes.microservices.salesservice.models.Transaction;
+import grapes.microservices.salesservice.repositories.OrderItemRepository;
 import grapes.microservices.salesservice.repositories.OrderRepository;
 import grapes.microservices.salesservice.repositories.TransactionRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -23,15 +26,19 @@ public class PaymentEventConsumer {
     private final OrderRepository orderRepository;
     private final OrderService orderService;
 
+    private final OrderItemRepository orderItemRepository;
+
+
     @Autowired
     public PaymentEventConsumer(RabbitTemplate rabbitTemplate,
                                 TransactionRepository transactionRepository,
                                 OrderRepository orderRepository,
-                                OrderService orderService) {
+                                OrderService orderService, OrderItemRepository orderItemRepository) {
         this.rabbitTemplate = rabbitTemplate;
         this.transactionRepository = transactionRepository;
         this.orderRepository = orderRepository;
         this.orderService = orderService;
+        this.orderItemRepository = orderItemRepository;
     }
 
     @RabbitListener(queues = "payment-validated-queue")
@@ -69,31 +76,37 @@ public class PaymentEventConsumer {
                 message.getPhoneNumber(),
                 message.getCustomerName()
         );
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
 
-        ActivityLogEvent activityLog = ActivityLogEvent.builder()
-                .eventId(UUID.randomUUID().toString())
-                .eventType("TransactionCompleted")
-                .eventTimestamp(LocalDateTime.now().toString())
-                .sourceSystem("SalesService")
-                .version("1.1")
-                .payload(ActivityLogEvent.Payload.builder()
-                        .sourceTransactionId("BANK_TX_" + message.getTransactionId())
-                        .clientId("user_" + message.getClientName())
-                        .productId("PROD_FRUIT_003") // TODO: Dynamique plus tard
-                        .serviceId(null)
-                        .transactionTimestamp(message.getTransactionDateTime().toString())
-                        .quantity(1) // TODO: récup réelle quantité
-                        .unitPrice(message.getTransferAmount())
-                        .totalAmount(message.getTransferAmount())
-                        .currency(message.getCurrency())
-                        .paymentMethod(message.getCardType())
-                        .paymentStatus("Success")
-                        .deliveryStatus("Pending")
-                        .deliveryTimeDays(message.getDeliveryTimeDays())
-                        .build())
-                .build();
+        for (OrderItem item : orderItems) {
+            ActivityLogEvent log = ActivityLogEvent.builder()
+                    .eventId(UUID.randomUUID().toString())
+                    .eventType("TransactionCompleted")
+                    .eventTimestamp(LocalDateTime.now().toString())
+                    .sourceSystem("SalesService")
+                    .version("1.1")
+                    .payload(ActivityLogEvent.Payload.builder()
+                            .sourceTransactionId("BANK_TX_" + message.getTransactionId())
+                            .clientId("user_" + message.getClientName())
+                            .productId("ARTICLE_" + item.getArticleId())
+                            .serviceId(null)
+                            .transactionTimestamp(message.getTransactionDateTime().toString())
+                            .quantity(item.getQuantityKg() != null ? item.getQuantityKg().intValue() : item.getQuantity().intValue())
+                            .unitPrice(item.getPrice())
+                            .totalAmount(item.getPrice().multiply(
+                                    item.getQuantityKg() != null ? item.getQuantityKg() : item.getQuantity()
+                            ))
+                            .currency(message.getCurrency())
+                            .paymentMethod(message.getCardType())
+                            .paymentStatus("Success")
+                            .deliveryStatus("Pending")
+                            .deliveryTimeDays(message.getDeliveryTimeDays())
+                            .build())
+                    .build();
 
-        rabbitTemplate.convertAndSend("q_activity_logs", activityLog);
-        System.out.println("[Sales-Service] Activity log sent to 'q_activity_logs': " + activityLog);
+            rabbitTemplate.convertAndSend("q_activity_logs", log);
+            System.out.println("[Sales-Service] Sent detailed item log to q_activity_logs: " + log);
+        }
     }
+
 }

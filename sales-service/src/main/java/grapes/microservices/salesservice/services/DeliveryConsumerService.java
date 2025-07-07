@@ -26,6 +26,7 @@ public class DeliveryConsumerService {
     @RabbitListener(queues = "order-paid-queue")
     public void receiveOrder(DeliveryMessage message) {
 
+        System.out.println("[Delivery-Service] Message received from 'order-paid-queue': " + message);
         try {
             var order = orderRepository.findById(message.getOrderId())
                     .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + message.getOrderId()));
